@@ -22,15 +22,18 @@ class Params:
     Class encapsulating Params objects
     """
 
-    def __init__(self, project_name):
+    def __init__(self,
+                 project_name: str,
+                 params_in):
         """
         Initialise Params object
        
         ARGS:
-        project_name (str) :: Name of current project
+        project_name :: Name of current project
         """
 
         self.project_name = project_name
+        self.params = params_in
 
 
     def new_master_yaml(self):
@@ -50,3 +53,24 @@ class Params:
 
         with open(master_yaml_name, 'w') as f:
             yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False) 
+
+
+def read_yaml(filename: str):
+    """
+    Function to read in config file
+
+    ARGS:
+    filename :: config file name
+
+    RETURNS:
+    Params object
+    """
+
+    # Check if 
+    if not os.path.isfile(filename):
+        raise IOError("Error in Ot2Rec.params.read_yaml: File not found.")
+
+    with open(filename, 'r') as f:
+        params = yaml.load(f, Loader=yaml.FullLoader)
+
+    return Params(params)
