@@ -36,6 +36,7 @@ class Metadata:
     def __init__(self,
                  project_name: str,
                  job_type: str,
+                 md_in=None,
     ):
         """
         Initialise Metadata object
@@ -43,10 +44,12 @@ class Metadata:
         ARGS:
         project_name :: name of the current project
         job_type     :: what job is being done (motioncorr/ctffind/align/reconstruct)
+        md_in        :: dictionary read from yaml file containing existing metadata
         """
 
         self.project_name = project_name
         self.job_type = job_type
+        self.metadata = md_in
 
         # Obtain parameters first
         self.get_param()
@@ -120,3 +123,29 @@ class Metadata:
                              angles=self.tilt_angles)
 
         
+def read_md_yaml(project_name: str,
+                 job_type: str,
+                 filename: str,
+):
+    """
+    Function to read in YAML file containing metadata
+
+    ARGS:
+    project_name :: Name of current project
+    job_type     :: what job is being done (motioncorr/ctffind/align/reconstruct)
+    filename     :: Name of the YAML file to be read
+
+    RETURNS:
+    Metadata object
+    """
+
+    # Check if file exists
+    if not os.path.isfile(filename):
+        raise IOError("Error in Ot2Rec.metadata.read_md_yaml: File not found.")
+
+    with open(filename, 'r') as f:
+        md = yaml.load(f, Loader=yaml.FullLoader)
+
+    return Metadata(project_name=project_name,
+                    job_type=job_type,
+                    md_in=md)
