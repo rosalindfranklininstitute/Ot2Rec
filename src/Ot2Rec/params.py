@@ -6,7 +6,7 @@ Copyright (C) Rosalind Franklin Institute 2021
 Author: Neville B.-y. Yee
 Date: 10-Jun-2021
 
-Version: 0.0.1
+Version: 0.0.2
 """
 
 import os
@@ -61,12 +61,14 @@ def new_master_yaml(project_name: str):
         yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False) 
 
             
-def read_yaml(filename: str):
+def read_yaml(project_name: str,
+              filename: str):
     """
     Function to read in config file
 
     ARGS:
-    filename :: config file name
+    project_name :: name of current project
+    filename     :: config file name
 
     RETURNS:
     Params object
@@ -79,4 +81,4 @@ def read_yaml(filename: str):
     with open(filename, 'r') as f:
         params = yaml.load(f, Loader=yaml.FullLoader)
 
-    return Params(params)
+    return Params(project_name, params)

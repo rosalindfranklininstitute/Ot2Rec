@@ -17,6 +17,7 @@ def main():
         entry_points={
             "console_scripts": [
                 "o2r.new=Ot2Rec.main:new_proj",
+                "o2r.get_master=Ot2Rec.main:get_master_metadata",
             ]
         }
     )

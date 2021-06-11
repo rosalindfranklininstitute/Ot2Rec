@@ -6,7 +6,7 @@ Copyright (C) Rosalind Franklin Institute 2021
 Author: Neville B.-y. Yee
 Date: 10-Jun-2021
 
-Version: 0.0.1
+Version: 0.0.2
 """
 
 
@@ -50,7 +50,6 @@ class Metadata:
 
         # Obtain parameters first
         self.get_param()
-        self.params = self.prmObj.params
 
 
     def get_param(self):
@@ -58,8 +57,10 @@ class Metadata:
         Subroutine to get parameters for current job
         """
 
-        param_file = self.project_name + '_' + suffix_dict[self.job_type] + '.yaml'
-        self.prmObj = prmMod.read_yaml(param_file)
+        param_file = self.project_name + '_' + Metadata.suffix_dict[self.job_type] + '.yaml'
+        self.prmObj = prmMod.read_yaml(project_name=self.project_name,
+                                       filename=param_file)
+        self.params = self.prmObj.params
         
 
     def create_master_metadata(self):
@@ -80,12 +81,15 @@ class Metadata:
         else:
             source_extension = 'mrc'
 
+        print("{}{}.{}".format(self.params['source_folder'],
+                                                ts_subfolder_criterion,
+                                                source_extension))
         # Find files and check
         raw_images_list = glob("{}{}.{}".format(self.params['source_folder'],
                                                 ts_subfolder_criterion,
                                                 source_extension)
         )
-        assert (len(raw_images_list) > 0), \
+        if (len(raw_images_list) == 0):
             raise IOError("Error in Ot2Rec.metadata.Metadata.create_master_metadata: No vaild files found using given criteria.")
 
 
@@ -104,8 +108,8 @@ class Metadata:
 
             # Extract tilt angle
             try:
-                tilt_angle = float(split_path_name[self.params['Inputs']['image_tiltangle_field']].replace(
-                    f'.{extension}', '').replace('[', '').replace(']', ''))
+                tilt_angle = float(split_path_name[self.params['image_tiltangle_field']].replace(
+                    f'.{source_extension}', '').replace('[', '').replace(']', ''))
             except IndexError or ValueError as ierr:
                 raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt angle from file path {curr_image}.")
             self.tilt_angles.append(tilt_angle)
