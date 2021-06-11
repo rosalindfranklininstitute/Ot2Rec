@@ -31,7 +31,7 @@ class Metadata:
         'align': 'align',
         'reconstruct': 'recon',
     }
-        
+
 
     def __init__(self,
                  project_name: str,
@@ -64,11 +64,8 @@ class Metadata:
 
     def create_master_metadata(self):
         """
-        Function to create master metadata from raw data.
+        Subroutine to create master metadata from raw data.
         Metadata include: image paths, tilt series indices, tilt angles
-
-        OUTPUTS:
-        pandas DataFrame
         """
 
         # Define criteria for searching subfolders (tilt series) within source folder
@@ -101,8 +98,8 @@ class Metadata:
             split_path_name = curr_image.split('/')[-1].split('_')
             try:
                 ts_index = int(''.join(i for i in split_path_name[self.params['image_stack_field']] if i.isdigit()))
-            except IndexError or ValueError as ierr:
-                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata: Error code: {ierr}. Failed to get tilt series number from file path {curr_image}.")
+            except IndexError or ValueError:
+                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt series number from file path {curr_image}.")
             self.tilt_series.append(ts_index)
 
             # Extract tilt angle
@@ -110,11 +107,12 @@ class Metadata:
                 tilt_angle = float(split_path_name[self.params['Inputs']['image_tiltangle_field']].replace(
                     f'.{extension}', '').replace('[', '').replace(']', ''))
             except IndexError or ValueError as ierr:
-                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata: Error code: {ierr}. Failed to get tilt angle from file path {curr_image}.")
+                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt angle from file path {curr_image}.")
             self.tilt_angles.append(tilt_angle)
-        
-        return pd.DataFrame(dict(file_paths=self.image_paths,
-                                 ts=self.tilt_series,
-                                 angles=self.tilt_angles))
+
+        # Save metadata as a dictionary --- easier to dump as yaml
+        self.metadata = dict(file_paths=self.image_paths,
+                             ts=self.tilt_series,
+                             angles=self.tilt_angles)
 
         

@@ -24,37 +24,43 @@ class Params:
 
     def __init__(self,
                  project_name: str,
-                 params_in):
+                 params_in=None):
         """
         Initialise Params object
        
         ARGS:
         project_name :: Name of current project
+        params_in    :: Parameters being read in
         """
 
         self.project_name = project_name
         self.params = params_in
 
 
-    def new_master_yaml(self):
-        """
-        Subroutine to create yaml file for processing master metadata
-        """
+        
 
-        master_yaml_name = self.project_name + '_proj.yaml'
+def new_master_yaml(project_name: str):
+    """
+    Subroutine to create yaml file for processing master metadata
 
-        proj_yaml_dict - {
-            'source_folder': '../raw/',
-            'TS_folder_prefix': '*',
-            'image_stack_field': 1,
-            'image_tiltangle_field': 3,
-            'source_TIFF': True,
-        }
+    ARGS:
+    project_name :: Name of current project
+    """
 
-        with open(master_yaml_name, 'w') as f:
-            yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False) 
+    master_yaml_name = project_name + '_proj.yaml'
+    
+    proj_yaml_dict = {
+        'source_folder': '../raw/',
+        'TS_folder_prefix': '*',
+        'image_stack_field': 1,
+        'image_tiltangle_field': 3,
+        'source_TIFF': True,
+    }
 
+    with open(master_yaml_name, 'w') as f:
+        yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False) 
 
+            
 def read_yaml(filename: str):
     """
     Function to read in config file
@@ -66,7 +72,7 @@ def read_yaml(filename: str):
     Params object
     """
 
-    # Check if 
+    # Check if file exists
     if not os.path.isfile(filename):
         raise IOError("Error in Ot2Rec.params.read_yaml: File not found.")
 
