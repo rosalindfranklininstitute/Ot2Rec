@@ -92,7 +92,7 @@ def new_mc2_yaml(project_name: str):
         },
     }
         
-    with open(master_yaml_name, 'w') as f:
+    with open(mc2_yaml_name, 'w') as f:
         yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False) 
 
         
