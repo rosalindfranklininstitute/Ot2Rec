@@ -60,7 +60,42 @@ def new_master_yaml(project_name: str):
     with open(master_yaml_name, 'w') as f:
         yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False) 
 
-            
+
+def new_mc2_yaml(project_name: str):
+    """
+    Subroutine to create yaml file for motioncorr
+
+    ARGS:
+    project_name :: Name of current project
+    """
+
+    mc2_yaml_name = project_name + '_mc2.yaml'
+
+    mc2_yaml_dict = {
+        'System': {
+            'process_list': 'all',
+            'output_path': './motioncor/',
+            'output_prefix': 'TS',
+            'use_gpu': 'auto',
+            'jobs_per_gpu': 2,
+            'gpu_memory_usage': 1,
+        },
+        'MC2': {
+            'MC2_path': '/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110',
+            'desired_pixel_size': 'ps_x2',
+            'discard_frames_top': 1,
+            'discard_frames_bottom': 0,
+            'tolerance': 0.5,
+            'max_iterations': 10,
+            'patch_size': [5, 5, 20],
+            'use_subgroups': True,
+        },
+    }
+        
+    with open(master_yaml_name, 'w') as f:
+        yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False) 
+
+        
 def read_yaml(project_name: str,
               filename: str):
     """
