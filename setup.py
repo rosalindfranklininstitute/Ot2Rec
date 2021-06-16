@@ -19,6 +19,7 @@ def main():
                 "o2r.new=Ot2Rec.main:new_proj",
                 "o2r.get_master=Ot2Rec.main:get_master_metadata",
                 "o2r.mc.new=Ot2Rec.main:create_mc2_yaml",
+                "o2r.mc.run=Ot2Rec.main:run_mc2",
             ]
         }
     )
