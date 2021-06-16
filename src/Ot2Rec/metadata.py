@@ -13,7 +13,7 @@ Version: 0.0.2
 import yaml
 import os
 from glob import glob
-import pandas
+import pandas as pd
 
 import Ot2Rec.params as prmMod
 
@@ -26,7 +26,7 @@ class Metadata:
     # First define conversion table between job (module) name and file suffixes
     suffix_dict = {
         'master': 'proj',
-        'motioncorr': 'mc',
+        'motioncorr': 'mc2',
         'ctffind': 'ctffind',
         'align': 'align',
         'reconstruct': 'recon',

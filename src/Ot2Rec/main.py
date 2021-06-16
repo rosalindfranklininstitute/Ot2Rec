@@ -144,13 +144,10 @@ def run_mc2():
                                    job_type='motioncorr',
                                    filename=master_md)
 
-    # Get a subset of images as specified in the config
-    job_md = master_md[master_md['ts'].isin(mc2_config.params['System']['process_list'])]
-
     # Create Motioncorr object
     mc2_obj = mc2Mod.Motioncorr(project_name=project_name,
                                 mc2_params=mc2_config,
-                                md_in=job_md)
+                                md_in=master_md)
 
     # Run MC2 recursively (and update input/output metadata) until nothing is left in the input metadata list
     while len(mc2_obj.meta) > 0:

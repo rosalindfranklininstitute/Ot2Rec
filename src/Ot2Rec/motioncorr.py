@@ -12,7 +12,7 @@ Version: 0.0.2
 import os
 import subprocess
 import itertools
-import pandas
+import pandas as pd
 import yaml
 
 
@@ -36,7 +36,9 @@ class Motioncorr:
         self.prmObj = mc2_params
         self.params = self.prmObj.params
 
+        self._process_list = self.params['System']['process_list']
         self.meta = pd.DataFrame(md_in.metadata)
+        self.meta = self.meta[self.meta['ts'].isin(self._process_list)]
         self._set_output_path()
         
         self.meta_out = None
@@ -87,7 +89,7 @@ class Motioncorr:
         """
         self.meta['output'] = self.meta.apply(
             lambda row: f"{self.params['System']['output_path']}"
-            f"{self.params['Outputs']['output_prefix']}_{row['ts']:03}_{row['angles']}.mrc", axis=1)
+            f"{self.params['System']['output_prefix']}_{row['ts']:03}_{row['angles']}.mrc", axis=1)
         
 
     def _get_command(self, image):

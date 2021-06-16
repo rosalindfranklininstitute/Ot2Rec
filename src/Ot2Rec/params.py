@@ -114,7 +114,7 @@ def read_yaml(project_name: str,
 
     # Check if file exists
     if not os.path.isfile(filename):
-        raise IOError("Error in Ot2Rec.params.read_yaml: File not found.")
+        raise IOError(f"Error in Ot2Rec.params.read_yaml: {filename}: File not found.")
 
     with open(filename, 'r') as f:
         params = yaml.load(f, Loader=yaml.FullLoader)
