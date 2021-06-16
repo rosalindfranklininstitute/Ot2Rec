@@ -13,6 +13,7 @@ import os
 import subprocess
 import itertools
 import pandas
+import yaml
 
 
 class Motioncorr:
@@ -20,19 +21,24 @@ class Motioncorr:
     Class encapsulating a Motioncorr object
     """
 
-    def __init__(self, mc2_params, md_in):
+    def __init__(self, project_name, mc2_params, md_in):
         """
         Initialise Motioncorr object
 
         ARGS:
+        project_name (str)  :: Name of current project
         mc2_params (Params) :: Parameters read in from yaml file
-        md_in (Metadata) :: Metadata containing information of images to be motioncorr'd
+        md_in (Metadata)    :: Metadata containing information of images to be motioncorr'd
         """
 
+        self.proj_name = project_name
+        
         self.prmObj = mc2_params
         self.params = self.prmObj.params
 
         self.meta = pd.DataFrame(md_in.metadata)
+        self._set_output_path()
+        
         self.meta_out = None
 
 
@@ -75,7 +81,7 @@ class Motioncorr:
             raise ValueError(f'Error in metadata._get_gpu_from_nvidia_smi: {len(nv_uuid)} GPU detected, but none of them is free.')
 
 
-    def _get_output_path(self):
+    def _set_output_path(self):
         """
         Subroutine to set output path for motioncorr'd images
         """
@@ -156,6 +162,7 @@ class Motioncorr:
         jobs = (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) for cmd in mc_commands)
 
         # run subprocess by chunks of GPU
+        run = 0
         for job in self._yield_chunks(jobs, len(use_gpu) * jobs_per_gpu):
             # from the moment the next line is read, every process in job are spawned
             for process in [i for i in job]:
@@ -168,5 +175,19 @@ class Motioncorr:
         """
 
         # Search for files with output paths specified in the metadata
-        # If the files don't exist, keep the line in the metadata
+        # If the files don't exist, keep the line in the input metadata
+        # If they do, move them to the output metadata
         self.meta = self.meta.loc[~self.meta['output'].apply(lambda x: os.path.isfile(x))]
+        self.meta_out = self.meta.loc[self.meta['output'].apply(lambda x: os.path.isfile(x))]
+
+
+    def export_metadata(self):
+        """
+        Method to serialise output metadata, export as yaml
+        """
+
+        yaml_file = self.proj_name + '_mc2_mdout.yaml'
+
+        with open(yaml_file, 'w') as f:
+            yaml.dump(self.meta_out.asdict(), f, indent=4, sort_keys=False) 
+
