@@ -16,6 +16,7 @@ import pandas as pd
 
 import Ot2Rec.params as prmMod
 import Ot2Rec.metadata as mdMod
+import Ot2Rec.motioncorr as mc2Mod
 
 
 def get_proj_name():
@@ -119,3 +120,42 @@ def create_mc2_yaml():
     prmMod.new_mc2_yaml(project_name)
     update_mc2_yaml()
     
+
+def run_mc2():
+    """
+    Method to run motioncorr
+    """
+
+    project_name = get_proj_name()
+
+    # Check if prerequisite files exist
+    mc2_yaml = project_name + '_mc2.yaml'
+    master_md = project_name + '_master_md.yaml'
+
+    if not os.path.isfile(mc2_yaml):
+        raise IOError("Error in Ot2Rec.main.run_mc2: MC2 yaml config not found.")
+    if not os.path.isfile(master_md):
+        raise IOError("Error in Ot2Rec.main.run_mc2: Master metadata not found.")
+
+    # Read in config and metadata
+    mc2_config = prmMod.read_yaml(project_name=project_name,
+                                  filename=mc2_yaml)
+    master_md = mdMod.read_md_yaml(project_name=project_name,
+                                   job_type='motioncorr',
+                                   filename=master_md)
+
+    # Get a subset of images as specified in the config
+    job_md = master_md[master_md['ts'].isin(mc2_config.params['System']['process_list'])]
+
+    # Create Motioncorr object
+    mc2_obj = mc2Mod.Motioncorr(project_name=project_name,
+                                mc2_params=mc2_config,
+                                md_in=job_md)
+
+    # Run MC2 recursively (and update input/output metadata) until nothing is left in the input metadata list
+    while len(mc2_obj.meta) > 0:
+        mc2_obj.run_mc2()
+        mc2_obj.update_mc2_metadata()
+
+    # Once all specified images are processed, export output metadata
+    mc2_obj.export_metadata()
