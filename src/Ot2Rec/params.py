@@ -79,9 +79,12 @@ def new_mc2_yaml(project_name: str):
             'use_gpu': 'auto',
             'jobs_per_gpu': 2,
             'gpu_memory_usage': 1,
+            'source_TIFF': True,
         },
         'MC2': {
             'MC2_path': '/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110',
+            'gain_reference': 'nogain',
+            'pixel_size': 0.815,
             'desired_pixel_size': 'ps_x2',
             'discard_frames_top': 1,
             'discard_frames_bottom': 0,
