@@ -15,6 +15,8 @@ import itertools
 import pandas as pd
 import yaml
 
+from icecream import ic         # for debugging
+
 
 class Motioncorr:
     """
@@ -28,7 +30,7 @@ class Motioncorr:
         ARGS:
         project_name (str)  :: Name of current project
         mc2_params (Params) :: Parameters read in from yaml file
-        md_in (Metadata)    :: Metadata containing information of images to be motioncorr'd
+        md_in (Metadata)    :: Metadata containing information of images
         """
 
         self.proj_name = project_name
@@ -41,6 +43,12 @@ class Motioncorr:
         self.meta = self.meta[self.meta['ts'].isin(self._process_list)]
         self._set_output_path()
         
+        # Get index of available GPU
+        self.use_gpu = self._get_gpu_nvidia_smi()
+
+        # Set GPU index as new column in metadata
+        self.meta = self.meta.assign(gpu=self.use_gpu[0])
+
         self.meta_out = None
 
 
@@ -54,6 +62,10 @@ class Motioncorr:
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
                                  encoding='ascii')
+        nv_processes = subprocess.run(['nvidia-smi', '--query-compute-apps=gpu_uuid', '--format=csv'],
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.PIPE,
+                                      encoding='ascii')
 
         # catch the visible GPUs
         if nv_uuid.returncode != 0 or nv_processes.returncode != 0:
@@ -119,7 +131,7 @@ class Motioncorr:
         # Set FtBin parameter for MC2
         ftbin = self.params['MC2']['desired_pixel_size'] / self.params['MC2']['pixel_size']
 
-        return [self.params['MotionCor']['MotionCor2_path'],
+        return [self.params['MC2']['MC2_path'],
                 f'-{image_type}', in_path,
                 '-OutMrc', out_path,
                 '-Gpu', gpu_number,
@@ -151,12 +163,6 @@ class Motioncorr:
         Subroutine to run MotionCor2
         """
 
-        # Get index of available GPU
-        use_gpu = self._get_gpu_nvidia_smi()
-
-        # Set GPU index as new column in metadata
-        self.meta = self.meta.assign(gpu=use_gpu[0])
-
         # Get commands to run MC2
         mc_commands = [self._get_command((_in, _out, _gpu))
                        for _in, _out, _gpu in zip(self.meta.file_paths, self.meta.output, self.meta.gpu)]
@@ -165,9 +171,10 @@ class Motioncorr:
 
         # run subprocess by chunks of GPU
         run = 0
-        for job in self._yield_chunks(jobs, len(use_gpu) * jobs_per_gpu):
+        for job in self._yield_chunks(jobs, len(self.use_gpu) * self.params['System']['jobs_per_gpu']):
             # from the moment the next line is read, every process in job are spawned
             for process in [i for i in job]:
+                ic(process.communicate()[0])
                 run += 1
         
 
@@ -179,9 +186,9 @@ class Motioncorr:
         # Search for files with output paths specified in the metadata
         # If the files don't exist, keep the line in the input metadata
         # If they do, move them to the output metadata
-        self.meta = self.meta.loc[~self.meta['output'].apply(lambda x: os.path.isfile(x))]
         self.meta_out = self.meta.loc[self.meta['output'].apply(lambda x: os.path.isfile(x))]
-
+        self.meta = self.meta.loc[~self.meta['output'].apply(lambda x: os.path.isfile(x))]
+        
 
     def export_metadata(self):
         """
@@ -191,5 +198,5 @@ class Motioncorr:
         yaml_file = self.proj_name + '_mc2_mdout.yaml'
 
         with open(yaml_file, 'w') as f:
-            yaml.dump(self.meta_out.asdict(), f, indent=4, sort_keys=False) 
+            yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False) 
 

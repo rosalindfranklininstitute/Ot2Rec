@@ -14,6 +14,8 @@ from glob import glob
 import yaml
 import pandas as pd
 
+from icecream import ic
+
 import Ot2Rec.params as prmMod
 import Ot2Rec.metadata as mdMod
 import Ot2Rec.motioncorr as mc2Mod
@@ -150,7 +152,10 @@ def run_mc2():
                                 md_in=master_md)
 
     # Run MC2 recursively (and update input/output metadata) until nothing is left in the input metadata list
+    run = 0
     while len(mc2_obj.meta) > 0:
+        run += 1
+        ic(run, len(mc2_obj.meta))
         mc2_obj.run_mc2()
         mc2_obj.update_mc2_metadata()
 
