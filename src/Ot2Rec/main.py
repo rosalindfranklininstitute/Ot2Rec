@@ -133,11 +133,11 @@ def run_mc2():
 
     # Check if prerequisite files exist
     mc2_yaml = project_name + '_mc2.yaml'
-    master_md = project_name + '_master_md.yaml'
+    master_md_file = project_name + '_master_md.yaml'
 
     if not os.path.isfile(mc2_yaml):
         raise IOError("Error in Ot2Rec.main.run_mc2: MC2 yaml config not found.")
-    if not os.path.isfile(master_md):
+    if not os.path.isfile(master_md_file):
         raise IOError("Error in Ot2Rec.main.run_mc2: Master metadata not found.")
 
     # Read in config and metadata
@@ -145,7 +145,7 @@ def run_mc2():
                                   filename=mc2_yaml)
     master_md = mdMod.read_md_yaml(project_name=project_name,
                                    job_type='motioncorr',
-                                   filename=master_md)
+                                   filename=master_md_file)
 
     # Create Logger object
     logger = logMod.Logger()
@@ -157,8 +157,9 @@ def run_mc2():
                                 logger=logger
     )
 
-    # Run MC2 recursively (and update input/output metadata) until nothing is left in the input metadata list
-    mc2_obj.run_mc2()
+    if not mc2_obj.no_processes:
+        # Run MC2 recursively (and update input/output metadata) until nothing is left in the input metadata list
+        mc2_obj.run_mc2()
 
-    # Once all specified images are processed, export output metadata
-    mc2_obj.export_metadata()
+        # Once all specified images are processed, export output metadata
+        mc2_obj.export_metadata()

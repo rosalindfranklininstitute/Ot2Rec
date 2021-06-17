@@ -14,6 +14,7 @@ import subprocess
 import itertools
 import pandas as pd
 import yaml
+from tqdm import tqdm
 
 from icecream import ic         # for debugging
 
@@ -54,6 +55,7 @@ class Motioncorr:
 
         # Set GPU index as new column in metadata
         self.meta = self.meta.assign(gpu=self.use_gpu[0])
+        self.no_processes = False
         self._check_processed_images()
 
         # Check if output folder exists, create if not
@@ -85,6 +87,7 @@ class Motioncorr:
             self.logObj(f"Info: {len(_ignored)} images had been processed and will be omitted.")
         elif len(_ignored) == len(self.meta):
             self.logObj(f"Info: All specified images had been processed. Nothing will be done.")
+            self.no_processes = True
             
         self.meta = self.meta[~self.meta.output.isin(self.meta_out.output)]
             
@@ -200,24 +203,28 @@ class Motioncorr:
         Subroutine to run MotionCor2
         """
 
-        job_length = len(self.meta)
-        curr_job = 0
-        while len(self.meta) > 0:
-            # Get commands to run MC2
-            mc_commands = [self._get_command((_in, _out, _gpu))
-                           for _in, _out, _gpu in zip(self.meta.file_paths, self.meta.output, self.meta.gpu)]
+        # Process tilt-series one at a time
+        ts_list = self.params['System']['process_list']
+        tqdm_iter = tqdm(ts_list, ncols=100)
+        for curr_ts in tqdm_iter:
+            tqdm_iter.set_description(f"Processing TS {curr_ts}...")
+            self._curr_meta = self.meta.loc[self.meta.ts==curr_ts]
+        
+            while len(self._curr_meta) > 0:
+                # Get commands to run MC2
+                mc_commands = [self._get_command((_in, _out, _gpu))
+                               for _in, _out, _gpu in zip(self._curr_meta.file_paths, self._curr_meta.output, self._curr_meta.gpu)]
 
-            jobs = (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) for cmd in mc_commands)
+                jobs = (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) for cmd in mc_commands)
             
-            # run subprocess by chunks of GPU
-            chunks = self._yield_chunks(jobs, len(self.use_gpu) * self.params['System']['jobs_per_gpu'])
-            for job in chunks:
-                # from the moment the next line is read, every process in job are spawned
-                for process in [i for i in job]:
-                    self.log.append(process.communicate()[0].decode('UTF-8'))
-                    curr_job += 1
+                # run subprocess by chunks of GPU
+                chunks = self._yield_chunks(jobs, len(self.use_gpu) * self.params['System']['jobs_per_gpu'])
+                for job in chunks:
+                    # from the moment the next line is read, every process in job are spawned
+                    for process in [i for i in job]:
+                        self.log.append(process.communicate()[0].decode('UTF-8'))
 
-            self.update_mc2_metadata()
+                        self.update_mc2_metadata()
         
 
     def update_mc2_metadata(self):
@@ -232,6 +239,7 @@ class Motioncorr:
         self.meta_out = self.meta_out.append(self.meta.loc[self.meta['output'].apply(lambda x: os.path.isfile(x))],
                                              ignore_index=True)
         self.meta = self.meta.loc[~self.meta['output'].apply(lambda x: os.path.isfile(x))]
+        self._curr_meta = self._curr_meta.loc[~self._curr_meta['output'].apply(lambda x: os.path.isfile(x))]
 
 
     def export_metadata(self):
