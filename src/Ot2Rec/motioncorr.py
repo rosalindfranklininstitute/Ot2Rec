@@ -17,13 +17,15 @@ import yaml
 
 from icecream import ic         # for debugging
 
+import Ot2Rec.metadata as mdMod
+
 
 class Motioncorr:
     """
     Class encapsulating a Motioncorr object
     """
 
-    def __init__(self, project_name, mc2_params, md_in):
+    def __init__(self, project_name, mc2_params, md_in, logger):
         """
         Initialise Motioncorr object
 
@@ -31,9 +33,13 @@ class Motioncorr:
         project_name (str)  :: Name of current project
         mc2_params (Params) :: Parameters read in from yaml file
         md_in (Metadata)    :: Metadata containing information of images
+        logger (Logger)     :: Logger for recording events
         """
 
         self.proj_name = project_name
+
+        self.logObj = logger
+        self.log = []
         
         self.prmObj = mc2_params
         self.params = self.prmObj.params
@@ -48,7 +54,7 @@ class Motioncorr:
 
         # Set GPU index as new column in metadata
         self.meta = self.meta.assign(gpu=self.use_gpu[0])
-        self.meta_out = None
+        self._check_processed_images()
 
         # Check if output folder exists, create if not
         if not os.path.isdir(self.params['System']['output_path']):
@@ -56,7 +62,33 @@ class Motioncorr:
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE,
                            encoding='ascii')
-                           
+
+
+    def _check_processed_images(self):
+        """
+        Method to check images which have already been processed before
+        """
+        # Create new empty internal output metadata if no record exists
+        if not os.path.isfile(self.proj_name + '_mc2_mdout.yaml'):
+            self.meta_out = pd.DataFrame(columns=self.meta.columns)
+            
+        # Read in serialised metadata and turn into DataFrame if record exists
+        else:
+            _meta_record = mdMod.read_md_yaml(project_name=self.proj_name,
+                                              job_type='motioncorr',
+                                              filename=self.proj_name + '_mc2_mdout.yaml')
+            self.meta_out = pd.DataFrame(_meta_record.metadata)
+            
+        # Drop the items in input metadata if they are in the output record
+        _ignored = self.meta[self.meta.output.isin(self.meta_out.output)]
+        if len(_ignored) > 0 and len(_ignored) < len(self.meta):
+            self.logObj(f"Info: {len(_ignored)} images had been processed and will be omitted.")
+        elif len(_ignored) == len(self.meta):
+            self.logObj(f"Info: All specified images had been processed. Nothing will be done.")
+            
+        self.meta = self.meta[~self.meta.output.isin(self.meta_out.output)]
+            
+            
     @staticmethod
     def _get_gpu_nvidia_smi():
         """
@@ -168,19 +200,24 @@ class Motioncorr:
         Subroutine to run MotionCor2
         """
 
-        # Get commands to run MC2
-        mc_commands = [self._get_command((_in, _out, _gpu))
-                       for _in, _out, _gpu in zip(self.meta.file_paths, self.meta.output, self.meta.gpu)]
+        job_length = len(self.meta)
+        curr_job = 0
+        while len(self.meta) > 0:
+            # Get commands to run MC2
+            mc_commands = [self._get_command((_in, _out, _gpu))
+                           for _in, _out, _gpu in zip(self.meta.file_paths, self.meta.output, self.meta.gpu)]
 
-        jobs = (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) for cmd in mc_commands)
+            jobs = (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) for cmd in mc_commands)
+            
+            # run subprocess by chunks of GPU
+            chunks = self._yield_chunks(jobs, len(self.use_gpu) * self.params['System']['jobs_per_gpu'])
+            for job in chunks:
+                # from the moment the next line is read, every process in job are spawned
+                for process in [i for i in job]:
+                    self.log.append(process.communicate()[0].decode('UTF-8'))
+                    curr_job += 1
 
-        # run subprocess by chunks of GPU
-        run = 0
-        for job in self._yield_chunks(jobs, len(self.use_gpu) * self.params['System']['jobs_per_gpu']):
-            # from the moment the next line is read, every process in job are spawned
-            for process in [i for i in job]:
-                ic(process.communicate()[0])
-                run += 1
+            self.update_mc2_metadata()
         
 
     def update_mc2_metadata(self):
@@ -191,9 +228,11 @@ class Motioncorr:
         # Search for files with output paths specified in the metadata
         # If the files don't exist, keep the line in the input metadata
         # If they do, move them to the output metadata
-        self.meta_out = self.meta.loc[self.meta['output'].apply(lambda x: os.path.isfile(x))]
+
+        self.meta_out = self.meta_out.append(self.meta.loc[self.meta['output'].apply(lambda x: os.path.isfile(x))],
+                                             ignore_index=True)
         self.meta = self.meta.loc[~self.meta['output'].apply(lambda x: os.path.isfile(x))]
-        
+
 
     def export_metadata(self):
         """
