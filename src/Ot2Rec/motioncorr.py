@@ -48,10 +48,15 @@ class Motioncorr:
 
         # Set GPU index as new column in metadata
         self.meta = self.meta.assign(gpu=self.use_gpu[0])
-
         self.meta_out = None
 
-
+        # Check if output folder exists, create if not
+        if not os.path.isdir(self.params['System']['output_path']):
+            subprocess.run(['mkdir', self.params['System']['output_path']],
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
+                           encoding='ascii')
+                           
     @staticmethod
     def _get_gpu_nvidia_smi():
         """
