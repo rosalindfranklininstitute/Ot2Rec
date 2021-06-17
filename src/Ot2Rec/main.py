@@ -19,6 +19,7 @@ from icecream import ic
 import Ot2Rec.params as prmMod
 import Ot2Rec.metadata as mdMod
 import Ot2Rec.motioncorr as mc2Mod
+import Ot2Rec.logger as logMod
 
 
 def get_proj_name():
@@ -146,18 +147,18 @@ def run_mc2():
                                    job_type='motioncorr',
                                    filename=master_md)
 
+    # Create Logger object
+    logger = logMod.Logger()
+    
     # Create Motioncorr object
     mc2_obj = mc2Mod.Motioncorr(project_name=project_name,
                                 mc2_params=mc2_config,
-                                md_in=master_md)
+                                md_in=master_md,
+                                logger=logger
+    )
 
     # Run MC2 recursively (and update input/output metadata) until nothing is left in the input metadata list
-    run = 0
-    while len(mc2_obj.meta) > 0:
-        run += 1
-        ic(run, len(mc2_obj.meta))
-        mc2_obj.run_mc2()
-        mc2_obj.update_mc2_metadata()
+    mc2_obj.run_mc2()
 
     # Once all specified images are processed, export output metadata
     mc2_obj.export_metadata()
