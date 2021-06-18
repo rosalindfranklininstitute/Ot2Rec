@@ -102,7 +102,7 @@ def update_mc2_yaml():
     else:
         unprocessed_images = master_md
 
-    unique_ts_numbers = unprocessed_images['ts'].unique().tolist()
+    unique_ts_numbers = unprocessed_images['ts'].sort_values(ascending=True).unique().tolist()
 
     # Read in MC2 yaml file, modify, and update
     mc2_params = prmMod.read_yaml(project_name=project_name,
