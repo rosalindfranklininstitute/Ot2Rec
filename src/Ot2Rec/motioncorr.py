@@ -80,8 +80,23 @@ class Motioncorr:
                                               job_type='motioncorr',
                                               filename=self.proj_name + '_mc2_mdout.yaml')
             self.meta_out = pd.DataFrame(_meta_record.metadata)
+
+        # Compare output metadata and output folder
+        # If a file (in specified TS) is in record but missing, remove from record
+        self._missing = self.meta_out.loc[~self.meta_out['output'].apply(lambda x: os.path.isfile(x))]
+        self._missing_specified = pd.DataFrame(columns=self.meta.columns)
+        
+        for curr_ts in self.params['System']['process_list']:
+            self._missing_specified = self._missing_specified.append(self._missing[self._missing['ts']==curr_ts],
+                                                                     ignore_index=True,
+            )
+        self._merged = self.meta_out.merge(self._missing_specified, how='left', indicator=True)
+        self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
+
+        if len(self._missing_specified) > 0:
+            self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. Will be added back for processing.")
             
-        # Drop the items in input metadata if they are in the output record
+        # Drop the items in input metadata if they are in the output record 
         _ignored = self.meta[self.meta.output.isin(self.meta_out.output)]
         if len(_ignored) > 0 and len(_ignored) < len(self.meta):
             self.logObj(f"Info: {len(_ignored)} images had been processed and will be omitted.")
@@ -225,6 +240,7 @@ class Motioncorr:
                         self.log.append(process.communicate()[0].decode('UTF-8'))
 
                         self.update_mc2_metadata()
+                        self.export_metadata()
         
 
     def update_mc2_metadata(self):
