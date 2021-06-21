@@ -108,6 +108,11 @@ def update_mc2_yaml():
     mc2_params = prmMod.read_yaml(project_name=project_name,
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
+    if mc2_params.params['MC2']['desired_pixel_size'] == 'ps_x2':
+        mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size'] * 2
+    else:
+        mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size']
+
     with open(mc2_yaml_name, 'w') as f:
         yaml.dump(mc2_params.params, f, indent=4, sort_keys=False) 
 
@@ -163,3 +168,70 @@ def run_mc2():
 
         # Once all specified images are processed, export output metadata
         mc2_obj.export_metadata()
+
+
+def update_ctffind_yaml():
+    """
+    Subroutine to update yaml file for ctffind
+    """
+
+    project_name = get_proj_name()
+    
+    # Check if ctffind and motioncorr yaml files exist
+    ctf_yaml_name = project_name + '_ctffind.yaml'
+    mc2_yaml_name = project_name + '_mc2.yaml'
+    if not os.path.isfile(ctf_yaml_name):
+        raise IOError("Error in Ot2Rec.main.update_ctffind_yaml: ctffind config file not found.")
+    if not os.path.isfile(mc2_yaml_name):
+        raise IOError("Error in Ot2Rec.main.update_ctffind_yaml: motioncorr config file not found.")
+
+    # Read in MC2 metadata (as Pandas dataframe)
+    # We only need the TS number and the tilt angle for comparisons at this stage
+    mc2_md_name = project_name + '_mc2_mdout.yaml'
+    with open(mc2_md_name, 'r') as f:
+        mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+
+    # Read in previous ctffind output metadata (as Pandas dataframe) for old projects
+    ctf_md_name = project_name + '_ctf_mdout.yaml'
+    if os.path.isfile(ctf_md_name):
+        is_old_project = True
+        with open(ctf_md_name, 'r') as f:
+            ctf_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+    else:
+        is_old_project = False
+
+    # Diff the two dataframes to get numbers of tilt-series with unprocessed data
+    if is_old_project:
+        merged_md = mc2_md.merge(ctf_md,
+                                 how='outer',
+                                 indicator=True)
+        unprocessed_images = merged_md.loc[lambda x: x['_merge']=='left_only']
+    else:
+        unprocessed_images = mc2_md
+
+    unique_ts_numbers = unprocessed_images['ts'].sort_values(ascending=True).unique().tolist()
+
+    # Read in ctffind yaml file, modify, and update
+    # read in MC2 yaml as well (some parameters depend on MC2 settings)
+    ctf_params = prmMod.read_yaml(project_name=project_name,
+                                  filename=ctf_yaml_name)
+    mc2_params = prmMod.read_yaml(project_name=project_name,
+                                  filename=mc2_yaml_name)
+    
+    ctf_params.params['System']['process_list'] = unique_ts_numbers
+    ctf_params.params['ctffind']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size']
+    
+    with open(ctf_yaml_name, 'w') as f:
+        yaml.dump(ctf_params.params, f, indent=4, sort_keys=False) 
+
+
+def create_ctffind_yaml():
+    """
+    Subroutine to create new yaml file for ctffind
+    """
+
+    project_name = get_proj_name()
+    
+    # Create the yaml file, then automatically update it
+    prmMod.new_ctffind_yaml(project_name)
+    update_ctffind_yaml()

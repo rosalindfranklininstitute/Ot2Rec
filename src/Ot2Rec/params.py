@@ -98,6 +98,45 @@ def new_mc2_yaml(project_name: str):
     with open(mc2_yaml_name, 'w') as f:
         yaml.dump(mc2_yaml_dict, f, indent=4, sort_keys=False) 
 
+
+def new_ctffind_yaml(project_name: str):
+    """
+    Subroutine to create yaml file for ctffind
+
+    ARGS:
+    project_name :: Name of current project
+    """
+
+    ctf_yaml_name = project_name + '_ctffind.yaml'
+
+    ctf_yaml_dict = {
+        'System': {
+            'process_list': 'all',
+            'output_path': './ctffind/',
+            'output_prefix': 'TS',
+        },
+        'ctffind': {
+            'ctffind_path': '/opt/lmod/modules/ctffind/4.1.14/bin/ctffind',
+            'pixel_size': None,
+            'voltage': 300.,
+            'spherical_aberration': 2.7,
+            'amp_contrast': 0.8,
+            'amp_spec_size': 512,
+            'resolution_min': 30.,
+            'resolution_max': 5.,
+            'defocus_min': 5000.,
+            'defocus_max': 50000.,
+            'defocus_step': 500.,
+            'astigm_type': None,
+            'exhaustive_search': False,
+            'astigm_restraint': False,
+            'phase_shift': False,
+        },
+    }
+        
+    with open(ctf_yaml_name, 'w') as f:
+        yaml.dump(ctf_yaml_dict, f, indent=4, sort_keys=False) 
+
         
 def read_yaml(project_name: str,
               filename: str):

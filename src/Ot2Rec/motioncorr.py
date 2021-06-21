@@ -177,12 +177,6 @@ class Motioncorr:
         else:
             image_type = 'InMrc'
 
-        # Set output pixel size
-        if self.params['MC2']['desired_pixel_size'] == 'ps_x2':
-            self.params['MC2']['desired_pixel_size'] = self.params['MC2']['pixel_size'] * 2
-        else:
-            self.params['MC2']['desired_pixel_size'] = self.params['MC2']['pixel_size']
-
         # Set FtBin parameter for MC2
         ftbin = self.params['MC2']['desired_pixel_size'] / self.params['MC2']['pixel_size']
 
