@@ -21,6 +21,7 @@ def main():
                 "o2r.mc.new=Ot2Rec.main:create_mc2_yaml",
                 "o2r.mc.run=Ot2Rec.main:run_mc2",
                 "o2r.ctffind.new=Ot2Rec.main:create_ctffind_yaml",
+                "o2r.ctffind.run=Ot2Rec.main:run_ctffind",
             ]
         }
     )

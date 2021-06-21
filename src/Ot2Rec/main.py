@@ -20,6 +20,7 @@ import Ot2Rec.params as prmMod
 import Ot2Rec.metadata as mdMod
 import Ot2Rec.motioncorr as mc2Mod
 import Ot2Rec.logger as logMod
+import Ot2Rec.ctffind as ctfMod
 
 
 def get_proj_name():
@@ -235,3 +236,43 @@ def create_ctffind_yaml():
     # Create the yaml file, then automatically update it
     prmMod.new_ctffind_yaml(project_name)
     update_ctffind_yaml()
+
+
+def run_ctffind():
+    """
+    Method to run ctffind
+    """
+
+    project_name = get_proj_name()
+
+    # Check if prerequisite files exist
+    ctffind_yaml = project_name + '_ctffind.yaml'
+    mc2_md_file = project_name + '_mc2_mdout.yaml'
+
+    if not os.path.isfile(ctffind_yaml):
+        raise IOError("Error in Ot2Rec.main.run_ctffind: ctffind yaml config not found.")
+    if not os.path.isfile(mc2_md_file):
+        raise IOError("Error in Ot2Rec.main.run_ctffind: MC2 output metadata not found.")
+
+    # Read in config and metadata
+    ctffind_config = prmMod.read_yaml(project_name=project_name,
+                                      filename=ctffind_yaml)
+    mc2_md = mdMod.read_md_yaml(project_name=project_name,
+                                job_type='ctffind',
+                                filename=mc2_md_file)
+
+    # Create Logger object
+    logger = logMod.Logger()
+    
+    # Create Motioncorr object
+    ctffind_obj = ctfMod.ctffind(project_name=project_name,
+                                 md_in=mc2_md,
+                                 params_in=ctffind_config,
+                                 logger_in=logger,
+    )
+
+    if not ctffind_obj.no_processes:
+        ctffind_obj.run_ctffind()
+
+
+
