@@ -82,14 +82,14 @@ def update_mc2_yaml():
     # Read in master metadata (as Pandas dataframe)
     master_md_name = project_name + '_master_md.yaml'
     with open(master_md_name, 'r') as f:
-        master_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader)).drop(columns=['file_paths'])
+        master_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
 
     # Read in previous MC2 output metadata (as Pandas dataframe) for old projects
     mc2_md_name = project_name + '_mc2_md.yaml'
     if os.path.isfile(mc2_md_name):
         is_old_project = True
         with open(mc2_md_name, 'r') as f:
-            mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader)).drop(columns=['file_paths'])
+            mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
     else:
         is_old_project = False
 
