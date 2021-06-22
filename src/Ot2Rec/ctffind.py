@@ -104,6 +104,7 @@ class ctffind():
                                               job_type='ctffind',
                                               filename=self.proj_name + '_ctffind_mdout.yaml')
             self.meta_out = pd.DataFrame(_meta_record.metadata)
+        self.meta_out.drop_duplicates(inplace=True)
 
         # Compare output metadata and output folder
         # If a file (in specified TS) is in record but missing, remove from record
@@ -121,15 +122,17 @@ class ctffind():
             self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. Will be added back for processing.")
             
         # Drop the items in input metadata if they are in the output record 
-        _ignored = self.ctf_images[self.ctf_images.output.isin(self.meta_out.output)]
-        if len(_ignored) > 0 and len(_ignored) < len(self.meta):
+        _ignored = self.ctf_images[self.ctf_images.output.isin(self.meta_out.file_paths)]
+        if len(_ignored) > 0 and len(_ignored) < len(self.ctf_images):
             self.logObj(f"Info: {len(_ignored)} images had been processed and will be omitted.")
         elif len(_ignored) == len(self.ctf_images):
             self.logObj(f"Info: All specified images had been processed. Nothing will be done.")
             self.no_processes = True
-            
-        self.ctf_images = self.ctf_images[~self.ctf_images.output.isin(self.meta_out.output)]
 
+        self._merged = self.ctf_images.merge(_ignored, how='left', indicator=True)
+        self.ctf_images = self.ctf_images[self._merged['_merge']=='left_only']
+        self._process_list = self.ctf_images['ts'].sort_values(ascending=True).unique().tolist()
+        
 
     def _get_ctffind_command(self, ts):
         """
@@ -139,7 +142,6 @@ class ctffind():
         ts (int) :: index of curent tilt-series
         """
         curr_image = self.ctf_images[self.ctf_images['ts']==ts]
-        
         self.cmd = [self.params['ctffind']['ctffind_path']]
         input_dict = [curr_image['file_paths'].values[0],
                       curr_image['output'].values[0],
@@ -183,6 +185,7 @@ class ctffind():
                 self.update_ctffind_metadata()
                 self.export_metadata()
 
+                
     def update_ctffind_metadata(self):
         """
         Subroutine to update metadata after one set of runs
@@ -196,7 +199,10 @@ class ctffind():
                                              ignore_index=True)
         self.ctf_images = self.ctf_images.loc[~self.ctf_images['output'].apply(lambda x: os.path.isfile(x))]
 
+        # Sometimes data might be duplicated (unlikely) -- need to drop the duplicates
+        self.meta_out.drop_duplicates(inplace=True)
 
+        
     def export_metadata(self):
         """
         Method to serialise output metadata, export as yaml
