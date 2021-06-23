@@ -135,7 +135,77 @@ def new_ctffind_yaml(project_name: str):
     }
         
     with open(ctf_yaml_name, 'w') as f:
-        yaml.dump(ctf_yaml_dict, f, indent=4, sort_keys=False) 
+        yaml.dump(ctf_yaml_dict, f, indent=4, sort_keys=False)
+
+
+def new_align_yaml(project_name: str):
+    """
+    Subroutine to create yaml file for stack creation and BatchTomo (up till alignment)
+
+    ARGS:
+    project_name :: Name of current project
+    """
+
+    align_yaml_name = project_name + '_align.yaml'
+
+    align_yaml_dict = {
+        'System' : {
+            'process_list' : 'all',
+            'output_path' : './stacks/',
+            'output_prefix' : 'TS',
+        },
+        
+        'BatchRunTomo': {
+            'general': {
+                'align_images_brt': True,
+                'adoc_file': 'default',
+                'step_start': 0,
+                'step_end': 20,
+            },
+            
+            'setup': {
+                'use_rawtlt': True,
+                'pixel_size': 'default',
+                'rot_angle': 86.,
+                'gold_size': 0.,
+                'adoc_template': '/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc',
+            },
+
+            'preprocessing': {
+                'delete_old_files': False,
+                'remove_xrays': True,
+            },
+
+            'coarse_align': {
+                'bin_factor': 8,
+            },
+
+            'patch_track': {
+                'size_of_patches': [300, 200],
+                'num_of_patches': [12, 8],
+                'num_iterations': 4,
+                'limits_on_shift': [2, 2],
+                'adjust_tilt_angles': True,
+            },
+
+            'fine_align': {
+                'num_surfaces': 1,
+                'mag_option': 'fixed',
+                'tilt_option': 'fixed',
+                'rot_option': 'group',
+                'beam_tilt_option': 'fixed',
+                'use_robust_fitting': True,
+                'weight_all_contours': True,
+            },
+
+            'positioning': {
+                'do_positioning': False,
+                'unbinned_thickness': 3600,
+            },
+        }
+                
+    with open(align_yaml_name, 'w') as f:
+        yaml.dump(align_yaml_dict, f, indent=4, sort_keys=False)
 
         
 def read_yaml(project_name: str,
