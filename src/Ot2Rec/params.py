@@ -203,6 +203,7 @@ def new_align_yaml(project_name: str):
                 'unbinned_thickness': 3600,
             },
         }
+    }
                 
     with open(align_yaml_name, 'w') as f:
         yaml.dump(align_yaml_dict, f, indent=4, sort_keys=False)

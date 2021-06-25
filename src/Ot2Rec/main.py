@@ -324,7 +324,7 @@ def update_align_yaml():
                                   filename=mc2_yaml_name)
     
     align_params.params['System']['process_list'] = unique_ts_numbers
-    align_params.params['BatchRunTomo']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size']
+    align_params.params['BatchRunTomo']['setup']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size']
     
     with open(align_yaml_name, 'w') as f:
         yaml.dump(align_params.params, f, indent=4, sort_keys=False) 
