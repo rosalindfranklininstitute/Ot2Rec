@@ -374,8 +374,6 @@ def run_align():
     # Run IMOD
     # Create the stacks and rawtlt files first
     align_obj.create_stack_folders()
-    ic('folders created')
     align_obj.create_rawtlt()
-    ic('rawtlt written')
     align_obj.create_stack()
     

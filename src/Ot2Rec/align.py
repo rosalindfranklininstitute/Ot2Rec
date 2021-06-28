@@ -13,6 +13,7 @@ import os
 import subprocess
 from glob import glob
 import pandas as pd
+from tqdm import tqdm
 
 from icecream import ic
 
@@ -123,15 +124,16 @@ class Align:
         Method to create stack file for a given tilt-series.
         """
 
-        for curr_ts in self._process_list:
-            ic(curr_ts)
+        tqdm_iter = tqdm(self._process_list, ncols=100)
+        for curr_ts in tqdm_iter:
+            tqdm_iter.set_description(f"Processing TS {curr_ts}...")
+
             # Define path where the new stack file should go
             stack_file = self._path_dict[curr_ts] + self.params['System']['output_prefix'] + f'{curr_ts:03}.st'
 
             # Sort the filtered metadata
             # Metadata is fetched in the _sort_tilt_angles method
             meta_ts = self._sort_tilt_angles(curr_ts)
-#            ic(meta_ts); exit()
 
             # Create template for newstack
             self._filename_fileinlist = self._path_dict[curr_ts] + self.params['System']['output_prefix'] + f'{curr_ts:03}_sources.txt'
