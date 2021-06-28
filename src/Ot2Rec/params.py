@@ -160,7 +160,7 @@ def new_align_yaml(project_name: str):
                 'align_images_brt': True,
                 'adoc_file': 'default',
                 'step_start': 0,
-                'step_end': 20,
+                'step_end': 6,
             },
             
             'setup': {

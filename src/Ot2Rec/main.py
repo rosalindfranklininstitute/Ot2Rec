@@ -21,6 +21,7 @@ import Ot2Rec.metadata as mdMod
 import Ot2Rec.motioncorr as mc2Mod
 import Ot2Rec.logger as logMod
 import Ot2Rec.ctffind as ctfMod
+import Ot2Rec.align as alignMod
 
 
 def get_proj_name():
@@ -264,7 +265,7 @@ def run_ctffind():
     # Create Logger object
     logger = logMod.Logger()
     
-    # Create Motioncorr object
+    # Create ctffind object
     ctffind_obj = ctfMod.ctffind(project_name=project_name,
                                  md_in=mc2_md,
                                  params_in=ctffind_config,
@@ -340,3 +341,41 @@ def create_align_yaml():
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(project_name)
     update_align_yaml()
+
+
+def run_align():
+    """
+    Method to run IMOD newstack / alignment
+    """
+
+    project_name = get_proj_name()
+    
+    # Check if prerequisite files exist
+    align_yaml = project_name + '_align.yaml'
+    mc2_md_file = project_name + '_mc2_mdout.yaml'
+
+    # Read in config and metadata
+    align_config = prmMod.read_yaml(project_name=project_name,
+                                    filename=align_yaml)
+    mc2_md = mdMod.read_md_yaml(project_name=project_name,
+                                job_type='ctffind',
+                                filename=mc2_md_file)
+
+    # Create Logger object
+    logger = logMod.Logger()
+    
+    # Create Align object
+    align_obj = alignMod.Align(project_name=project_name,
+                               md_in=mc2_md,
+                               params_in=align_config,
+                               logger_in=logger,
+    )
+
+    # Run IMOD
+    # Create the stacks and rawtlt files first
+    align_obj.create_stack_folders()
+    ic('folders created')
+    align_obj.create_rawtlt()
+    ic('rawtlt written')
+    align_obj.create_stack()
+    
