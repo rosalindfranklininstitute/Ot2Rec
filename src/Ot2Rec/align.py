@@ -15,8 +15,11 @@ import multiprocess as mp
 from glob import glob
 import pandas as pd
 from tqdm import tqdm
+import yaml
 
 from icecream import ic
+
+import Ot2Rec.metadata as mdMod
 
 
 class Align:
@@ -42,7 +45,7 @@ class Align:
 
         self.proj_name = project_name
 
-        self.loggerObj = logger_in
+        self.logObj = logger_in
         
         self.mObj = md_in
         self.meta = pd.DataFrame(self.mObj.metadata)
@@ -50,8 +53,75 @@ class Align:
         self.pObj = params_in
         self.params = self.pObj.params
 
+        self._get_internal_metadata()
+        self.no_processes = False
+        
         self._process_list = self.params['System']['process_list']
+        self._check_aligned_images()
+        
 
+    def _get_internal_metadata(self):
+        """
+        Method to prepare internal metadata for processing and checking
+        """
+        basis_folder = self.params['System']['output_path']
+        if basis_folder.endswith('/'):
+            basis_folder = basis_folder[:-1]
+
+        self._align_images = pd.DataFrame(columns=['ts', 'stack_output', 'align_output'])
+        for curr_ts in self.params['System']['process_list']:
+            self._align_images = self._align_images.append(
+                pd.Series({
+                    'ts': curr_ts,
+                    'stack_output': basis_folder + '/' + f'stack{curr_ts:03}' + '/' + self.params['System']['output_prefix'] + f'_{curr_ts:03}.st',
+                    'align_output': basis_folder + '/' + f'stack{curr_ts:03}' + '/' + self.params['System']['output_prefix'] + f'_{curr_ts:03}_ali.mrc'
+                }), ignore_index=True
+            )
+
+
+    def _check_aligned_images(self):
+        """
+        Method to check images which have already been aligned
+        """
+        # Create new empty internal output metadata if no record exists
+        if not os.path.isfile(self.proj_name + '_align_mdout.yaml'):
+            self.meta_out = pd.DataFrame(columns=self._align_images.columns)
+            
+        # Read in serialised metadata and turn into DataFrame if record exists
+        else:
+            _meta_record = mdMod.read_md_yaml(project_name=self.proj_name,
+                                              job_type='align',
+                                              filename=self.proj_name + '_align_mdout.yaml')
+            self.meta_out = pd.DataFrame(_meta_record.metadata)
+        self.meta_out.drop_duplicates(inplace=True)
+
+        # Compare output metadata and output folder
+        # If a file (in specified TS) is in record but missing, remove from record
+        self._missing = self.meta_out.loc[~self.meta_out['align_output'].apply(lambda x: os.path.isfile(x))]
+        self._missing_specified = pd.DataFrame(columns=self.meta.columns)
+        
+        for curr_ts in self.params['System']['process_list']:
+            self._missing_specified = self._missing_specified.append(self._missing[self._missing['ts']==curr_ts],
+                                                                     ignore_index=True,
+            )
+        self._merged = self.meta_out.merge(self._missing_specified, how='left', indicator=True)
+        self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
+
+        if len(self._missing_specified) > 0:
+            self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. Will be added back for processing.")
+            
+        # Drop the items in input metadata if they are in the output record 
+        _ignored = self._align_images[self._align_images.align_output.isin(self.meta_out.align_output)]
+        if len(_ignored) > 0 and len(_ignored) < len(self._align_images):
+            self.logObj(f"Info: {len(_ignored)} images had been processed and will be omitted.")
+        elif len(_ignored) == len(self._align_images):
+            self.logObj(f"Info: All specified images had been processed. Nothing will be done.")
+            self.no_processes = True
+
+        self._merged = self._align_images.merge(_ignored, how='left', indicator=True)
+        self._align_images = self._align_images[self._merged['_merge']=='left_only']
+        self._process_list = self._align_images['ts'].sort_values(ascending=True).unique().tolist()
+   
 
     """
     STACK CREATION
@@ -133,7 +203,7 @@ class Align:
             tqdm_iter.set_description(f"Creating stack for TS {curr_ts}...")
 
             # Define path where the new stack file should go
-            stack_file = self._path_dict[curr_ts] + self.params['System']['output_prefix'] + f'_{curr_ts:03}.st'
+            stack_file = self._align_images[self._align_images['ts']==curr_ts]['stack_output'].values[0]
 
             # Sort the filtered metadata
             # Metadata is fetched in the _sort_tilt_angles method
@@ -152,9 +222,15 @@ class Align:
             ]
 
             # Run newstack to create stack
-            subprocess.run(cmd,
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT)
+            run_newstack = subprocess.run(cmd,
+                                          stdout=subprocess.PIPE,
+                                          stderr=subprocess.STDOUT)
+
+            if run_newstack.stderr:
+                raise ValueError(f'newstack: An error has occurred ({run_newstack.returncode}) '
+                                 f'on stack{curr_ts}.')
+            else:
+                self.stdout = run_newstack.stdout
 
             
     """
@@ -277,7 +353,41 @@ comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
 
             batchruntomo = subprocess.run(self._get_brt_align_command(curr_ts),
                                           stdout=subprocess.PIPE,
+                                          stderr=subprocess.STDOUT,
                                           encoding='ascii')
 
-            self.stdout = batchruntomo.stdout
+            if batchruntomo.stderr:
+                raise ValueError(f'Batchtomo: An error has occurred ({batchruntomo.returncode}) '
+                                 f'on stack{curr_ts}.')
+            else:
+                self.stdout = batchruntomo.stdout
+                self.update_align_metadata()
+                self.export_metadata()
+
+                
+    def update_align_metadata(self):
+        """
+        Subroutine to update metadata after one set of runs
+        """
+
+        # Search for files with output paths specified in the metadata
+        # If the files don't exist, keep the line in the input metadata
+        # If they do, move them to the output metadata
+
+        self.meta_out = self.meta_out.append(self._align_images.loc[self._align_images['align_output'].apply(lambda x: os.path.isfile(x))],
+                                             ignore_index=True)
+        self._align_images = self._align_images.loc[~self._align_images['align_output'].apply(lambda x: os.path.isfile(x))]
+
+        # Sometimes data might be duplicated (unlikely) -- need to drop the duplicates
+        self.meta_out.drop_duplicates(inplace=True)
+
         
+    def export_metadata(self):
+        """
+        Method to serialise output metadata, export as yaml
+        """
+
+        yaml_file = self.proj_name + '_align_mdout.yaml'
+
+        with open(yaml_file, 'w') as f:
+            yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False) 
