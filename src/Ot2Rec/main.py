@@ -376,4 +376,5 @@ def run_align():
     align_obj.create_stack_folders()
     align_obj.create_rawtlt()
     align_obj.create_stack()
+    align_obj.align_stack()
     

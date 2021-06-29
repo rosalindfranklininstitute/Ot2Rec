@@ -11,6 +11,7 @@ Version: 0.0.2
 
 import os
 import subprocess
+import multiprocess as mp
 from glob import glob
 import pandas as pd
 from tqdm import tqdm
@@ -52,6 +53,9 @@ class Align:
         self._process_list = self.params['System']['process_list']
 
 
+    """
+    STACK CREATION
+    """
     def create_stack_folders(self):
         """
         Method to create folders for storing stacked images.
@@ -62,7 +66,7 @@ class Align:
         if basis_folder.endswith('/'):
             basis_folder = basis_folder[:-1]
 
-        # Create the folders and dictionary for future referrals
+        # Create the folders and dictionary for future reference
         self._path_dict = dict()
         for curr_ts in self._process_list:
             subfolder_name = f'stack{curr_ts:03}'
@@ -106,7 +110,7 @@ class Align:
         
         for curr_ts in self._process_list:
             # Define path where the new rawtlt file should go
-            rawtlt_file = self._path_dict[curr_ts] + self.params['System']['output_prefix'] + f'{curr_ts:03}.rawtlt'
+            rawtlt_file = self._path_dict[curr_ts] + self.params['System']['output_prefix'] + f'_{curr_ts:03}.rawtlt'
         
             # Sort the filtered metadata
             # Metadata is fetched in the _sort_tilt_angles method
@@ -126,10 +130,10 @@ class Align:
 
         tqdm_iter = tqdm(self._process_list, ncols=100)
         for curr_ts in tqdm_iter:
-            tqdm_iter.set_description(f"Processing TS {curr_ts}...")
+            tqdm_iter.set_description(f"Creating stack for TS {curr_ts}...")
 
             # Define path where the new stack file should go
-            stack_file = self._path_dict[curr_ts] + self.params['System']['output_prefix'] + f'{curr_ts:03}.st'
+            stack_file = self._path_dict[curr_ts] + self.params['System']['output_prefix'] + f'_{curr_ts:03}.st'
 
             # Sort the filtered metadata
             # Metadata is fetched in the _sort_tilt_angles method
@@ -152,3 +156,128 @@ class Align:
                            stdout=subprocess.PIPE,
                            stderr=subprocess.STDOUT)
 
+            
+    """
+    ALIGNMENT - BATCHTOMO
+    """
+    def _get_adoc(self):
+        """
+        Method to create directives for batchtomo alignment
+        """
+
+        # Template for directive file
+        adoc_temp = f"""
+setupset.currentStackExt = st
+setupset.copyarg.stackext = st
+setupset.copyarg.userawtlt = <use_rawtlt>
+setupset.copyarg.pixel = <pixel_size>
+setupset.copyarg.rotation = <rot_angle>
+setupset.copyarg.gold = <gold_size>
+setupset.systemTemplate = <adoc_template>
+
+runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
+runtime.Preprocessing.any.removeXrays = <remove_xrays>
+
+comparam.prenewst.newstack.BinByFactor = <ca_bin_factor>
+
+runtime.Fiducials.any.trackingMethod = 1
+
+comparam.xcorr_pt.tiltxcorr.SizeOfPatchesXandY = <size_of_patches>
+comparam.xcorr_pt.tiltxcorr.NumberOfPatchesXandY = <num_of_patches>
+comparam.xcorr_pt.tiltxcorr.ShiftLimitsXandY = <limits_on_shift>
+comparam.xcorr_pt.tiltxcorr.IterateCorrelations = <num_iterations>
+runtime.PatchTracking.any.adjustTiltAngles = <adj_tilt_angles>
+comparam.xcorr_pt.imodchopconts.LengthOfPieces = -1
+
+comparam.align.tiltalign.SurfacesToAnalyze = <num_surfaces>
+comparam.align.tiltalign.MagOption = <mag_option>
+comparam.align.tiltalign.TiltOption = <tilt_option>
+comparam.align.tiltalign.RotOption = <rot_option>
+comparam.align.tiltalign.BeamTiltOption = <beamtilt_option>
+comparam.align.tiltalign.RobustFitting = <use_robust>
+comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
+        """
+
+        convert_dict = {
+            'use_rawtlt': 1 if self.params['BatchRunTomo']['setup']['use_rawtlt'] else 0,
+            'pixel_size': self.params['BatchRunTomo']['setup']['pixel_size'],
+            'rot_angle': self.params['BatchRunTomo']['setup']['rot_angle'],
+            'gold_size': self.params['BatchRunTomo']['setup']['gold_size'],
+            'adoc_template': self.params['BatchRunTomo']['setup']['adoc_template'],
+
+            'delete_old_files': 1 if self.params['BatchRunTomo']['preprocessing']['delete_old_files'] else 0,
+            'remove_xrays': 1 if self.params['BatchRunTomo']['preprocessing']['remove_xrays'] else 0,
+
+            'ca_bin_factor': self.params['BatchRunTomo']['coarse_align']['bin_factor'],
+
+            'size_of_patches': f'{",".join(map(str, self.params["BatchRunTomo"]["patch_track"]["size_of_patches"]))}',
+            'num_of_patches': f'{",".join(map(str, self.params["BatchRunTomo"]["patch_track"]["num_of_patches"]))}',
+            'limits_on_shift': f'{",".join(map(str, self.params["BatchRunTomo"]["patch_track"]["limits_on_shift"]))}',
+            'num_iterations': self.params['BatchRunTomo']['patch_track']['num_iterations'],
+            'adj_tilt_angles': 1 if self.params['BatchRunTomo']['patch_track']['adjust_tilt_angles'] else 0,
+
+            'num_surfaces': self.params['BatchRunTomo']['fine_align']['num_surfaces'],
+            'mag_option': {'all': 1, 'group': 3, 'fixed': 0}[self.params['BatchRunTomo']['fine_align']['mag_option']],
+            'tilt_option': {'all': 1, 'group': 5, 'fixed': 0}[self.params['BatchRunTomo']['fine_align']['tilt_option']],
+            'rot_option': {'all': 1, 'group': 3, 'one': -1, 'fixed': 0}[self.params['BatchRunTomo']['fine_align']['rot_option']],
+            'beamtilt_option': {'all': 2, 'group': 5, 'fixed': 0}[self.params['BatchRunTomo']['fine_align']['beam_tilt_option']],
+            'use_robust': 1 if self.params['BatchRunTomo']['fine_align']['use_robust_fitting'] else 0,
+            'weight_contours': 1 if self.params['BatchRunTomo']['fine_align']['weight_all_contours'] else 0,
+        }
+
+        for param in list(convert_dict.keys()):
+            adoc_temp = adoc_temp.replace(f'<{param}>', f'{convert_dict[param]}')
+
+        with open('./align.adoc', 'w') as f:
+            f.write(adoc_temp)
+
+
+    def _get_brt_align_command(self,
+                               curr_ts: int):
+        """
+        Method to get command to run batchtomo for alignment
+        
+        ARGS:
+        curr_ts :: index of the tilt-series currently being processed
+
+        RETURNS:
+        list
+        """
+
+        # Get indices of usable CPUs
+        temp_cpu = [str(i) for i in range(1, mp.cpu_count()+1)]
+        
+        cmd = ['batchruntomo',
+               '-CPUMachineList', f"{temp_cpu}",
+               '-GPUMachineList', '1',
+               '-DirectiveFile', './align.adoc',
+               '-RootName', self.params['System']['output_prefix'] + f'_{curr_ts:03}',
+               '-CurrentLocation', self._path_dict[curr_ts],
+               '-StartingStep', '0',
+               '-EndingStep', '8',
+        ]
+
+        return cmd
+
+
+    def align_stack(self):
+        """
+        Method to align specified stack(s) using IMOD batchtomo
+        """
+
+        # Create adoc file
+        self._get_adoc()
+        
+        tqdm_iter = tqdm(self._process_list, ncols=100)
+        for curr_ts in tqdm_iter:
+            tqdm_iter.set_description(f"Aligning TS {curr_ts}...")
+
+            # Get command for current tilt-series
+            cmd_ts = self._get_brt_align_command(curr_ts)
+
+            batchruntomo = subprocess.run(self._get_brt_align_command(curr_ts),
+                                          stdout=subprocess.PIPE,
+                                          encoding='ascii')
+
+            self.stdout = batchruntomo.stdout
+        

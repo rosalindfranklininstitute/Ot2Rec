@@ -156,13 +156,6 @@ def new_align_yaml(project_name: str):
         },
         
         'BatchRunTomo': {
-            'general': {
-                'align_images_brt': True,
-                'adoc_file': 'default',
-                'step_start': 0,
-                'step_end': 6,
-            },
-            
             'setup': {
                 'use_rawtlt': True,
                 'pixel_size': 'default',
@@ -196,11 +189,6 @@ def new_align_yaml(project_name: str):
                 'beam_tilt_option': 'fixed',
                 'use_robust_fitting': True,
                 'weight_all_contours': True,
-            },
-
-            'positioning': {
-                'do_positioning': False,
-                'unbinned_thickness': 3600,
             },
         }
     }
