@@ -84,11 +84,15 @@ class Metadata:
         else:
             source_extension = 'mrc'
 
-        print("{}{}.{}".format(self.params['source_folder'],
-                                                ts_subfolder_criterion,
-                                                source_extension))
+        # Source folder should not end with forward slash so remove them
+        while self.params['source_folder'].endswith('/'):
+            self.params['source_folder'] = self.params['source_folder'][:-1]
+        
+        print("{}/{}.{}".format(self.params['source_folder'],
+                               ts_subfolder_criterion,
+                               source_extension))
         # Find files and check
-        raw_images_list = glob("{}{}.{}".format(self.params['source_folder'],
+        raw_images_list = glob("{}/{}.{}".format(self.params['source_folder'],
                                                 ts_subfolder_criterion,
                                                 source_extension)
         )
