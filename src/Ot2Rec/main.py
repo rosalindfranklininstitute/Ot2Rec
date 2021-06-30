@@ -297,14 +297,14 @@ def update_align_yaml():
     # We only need the TS number and the tilt angle for comparisons at this stage
     mc2_md_name = project_name + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
-        mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+        mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
     align_md_name = project_name + '_align_mdout.yaml'
     if os.path.isfile(align_md_name):
         is_old_project = True
         with open(align_md_name, 'r') as f:
-            align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+            align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
     else:
         is_old_project = False
 
@@ -327,7 +327,7 @@ def update_align_yaml():
                                   filename=mc2_yaml_name)
     
     align_params.params['System']['process_list'] = unique_ts_numbers
-    align_params.params['BatchRunTomo']['setup']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size']
+    align_params.params['BatchRunTomo']['setup']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size'] * 0.1
     
     with open(align_yaml_name, 'w') as f:
         yaml.dump(align_params.params, f, indent=4, sort_keys=False) 

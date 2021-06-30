@@ -210,7 +210,7 @@ class Align:
             meta_ts = self._sort_tilt_angles(curr_ts)
 
             # Create template for newstack
-            self._filename_fileinlist = self._path_dict[curr_ts] + self.params['System']['output_prefix'] + f'{curr_ts:03}_sources.txt'
+            self._filename_fileinlist = self._path_dict[curr_ts] + self.params['System']['output_prefix'] + f'_{curr_ts:03}_sources.txt'
             self._stack_template = f"{len(meta_ts)}\n" + '\n0\n'.join(meta_ts['output']) + '\n0\n'
             with open(self._filename_fileinlist, 'w') as f:
                 f.write(self._stack_template)
