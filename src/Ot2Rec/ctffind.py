@@ -5,7 +5,8 @@ Copyright (C) Rosalind Franklin Institute 2021
 
 Author  : Neville B.-y. Yee
 Date    : 21-Jun-2021
-Version : 0.0.2
+
+Version : 1.0.0
 """
 
 import os

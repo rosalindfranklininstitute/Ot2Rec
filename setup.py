@@ -25,6 +25,7 @@ def main():
                 "o2r.align.new=Ot2Rec.main:create_align_yaml",
                 "o2r.align.run=Ot2Rec.main:run_align",
                 "o2r.recon.new=Ot2Rec.main:create_recon_yaml",
+                "o2r.recon.run=Ot2Rec.main:run_recon",
             ]
         }
     )

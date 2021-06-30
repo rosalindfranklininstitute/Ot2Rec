@@ -5,7 +5,8 @@ Copyright (C) Rosalind Franklin Institute 2021
 
 Author  : Neville B.-y. Yee
 Date    : 11-Jun-2021
-Version : 0.0.2
+
+Version : 1.0.0
 """
 
 import sys
@@ -22,6 +23,7 @@ import Ot2Rec.motioncorr as mc2Mod
 import Ot2Rec.logger as logMod
 import Ot2Rec.ctffind as ctfMod
 import Ot2Rec.align as alignMod
+import Ot2Rec.recon as reconMod
 
 
 def get_proj_name():
@@ -443,3 +445,36 @@ def create_recon_yaml():
     # Create the yaml file, then automatically update it
     prmMod.new_recon_yaml(project_name)
     update_recon_yaml()
+
+
+def run_recon():
+    """
+    Method to run IMOD reconstruction
+    """
+
+    project_name = get_proj_name()
+    
+    # Check if prerequisite files exist
+    recon_yaml = project_name + '_recon.yaml'
+    align_md_file = project_name + '_align_mdout.yaml'
+
+    # Read in config and metadata
+    recon_config = prmMod.read_yaml(project_name=project_name,
+                                    filename=recon_yaml)
+    align_md = mdMod.read_md_yaml(project_name=project_name,
+                                  job_type='reconstruct',
+                                  filename=align_md_file)
+
+    # Create Logger object
+    logger = logMod.Logger()
+    
+    # Create Align object
+    recon_obj = reconMod.Recon(project_name=project_name,
+                               md_in=align_md,
+                               params_in=recon_config,
+                               logger_in=logger,
+    )
+
+    # Run IMOD
+    if not recon_obj.no_processes:
+        recon_obj.recon_stack()
