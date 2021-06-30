@@ -379,3 +379,67 @@ def run_align():
         align_obj.create_stack()
         align_obj.align_stack()
     
+
+def update_recon_yaml():
+    """
+    Subroutine to update yaml file for IMOD reconstruction
+    """
+
+    project_name = get_proj_name()
+    
+    # Check if recon and align yaml files exist
+    recon_yaml_name = project_name + '_recon.yaml'
+    align_yaml_name = project_name + '_align.yaml'
+    if not os.path.isfile(recon_yaml_name):
+        raise IOError("Error in Ot2Rec.main.update_recon_yaml: reconstruction config file not found.")
+    if not os.path.isfile(align_yaml_name):
+        raise IOError("Error in Ot2Rec.main.update_recon_yaml: alignment config file not found.")
+
+    # Read in alignment metadata (as Pandas dataframe)
+    align_md_name = project_name + '_align_mdout.yaml'
+    with open(align_md_name, 'r') as f:
+        align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
+
+    # Read in previous alignment output metadata (as Pandas dataframe) for old projects
+    recon_md_name = project_name + '_recon_mdout.yaml'
+    if os.path.isfile(recon_md_name):
+        is_old_project = True
+        with open(recon_md_name, 'r') as f:
+            recon_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
+    else:
+        is_old_project = False
+
+    # Diff the two dataframes to get numbers of tilt-series with unprocessed data
+    if is_old_project:
+        merged_md = align_md.merge(recon_md,
+                                   how='outer',
+                                   indicator=True)
+        unprocessed_images = merged_md.loc[lambda x: x['_merge']=='left_only']
+    else:
+        unprocessed_images = align_md
+    unique_ts_numbers = unprocessed_images['ts'].sort_values(ascending=True).unique().tolist()
+
+    # Read in reconstruction yaml file, modify, and update
+    # read in alignment yaml as well (some parameters depend on alignment settings)
+    recon_params = prmMod.read_yaml(project_name=project_name,
+                                    filename=recon_yaml_name)
+    align_params = prmMod.read_yaml(project_name=project_name,
+                                  filename=align_yaml_name)
+    
+    recon_params.params['System']['process_list'] = unique_ts_numbers
+    recon_params.params['BatchRunTomo']['setup'] = align_params.params['BatchRunTomo']['setup']
+    
+    with open(recon_yaml_name, 'w') as f:
+        yaml.dump(recon_params.params, f, indent=4, sort_keys=False) 
+        
+
+def create_recon_yaml():
+    """
+    Subroutine to create new yaml file for IMOD reconstruction
+    """
+
+    project_name = get_proj_name()
+    
+    # Create the yaml file, then automatically update it
+    prmMod.new_recon_yaml(project_name)
+    update_recon_yaml()

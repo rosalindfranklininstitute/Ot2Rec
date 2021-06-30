@@ -196,6 +196,59 @@ def new_align_yaml(project_name: str):
     with open(align_yaml_name, 'w') as f:
         yaml.dump(align_yaml_dict, f, indent=4, sort_keys=False)
 
+
+def new_recon_yaml(project_name: str):
+    """
+    Subroutine to create yaml file for batchtomo (continuing from aligned stacks to full reconstruction)
+
+    ARGS:
+    project_name :: Name of current project
+    """
+
+    recon_yaml_name = project_name + '_recon.yaml'
+
+    recon_yaml_dict = {
+        'System' : {
+            'process_list' : 'all',
+            'output_path' : './stacks/',
+            'output_prefix' : 'TS',
+        },
+        
+        'BatchRunTomo': {
+            'setup': {
+                'use_rawtlt': True,
+                'pixel_size': 'default',
+                'rot_angle': 86.,
+                'gold_size': 0.,
+                'adoc_template': '/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc',
+            },
+
+            'positioning': {
+                'do_positioning': False,
+                'unbinned_thickness': 3600,
+            },
+
+            'aligned_stack': {
+                'correct_ctf': False,
+                'erase_gold': False,
+                '2d_filtering': False,
+                'bin_factor': 8,
+            },
+
+            'reconstruction': {
+                'thickness': 3600,
+            },
+
+            'postprocessing': {
+                'run_trimvol': True,
+                'trimvol_reorient': 'rotate',
+            },
+        }
+    }
+                
+    with open(recon_yaml_name, 'w') as f:
+        yaml.dump(recon_yaml_dict, f, indent=4, sort_keys=False)
+
         
 def read_yaml(project_name: str,
               filename: str):
