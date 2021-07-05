@@ -20,9 +20,17 @@ on:
     branches:
       - '**'
       - '!pr-**'
+    paths-ignore:
+      - README.md
+      - README.template
+      - .github/workflows/readme.yml
   pull_request:
     branches:
       - '**'
+    paths-ignore:
+      - README.md
+      - README.template
+      - .github/workflows/readme.yml
 
 jobs:
   build_env:
