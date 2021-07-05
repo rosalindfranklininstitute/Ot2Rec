@@ -27,6 +27,7 @@ setup(
     license='Apache License, Version 2.0',
     zip_safe=False,
     install_requires=[
+        'tqdm',
         'pandas',
         'pyyaml',
         'multiprocess',
