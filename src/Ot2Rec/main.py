@@ -1,29 +1,32 @@
-"""
-Ot2Rec.main.py
+# Copyright 2021 Rosalind Franklin Institute
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
 
-Copyright (C) Rosalind Franklin Institute 2021
-
-Author  : Neville B.-y. Yee
-Date    : 11-Jun-2021
-
-Version : 1.0.0
-"""
 
 import sys
 import os
 from glob import glob
 import yaml
 import pandas as pd
-
 from icecream import ic
 
-import Ot2Rec.params as prmMod
-import Ot2Rec.metadata as mdMod
-import Ot2Rec.motioncorr as mc2Mod
-import Ot2Rec.logger as logMod
-import Ot2Rec.ctffind as ctfMod
-import Ot2Rec.align as alignMod
-import Ot2Rec.recon as reconMod
+from . import params as prmMod
+from . import metadata as mdMod
+from . import motioncorr as mc2Mod
+from . import logger as logMod
+from . import ctffind as ctfMod
+from . import align as alignMod
+from . import recon as reconMod
 
 
 def get_proj_name():
@@ -284,7 +287,7 @@ def update_align_yaml():
     """
 
     project_name = get_proj_name()
-    
+
     # Check if align and motioncorr yaml files exist
     align_yaml_name = project_name + '_align.yaml'
     mc2_yaml_name = project_name + '_mc2.yaml'
@@ -325,21 +328,21 @@ def update_align_yaml():
                                     filename=align_yaml_name)
     mc2_params = prmMod.read_yaml(project_name=project_name,
                                   filename=mc2_yaml_name)
-    
+
     align_params.params['System']['process_list'] = unique_ts_numbers
     align_params.params['BatchRunTomo']['setup']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size'] * 0.1
-    
-    with open(align_yaml_name, 'w') as f:
-        yaml.dump(align_params.params, f, indent=4, sort_keys=False) 
 
-        
+    with open(align_yaml_name, 'w') as f:
+        yaml.dump(align_params.params, f, indent=4, sort_keys=False)
+
+
 def create_align_yaml():
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
 
     project_name = get_proj_name()
-    
+
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(project_name)
     update_align_yaml()
@@ -351,7 +354,7 @@ def run_align():
     """
 
     project_name = get_proj_name()
-    
+
     # Check if prerequisite files exist
     align_yaml = project_name + '_align.yaml'
     mc2_md_file = project_name + '_mc2_mdout.yaml'
@@ -365,7 +368,7 @@ def run_align():
 
     # Create Logger object
     logger = logMod.Logger()
-    
+
     # Create Align object
     align_obj = alignMod.Align(project_name=project_name,
                                md_in=mc2_md,
