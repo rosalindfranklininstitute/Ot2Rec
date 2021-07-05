@@ -12,19 +12,3 @@
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-
-# Ot2Rec Imports
-from . import params
-from . import metadata
-from . import motioncorr
-from . import logger
-from . import ctffind
-from . import align
-from . import recon
-from . import main
-
-
-VERSION = 'v1.0a'
-"""
-str : Ot2Rec version string.
-"""

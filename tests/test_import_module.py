@@ -13,18 +13,20 @@
 # language governing permissions and limitations under the License.
 
 
-# Ot2Rec Imports
-from . import params
-from . import metadata
-from . import motioncorr
-from . import logger
-from . import ctffind
-from . import align
-from . import recon
-from . import main
+# Utility imports
+import unittest
+
+# Test imports
+import Ot2Rec
 
 
-VERSION = 'v1.0a'
-"""
-str : Ot2Rec version string.
-"""
+class ImportModuleTest(unittest.TestCase):
+    """
+    Tests the Ot2Rec module can be imported and accessed correctly.
+    """
+
+    def test_ot2rec_version_string(self):
+        """
+        Tests that the version string can be correctly accessed from the root of the Ot2Rec project.
+        """
+        self.assertEqual(type(Ot2Rec.VERSION), str)
