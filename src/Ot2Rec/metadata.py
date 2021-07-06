@@ -94,8 +94,8 @@ class Metadata:
         
         # Find files and check
         raw_images_list = glob("{}/{}/*.{}".format(self.params['source_folder'],
-                                                ts_subfolder_criterion,
-                                                source_extension)
+                                                   ts_subfolder_criterion,
+                                                   source_extension)
         )
         if (len(raw_images_list) == 0):
             raise IOError("Error in Ot2Rec.metadata.Metadata.create_master_metadata: No vaild files found using given criteria.")
