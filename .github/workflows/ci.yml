@@ -1,0 +1,80 @@
+# Copyright 2021 Rosalind Franklin Institute
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+
+name: CI - Build & Test Container
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!pr-**'
+    paths-ignore:
+      - README.md
+      - README.template
+      - .github/workflows/readme.yml
+  pull_request:
+    branches:
+      - '**'
+    paths-ignore:
+      - README.md
+      - README.template
+      - .github/workflows/readme.yml
+
+jobs:
+  build_env:
+    name: Build & Test Container
+    runs-on: ubuntu-20.04
+
+    steps:
+      # Configure environment variable depending on which branch we are running on
+      - name: Set env to main
+        if: endsWith(github.ref, '/main')
+        run: echo "DOCKER_REPO_TAG=ot2rec:latest" >> $GITHUB_ENV
+
+      - name: Set env to branch
+        if: (!endsWith(github.ref, '/main'))
+        run: echo "DOCKER_REPO_TAG=ot2rec:${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+      - name: Set image name
+        run: echo "DOCKER_REPO_NAME=${{ secrets.DOCKER_ORG }}/$DOCKER_REPO_TAG" >> $GITHUB_ENV
+
+      # Checks-out repository under $(pwd)
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      # Build Docker image, push image to Dockerhub on success
+      - name: Pull existing Docker image
+        run: docker pull $DOCKER_REPO_NAME || true
+
+      - name: Build Docker image
+        run: |
+          docker build --pull --cache-from $DOCKER_REPO_NAME --tag $DOCKER_REPO_NAME -f Dockerfile .
+
+      - name: Execute tests within container
+        run: |
+          docker run --rm -v $(pwd):/tmp/repo/ -w /tmp/repo/ $DOCKER_REPO_NAME \
+                     python -m pytest --cov=/usr/local/Ot2Rec/src /usr/local/Ot2Rec/tests/ \
+                                      --cov-report xml:coverage.xml --cov-report term-missing
+
+      - name: Submit coverage to Codecov
+        run: |
+          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -f coverage.xml
+
+      - name: Push container image to Dockerhub if this is a branch push event
+        run: |
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker push $DOCKER_REPO_NAME
+        if: (!startsWith(github.ref, 'refs/pull/'))

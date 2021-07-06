@@ -1,34 +1,50 @@
-"""
-Copyright (C) 2021 Rosalind Franklin Institute
+# Copyright 2021 Rosalind Franklin Institute
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
 
-This code is distributed under the ApacheV2 license
-"""
-from skbuild import setup
 
-def main():
-    """
-    Setup the package
-    """
+from setuptools import setup, find_packages
 
-    setup(
-        package_dir={"": "src"},
-        packages=["Ot2Rec"],
-        install_requires=[],
-        entry_points={
-            "console_scripts": [
-                "o2r.new=Ot2Rec.main:new_proj",
-                "o2r.get_master=Ot2Rec.main:get_master_metadata",
-                "o2r.mc.new=Ot2Rec.main:create_mc2_yaml",
-                "o2r.mc.run=Ot2Rec.main:run_mc2",
-                "o2r.ctffind.new=Ot2Rec.main:create_ctffind_yaml",
-                "o2r.ctffind.run=Ot2Rec.main:run_ctffind",
-                "o2r.align.new=Ot2Rec.main:create_align_yaml",
-                "o2r.align.run=Ot2Rec.main:run_align",
-                "o2r.recon.new=Ot2Rec.main:create_recon_yaml",
-                "o2r.recon.run=Ot2Rec.main:run_recon",
-            ]
-        }
-    )
 
-if __name__ == '__main__':
-    main()
+setup(
+    version='1.0a',
+    name='Ot2Rec',
+    description='Ot2Rec',
+    url='https://github.com/rosalindfranklininstitute/Ot2Rec',
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
+    test_suite='tests',
+    license='Apache License, Version 2.0',
+    zip_safe=False,
+    install_requires=[
+        'tqdm',
+        'pandas',
+        'pyyaml',
+        'multiprocess',
+        'icecream',
+    ],
+    entry_points={
+        "console_scripts": [
+            "o2r.new=Ot2Rec.main:new_proj",
+            "o2r.get_master=Ot2Rec.main:get_master_metadata",
+            "o2r.mc.new=Ot2Rec.main:create_mc2_yaml",
+            "o2r.mc.run=Ot2Rec.main:run_mc2",
+            "o2r.ctffind.new=Ot2Rec.main:create_ctffind_yaml",
+            "o2r.ctffind.run=Ot2Rec.main:run_ctffind",
+            "o2r.align.new=Ot2Rec.main:create_align_yaml",
+            "o2r.align.run=Ot2Rec.main:run_align",
+            "o2r.recon.new=Ot2Rec.main:create_recon_yaml",
+            "o2r.recon.run=Ot2Rec.main:run_recon",
+        ]
+    }
+)
