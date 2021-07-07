@@ -100,6 +100,8 @@ class Metadata:
         if (len(raw_images_list) == 0):
             raise IOError("Error in Ot2Rec.metadata.Metadata.create_master_metadata: No vaild files found using given criteria.")
 
+        # Convert potentially relative file paths to absolute paths
+        raw_images_list = [os.path.abspath(image) for image in raw_images_list]
 
         # Extract information from image file names
         self.image_paths, self.tilt_series, self.tilt_angles = [], [], []
@@ -124,7 +126,7 @@ class Metadata:
 
         # Save metadata as a dictionary --- easier to dump as yaml
         self.metadata = dict(file_paths=self.image_paths,
-                             ts=self.tilt_series,
+                             ts=int(self.tilt_series),
                              angles=self.tilt_angles)
 
         

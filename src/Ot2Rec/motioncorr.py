@@ -228,7 +228,6 @@ class Motioncorr:
                 # Get commands to run MC2
                 mc_commands = [self._get_command((_in, _out, _gpu))
                                for _in, _out, _gpu in zip(self._curr_meta.file_paths, self._curr_meta.output, self._curr_meta.gpu)]
-
                 jobs = (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) for cmd in mc_commands)
             
                 # run subprocess by chunks of GPU
