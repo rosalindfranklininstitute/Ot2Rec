@@ -363,7 +363,7 @@ def run_align():
     align_config = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml)
     mc2_md = mdMod.read_md_yaml(project_name=project_name,
-                                job_type='ctffind',
+                                job_type='align',
                                 filename=mc2_md_file)
 
     # Create Logger object
