@@ -93,10 +93,16 @@ class Metadata:
             self.params['source_folder'] = self.params['source_folder'][:-1]
         
         # Find files and check
-        raw_images_list = glob("{}/{}/*.{}".format(self.params['source_folder'],
-                                                   ts_subfolder_criterion,
-                                                   source_extension)
-        )
+        if len(self.params['TS_folder_prefix']) > 0:
+            raw_images_list = glob("{}/{}/*.{}".format(self.params['source_folder'],
+                                                       ts_subfolder_criterion,
+                                                       source_extension)
+            )
+        else:
+            raw_images_list = glob("{}/*.{}".format(self.params['source_folder'],
+                                                    source_extension)
+            )
+            
         if (len(raw_images_list) == 0):
             raise IOError("Error in Ot2Rec.metadata.Metadata.create_master_metadata: No vaild files found using given criteria.")
 
@@ -109,7 +115,7 @@ class Metadata:
             self.image_paths.append(curr_image)
 
             # Extract tilt series number
-            split_path_name = curr_image.split('/')[-1].split('_')
+            split_path_name = curr_image.split('/')[-1].replace('[', '_').split('_')
             try:
                 ts_index = int(''.join(i for i in split_path_name[self.params['image_stack_field']] if i.isdigit()))
             except IndexError or ValueError:
@@ -126,7 +132,7 @@ class Metadata:
 
         # Save metadata as a dictionary --- easier to dump as yaml
         self.metadata = dict(file_paths=self.image_paths,
-                             ts=int(self.tilt_series),
+                             ts=[int(i) for i in self.tilt_series],
                              angles=self.tilt_angles)
 
         
