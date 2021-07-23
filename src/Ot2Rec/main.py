@@ -118,6 +118,8 @@ def update_mc2_yaml():
     mc2_params = prmMod.read_yaml(project_name=project_name,
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
+    mc2_params.params['System']['output_prefix'] = project_name
+    
     if mc2_params.params['MC2']['desired_pixel_size'] == 'ps_x2':
         mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size'] * 2
     else:
@@ -228,6 +230,7 @@ def update_ctffind_yaml():
     mc2_params = prmMod.read_yaml(project_name=project_name,
                                   filename=mc2_yaml_name)
     
+    ctf_params.params['System']['output_prefix'] = project_name
     ctf_params.params['System']['process_list'] = unique_ts_numbers
     ctf_params.params['ctffind']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size']
     
@@ -332,6 +335,7 @@ def update_align_yaml():
     mc2_params = prmMod.read_yaml(project_name=project_name,
                                   filename=mc2_yaml_name)
 
+    align_params.params['System']['output_prefix'] = project_name
     align_params.params['System']['process_list'] = unique_ts_numbers
     align_params.params['BatchRunTomo']['setup']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size'] * 0.1
 
@@ -492,6 +496,7 @@ def update_recon_yaml():
     align_params = prmMod.read_yaml(project_name=project_name,
                                   filename=align_yaml_name)
     
+    recon_params.params['System']['output_prefix'] = project_name
     recon_params.params['System']['process_list'] = unique_ts_numbers
     recon_params.params['BatchRunTomo']['setup'] = align_params.params['BatchRunTomo']['setup']
     
