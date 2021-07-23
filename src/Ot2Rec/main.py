@@ -21,6 +21,7 @@ import pandas as pd
 from icecream import ic
 from beautifultable import BeautifulTable as bt
 import re
+import subprocess
 
 from . import params as prmMod
 from . import metadata as mdMod
@@ -541,3 +542,43 @@ def run_recon():
     # Run IMOD
     if not recon_obj.no_processes:
         recon_obj.recon_stack()
+
+
+def cleanup():
+    """
+    Method to clean up project folder to save space
+    """
+
+    project_name = get_proj_name()
+    
+    mc2_yaml = project_name + '_mc2.yaml'
+    recon_yaml = project_name + '_recon.yaml'
+
+    # Create Logger object
+    logger = logMod.Logger()
+    
+    if os.path.isfile(mc2_yaml):
+        mc2_config = prmMod.read_yaml(project_name=project_name,
+                                      filename=mc2_yaml)
+        mc2_path = mc2_config.params['System']['output_path']
+        if os.path.isdir(mc2_path):
+            logger(f"Deleting {mc2_path} folder and its contents...")
+            cmd = ['rm', '-rf', mc2_path]
+            del_mc2 = subprocess.run(cmd,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT)
+
+    if os.path.isfile(recon_yaml):
+        recon_config = prmMod.read_yaml(project_name=project_name,
+                                        filename=recon_yaml)
+        recon_path = recon_config.params['System']['output_path']
+        if os.path.isdir(recon_path):
+            logger(f"Deleting intermediary IMOD files...")
+            files = glob(recon_path + 'stack*/*.*~') + \
+                glob(recon_path + 'stack*/*_full_rec.*')
+            cmd = ['rm', *files]
+            del_recon = subprocess.run(cmd,
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.STDOUT)
+        
+        
