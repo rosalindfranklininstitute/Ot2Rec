@@ -19,6 +19,8 @@ from glob import glob
 import yaml
 import pandas as pd
 from icecream import ic
+from beautifultable import BeautifulTable as bt
+import re
 
 from . import params as prmMod
 from . import metadata as mdMod
@@ -383,7 +385,65 @@ def run_align():
         align_obj.create_rawtlt()
         align_obj.create_stack()
         align_obj.align_stack()
+
+
+def get_align_stats():
+    """
+    Method to extract statistics from alignment
+    """
+
+    project_name = get_proj_name()
+
+    # Check if align metadata file exists
+    align_md_name = project_name + '_align_mdout.yaml'
+    if not os.path.isfile(align_md_name):
+        raise IOError("Error in Ot2Rec.main.get_align_stats: alignment metadata file not found.")
+
+    # Get stacks folder path from config
+    align_yaml = project_name + '_align.yaml'
+    align_config = prmMod.read_yaml(project_name=project_name,
+                                    filename=align_yaml)
+    folder_path = align_config.params['System']['output_path']
     
+    # Read metadata to extract aligned TS numbers
+    with open(align_md_name, 'r') as f:
+        aligned_ts = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))['ts'].values.tolist()
+
+    # Create table object
+    stats = bt()
+    stats.columns.headers = ['Tilt series', 'Error mean (nm)', 'Error SD (nm)', 'Error weighted mean (nm)']
+    stats.rows.append(stats.columns.headers)
+
+    # Loop through folders and find data
+    for curr_ts in aligned_ts:
+        target_file_path = folder_path + f'stack{curr_ts:03d}/align.log'
+        if not os.path.isfile(target_file_path):
+            raise IOError("Error in Ot2Rec.main.get_align_stats: alignment metadata file not found.")
+
+        with open(target_file_path, 'r') as f:
+            lines = f.readlines()
+
+        mean_sd_criterion = re.compile('^\s*Residual error mean')
+        filtered = list(filter(mean_sd_criterion.match, lines))
+        filter_split = re.split('\s+', filtered[0])
+
+        get_mean_sd = re.compile('[0-9]+.[0-9]+')
+        mean = float(list(filter(get_mean_sd.match, filter_split))[0])
+        sd = float(list(filter(get_mean_sd.match, filter_split))[1])
+            
+        weighted_mean_criterion = re.compile('^\s*Residual error weighted mean')
+        filtered = list(filter(weighted_mean_criterion.match, lines))
+        filter_split = re.split('\s+', filtered[0])
+
+        get_weighted_crit = re.compile('[0-9]+.[0-9]+')
+        weighted_error = float(list(filter(get_weighted_crit.match, filter_split))[0])
+        
+        stats.rows.append([curr_ts, mean, sd, weighted_error])
+
+    # Print out stats
+    print(stats)    
+    
+        
 
 def update_recon_yaml():
     """
