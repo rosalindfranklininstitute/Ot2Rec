@@ -276,6 +276,8 @@ comparam.align.tiltalign.RotOption = <rot_option>
 comparam.align.tiltalign.BeamTiltOption = <beamtilt_option>
 comparam.align.tiltalign.RobustFitting = <use_robust>
 comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
+
+runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
         """
 
         convert_dict = {
@@ -284,6 +286,7 @@ comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
             'rot_angle': self.params['BatchRunTomo']['setup']['rot_angle'],
             'gold_size': self.params['BatchRunTomo']['setup']['gold_size'],
             'adoc_template': self.params['BatchRunTomo']['setup']['adoc_template'],
+            'stack_bin_factor': self.params['BatchRunTomo']['setup']['stack_bin_factor'],
 
             'delete_old_files': 1 if self.params['BatchRunTomo']['preprocessing']['delete_old_files'] else 0,
             'remove_xrays': 1 if self.params['BatchRunTomo']['preprocessing']['remove_xrays'] else 0,
