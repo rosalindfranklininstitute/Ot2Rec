@@ -22,6 +22,7 @@ from icecream import ic
 from beautifultable import BeautifulTable as bt
 import re
 import subprocess
+import numpy as np
 
 from . import params as prmMod
 from . import metadata as mdMod
@@ -414,12 +415,16 @@ def get_align_stats():
     with open(align_md_name, 'r') as f:
         aligned_ts = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))['ts'].values.tolist()
 
-    # Create table object
-    stats = bt()
-    stats.columns.headers = ['Tilt series', 'Error mean (nm)', 'Error SD (nm)', 'Error weighted mean (nm)']
-    stats.rows.append(stats.columns.headers)
+    # Create pandas dataframe
+    stats_df = pd.DataFrame(
+        {'Tilt series': [],
+         'Error mean (nm)': [],
+         'Error SD (nm)': [],
+         'Error weighted mean (nm)': [],
+         }
+    )
 
-    # Loop through folders and find data
+    # Loop through folders, find data and append to dataframe
     for curr_ts in aligned_ts:
         target_file_path = folder_path + f'stack{curr_ts:03d}/align.log'
         if not os.path.isfile(target_file_path):
@@ -443,7 +448,17 @@ def get_align_stats():
         get_weighted_crit = re.compile('[0-9]+.[0-9]+')
         weighted_error = float(list(filter(get_weighted_crit.match, filter_split))[0])
         
-        stats.rows.append([curr_ts, mean, sd, weighted_error])
+        stats_df.loc[len(stats_df.index)] = [curr_ts, mean, sd, weighted_error]
+
+    stats_df.sort_values(by='Error weighted mean (nm)',
+                         inplace=True)
+
+    # Create table object and append data from dataframe
+    stats = bt()
+    stats.columns.headers = ['Tilt series', 'Error mean (nm)', 'Error SD (nm)', 'Error weighted mean (nm)']
+    stats.rows.append(stats.columns.headers)
+    for i in stats_df.values.tolist():
+        stats.rows.append([int(i[0]), *i[1:]])
 
     # Print out stats
     print(stats)    
