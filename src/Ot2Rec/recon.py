@@ -108,18 +108,19 @@ class Recon:
 
         # Compare output metadata and output folder
         # If a file (in specified TS) is in record but missing, remove from record
-        self._missing = self.meta_out.loc[~self.meta_out['recon_output'].apply(lambda x: os.path.isfile(x))]
-        self._missing_specified = pd.DataFrame(columns=self.meta.columns)
+        if len(self.meta_out) > 0:
+            self._missing = self.meta_out.loc[~self.meta_out['recon_output'].apply(lambda x: os.path.isfile(x))]
+            self._missing_specified = pd.DataFrame(columns=self.meta.columns)
         
-        for curr_ts in self.params['System']['process_list']:
-            self._missing_specified = self._missing_specified.append(self._missing[self._missing['ts']==curr_ts],
-                                                                     ignore_index=True,
-            )
-        self._merged = self.meta_out.merge(self._missing_specified, how='left', indicator=True)
-        self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
+            for curr_ts in self.params['System']['process_list']:
+                self._missing_specified = self._missing_specified.append(self._missing[self._missing['ts']==curr_ts],
+                                                                         ignore_index=True,
+                )
+            self._merged = self.meta_out.merge(self._missing_specified, how='left', indicator=True)
+            self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
 
-        if len(self._missing_specified) > 0:
-            self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. Will be added back for processing.")
+            if len(self._missing_specified) > 0:
+                self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. Will be added back for processing.")
             
         # Drop the items in input metadata if they are in the output record 
         _ignored = self._recon_images[self._recon_images.recon_output.isin(self.meta_out.recon_output)]
