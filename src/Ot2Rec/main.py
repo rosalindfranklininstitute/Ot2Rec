@@ -602,3 +602,33 @@ def cleanup():
                                        stderr=subprocess.STDOUT)
         
         
+def run_all():
+    """
+    Method to run all four processes in one go using default settings.
+    """
+
+    logger = logMod.Logger()
+    
+    # Collect raw images and produce master metadata
+    logger("Collecting raw images...")
+    get_master_metadata()
+
+    # Motion correction
+    logger("Motion correction in progress...")
+    create_mc2_yaml()
+    run_mc2()
+
+    # CTF estimation
+    logger("CTF estimation in progress...")
+    create_ctffind_yaml()
+    run_ctffind()
+
+    # Alignment
+    logger("Alignment in progress...")
+    create_align_yaml()
+    run_align()
+
+    # Reconstruction
+    logger("Reconstruction in progress...")
+    create_recon_yaml()
+    run_recon()

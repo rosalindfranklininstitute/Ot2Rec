@@ -114,17 +114,20 @@ class Metadata:
         for curr_image in raw_images_list:
             self.image_paths.append(curr_image)
 
+            # Get length of filename prefix 
+            prefix_length = len(self.params['file_prefix'].split('_'))
+            
             # Extract tilt series number
             split_path_name = curr_image.split('/')[-1].replace('[', '_').split('_')
             try:
-                ts_index = int(''.join(i for i in split_path_name[self.params['image_stack_field']] if i.isdigit()))
+                ts_index = int(''.join(i for i in split_path_name[self.params['image_stack_field']+prefix_length] if i.isdigit()))
             except IndexError or ValueError:
                 raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt series number from file path {curr_image}.")
             self.tilt_series.append(ts_index)
 
             # Extract tilt angle
             try:
-                tilt_angle = float(split_path_name[self.params['image_tiltangle_field']].replace(
+                tilt_angle = float(split_path_name[self.params['image_tiltangle_field']+prefix_length].replace(
                     f'.{source_extension}', '').replace('[', '').replace(']', ''))
             except IndexError or ValueError as ierr:
                 raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt angle from file path {curr_image}.")

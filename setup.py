@@ -48,6 +48,7 @@ setup(
             "o2r.recon.new=Ot2Rec.main:create_recon_yaml",
             "o2r.recon.run=Ot2Rec.main:run_recon",
             "o2r.cleanup=Ot2Rec.main:cleanup",
+            "o2r.runall=Ot2Rec.main:run_all",
         ]
     }
 )

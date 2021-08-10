@@ -56,8 +56,9 @@ def new_master_yaml(project_name: str):
     proj_yaml_dict = {
         'source_folder': '../raw/',
         'TS_folder_prefix': '*',
-        'image_stack_field': 1,
-        'image_tiltangle_field': 3,
+        'file_prefix': project_name,
+        'image_stack_field': 0,
+        'image_tiltangle_field': 2,
         'source_TIFF': True,
     }
 
