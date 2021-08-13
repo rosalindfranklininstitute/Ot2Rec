@@ -67,25 +67,33 @@ class Recon:
         """
         Method to prepare internal metadata for processing and checking
         """
-        basis_folder = self.params['System']['output_path']
-        if basis_folder.endswith('/'):
-            basis_folder = basis_folder[:-1]
+        self.basis_folder = self.params['System']['output_path']
+        if self.basis_folder.endswith('/'):
+            self.basis_folder = self.basis_folder[:-1]
+
+        self.rootname = self.params['System']['output_rootname']
+        if self.rootname.endswith('_'):
+            self.rootname = self.rootname[:-1]
+
+        self.suffix = self.params['System']['output_suffix']
+        if self.suffix.endswith('_'):
+            self.suffix = self.suffix[:-1]
 
         # Create the folders and dictionary for future reference
         self._path_dict = dict()
         for curr_ts in self.params['System']['process_list']:
-            subfolder_name = f'stack{curr_ts:03}'
-            subfolder_path = basis_folder + '/' + subfolder_name + '/'
-            os.makedirs(subfolder_path, exist_ok=True)
-            self._path_dict[curr_ts] = subfolder_path
+            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
+            os.makedirs(subfolder, exist_ok=True)
+            self._path_dict[curr_ts] = subfolder
 
         self._recon_images = pd.DataFrame(columns=['ts', 'align_output', 'recon_output'])
         for curr_ts in self.params['System']['process_list']:
+            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
             self._recon_images = self._recon_images.append(
                 pd.Series({
                     'ts': curr_ts,
-                    'align_output': basis_folder + '/' + f'stack{curr_ts:03}' + '/' + self.params['System']['output_prefix'] + f'_{curr_ts:03}_ali.mrc',
-                    'recon_output': basis_folder + '/' + f'stack{curr_ts:03}' + '/' + self.params['System']['output_prefix'] + f'_{curr_ts:03}_rec.mrc'
+                    'align_output': f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_ali.mrc",
+                    'recon_output': f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_rec.mrc"
                 }), ignore_index=True
             )
 
@@ -213,7 +221,7 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
                '-CPUMachineList', f"{temp_cpu}",
                '-GPUMachineList', '1',
                '-DirectiveFile', './recon.adoc',
-               '-RootName', self.params['System']['output_prefix'] + f'_{curr_ts:03}',
+               '-RootName', f'{self.rootname}_{curr_ts:02d}',
                '-CurrentLocation', self._path_dict[curr_ts],
                '-StartingStep', '8',
                '-EndingStep', '20',

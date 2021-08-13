@@ -488,7 +488,16 @@ def get_align_stats():
     align_yaml = project_name + '_align.yaml'
     align_config = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml)
+
     folder_path = align_config.params['System']['output_path']
+    while folder_path.endswith('/'):
+        folder_path = folder_path[:-1]
+
+    rootname = align_config.params['System']['output_rootname']
+    while rootname.endswith('_'):
+        rootname = rootname[:-1]
+
+    suffix = align_config.params['System']['output_suffix']
     
     # Read metadata to extract aligned TS numbers
     with open(align_md_name, 'r') as f:
@@ -505,9 +514,9 @@ def get_align_stats():
 
     # Loop through folders, find data and append to dataframe
     for curr_ts in aligned_ts:
-        target_file_path = folder_path + f'stack{curr_ts:03d}/align.log'
+        target_file_path = f"{folder_path}/{rootname}_{curr_ts:02d}{suffix}/align.log"
         if not os.path.isfile(target_file_path):
-            raise IOError("Error in Ot2Rec.main.get_align_stats: alignment metadata file not found.")
+            raise IOError("Error in Ot2Rec.main.get_align_stats: alignment log file not found.")
 
         with open(target_file_path, 'r') as f:
             lines = f.readlines()
@@ -590,7 +599,8 @@ def update_recon_yaml():
     align_params = prmMod.read_yaml(project_name=project_name,
                                   filename=align_yaml_name)
     
-    recon_params.params['System']['output_prefix'] = project_name
+    recon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
+    recon_params.params['System']['output_suffix'] = align_params.params['System']['output_suffix']
     recon_params.params['System']['process_list'] = unique_ts_numbers
     recon_params.params['BatchRunTomo']['setup'] = align_params.params['BatchRunTomo']['setup']
     

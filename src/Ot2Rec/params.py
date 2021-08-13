@@ -218,8 +218,8 @@ def new_recon_yaml(project_name: str):
         'System' : {
             'process_list' : 'all',
             'output_path' : './stacks/',
-            'output_prefix' : 'TS',
-            'remove_intermediary_files' : True,
+            'output_rootname' : 'TS',
+            'output_suffix' : '',
         },
         
         'BatchRunTomo': {
