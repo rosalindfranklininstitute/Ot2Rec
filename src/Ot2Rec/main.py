@@ -336,7 +336,7 @@ def update_align_yaml():
     mc2_params = prmMod.read_yaml(project_name=project_name,
                                   filename=mc2_yaml_name)
 
-    align_params.params['System']['output_prefix'] = project_name
+    align_params.params['System']['output_rootname'] = project_name
     align_params.params['System']['process_list'] = unique_ts_numbers
     align_params.params['BatchRunTomo']['setup']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size'] * 0.1
 
@@ -344,16 +344,65 @@ def update_align_yaml():
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
 
 
-def create_align_yaml():
+def update_align_yaml_stacked():
+    """
+    Method to update yaml file for IMOD newstack / alignment --- if stacks already exist
+    """
+
+    project_name = get_proj_name()
+
+    # User prompt for file specifications
+    parent_path = input('Enter path of parent folder with stacks in: \n')
+    assert (os.path.isdir(parent_path)), \
+        "Error in main.update_align_yaml_stacked: IMOD parent folder not found."
+    while parent_path.endswith('/'):
+        parent_path = parent_path[:-1]
+
+    rootname = input('Enter rootname of project (remove final underscore): \n')
+    while rootname.endswith('_'):
+        rootname = rootname[:-1]
+
+    suffix = input('Enter file suffix (leave empty if not applicable): \n')
+    pixel_size = input('Enter desired pixel size (in angstroms): \n')
+
+    # Find stack files
+    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
+
+    # Extract tilt series number
+    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}.st', '')) for i in st_file_list]
+
+    # Read in and update YAML parameters
+    align_yaml_name = project_name + '_align.yaml'
+    align_params = prmMod.read_yaml(project_name=project_name,
+                                    filename=align_yaml_name)
+
+    align_params.params['System']['output_path'] = parent_path
+    align_params.params['System']['output_rootname'] = rootname
+    align_params.params['System']['output_suffix'] = suffix
+    align_params.params['System']['process_list'] = ts_list
+    align_params.params['BatchRunTomo']['setup']['pixel_size'] = float(pixel_size) * 0.1
+
+    # Write out YAML file
+    with open(align_yaml_name, 'w') as f:
+        yaml.dump(align_params.params, f, indent=4, sort_keys=False)
+    
+
+def create_align_yaml(prestack=False):
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
+
+    ARGS:
+    prestack (bool) :: if stacks already exist
     """
 
     project_name = get_proj_name()
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(project_name)
-    update_align_yaml()
+    if not prestack:
+        update_align_yaml()
+    else:
+        update_align_yaml_stacked()
 
 
 def run_align():
@@ -392,6 +441,36 @@ def run_align():
         align_obj.create_stack()
         align_obj.align_stack()
 
+
+def run_align_ext():
+    """
+    Method to run IMOD alignment with existing stacks
+    """
+
+    project_name = get_proj_name()
+
+    # Check if prerequisite files exist
+    align_yaml = project_name + '_align.yaml'
+
+    # Read in config and metadata
+    align_config = prmMod.read_yaml(project_name=project_name,
+                                    filename=align_yaml)
+
+    # Create Logger object
+    logger = logMod.Logger()
+
+    # Create Align object
+    align_obj = alignMod.Align(project_name=project_name,
+                               md_in=None,
+                               params_in=align_config,
+                               logger_in=logger,
+    )
+
+    # Run IMOD
+    # Create the stacks and rawtlt files first
+    if not align_obj.no_processes:
+        align_obj.align_stack()
+        
 
 def get_align_stats():
     """

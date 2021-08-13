@@ -157,7 +157,8 @@ def new_align_yaml(project_name: str):
         'System' : {
             'process_list' : 'all',
             'output_path' : './stacks/',
-            'output_prefix' : 'TS',
+            'output_rootname' : 'TS',
+            'output_suffix' : '',
         },
         
         'BatchRunTomo': {
