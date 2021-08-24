@@ -77,8 +77,8 @@ class ctffind():
         self.ctf_images = pd.DataFrame(columns=self.meta.columns)
         for curr_ts in self._process_list:
             temp = self.meta[self.meta['ts']==curr_ts]
-            ts_image = temp.loc[temp['angles'].abs().idxmin(axis=0)]
-            self.ctf_images = self.ctf_images.append(ts_image,
+#            ts_image = temp.loc[temp['angles'].abs().idxmin(axis=0)]
+            self.ctf_images = self.ctf_images.append(temp,
                                                      ignore_index=True)
         
 
@@ -92,7 +92,7 @@ class ctffind():
         # update output column
         self.ctf_images['output'] = self.ctf_images.apply(
             lambda row: f"{self.params['System']['output_path']}"
-            f"{self.params['System']['output_prefix']}_{row['ts']:03}_ctffind.mrc", axis=1)
+            f"{self.params['System']['output_prefix']}_{row['ts']:03}_{row['angles']}_ctffind.mrc", axis=1)
         
 
     def _check_processed_images(self):
@@ -140,17 +140,17 @@ class ctffind():
         self._process_list = self.ctf_images['ts'].sort_values(ascending=True).unique().tolist()
         
 
-    def _get_ctffind_command(self, ts):
+    def _get_ctffind_command(self, image):
         """
         Function to return command for CTFfind
 
         ARGS:
         ts (int) :: index of curent tilt-series
         """
-        curr_image = self.ctf_images[self.ctf_images['ts']==ts]
+
         self.cmd = [self.params['ctffind']['ctffind_path']]
-        input_dict = [curr_image['file_paths'].values[0],
-                      curr_image['output'].values[0],
+        input_dict = [image['file_paths'],
+                      image['output'],
                       str(self.params['ctffind']['pixel_size']),
                       str(self.params['ctffind']['voltage']),
                       str(self.params['ctffind']['spherical_aberration']),
@@ -174,9 +174,9 @@ class ctffind():
         Method to run ctffind on tilt-series sequentially
         """
 
-        for curr_ts in self._process_list:
+        for index, curr_image in self.ctf_images.iterrows():
             # Get the command and inputs for current tilt-series
-            self._get_ctffind_command(curr_ts)
+            self._get_ctffind_command(curr_image)
             ctffind_run = subprocess.run(self.cmd,
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.STDOUT,
