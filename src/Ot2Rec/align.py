@@ -51,7 +51,8 @@ class Align:
         self.logObj = logger_in
         
         self.mObj = md_in
-        self.meta = pd.DataFrame(self.mObj.metadata)
+        if self.mObj is not None:
+            self.meta = pd.DataFrame(self.mObj.metadata)
         
         self.pObj = params_in
         self.params = self.pObj.params
@@ -67,17 +68,22 @@ class Align:
         """
         Method to prepare internal metadata for processing and checking
         """
-        basis_folder = self.params['System']['output_path']
-        if basis_folder.endswith('/'):
-            basis_folder = basis_folder[:-1]
+        self.basis_folder = self.params['System']['output_path']
+        while self.basis_folder.endswith('/'):
+            self.basis_folder = self.basis_folder[:-1]
+        self.rootname = self.params['System']['output_rootname']
+        while self.rootname.endswith('_'):
+            self.rootname = self.rootname[:-1]
+        self.suffix = self.params['System']['output_suffix']
 
         self._align_images = pd.DataFrame(columns=['ts', 'stack_output', 'align_output'])
         for curr_ts in self.params['System']['process_list']:
+            subfolder_name = f'{self.rootname}_{curr_ts:02}{self.suffix}' 
             self._align_images = self._align_images.append(
                 pd.Series({
                     'ts': curr_ts,
-                    'stack_output': basis_folder + '/' + f'stack{curr_ts:03}' + '/' + self.params['System']['output_prefix'] + f'_{curr_ts:03}.st',
-                    'align_output': basis_folder + '/' + f'stack{curr_ts:03}' + '/' + self.params['System']['output_prefix'] + f'_{curr_ts:03}_ali.mrc'
+                    'stack_output': f'{self.basis_folder}/{subfolder_name}/{subfolder_name}.st',
+                    'align_output': f'{self.basis_folder}/{subfolder_name}/{subfolder_name}_ali.mrc'
                 }), ignore_index=True
             )
 
@@ -136,15 +142,20 @@ class Align:
         These folders will be used for alignment and reconstruction as well.
         """
 
-        basis_folder = self.params['System']['output_path']
-        if basis_folder.endswith('/'):
-            basis_folder = basis_folder[:-1]
+        self.basis_folder = self.params['System']['output_path']
+        if self.basis_folder.endswith('/'):
+            self.basis_folder = self.basis_folder[:-1]
+            
+        self.rootname = self.params['System']['output_rootname']
+        while self.rootname.endswith('_'):
+            self.rootname = self.rootname[:-1]
+            
+        self.suffix = self.params['System']['output_suffix']
 
         # Create the folders and dictionary for future reference
         self._path_dict = dict()
         for curr_ts in self._process_list:
-            subfolder_name = f'stack{curr_ts:03}'
-            subfolder_path = basis_folder + '/' + subfolder_name + '/'
+            subfolder_path = f'{self.basis_folder}/{self.rootname}_{curr_ts:02}{self.suffix}'
             os.makedirs(subfolder_path, exist_ok=True)
             self._path_dict[curr_ts] = subfolder_path
 
@@ -184,7 +195,7 @@ class Align:
         
         for curr_ts in self._process_list:
             # Define path where the new rawtlt file should go
-            rawtlt_file = self._path_dict[curr_ts] + self.params['System']['output_prefix'] + f'_{curr_ts:03}.rawtlt'
+            rawtlt_file = f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}_{curr_ts:02}{self.params['System']['output_suffix']}.rawtlt"
         
             # Sort the filtered metadata
             # Metadata is fetched in the _sort_tilt_angles method
@@ -214,7 +225,7 @@ class Align:
             meta_ts = self._sort_tilt_angles(curr_ts)
 
             # Create template for newstack
-            self._filename_fileinlist = self._path_dict[curr_ts] + self.params['System']['output_prefix'] + f'_{curr_ts:03}_sources.txt'
+            self._filename_fileinlist = f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}_{curr_ts:02}{self.params['System']['output_suffix']}_sources.txt"
             self._stack_template = f"{len(meta_ts)}\n" + '\n0\n'.join(meta_ts['output']) + '\n0\n'
             with open(self._filename_fileinlist, 'w') as f:
                 f.write(self._stack_template)
@@ -329,13 +340,14 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
 
         # Get indices of usable CPUs
         temp_cpu = [str(i) for i in range(1, mp.cpu_count()+1)]
-        
+
+
         cmd = ['batchruntomo',
                '-CPUMachineList', f"{temp_cpu}",
                '-GPUMachineList', '1',
                '-DirectiveFile', './align.adoc',
-               '-RootName', self.params['System']['output_prefix'] + f'_{curr_ts:03}',
-               '-CurrentLocation', self._path_dict[curr_ts],
+               '-RootName', self.params['System']['output_rootname'] + f'_{curr_ts:02}',
+               '-CurrentLocation', f'{self.basis_folder}/{self.rootname}_{curr_ts:02}{self.suffix}',
                '-StartingStep', '0',
                '-EndingStep', '8',
         ]
