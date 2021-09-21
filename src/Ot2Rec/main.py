@@ -387,11 +387,21 @@ def update_align_yaml_stacked():
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
     
 
-def create_align_yaml(prestack=False):
+def create_align_yaml():
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
+    """
 
-    ARGS:
+    project_name = get_proj_name()
+
+    # Create the yaml file, then automatically update it
+    prmMod.new_align_yaml(project_name)
+    update_align_yaml()
+
+
+def create_align_yaml_stacked():
+    """
+    Subroutine to create new yaml file for IMOD newstack / alignment
     prestack (bool) :: if stacks already exist
     """
 
@@ -399,11 +409,8 @@ def create_align_yaml(prestack=False):
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(project_name)
-    if not prestack:
-        update_align_yaml()
-    else:
-        update_align_yaml_stacked()
-
+    update_align_yaml_stacked()
+        
 
 def run_align():
     """

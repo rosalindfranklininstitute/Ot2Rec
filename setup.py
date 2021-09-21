@@ -38,17 +38,22 @@ setup(
         "console_scripts": [
             "o2r.new=Ot2Rec.main:new_proj",
             "o2r.get_master=Ot2Rec.main:get_master_metadata",
+
             "o2r.mc.new=Ot2Rec.main:create_mc2_yaml",
             "o2r.mc.run=Ot2Rec.main:run_mc2",
+
             "o2r.ctffind.new=Ot2Rec.main:create_ctffind_yaml",
             "o2r.ctffind.run=Ot2Rec.main:run_ctffind",
+
             "o2r.align.new=Ot2Rec.main:create_align_yaml",
-            "o2r.align.new_ext=Ot2Rec.main:update_align_yaml_stacked",
+            "o2r.align.new_ext=Ot2Rec.main:create_align_yaml_stacked",
             "o2r.align.run=Ot2Rec.main:run_align",
             "o2r.align.run_ext=Ot2Rec.main:run_align_ext",
             "o2r.align.stats=Ot2Rec.main:get_align_stats",
+
             "o2r.recon.new=Ot2Rec.main:create_recon_yaml",
             "o2r.recon.run=Ot2Rec.main:run_recon",
+
             "o2r.cleanup=Ot2Rec.main:cleanup",
             "o2r.runall=Ot2Rec.main:run_all",
         ]
