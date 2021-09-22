@@ -397,7 +397,7 @@ o2r.align.run_ext demo
 ```
 
 
-## Reconstruction
+## 4. Reconstruction
 The final step of image processing is reconstruction, which is a continuation from the alignment process in IMOD.
 
 ### Creating configuration file
