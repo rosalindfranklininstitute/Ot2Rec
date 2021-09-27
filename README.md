@@ -56,12 +56,10 @@ git clone https://github.com/rosalindfranklininstitute/Ot2Rec.git
    conda activate o2r
    ```
 
-4. Install the prerequisite Python packages
+4. Add conda-forge
    ```
    conda config --add channels conda-forge
-   conda install --file requirements.txt
    ```
-   (NB. the first line is required as some of the packages are only available via conda-forge)
 
 5. Go to the Ot2Rec folder and install Ot2Rec
    ```
