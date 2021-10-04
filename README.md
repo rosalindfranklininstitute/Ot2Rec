@@ -156,11 +156,7 @@ and you should get a `demo_master_md.yaml` file. <br>***(WARNING: This file cont
 
 
 ## 2. Motion Correction
-After creating the master metadata, the next step will be correct for the motion during image acquisition. Ot2Rec uses the external code MotionCor2 to do this. The program module must be loaded before being executed:
-```
-module load motioncor2
-```
-
+After creating the master metadata, the next step will be correct for the motion during image acquisition. Ot2Rec uses the external code MotionCor2 to do this.
 
 ### Creating configuration file
 To create the configuration file for MotionCor2, run the following command:
@@ -233,11 +229,6 @@ At the end of the process, there should be another metafile `demo_mc2_md.yaml`.
 To estimate the defocus and hence the contrast transfer function (CTF) of the images, Ot2Rec uses the code CTFFind4.
 <br>**(Note: This step is optional. The image reconstruction pipeline will not be affected if this step is omitted.)**
 
-To use CTFFind4, the appropriate module must be loaded beforehand:
-```
-module load ctffind
-```
-
 ### Creating configuration file
 To create the configuration file for CTFFind4, run the following command:
 ```
@@ -302,10 +293,7 @@ At the end of the process, there should be a new metafile `demo_ctffind_md.yaml`
 
 
 ## 3. Alignment
-Ot2Rec uses the program IMOD for aligning raw images. To run IMOD, the appropriate module must be loaded using the command:
-```
-module load imod
-```
+Ot2Rec uses the program IMOD for aligning raw images.
 
 ### Creating configuration file
 To create the configuration file for alignment in IMOD, run the following command:
