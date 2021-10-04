@@ -161,7 +161,7 @@ After creating the master metadata, the next step will be correct for the motion
 ### Creating configuration file
 To create the configuration file for MotionCor2, run the following command:
 ```
-o2r.mc.new demo
+o2r.mc2.new demo
 ```
 which should produce the file `demo_mc2.yaml`, whose contents are listed below:
 ```
@@ -218,7 +218,7 @@ Parameters | Descriptions
 ### Running MotionCor2
 With the configuration file `demo_mc2.yaml` created, we can run MotionCor2 by using the the command
 ```
-o2r.mc.run demo
+o2r.mc2.run demo
 ```
 
 At the end of the process, there should be another metafile `demo_mc2_md.yaml`.
