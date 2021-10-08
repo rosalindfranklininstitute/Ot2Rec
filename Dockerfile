@@ -24,7 +24,17 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
     apt-get autoremove -y --purge && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 # Install each piece of external software that Ot2Rec calls
+# Motioncor2
+RUN wget -O Motioncor2-v1.4.4.zip "https://drive.google.com/uc-export=download&id=15CwzXfqqnYE7XpkZuT94H4XjbNUDUt4B" && \
+	unzip Motioncor2-v1.4.4.zip
 
+# ctffind4
+RUN wget -O ctffind-4.1.14-linux64.tar.gz "https://grigoriefflab.umassmed.edu/system/tdf?path=ctffind-4.1.14-linux64.tar.gz&file=1&type=node&id=26" && \
+	tar -xf ctffind-4.1.14-linux64.tar.gz && mv bin/ ctffind/
+
+# IMOD
+RUN wget https://bio3d.colorado.edu/imod/AMD64-RHEL5/imod_4.11.10_RHEL7-64_CUDA10.1.sh && \
+    bash imod_4.11.10_RHEL7-64_CUDA10.1.sh -debian -yes
 
 # Install python packages
 RUN pip3 install --no-cache-dir --upgrade \
