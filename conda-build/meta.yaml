@@ -1,0 +1,15 @@
+package:
+  name: ot2rec
+  version: "0.1.0"
+
+source:
+  path: ..
+
+ 
+requirements:
+  build:
+    - python
+    
+  
+  run: 
+    - python
