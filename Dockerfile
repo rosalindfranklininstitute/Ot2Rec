@@ -30,16 +30,14 @@ RUN wget --no-hsts -O Motioncor2-v1.4.4.zip "https://drive.google.com/uc?export=
 unzip Motioncor2-v1.4.4.zip && rm Motioncor2-v1.4.4.zip
 
 # ctffind4
-WORKDIR /usr/local/ctffind-4.1.14
+WORKDIR /usr/local/ctffind
 RUN wget -O ctffind-4.1.14-linux64.tar.gz "https://grigoriefflab.umassmed.edu/system/tdf?path=ctffind-4.1.14-linux64.tar.gz&file=1&type=node&id=26" && \
-tar -xf ctffind-4.1.14-linux64.tar.gz && mv bin/ ctffind/ && rm ctffind-4.1.14-linux64.tar.gz
-
+tar -xf ctffind-4.1.14-linux64.tar.gz && mv bin/ ctffind-4.1.14/ && rm ctffind-4.1.14-linux64.tar.gz
 
 # IMOD
-WORKDIR /usr/local/imod_4.11.10
+WORKDIR /usr/local/imod
 RUN wget https://bio3d.colorado.edu/imod/AMD64-RHEL5/imod_4.11.10_RHEL7-64_CUDA10.1.sh && \
-    bash imod_4.11.10_RHEL7-64_CUDA10.1.sh -dir /usr/local/imod_4.11.10 -debian -yes && \
-    rm imod_4.11.10_RHEL7-64_CUDA10.1.sh
+    bash imod_4.11.10_RHEL7-64_CUDA10.1.sh -dir /usr/local/imod -debian -yes && rm imod_4.11.10_RHEL7-64_CUDA10.1.sh
 
 # Install python packages
 RUN pip3 install --no-cache-dir --upgrade \
