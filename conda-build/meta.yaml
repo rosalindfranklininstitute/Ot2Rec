@@ -1,0 +1,21 @@
+package:
+  name: ot2rec
+  version: "0.1.0"
+
+source:
+  path: ..
+
+ 
+requirements:
+  host:
+    - python
+    - setuptools
+    
+  
+  run: 
+    - tqdm
+    - pandas
+    - pyyaml
+    - multiprocess
+    - icecream
+    - beautifultable
