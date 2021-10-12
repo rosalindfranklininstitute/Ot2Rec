@@ -7,9 +7,15 @@ source:
 
  
 requirements:
-  build:
+  host:
     - python
+    - setuptools
     
   
   run: 
-    - python
+    - tqdm
+    - pandas
+    - pyyaml
+    - multiprocess
+    - icecream
+    - beautifultable
