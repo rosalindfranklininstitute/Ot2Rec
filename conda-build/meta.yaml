@@ -38,4 +38,8 @@ requirements:
     - multiprocess
     - icecream
     - beautifultable
-    
+
+about:
+  home: https://github.com/RosalindFranklinInstitute/Ot2Rec
+  summary: wrapper software for Electron Microscopy pipelines
+  license: Apache-2.0
