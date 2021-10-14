@@ -423,7 +423,6 @@ BatchRunTomo:
         rot_angle: 86.0
         gold_size: 0.0
         adoc_template: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc
-        stack_bin_factor: 8
     positioning:
         do_positioning: false
         unbinned_thickness: 3600
