@@ -25,19 +25,21 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
 
 # Install each piece of external software that Ot2Rec calls
 # Motioncor2
-WORKDIR /usr/local/Motioncor2
+WORKDIR /usr/local/MotionCor2
 RUN wget --no-hsts -O Motioncor2-v1.4.4.zip "https://drive.google.com/uc?export=download&id=15CwzXfqqnYE7XpkZuT94H4XjbNUDUt4B" && \
-unzip Motioncor2-v1.4.4.zip && rm Motioncor2-v1.4.4.zip
+unzip Motioncor2-v1.4.4.zip && rm Motioncor2-v1.4.4.zip && chmod -R +rx /usr/local/MotionCor2
 
 # ctffind4
 WORKDIR /usr/local/ctffind
 RUN wget -O ctffind-4.1.14-linux64.tar.gz "https://grigoriefflab.umassmed.edu/system/tdf?path=ctffind-4.1.14-linux64.tar.gz&file=1&type=node&id=26" && \
-tar -xf ctffind-4.1.14-linux64.tar.gz && mv bin/ ctffind-4.1.14/ && rm ctffind-4.1.14-linux64.tar.gz
+tar -xf ctffind-4.1.14-linux64.tar.gz && mv bin/ ctffind-4.1.14/ && rm ctffind-4.1.14-linux64.tar.gz && \
+chmod -R +rx /usr/local/ctffind
 
 # IMOD
 WORKDIR /usr/local/imod
 RUN wget https://bio3d.colorado.edu/imod/AMD64-RHEL5/imod_4.11.10_RHEL7-64_CUDA10.1.sh && \
-    bash imod_4.11.10_RHEL7-64_CUDA10.1.sh -dir /usr/local/imod -debian -yes && rm imod_4.11.10_RHEL7-64_CUDA10.1.sh
+    bash imod_4.11.10_RHEL7-64_CUDA10.1.sh -dir /usr/local/imod -debian -yes && rm imod_4.11.10_RHEL7-64_CUDA10.1.sh && \
+chmod -R +rx /usr/local/imod
 
 # Install python packages
 RUN pip3 install --no-cache-dir --upgrade \
