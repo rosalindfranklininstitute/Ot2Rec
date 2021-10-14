@@ -609,7 +609,8 @@ def update_recon_yaml():
     recon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
     recon_params.params['System']['output_suffix'] = align_params.params['System']['output_suffix']
     recon_params.params['System']['process_list'] = unique_ts_numbers
-    recon_params.params['BatchRunTomo']['setup'] = align_params.params['BatchRunTomo']['setup']
+    recon_params.params['BatchRunTomo']['setup'] = {key: value for key, value in align_params.params['BatchRunTomo']['setup'].items() \
+                                                    if key != 'stack_bin_factor'}
     
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False) 

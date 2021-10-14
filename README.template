@@ -452,7 +452,6 @@ Parameters | Descriptions
 **`BatchRunTomo.setup.rot_angle`** | (See above)
 **`BatchRunTomo.setup.gold_size`** | (See above)
 **`BatchRunTomo.setup.adoc_template`** | (See above)
-**`BatchRunTomo.setup.stack_bin_factor`** | (See above)
 **`BatchRunTomo.positioning.do_positioning`** | If set to `true`, IMOD will perform positioning for the stack.
 **`BatchRunTomo.positioning.unbinned_thickness`** | Unbinned thickness (in pixels) for samples or whole tomogram
 **`BatchRunTomo.aligned_stack.correct_ctf`** | If set to `true`, IMOD will attempt to correct CTF for the aligned stack.
