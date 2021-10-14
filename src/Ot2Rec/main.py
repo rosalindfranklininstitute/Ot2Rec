@@ -90,6 +90,11 @@ def update_mc2_yaml():
     if not os.path.isfile(mc2_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_mc2_yaml: File not found.")
 
+    # Read in master yaml
+    master_yaml = project_name + '_proj.yaml'
+    with open(master_yaml, 'r') as f:
+        master_config = yaml.load(f, Loader=yaml.FullLoader)
+
     # Read in master metadata (as Pandas dataframe)
     master_md_name = project_name + '_master_md.yaml'
     with open(master_md_name, 'r') as f:
@@ -120,6 +125,8 @@ def update_mc2_yaml():
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
     mc2_params.params['System']['output_prefix'] = project_name
+    mc2_params.params['System']['source_TIFF'] = master_config['source_TIFF']
+    
     
     if mc2_params.params['MC2']['desired_pixel_size'] == 'ps_x2':
         mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size'] * 2
