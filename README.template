@@ -460,3 +460,9 @@ Parameters | Descriptions
 **`BatchRunTomo.reconstruction.thickness`** | Thickness (in pixels) for reconstruction
 **`BatchRunTomo.postprocessing.run_trimvol`** | If set to `true`, IMOD will run Trimvol on reconstruction
 **`BatchRunTomo.postprocessing.trimvol_reorient`** | Reorientation in Trimvol <br>(options: none \| flip \| rotate)
+
+### Running IMOD reconstruction
+To start the reconstruction process, the user should use this command
+```
+o2r.recon.run demo
+```
