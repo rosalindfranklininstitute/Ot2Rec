@@ -4,13 +4,14 @@ on:
     tags:
       - 'v*.*.*'
 jobs:
-  build-tar:
+  build-conda-installer:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          installer-url: https://github.com/conda-forge/miniforge/releases/tag/4.10.3-7/Miniforge3-4.10.3-7-Linux-x86_64.sh
+          miniconda-version: "latest"
+          activate-environment: o2rbuild
       - name: build conda package
         run: conda build --quiet -c conda-forge conda-build
         timeout-minutes: 30
