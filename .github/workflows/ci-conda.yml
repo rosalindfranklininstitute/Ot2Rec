@@ -5,9 +5,9 @@ on:
       - 'v*.*.*'
 jobs:
   build-tar:
-    runs_on: ubuntu_latest
+    runs-on: ubuntu-20.04
     steps:
-      - users: actions/checkout@v2
+      - uses: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v2
         with:
           installer-url: https://github.com/conda/conda-forge/miniforge/releases/lateset/download/Miniforge3-Linux-x86_64.sh
