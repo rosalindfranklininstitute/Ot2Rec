@@ -5,6 +5,7 @@ on:
       - 'v*.*.*'
 jobs:
   build-tar:
+    runs_on: ubuntu_latest
     steps:
       - users: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v2
