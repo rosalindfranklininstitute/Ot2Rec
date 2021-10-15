@@ -3,7 +3,7 @@ version: 0.1.0
 company: Rosalind Franklin Institute
 channels:
   - https://conda.anaconda.org/conda-forge
-  - file:///home/laurashemilt/miniforge3/conda-bld/
+  - file:///usr/share/miniconda3/conda-bld/
 specs:
   - python 3.8.*
   - Ot2Rec 0.1.0
