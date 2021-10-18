@@ -11,21 +11,22 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           miniconda-version: "latest"
-          activate-environment: o2rbuild
+          auto-activate-base: true
+          activate-environment: ""
       - name: build conda package
         run: |
           conda install -c conda-forge conda-build conda-verify
           conda build --quiet -c conda-forge conda-build
         timeout-minutes: 30
-      - name: Initalise conda
-        timeout-minutes: 30
-        run: |
+      - name: initialise conda shell
+        run:
           conda init bash
-          exec bash
       - name: Build Installer
         run: |
-          conda create -n constructor -c defaults constructor
-          conda activate constructor
+          conda install constructor
+          conda activate
+          conda info
+          conda list
           constructor .
       - name: Create release
         uses: softprops/action-gh-release@v1
