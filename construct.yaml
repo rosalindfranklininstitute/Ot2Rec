@@ -5,6 +5,6 @@ channels:
   - https://conda.anaconda.org/conda-forge
   - file:///usr/share/miniconda3/conda-bld/
 specs:
-  - python 3.8.*
+  - python 3.9.*
   - Ot2Rec 0.1.0
   - conda
