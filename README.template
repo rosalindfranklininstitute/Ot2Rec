@@ -299,6 +299,8 @@ Ot2Rec uses the program IMOD for aligning raw images. To run IMOD, the appropria
 ```
 module load imod
 ```
+Detailed discussion on Alignment and Reconstruction using IMOD can be found [here](https://bio3d.colorado.edu/imod/doc/tomoguide.html)
+
 
 ### Creating configuration file
 To create the configuration file for alignment in IMOD, run the following command:
