@@ -294,7 +294,7 @@ o2r.ctffind.run demo
 At the end of the process, there should be a new metafile `demo_ctffind_md.yaml`. <br>***(WARNING: This file will be used in later processing stages. DO NOT MANUALLY CHANGE ITS CONTENTS.)***
 
 
-## 3. Alignment
+## 4. Alignment
 Ot2Rec uses the program IMOD for aligning raw images. To run IMOD, the appropriate module must be loaded using the command:
 ```
 module load imod
@@ -404,7 +404,7 @@ o2r.align.run_ext demo
 ```
 
 
-## 4. Reconstruction
+## 5. Reconstruction
 The final step of image processing is reconstruction, which is a continuation from the alignment process in IMOD.
 
 ### Creating configuration file
