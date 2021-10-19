@@ -6,6 +6,9 @@ on:
 jobs:
   build-conda-installer:
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash -1 {0}
     steps:
       - uses: actions/checkout@v2
       - uses: conda-incubator/setup-miniconda@v2
@@ -23,8 +26,8 @@ jobs:
           conda init bash
       - name: Build Installer
         run: |
-          conda install constructor
-          conda activate
+          conda create -n constructor -c defaults constructor
+          conda activate constructor
           conda info
           conda list
           constructor .
