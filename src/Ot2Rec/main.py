@@ -483,7 +483,7 @@ def run_align_ext():
     # Run IMOD
     # Create the stacks and rawtlt files first
     if not align_obj.no_processes:
-        align_obj.align_stack()
+        align_obj.align_stack(ext=True)
         
 
 def get_align_stats():
