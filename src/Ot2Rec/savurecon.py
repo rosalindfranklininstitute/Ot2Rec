@@ -94,6 +94,8 @@ class SavuRecon:
             raise ValueError(
                 "Algorithm not supported. Please amend algorithm in savurecon.yaml to one of {}".format(algo_choices)
                 )
+        
+        subfolder = self.md_out["savu_output_dir"][curr_ts]
 
         cmd = ['add MrcLoader\n',
                 'mod 1.2 {}\n'.format(self.params['Savu']['setup']['tilt_angles'][i]),
@@ -101,7 +103,7 @@ class SavuRecon:
                 'mod 2.2 {}\n'.format(algo),
                 'add TiffSaver\n',
                 'mod 3.1 VOLUME_YZ\n',
-                'save {}_{}.nxs\n'.format(ts_name, algo),
+                'save {}/{}_{}.nxs\n'.format(subfolder, ts_name, algo),
                 'y\n',
                 'exit\n',
                 'y\n'
@@ -112,7 +114,7 @@ class SavuRecon:
         # Add location of .nxs file to metadata
         if "savu_process_lists" not in list(self.md_out.keys()):
             self.md_out['savu_process_lists'] = {}
-        self.md_out['savu_process_lists'][curr_ts] = '{}_{}.nxs'.format(ts_name, algo)
+        self.md_out['savu_process_lists'][curr_ts] = '{}/{}_{}.nxs'.format(subfolder, ts_name, algo)
         
         return cmd
     
@@ -133,7 +135,7 @@ class SavuRecon:
         # Feed commands to savu_config to make process list
         for command in cmd:
             savu_config.stdin.write(command)
-        print(savu_config.communicate()[0])
+        # print(savu_config.communicate()[0])
 
         # Run savu
         savu_run = subprocess.run(['savu',
@@ -144,6 +146,7 @@ class SavuRecon:
                                    stderr=subprocess.STDOUT,
                                    encoding='ascii',
                                    )
+        # print(savu_run.stdout)
 
 
     def dummy_runner(self, i):
