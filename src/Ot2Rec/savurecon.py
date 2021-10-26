@@ -15,7 +15,7 @@
 
 import yaml
 import os
-import subprocess 
+import subprocess
 
 
 class SavuRecon:
@@ -27,6 +27,7 @@ class SavuRecon:
     def __init__(self,
                  project_name,
                  params_in,
+                 logger_in,
     ):
         """
         Initialising a SavuRecon object
@@ -34,12 +35,15 @@ class SavuRecon:
         ARGS:
         project_name (str) :: name of current project
         params_in (Params) :: parameters for stack creation
+        logger_in (Logger) :: logger object to keep record of progress and errors
         """
 
         self.proj_name = project_name
 
         self.pObj = params_in
         self.params = self.pObj.params
+
+        self.logObj = logger_in
 
         self.md_out = dict()
 

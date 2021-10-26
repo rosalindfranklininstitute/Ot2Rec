@@ -728,11 +728,12 @@ def run_savurecon():
                                         filename=savurecon_yaml)
 
     # Create Logger object
-    # logger = logMod.Logger()
+    logger = logMod.Logger()
     
     # Create SavuRecon object
     savurecon_obj = savuMod.SavuRecon(project_name=project_name,
                                   params_in=savurecon_params,
+                                  logger_in=logger,
                                  )
 
     # Run Savu
