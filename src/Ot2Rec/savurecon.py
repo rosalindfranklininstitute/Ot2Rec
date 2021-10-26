@@ -95,7 +95,7 @@ class SavuRecon:
                 "Algorithm not supported. Please amend algorithm in savurecon.yaml to one of {}".format(algo_choices)
                 )
         
-        subfolder = self.md_out["savu_output_dir"][curr_ts]
+        subfolder = os.path.abspath(self.md_out["savu_output_dir"][curr_ts])
 
         cmd = ['add MrcLoader\n',
                 'mod 1.2 {}\n'.format(self.params['Savu']['setup']['tilt_angles'][i]),
