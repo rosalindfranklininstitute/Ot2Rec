@@ -174,7 +174,7 @@ class SavuRecon:
         for i, curr_ts in enumerate(self.params['System']['process_list']):
             self.savurecon_stack(i)
             # self.dummy_runner(i)
-        print("Savu reconstruction complete for {}_{}".format(self.proj_name, curr_ts))
+            print("Savu reconstruction complete for {}_{}".format(self.proj_name, curr_ts))
         self.export_metadata()
 
     
