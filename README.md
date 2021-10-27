@@ -403,8 +403,9 @@ o2r.align.run_ext demo
 
 
 ## 4. Reconstruction
-The final step of image processing is reconstruction, which is a continuation from the alignment process in IMOD.
+The final step of image processing is reconstruction, which is a continuation from the alignment process in IMOD. There are two options for reconstruction, IMOD and [Savu](https://savu.readthedocs.io/en/latest/). 
 
+## 4a. IMOD Reconstruction
 ### Creating configuration file
 To create the configuration file for reconstruction in IMOD, run the following command:
 ```
@@ -462,3 +463,60 @@ Parameters | Descriptions
 **`BatchRunTomo.reconstruction.thickness`** | Thickness (in pixels) for reconstruction
 **`BatchRunTomo.postprocessing.run_trimvol`** | If set to `true`, IMOD will run Trimvol on reconstruction
 **`BatchRunTomo.postprocessing.trimvol_reorient`** | Reorientation in Trimvol <br>(options: none \| flip \| rotate)
+
+### Running IMOD reconstruction
+
+Run the reconstruction with the following command:
+
+```
+o2r.recon.run demo
+```
+
+## 4b Savu Reconstruction
+
+### Setting up Savu reconstruction
+
+The ot2rec wrapper for Savu reads the aligned .mrc files, reconstructs the images using the `AstraReconGpu` [plugin](https://savu.readthedocs.io/en/latest/reference/plugin_documentation/plugins/reconstructions/astra_recons/astra_recon_gpu.html), and saves the reconstructed stack as a stack of tiff images.
+
+To create the configuration file to set up Savu reconstruction, run the following:
+
+```
+o2r.savu.new demo
+```
+
+which produces the file `demo_savurecon.yaml`:
+
+```
+System:
+    process_list: all
+    output_path: ./savurecon/
+    output_rootname: TS
+    output_suffix: ''
+Savu:
+    setup:
+        tilt_angles: .tlt
+        aligned_projections: '*_ali.mrc'
+        algorithm: CGLS_CUDA
+```
+
+### List of parameters
+Parameters | Descriptions 
+ --- | --- 
+**`System.process_list`** | (See above)
+**`System.output_path`** | (See above)
+**`System.output_rootname`** | (See above)
+**`System.output_suffix`** | (See above)
+ --- | ---
+**`Savu.setup.tilt_angles`** | Path to text files containing tilt angles for the aligned .mrc stacks, output by the alignment step. These files have the extension `.tlt` and this field is populated automatically if the alignment step has been run correctly.
+**`Savu.setup.aligned_projections`** | Path to `.mrc` files containing aligned tilt series. Populated automatically if alignment step has been run correctly.
+**`Savu.setup.algorithm`** | Reconstruction algorithm used by `AstraReconGpu`. Choices are ['FBP_CUDA', 'SIRT_CUDA', 'SART_CUDA', 'CGLS_CUDA', 'BP_CUDA', 'SIRT3D_CUDA', 'CGLS3D_CUDA']. Not using one of these options throws an error. See the [documentation](https://savu.readthedocs.io/en/latest/reference/plugin_documentation/plugins/reconstructions/astra_recons/astra_recon_gpu.html) for more information. The number of iterations `n_iterations` is set to 5 for `SIRT_CUDA`, `SART_CUDA`, or `CGLS_CUDA`. All other parameters are kept at default values.
+
+### Running Savu reconstruction
+
+To create Savu process lists and run them on the appropriate datasets, run:
+
+```
+o2r.savu.run demo
+```
+
+The resulting .tiff stacks can be viewed with any image processing software, e.g., [Fiji](https://imagej.net/software/fiji/).
