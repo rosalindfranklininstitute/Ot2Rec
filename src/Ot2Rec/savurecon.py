@@ -112,7 +112,7 @@ class SavuRecon:
                 'exit\n',
                 'y\n'
                 ]
-        if self.params['Savu']['setup']['algorithm'] != "FBP_CUDA":
+        if algo=="SIRT_CUDA" or algo=="SART_CUDA" or algo=="CGLS_CUDA":
             cmd.insert(4, "mod 2.2 5\n")
         
         # Add location of .nxs file to metadata
