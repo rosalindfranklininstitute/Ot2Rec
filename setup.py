@@ -33,6 +33,7 @@ setup(
         'multiprocess',
         'icecream',
         'beautifultable',
+        'scikit-image',
     ],
     entry_points={
         "console_scripts": [
