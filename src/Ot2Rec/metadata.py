@@ -56,7 +56,8 @@ class Metadata:
         self.metadata = md_in
 
         # Obtain parameters first
-        self.get_param()
+        if self.job_type in ['master', 'motioncorr', 'ctffind', 'align', 'reconstruct']:
+            self.get_param()
 
 
     def get_param(self):

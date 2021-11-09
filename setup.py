@@ -33,6 +33,8 @@ setup(
         'multiprocess',
         'icecream',
         'beautifultable',
+        'scikit-image',
+        'mrcfile',
     ],
     entry_points={
         "console_scripts": [
@@ -44,6 +46,7 @@ setup(
 
             "o2r.ctffind.new=Ot2Rec.main:create_ctffind_yaml",
             "o2r.ctffind.run=Ot2Rec.main:run_ctffind",
+            "o2r.ctfsim.run=Ot2Rec.main:run_ctfsim",
 
             "o2r.align.new=Ot2Rec.main:create_align_yaml",
             "o2r.align.new_ext=Ot2Rec.main:create_align_yaml_stacked",
