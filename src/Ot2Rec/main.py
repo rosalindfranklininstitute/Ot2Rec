@@ -15,14 +15,18 @@
 
 import sys
 import os
-from glob import glob
+from glob import glob, glob1
 import yaml
 import pandas as pd
 from icecream import ic
 from beautifultable import BeautifulTable as bt
+from tqdm import tqdm
+import skimage.transform as skt
+
 import re
 import subprocess
 import numpy as np
+import mrcfile
 
 from . import params as prmMod
 from . import metadata as mdMod
@@ -31,6 +35,8 @@ from . import logger as logMod
 from . import ctffind as ctfMod
 from . import align as alignMod
 from . import recon as reconMod
+from . import ctfsim as ctfsimMod
+from . import savurecon as savuMod
 
 
 def get_proj_name():
@@ -45,15 +51,15 @@ def get_proj_name():
             raise ValueError(f"Error in Ot2Rec.main.new_proj: Illegal character ({char}) found in input project name.")
 
     return project_name
-    
-    
+
+
 def new_proj():
     """
     Subroutine executing actions when a new project has been initiated
     """
 
     project_name = get_proj_name()
-    
+
     # Create master yaml config file
     prmMod.new_master_yaml(project_name)
 
@@ -76,7 +82,7 @@ def get_master_metadata():
     master_md_name = project_name + '_master_md.yaml'
     with open(master_md_name, 'w') as f:
         yaml.dump(meta.metadata, f, indent=4)
-    
+
 
 def update_mc2_yaml():
     """
@@ -84,11 +90,16 @@ def update_mc2_yaml():
     """
 
     project_name = get_proj_name()
-    
+
     # Check if MC2 yaml exists
     mc2_yaml_name = project_name + '_mc2.yaml'
     if not os.path.isfile(mc2_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_mc2_yaml: File not found.")
+
+    # Read in master yaml
+    master_yaml = project_name + '_proj.yaml'
+    with open(master_yaml, 'r') as f:
+        master_config = yaml.load(f, Loader=yaml.FullLoader)
 
     # Read in master metadata (as Pandas dataframe)
     master_md_name = project_name + '_master_md.yaml'
@@ -120,27 +131,29 @@ def update_mc2_yaml():
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
     mc2_params.params['System']['output_prefix'] = project_name
-    
+
+    mc2_params.params['System']['source_TIFF'] = master_config['source_TIFF']
+
     if mc2_params.params['MC2']['desired_pixel_size'] == 'ps_x2':
         mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size'] * 2
     else:
         mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size']
 
     with open(mc2_yaml_name, 'w') as f:
-        yaml.dump(mc2_params.params, f, indent=4, sort_keys=False) 
+        yaml.dump(mc2_params.params, f, indent=4, sort_keys=False)
 
-        
+
 def create_mc2_yaml():
     """
     Subroutine to create new yaml file for motioncorr
     """
 
     project_name = get_proj_name()
-    
+
     # Create the yaml file, then automatically update it
     prmMod.new_mc2_yaml(project_name)
     update_mc2_yaml()
-    
+
 
 def run_mc2():
     """
@@ -167,7 +180,7 @@ def run_mc2():
 
     # Create Logger object
     logger = logMod.Logger()
-    
+
     # Create Motioncorr object
     mc2_obj = mc2Mod.Motioncorr(project_name=project_name,
                                 mc2_params=mc2_config,
@@ -189,7 +202,7 @@ def update_ctffind_yaml():
     """
 
     project_name = get_proj_name()
-    
+
     # Check if ctffind and motioncorr yaml files exist
     ctf_yaml_name = project_name + '_ctffind.yaml'
     mc2_yaml_name = project_name + '_mc2.yaml'
@@ -230,13 +243,13 @@ def update_ctffind_yaml():
                                   filename=ctf_yaml_name)
     mc2_params = prmMod.read_yaml(project_name=project_name,
                                   filename=mc2_yaml_name)
-    
+
     ctf_params.params['System']['output_prefix'] = project_name
     ctf_params.params['System']['process_list'] = unique_ts_numbers
     ctf_params.params['ctffind']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size']
-    
+
     with open(ctf_yaml_name, 'w') as f:
-        yaml.dump(ctf_params.params, f, indent=4, sort_keys=False) 
+        yaml.dump(ctf_params.params, f, indent=4, sort_keys=False)
 
 
 def create_ctffind_yaml():
@@ -245,7 +258,7 @@ def create_ctffind_yaml():
     """
 
     project_name = get_proj_name()
-    
+
     # Create the yaml file, then automatically update it
     prmMod.new_ctffind_yaml(project_name)
     update_ctffind_yaml()
@@ -276,7 +289,7 @@ def run_ctffind():
 
     # Create Logger object
     logger = logMod.Logger()
-    
+
     # Create ctffind object
     ctffind_obj = ctfMod.ctffind(project_name=project_name,
                                  md_in=mc2_md,
@@ -385,7 +398,7 @@ def update_align_yaml_stacked():
     # Write out YAML file
     with open(align_yaml_name, 'w') as f:
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
-    
+
 
 def create_align_yaml():
     """
@@ -410,7 +423,7 @@ def create_align_yaml_stacked():
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(project_name)
     update_align_yaml_stacked()
-        
+
 
 def run_align():
     """
@@ -476,9 +489,9 @@ def run_align_ext():
     # Run IMOD
     # Create the stacks and rawtlt files first
     if not align_obj.no_processes:
-        align_obj.align_stack()
-        
+        align_obj.align_stack(ext=True)
 
+        
 def get_align_stats():
     """
     Method to extract statistics from alignment
@@ -505,7 +518,7 @@ def get_align_stats():
         rootname = rootname[:-1]
 
     suffix = align_config.params['System']['output_suffix']
-    
+
     # Read metadata to extract aligned TS numbers
     with open(align_md_name, 'r') as f:
         aligned_ts = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))['ts'].values.tolist()
@@ -535,14 +548,14 @@ def get_align_stats():
         get_mean_sd = re.compile('[0-9]+.[0-9]+')
         mean = float(list(filter(get_mean_sd.match, filter_split))[0])
         sd = float(list(filter(get_mean_sd.match, filter_split))[1])
-            
+
         weighted_mean_criterion = re.compile('^\s*Residual error weighted mean')
         filtered = list(filter(weighted_mean_criterion.match, lines))
         filter_split = re.split('\s+', filtered[0])
 
         get_weighted_crit = re.compile('[0-9]+.[0-9]+')
         weighted_error = float(list(filter(get_weighted_crit.match, filter_split))[0])
-        
+
         stats_df.loc[len(stats_df.index)] = [curr_ts, mean, sd, weighted_error]
 
     stats_df.sort_values(by='Error weighted mean (nm)',
@@ -556,9 +569,9 @@ def get_align_stats():
         stats.rows.append([int(i[0]), *i[1:]])
 
     # Print out stats
-    print(stats)    
-    
-        
+    print(stats)
+
+
 
 def update_recon_yaml():
     """
@@ -566,7 +579,7 @@ def update_recon_yaml():
     """
 
     project_name = get_proj_name()
-    
+
     # Check if recon and align yaml files exist
     recon_yaml_name = project_name + '_recon.yaml'
     align_yaml_name = project_name + '_align.yaml'
@@ -605,15 +618,17 @@ def update_recon_yaml():
                                     filename=recon_yaml_name)
     align_params = prmMod.read_yaml(project_name=project_name,
                                   filename=align_yaml_name)
-    
+
     recon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
     recon_params.params['System']['output_suffix'] = align_params.params['System']['output_suffix']
     recon_params.params['System']['process_list'] = unique_ts_numbers
-    recon_params.params['BatchRunTomo']['setup'] = align_params.params['BatchRunTomo']['setup']
-    
+
+    recon_params.params['BatchRunTomo']['setup'] = {key: value for key, value in align_params.params['BatchRunTomo']['setup'].items() \
+                                                    if key != 'stack_bin_factor'}
+
     with open(recon_yaml_name, 'w') as f:
-        yaml.dump(recon_params.params, f, indent=4, sort_keys=False) 
-        
+        yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
+
 
 def create_recon_yaml():
     """
@@ -621,7 +636,7 @@ def create_recon_yaml():
     """
 
     project_name = get_proj_name()
-    
+
     # Create the yaml file, then automatically update it
     prmMod.new_recon_yaml(project_name)
     update_recon_yaml()
@@ -633,7 +648,7 @@ def run_recon():
     """
 
     project_name = get_proj_name()
-    
+
     # Check if prerequisite files exist
     recon_yaml = project_name + '_recon.yaml'
     align_md_file = project_name + '_align_mdout.yaml'
@@ -647,7 +662,7 @@ def run_recon():
 
     # Create Logger object
     logger = logMod.Logger()
-    
+
     # Create Align object
     recon_obj = reconMod.Recon(project_name=project_name,
                                md_in=align_md,
@@ -660,19 +675,98 @@ def run_recon():
         recon_obj.recon_stack()
 
 
+def update_savurecon_yaml():
+    """
+    Subroutine to update yaml file for savu reconstruction
+    """
+
+    project_name = get_proj_name()
+    
+    # Check if savurecon, align, and align_mdout yaml files exist
+    savurecon_yaml_name = project_name + '_savurecon.yaml'
+    align_yaml_name = project_name + '_align.yaml'
+    align_md_name = project_name + '_align_mdout.yaml'
+    if not os.path.isfile(savurecon_yaml_name):
+        raise IOError("Error in Ot2Rec.main.update_savurecon_yaml: reconstruction config file not found.")
+    if not os.path.isfile(align_yaml_name):
+        raise IOError("Error in Ot2Rec.main.update_savurecon_yaml: align.yaml file not found")
+    if not os.path.isfile(align_md_name):
+        raise IOError("Error in Ot2Rec.main.update_savurecon_yaml: alignment mdout file not found.")
+
+    # Read in alignment metadata (as Pandas dataframe)
+    with open(align_md_name, 'r') as f:
+        align_md_df = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))
+        align_md_ts = align_md_df['ts']
+        align_output = align_md_df['align_output']
+
+    savurecon_params = prmMod.read_yaml(project_name=project_name,
+                                    filename=savurecon_yaml_name)
+    align_params = prmMod.read_yaml(project_name=project_name,
+                                  filename=align_yaml_name)
+
+    # Get tilt angle files
+    align_tilt_files = []
+    for f in align_md_df['stack_output']:
+        align_tilt_files.append(f.replace('.st', '.tlt'))
+
+    # Update savurecon yaml
+    savurecon_params.params['System']['process_list'] = align_md_ts.sort_values(ascending=True).unique().tolist()
+    savurecon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
+    savurecon_params.params['System']['output_suffix'] = align_params.params['System']['output_suffix']
+    savurecon_params.params['Savu']['setup']['tilt_angles'] = align_tilt_files
+    savurecon_params.params['Savu']['setup']['aligned_projections'] = align_output.sort_values(ascending=True).unique().tolist()
+    
+    with open(savurecon_yaml_name, 'w') as f:
+        yaml.dump(savurecon_params.params, f, indent=4, sort_keys=False) 
+
+
+def create_savurecon_yaml():
+    """
+    Creates yaml for savu reconstruction
+    """
+    project_name = get_proj_name()
+
+    # Create savurecon yaml file and automatically update it
+    prmMod.new_savurecon_yaml(project_name)
+    update_savurecon_yaml()
+
+
+def run_savurecon():
+    project_name = get_proj_name()
+    
+    # Check if prerequisite files exist
+    savurecon_yaml = project_name + '_savurecon.yaml'
+
+    # Read in config and metadata
+    savurecon_params = prmMod.read_yaml(project_name=project_name,
+                                        filename=savurecon_yaml)
+
+    # Create Logger object
+    logger = logMod.Logger()
+    
+    # Create SavuRecon object
+    savurecon_obj = savuMod.SavuRecon(project_name=project_name,
+                                  params_in=savurecon_params,
+                                  logger_in=logger,
+                                 )
+
+    # Run Savu
+    savurecon_obj.run_savu_all()
+
+
 def cleanup():
     """
     Method to clean up project folder to save space
     """
 
     project_name = get_proj_name()
-    
+
     mc2_yaml = project_name + '_mc2.yaml'
     recon_yaml = project_name + '_recon.yaml'
 
     # Create Logger object
     logger = logMod.Logger()
-    
+
     if os.path.isfile(mc2_yaml):
         mc2_config = prmMod.read_yaml(project_name=project_name,
                                       filename=mc2_yaml)
@@ -696,15 +790,15 @@ def cleanup():
             del_recon = subprocess.run(cmd,
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.STDOUT)
-        
-        
+
+
 def run_all():
     """
     Method to run all four processes in one go using default settings.
     """
 
     logger = logMod.Logger()
-    
+
     # Collect raw images and produce master metadata
     logger("Collecting raw images...")
     get_master_metadata()
@@ -728,3 +822,75 @@ def run_all():
     logger("Reconstruction in progress...")
     create_recon_yaml()
     run_recon()
+
+
+def run_ctfsim():
+    """
+    Method to run simulator for CTF from CTFFIND4 outputs
+    """
+
+    project_name = get_proj_name()
+
+    rootname = input(f'Enter file rootname: (Default: {project_name})\n')
+    if len(rootname) == 0:
+        rootname = project_name
+    while rootname.endswith('/'):
+        rootname = rootname[:-1]
+
+    pixel_size = input(f'Enter pixel size of motion-corrected images (in Angstroms)\n')
+    pixel_size = float(pixel_size) * 1e-10
+
+    ds_factor = int(input(f'Enter downsampling factor (must be same as alignment/reconstruction)\n'))
+
+    # Read in metadata from ctffind
+    ctffind_md_file = project_name + '_ctffind_mdout.yaml'
+    ctffind_obj = mdMod.read_md_yaml(project_name=project_name,
+                                    job_type='ctfsim',
+                                    filename=ctffind_md_file)
+    ctffind_md = pd.DataFrame(ctffind_obj.metadata)
+
+    # Read image to get dimensions
+    sample_image = ctffind_md.iloc[0].file_paths
+    with mrcfile.open(sample_image) as source:
+        source_dim = skt.downscale_local_mean(source.data, (ds_factor, ds_factor)).shape
+
+    # Generate point source
+    ps = np.zeros(source_dim[-2:], dtype=np.float32)
+    ps[ps.shape[0]//2, ps.shape[1]//2] = 1
+    ps_k = np.fft.fft2(ps).astype(np.cdouble)
+
+    # Calculate the grids in reciprocal space
+    k2_grid, alpha_g_grid = ctfsimMod.calculate_k_grids(source_dim, pixel_size*ds_factor)
+
+    # Grab tilt series numbers and tilt angles from metadata
+    ts_list = sorted(pd.Series(ctffind_md['ts']).unique())
+    tqdm_iter = tqdm(ts_list, ncols=100)
+
+    for curr_ts in tqdm_iter:
+        # Create folders and subfolders
+        subfolder_path = f'PSF/{rootname}_{curr_ts:02}'
+        os.makedirs(subfolder_path, exist_ok=True)
+
+        # Find txt files from ctffind
+        glob_list = glob1('./ctffind/', f'{rootname}_{curr_ts:03}_*ctffind.txt')
+
+        angle_list = [float(i.split('/')[-1].split('_')[2]) for i in glob_list]
+        angle_index = [sorted(angle_list).index(i) for i in angle_list]
+
+        full_psf = np.empty(shape=(len(angle_list), *source_dim[-2:]),
+                            dtype=np.float32)
+        for index in range(len(angle_index)):
+            full_psf[angle_index[index], ...] = ctfsimMod.get_psf(ctffile='./ctffind/' + glob_list[index],
+                                                                  point_source_recip=ps_k,
+                                                                  k2_grid=k2_grid,
+                                                                  alpha_g=alpha_g_grid)
+
+        # Write out psf stack
+        with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:02}.st', overwrite=True) as f:
+            f.set_data(full_psf)
+
+
+        # Write out rawtlt file
+        with open(subfolder_path + f'/{rootname}_{curr_ts:02}.rawtlt', 'w') as f:
+            for angle in sorted(angle_list):
+                f.writelines(str(angle) + '\n')

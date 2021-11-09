@@ -354,7 +354,7 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
         return cmd
 
 
-    def align_stack(self):
+    def align_stack(self, ext=False):
         """
         Method to align specified stack(s) using IMOD batchtomo
         """
@@ -379,11 +379,11 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
                                  f'on stack{curr_ts}.')
             else:
                 self.stdout = batchruntomo.stdout
-                self.update_align_metadata()
+                self.update_align_metadata(ext)
                 self.export_metadata()
 
                 
-    def update_align_metadata(self):
+    def update_align_metadata(self, ext=False):
         """
         Subroutine to update metadata after one set of runs
         """
@@ -392,6 +392,8 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
         # If the files don't exist, keep the line in the input metadata
         # If they do, move them to the output metadata
 
+        if ext:
+            self.meta_out = self._align_images
         self.meta_out = self.meta_out.append(self._align_images.loc[self._align_images['align_output'].apply(lambda x: os.path.isfile(x))],
                                              ignore_index=True)
         self._align_images = self._align_images.loc[~self._align_images['align_output'].apply(lambda x: os.path.isfile(x))]

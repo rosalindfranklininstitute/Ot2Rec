@@ -1,0 +1,10 @@
+name: Ot2Rec
+version: 0.1.0
+company: Rosalind Franklin Institute
+channels:
+  - https://conda.anaconda.org/conda-forge
+  - file:///usr/share/miniconda3/conda-bld/
+specs:
+  - python 3.9.*
+  - Ot2Rec 0.1.0
+  - conda
