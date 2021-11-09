@@ -257,6 +257,37 @@ def new_recon_yaml(project_name: str):
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_yaml_dict, f, indent=4, sort_keys=False)
 
+
+def new_savurecon_yaml(project_name: str):
+    """
+    Subroutine to create yaml file for savurecon (continuing from aligned stacks to full reconstruction)
+
+    ARGS:
+    project_name :: Name of current project
+    """
+
+    savurecon_yaml_name = project_name + '_savurecon.yaml'
+
+    savurecon_yaml_dict = {
+        'System' : {
+            'process_list' : 'all',
+            'output_path' : './savurecon/',
+            'output_rootname' : 'TS',
+            'output_suffix' : '',
+        },
+        
+        'Savu': {
+            'setup': {
+                'tilt_angles': '.tlt',
+                'aligned_projections': '*_ali.mrc',
+                'algorithm': 'CGLS_CUDA',
+            }
+        }
+    }
+                
+    with open(savurecon_yaml_name, 'w') as f:
+        yaml.dump(savurecon_yaml_dict, f, indent=4, sort_keys=False)
+
         
 def read_yaml(project_name: str,
               filename: str):
