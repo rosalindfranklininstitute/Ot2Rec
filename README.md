@@ -135,7 +135,7 @@ source_TIFF: true
 Parameters | Descriptions 
  --- | --- 
 **`source_folder`** | The path to the folder where the raw images are stored.
-**`TS_folder_prefix`** | The _common_ prefix of the folders holding the raw images. For instance, if the folders for the tilt-series are named `demo_01`, `demo_02` etc., then `TS_folder_prefix` = `demo`. <br>**(Note: The trailing underscore is not necessary. Ot2Rec uses underscores as field separators by default.)**
+**`TS_folder_prefix`** | The _common_ prefix of the folders holding the raw images. For instance, if the folders for the tilt-series are named `demo_01`, `demo_02` etc., then `TS_folder_prefix` = `demo`. <br>If all raw images are in the same folder (i.e. not in individual tilt-series level subfolders), `TS_folder_prefix` = `''`. <br>**(Note: The trailing underscore is not necessary. Ot2Rec uses underscores as field separators by default.)**
 **`file_prefix`** | The prefix in the filenames of the raw images, which is recommended to match with the Ot2Rec project name to avoid confusions. <br>For example, if an image in tilt series 1 (taken at the sample tilt angle -60 degrees) has the filename `demo_01_0001_-60.0.tif`, with `01` being the tilt series index, then `file_prefix` = `demo`.
 **`image_stack_field`** and **`image_tiltangle_field`** | Where to find the _tilt-series number_ and the _tilt angles_ from the image file names. Fields start counting from **after the prefix.** <br>In the previous example, the filename is `TS_01_0001_-60.0.tif`, with `01` being the tilt series index, `0001` the index of image in the stack, and `-60.0` the tilt angle, then `image_stack_field` = 0 and `image_tiltangle_field` = 2. <br>**(Note: the field numbers obey the Python indexing rule, where the first field has index 0.)**  
 **`source_TIFF`** | Whether the raw images are in the TIFF format. If set to `false`, the program automatically assumes the images are MRCs.
@@ -294,11 +294,13 @@ o2r.ctffind.run demo
 At the end of the process, there should be a new metafile `demo_ctffind_md.yaml`. <br>***(WARNING: This file will be used in later processing stages. DO NOT MANUALLY CHANGE ITS CONTENTS.)***
 
 
-## 3. Alignment
+## 4. Alignment
 Ot2Rec uses the program IMOD for aligning raw images. To run IMOD, the appropriate module must be loaded using the command:
 ```
 module load imod
 ```
+Detailed discussion on Alignment and Reconstruction using IMOD can be found [here](https://bio3d.colorado.edu/imod/doc/tomoguide.html)
+
 
 ### Creating configuration file
 To create the configuration file for alignment in IMOD, run the following command:
@@ -402,7 +404,7 @@ o2r.align.run_ext demo
 ```
 
 
-## 4. Reconstruction
+## 5. Reconstruction
 The final step of image processing is reconstruction, which is a continuation from the alignment process in IMOD.
 
 ### Creating configuration file
@@ -423,7 +425,6 @@ BatchRunTomo:
         rot_angle: 86.0
         gold_size: 0.0
         adoc_template: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc
-        stack_bin_factor: 8
     positioning:
         do_positioning: false
         unbinned_thickness: 3600
@@ -452,7 +453,6 @@ Parameters | Descriptions
 **`BatchRunTomo.setup.rot_angle`** | (See above)
 **`BatchRunTomo.setup.gold_size`** | (See above)
 **`BatchRunTomo.setup.adoc_template`** | (See above)
-**`BatchRunTomo.setup.stack_bin_factor`** | (See above)
 **`BatchRunTomo.positioning.do_positioning`** | If set to `true`, IMOD will perform positioning for the stack.
 **`BatchRunTomo.positioning.unbinned_thickness`** | Unbinned thickness (in pixels) for samples or whole tomogram
 **`BatchRunTomo.aligned_stack.correct_ctf`** | If set to `true`, IMOD will attempt to correct CTF for the aligned stack.
@@ -462,3 +462,9 @@ Parameters | Descriptions
 **`BatchRunTomo.reconstruction.thickness`** | Thickness (in pixels) for reconstruction
 **`BatchRunTomo.postprocessing.run_trimvol`** | If set to `true`, IMOD will run Trimvol on reconstruction
 **`BatchRunTomo.postprocessing.trimvol_reorient`** | Reorientation in Trimvol <br>(options: none \| flip \| rotate)
+
+### Running IMOD reconstruction
+To start the reconstruction process, the user should use this command
+```
+o2r.recon.run demo
+```
