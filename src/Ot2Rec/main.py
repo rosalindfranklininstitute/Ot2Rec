@@ -90,6 +90,11 @@ def update_mc2_yaml():
     if not os.path.isfile(mc2_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_mc2_yaml: File not found.")
 
+    # Read in master yaml
+    master_yaml = project_name + '_proj.yaml'
+    with open(master_yaml, 'r') as f:
+        master_config = yaml.load(f, Loader=yaml.FullLoader)
+
     # Read in master metadata (as Pandas dataframe)
     master_md_name = project_name + '_master_md.yaml'
     with open(master_md_name, 'r') as f:
@@ -120,6 +125,8 @@ def update_mc2_yaml():
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
     mc2_params.params['System']['output_prefix'] = project_name
+    mc2_params.params['System']['source_TIFF'] = master_config['source_TIFF']
+    
     
     if mc2_params.params['MC2']['desired_pixel_size'] == 'ps_x2':
         mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size'] * 2
@@ -476,7 +483,7 @@ def run_align_ext():
     # Run IMOD
     # Create the stacks and rawtlt files first
     if not align_obj.no_processes:
-        align_obj.align_stack()
+        align_obj.align_stack(ext=True)
         
 
 def get_align_stats():
@@ -609,7 +616,8 @@ def update_recon_yaml():
     recon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
     recon_params.params['System']['output_suffix'] = align_params.params['System']['output_suffix']
     recon_params.params['System']['process_list'] = unique_ts_numbers
-    recon_params.params['BatchRunTomo']['setup'] = align_params.params['BatchRunTomo']['setup']
+    recon_params.params['BatchRunTomo']['setup'] = {key: value for key, value in align_params.params['BatchRunTomo']['setup'].items() \
+                                                    if key != 'stack_bin_factor'}
     
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False) 
