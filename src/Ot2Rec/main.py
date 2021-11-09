@@ -36,6 +36,7 @@ from . import ctffind as ctfMod
 from . import align as alignMod
 from . import recon as reconMod
 from . import ctfsim as ctfsimMod
+from . import savurecon as savuMod
 
 
 def get_proj_name():
@@ -95,6 +96,11 @@ def update_mc2_yaml():
     if not os.path.isfile(mc2_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_mc2_yaml: File not found.")
 
+    # Read in master yaml
+    master_yaml = project_name + '_proj.yaml'
+    with open(master_yaml, 'r') as f:
+        master_config = yaml.load(f, Loader=yaml.FullLoader)
+
     # Read in master metadata (as Pandas dataframe)
     master_md_name = project_name + '_master_md.yaml'
     with open(master_md_name, 'r') as f:
@@ -125,6 +131,8 @@ def update_mc2_yaml():
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
     mc2_params.params['System']['output_prefix'] = project_name
+
+    mc2_params.params['System']['source_TIFF'] = master_config['source_TIFF']
 
     if mc2_params.params['MC2']['desired_pixel_size'] == 'ps_x2':
         mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size'] * 2
@@ -481,9 +489,9 @@ def run_align_ext():
     # Run IMOD
     # Create the stacks and rawtlt files first
     if not align_obj.no_processes:
-        align_obj.align_stack()
+        align_obj.align_stack(ext=True)
 
-
+        
 def get_align_stats():
     """
     Method to extract statistics from alignment
@@ -614,7 +622,9 @@ def update_recon_yaml():
     recon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
     recon_params.params['System']['output_suffix'] = align_params.params['System']['output_suffix']
     recon_params.params['System']['process_list'] = unique_ts_numbers
-    recon_params.params['BatchRunTomo']['setup'] = align_params.params['BatchRunTomo']['setup']
+
+    recon_params.params['BatchRunTomo']['setup'] = {key: value for key, value in align_params.params['BatchRunTomo']['setup'].items() \
+                                                    if key != 'stack_bin_factor'}
 
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
@@ -663,6 +673,85 @@ def run_recon():
     # Run IMOD
     if not recon_obj.no_processes:
         recon_obj.recon_stack()
+
+
+def update_savurecon_yaml():
+    """
+    Subroutine to update yaml file for savu reconstruction
+    """
+
+    project_name = get_proj_name()
+    
+    # Check if savurecon, align, and align_mdout yaml files exist
+    savurecon_yaml_name = project_name + '_savurecon.yaml'
+    align_yaml_name = project_name + '_align.yaml'
+    align_md_name = project_name + '_align_mdout.yaml'
+    if not os.path.isfile(savurecon_yaml_name):
+        raise IOError("Error in Ot2Rec.main.update_savurecon_yaml: reconstruction config file not found.")
+    if not os.path.isfile(align_yaml_name):
+        raise IOError("Error in Ot2Rec.main.update_savurecon_yaml: align.yaml file not found")
+    if not os.path.isfile(align_md_name):
+        raise IOError("Error in Ot2Rec.main.update_savurecon_yaml: alignment mdout file not found.")
+
+    # Read in alignment metadata (as Pandas dataframe)
+    with open(align_md_name, 'r') as f:
+        align_md_df = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))
+        align_md_ts = align_md_df['ts']
+        align_output = align_md_df['align_output']
+
+    savurecon_params = prmMod.read_yaml(project_name=project_name,
+                                    filename=savurecon_yaml_name)
+    align_params = prmMod.read_yaml(project_name=project_name,
+                                  filename=align_yaml_name)
+
+    # Get tilt angle files
+    align_tilt_files = []
+    for f in align_md_df['stack_output']:
+        align_tilt_files.append(f.replace('.st', '.tlt'))
+
+    # Update savurecon yaml
+    savurecon_params.params['System']['process_list'] = align_md_ts.sort_values(ascending=True).unique().tolist()
+    savurecon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
+    savurecon_params.params['System']['output_suffix'] = align_params.params['System']['output_suffix']
+    savurecon_params.params['Savu']['setup']['tilt_angles'] = align_tilt_files
+    savurecon_params.params['Savu']['setup']['aligned_projections'] = align_output.sort_values(ascending=True).unique().tolist()
+    
+    with open(savurecon_yaml_name, 'w') as f:
+        yaml.dump(savurecon_params.params, f, indent=4, sort_keys=False) 
+
+
+def create_savurecon_yaml():
+    """
+    Creates yaml for savu reconstruction
+    """
+    project_name = get_proj_name()
+
+    # Create savurecon yaml file and automatically update it
+    prmMod.new_savurecon_yaml(project_name)
+    update_savurecon_yaml()
+
+
+def run_savurecon():
+    project_name = get_proj_name()
+    
+    # Check if prerequisite files exist
+    savurecon_yaml = project_name + '_savurecon.yaml'
+
+    # Read in config and metadata
+    savurecon_params = prmMod.read_yaml(project_name=project_name,
+                                        filename=savurecon_yaml)
+
+    # Create Logger object
+    logger = logMod.Logger()
+    
+    # Create SavuRecon object
+    savurecon_obj = savuMod.SavuRecon(project_name=project_name,
+                                  params_in=savurecon_params,
+                                  logger_in=logger,
+                                 )
+
+    # Run Savu
+    savurecon_obj.run_savu_all()
 
 
 def cleanup():
