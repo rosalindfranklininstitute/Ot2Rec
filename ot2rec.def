@@ -1,0 +1,13 @@
+Bootstrap: docker
+From: 16823/ot2rec:v0.3.6
+
+%runscript
+	#!/bin/bash
+	if [[ $# == 2 ]]; then
+		o2r.$1 $2
+	elif [[ $# == 3 ]]; then
+		o2r.$1.$2 $3
+	else
+		echo "Incorrect number of arguments, see https://github.com/rosalindfranklininstitute/Ot2Rec for command details"
+		exit 1
+	fi
