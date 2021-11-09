@@ -34,6 +34,7 @@ setup(
         'icecream',
         'beautifultable',
         'scikit-image',
+        'mrcfile',
     ],
     entry_points={
         "console_scripts": [
