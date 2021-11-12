@@ -139,7 +139,11 @@ class SavuRecon:
         # Feed commands to savu_config to make process list
         for command in cmd:
             savu_config.stdin.write(command)
-        # print(savu_config.communicate()[0])
+        # Check that the process list was created with no stderr
+        # For some reason, if you call savu_config.communicate in any way at the end of this
+        # we don't have the problem of moving on to running process lists before they exist
+        if savu_config.communicate()[1] is None:
+            print("Process list created: {}".format(self.md_out['savu_process_lists'][curr_ts]))
 
 
     def _run_savurecon(self, i):
@@ -156,6 +160,7 @@ class SavuRecon:
                                    stderr=subprocess.STDOUT,
                                    encoding='ascii',
                                    )
+        print(savu_run.stdout)
 
 
     def _dummy_runner(self, i):
