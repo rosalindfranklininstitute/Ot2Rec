@@ -49,16 +49,17 @@ class Recon:
         self.proj_name = project_name
 
         self.logObj = logger_in
-        
+
         self.mObj = md_in
-        self.meta = pd.DataFrame(self.mObj.metadata)
-        
+        if self.mObj is not None:
+            self.meta = pd.DataFrame(self.mObj.metadata)
+
         self.pObj = params_in
         self.params = self.pObj.params
 
         self._get_internal_metadata()
         self.no_processes = False
-        
+
         self._process_list = self.params['System']['process_list']
         self._check_reconned_images()
 
@@ -97,7 +98,7 @@ class Recon:
                 }), ignore_index=True
             )
 
-        
+
     def _check_reconned_images(self):
         """
         Method to check images which have already been reconstructed
@@ -105,7 +106,7 @@ class Recon:
         # Create new empty internal output metadata if no record exists
         if not os.path.isfile(self.proj_name + '_recon_mdout.yaml'):
             self.meta_out = pd.DataFrame(columns=self._recon_images.columns)
-            
+
         # Read in serialised metadata and turn into DataFrame if record exists
         else:
             _meta_record = mdMod.read_md_yaml(project_name=self.proj_name,
@@ -119,7 +120,7 @@ class Recon:
         if len(self.meta_out) > 0:
             self._missing = self.meta_out.loc[~self.meta_out['recon_output'].apply(lambda x: os.path.isfile(x))]
             self._missing_specified = pd.DataFrame(columns=self.meta.columns)
-        
+
             for curr_ts in self.params['System']['process_list']:
                 self._missing_specified = self._missing_specified.append(self._missing[self._missing['ts']==curr_ts],
                                                                          ignore_index=True,
@@ -129,8 +130,8 @@ class Recon:
 
             if len(self._missing_specified) > 0:
                 self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. Will be added back for processing.")
-            
-        # Drop the items in input metadata if they are in the output record 
+
+        # Drop the items in input metadata if they are in the output record
         _ignored = self._recon_images[self._recon_images.recon_output.isin(self.meta_out.recon_output)]
         if len(_ignored) > 0 and len(_ignored) < len(self._recon_images):
             self.logObj(f"Info: {len(_ignored)} images had been processed and will be omitted.")
@@ -203,10 +204,12 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
 
 
     def _get_brt_recon_command(self,
-                               curr_ts: int):
+                               curr_ts: int,
+                               ext=False,
+    ):
         """
         Method to get command to run batchtomo for reconstruction
-        
+
         ARGS:
         curr_ts :: index of the tilt-series currently being processed
 
@@ -216,28 +219,29 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
 
         # Get indices of usable CPUs
         temp_cpu = [str(i) for i in range(1, mp.cpu_count()+1)]
-        
+
+
         cmd = ['batchruntomo',
                '-CPUMachineList', f"{temp_cpu}",
                '-GPUMachineList', '1',
                '-DirectiveFile', './recon.adoc',
                '-RootName', f'{self.rootname}_{curr_ts:02d}',
                '-CurrentLocation', self._path_dict[curr_ts],
-               '-StartingStep', '8',
-               '-EndingStep', '20',
+               '-StartingStep', '8' if not ext else '0',
+               '-EndingStep', '20' if not ext else '0',
         ]
 
         return cmd
 
 
-    def recon_stack(self):
+    def recon_stack(self, ext=False):
         """
         Method to reconstruct specified stack(s) using IMOD batchtomo
         """
 
         # Create adoc file
         self._get_adoc()
-        
+
         tqdm_iter = tqdm(self._process_list, ncols=100)
         for curr_ts in tqdm_iter:
             tqdm_iter.set_description(f"Reconstructing TS {curr_ts}...")
@@ -245,7 +249,13 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
             # Get command for current tilt-series
             cmd_ts = self._get_brt_recon_command(curr_ts)
 
-            batchruntomo = subprocess.run(self._get_brt_recon_command(curr_ts),
+            if ext:
+                batchruntomo = subprocess.run(self._get_brt_recon_command(curr_ts, ext=True),
+                                              stdout=subprocess.PIPE,
+                                              stderr=subprocess.STDOUT,
+                                              encoding='ascii')
+
+            batchruntomo = subprocess.run(self._get_brt_recon_command(curr_ts, ext=False),
                                           stdout=subprocess.PIPE,
                                           stderr=subprocess.STDOUT,
                                           encoding='ascii')
@@ -258,7 +268,7 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
                 self.update_recon_metadata()
                 self.export_metadata()
 
-                
+
     def update_recon_metadata(self):
         """
         Subroutine to update metadata after one set of runs
@@ -275,7 +285,7 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         # Sometimes data might be duplicated (unlikely) -- need to drop the duplicates
         self.meta_out.drop_duplicates(inplace=True)
 
-        
+
     def export_metadata(self):
         """
         Method to serialise output metadata, export as yaml
@@ -284,5 +294,4 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         yaml_file = self.proj_name + '_recon_mdout.yaml'
 
         with open(yaml_file, 'w') as f:
-            yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False) 
-   
+            yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False)
