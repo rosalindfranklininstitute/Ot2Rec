@@ -281,6 +281,7 @@ def new_savurecon_yaml(project_name: str):
                 'tilt_angles': '.tlt',
                 'aligned_projections': '*_ali.mrc',
                 'algorithm': 'CGLS_CUDA',
+                'centre_of_rotation': '0.0',
             }
         }
     }

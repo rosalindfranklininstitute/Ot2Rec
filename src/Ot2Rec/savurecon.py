@@ -104,6 +104,7 @@ class SavuRecon:
         cmd = ['add MrcLoader\n',
                 'mod 1.2 {}\n'.format(self.params['Savu']['setup']['tilt_angles'][i]),
                 'add AstraReconGpu\n',
+                'mod 2.1 {}\n'.format(self.params['Savu']['setup']['centre_of_rotation'][i]),
                 'mod 2.2 {}\n'.format(algo),
                 'add TiffSaver\n',
                 'mod 3.1 VOLUME_YZ\n',
