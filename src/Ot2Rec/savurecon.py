@@ -123,9 +123,9 @@ class SavuRecon:
         return cmd
     
 
-    def savurecon_stack(self, i):
+    def _create_savurecon_process_list(self, i):
         """
-        Method to generate savu_config process list and run savu for the i-th ts
+        Method to generate savu_config process lists
         """
         curr_ts = self.params['System']['process_list'][i]
         cmd = self._get_savuconfig_recon_command(i)
@@ -139,8 +139,18 @@ class SavuRecon:
         # Feed commands to savu_config to make process list
         for command in cmd:
             savu_config.stdin.write(command)
-        # print(savu_config.communicate()[0])
+        # Check that the process list was created with no stderr
+        # For some reason, if you call savu_config.communicate in any way at the end of this
+        # we don't have the problem of moving on to running process lists before they exist
+        if savu_config.communicate()[1] is None:
+            print("Process list created: {}".format(self.md_out['savu_process_lists'][curr_ts]))
 
+
+    def _run_savurecon(self, i):
+        """
+        Method to run savu process lists
+        """
+        curr_ts = self.params['System']['process_list'][i]
         # Run savu
         savu_run = subprocess.run(['savu',
                                    self.params['Savu']['setup']['aligned_projections'][i],
@@ -150,10 +160,10 @@ class SavuRecon:
                                    stderr=subprocess.STDOUT,
                                    encoding='ascii',
                                    )
-        # print(savu_run.stdout)
+        print(savu_run.stdout)
 
 
-    def dummy_runner(self, i):
+    def _dummy_runner(self, i):
         """
         Temp method to test locally that commands are created correctly
         """
@@ -172,8 +182,9 @@ class SavuRecon:
         Method to run savurecon_stack for all ts in process list
         """
         for i, curr_ts in enumerate(self.params['System']['process_list']):
-            self.savurecon_stack(i)
-            # self.dummy_runner(i)
+            self._create_savurecon_process_list(i)
+            self._run_savurecon(i)
+            # self._dummy_runner(i)
             print("Savu reconstruction complete for {}_{}".format(self.proj_name, curr_ts))
         self.export_metadata()
 
