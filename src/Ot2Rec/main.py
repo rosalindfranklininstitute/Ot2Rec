@@ -491,7 +491,7 @@ def run_align_ext():
     if not align_obj.no_processes:
         align_obj.align_stack(ext=True)
 
-        
+
 def get_align_stats():
     """
     Method to extract statistics from alignment
@@ -663,7 +663,7 @@ def run_recon():
     # Create Logger object
     logger = logMod.Logger()
 
-    # Create Align object
+    # Create Recon object
     recon_obj = reconMod.Recon(project_name=project_name,
                                md_in=align_md,
                                params_in=recon_config,
@@ -681,7 +681,7 @@ def update_savurecon_yaml():
     """
 
     project_name = get_proj_name()
-    
+
     # Check if savurecon, align, and align_mdout yaml files exist
     savurecon_yaml_name = project_name + '_savurecon.yaml'
     align_yaml_name = project_name + '_align.yaml'
@@ -715,9 +715,14 @@ def update_savurecon_yaml():
     savurecon_params.params['System']['output_suffix'] = align_params.params['System']['output_suffix']
     savurecon_params.params['Savu']['setup']['tilt_angles'] = align_tilt_files
     savurecon_params.params['Savu']['setup']['aligned_projections'] = align_output.sort_values(ascending=True).unique().tolist()
-    
-    with open(savurecon_yaml_name, 'w') as f:
-        yaml.dump(savurecon_params.params, f, indent=4, sort_keys=False) 
+
+
+    # Change centre of rotation to centre of image by default
+    centre_of_rotation = []
+    for image in savurecon_params.params['Savu']['setup']['aligned_projections']:
+        mrc = mrcfile.open(image)
+        centre_of_rotation.append(float(mrc.header["ny"]/2)) # ydim/2
+    savurecon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
 
 
 def create_savurecon_yaml():
@@ -733,7 +738,7 @@ def create_savurecon_yaml():
 
 def run_savurecon():
     project_name = get_proj_name()
-    
+
     # Check if prerequisite files exist
     savurecon_yaml = project_name + '_savurecon.yaml'
 
@@ -743,7 +748,7 @@ def run_savurecon():
 
     # Create Logger object
     logger = logMod.Logger()
-    
+
     # Create SavuRecon object
     savurecon_obj = savuMod.SavuRecon(project_name=project_name,
                                   params_in=savurecon_params,
@@ -886,7 +891,7 @@ def run_ctfsim():
                                                                   alpha_g=alpha_g_grid)
 
         # Write out psf stack
-        with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:02}.st', overwrite=True) as f:
+        with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:02}.mrc', overwrite=True) as f:
             f.set_data(full_psf)
 
 
@@ -894,3 +899,90 @@ def run_ctfsim():
         with open(subfolder_path + f'/{rootname}_{curr_ts:02}.rawtlt', 'w') as f:
             for angle in sorted(angle_list):
                 f.writelines(str(angle) + '\n')
+
+
+def update_recon_yaml_stacked():
+    """
+    Method to update yaml file for savu reconstruction --- if stacks already exist
+    """
+
+    project_name = get_proj_name()
+
+    # User prompt for file specifications
+    parent_path = input('Enter path of parent folder with stacks in: \n')
+    assert (os.path.isdir(parent_path)), \
+        "Error in main.update_recon_yaml_stacked: IMOD parent folder not found."
+    while parent_path.endswith('/'):
+        parent_path = parent_path[:-1]
+
+    rootname = input('Enter rootname of project (remove final underscore): \n')
+    while rootname.endswith('_'):
+        rootname = rootname[:-1]
+
+    suffix = input('Enter file suffix (leave empty if not applicable): \n')
+    pixel_size = input('Enter desired pixel size (in angstroms): \n')
+
+    # Find stack files
+    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.mrc')
+
+    # Find rawtlt files
+    rawtlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
+
+    # Extract tilt series number
+    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}.mrc', '')) for i in st_file_list]
+
+    # Read in and update YAML parameters
+    recon_yaml_name = project_name + '_savurecon.yaml'
+    recon_params = prmMod.read_yaml(project_name=project_name,
+                                    filename=recon_yaml_name)
+
+    recon_params.params['System']['process_list'] = ts_list
+    recon_params.params['System']['output_rootname'] = rootname
+    recon_params.params['System']['output_suffix'] = suffix
+    recon_params.params['Savu']['setup']['tilt_angles'] = rawtlt_file_list
+    recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
+
+    # Write out YAML file
+    with open(recon_yaml_name, 'w') as f:
+        yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
+
+
+def create_recon_yaml_stacked():
+    """
+    Subroutine to create new yaml file for IMOD reconstruction
+    """
+
+    project_name = get_proj_name()
+
+    # Create the yaml file, then automatically update it
+    prmMod.new_savurecon_yaml(project_name)
+    update_recon_yaml_stacked()
+
+
+def run_recon_ext():
+    """
+    Method to run IMOD reconstruction
+    """
+
+    project_name = get_proj_name()
+
+    # Check if prerequisite files exist
+    recon_yaml = project_name + '_recon.yaml'
+
+    # Read in config and metadata
+    recon_config = prmMod.read_yaml(project_name=project_name,
+                                    filename=recon_yaml)
+
+    # Create Logger object
+    logger = logMod.Logger()
+
+    # Create Align object
+    recon_obj = reconMod.Recon(project_name=project_name,
+                               md_in=None,
+                               params_in=recon_config,
+                               logger_in=logger,
+    )
+
+    # Run IMOD
+    if not recon_obj.no_processes:
+        recon_obj.recon_stack(ext=True)
