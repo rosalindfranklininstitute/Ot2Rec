@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: 16823/ot2rec:v0.4.1
+From: quay.io/rosalindfranklininstitute/ot2rec:latest
 	
 %environment
 	export MANPATH=/usr/local/imod/IMOD/man:/opt/lmod/lmod/share/man:
