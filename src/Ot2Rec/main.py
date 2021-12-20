@@ -718,11 +718,16 @@ def update_savurecon_yaml():
 
 
     # Change centre of rotation to centre of image by default
-    centre_of_rotation = []
-    for image in savurecon_params.params['Savu']['setup']['aligned_projections']:
-        mrc = mrcfile.open(image)
-        centre_of_rotation.append(float(mrc.header["ny"]/2)) # ydim/2
-    savurecon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
+    # This is now done in savurecon.py on an image-by-image basis, so the following 5 lines are deprecated
+    # centre_of_rotation = []
+    # for image in savurecon_params.params['Savu']['setup']['aligned_projections']:
+    #     mrc = mrcfile.open(image)
+    #     centre_of_rotation.append(float(mrc.header["ny"]/2)) # ydim/2
+    # savurecon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
+    
+    with open(savurecon_yaml_name, 'w') as f:
+        yaml.dump(savurecon_params.params, f, indent=4, sort_keys=False)
+
 
 
 def create_savurecon_yaml():
