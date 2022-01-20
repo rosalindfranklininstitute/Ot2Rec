@@ -19,6 +19,17 @@ from scipy.signal import convolve as conv
 from icecream import ic
 
 
+itick = 0
+def tickCallBack(self):
+    """
+    Function defining the tick callback
+    Note: Needs to be outside the class
+    """
+    global itick
+    ic(f'itick = {itick}')
+    itick += 1
+
+            
 class RLF_deconv():
     """
     Class encapsulating an RLF_deconv object
@@ -85,12 +96,6 @@ class RLF_deconv():
         Method to use RLF to deconvolve image
         """
 
-        def tickCallBack(self):
-            global itick
-            ic(f'itick = {itick}')
-            itick += 1
-
-        ic(self.params)
         image_deconvolved = rlf.doRLDeconvolutionFromNpArrays(
             self.orig, self.kernel,
             niter=self.params['niter'],
