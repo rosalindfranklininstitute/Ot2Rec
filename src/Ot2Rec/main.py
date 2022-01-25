@@ -724,7 +724,7 @@ def update_savurecon_yaml():
         centre_of_rotation.append(float(mrc.header["ny"]/2)) # ydim/2
     savurecon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
 
-
+    
 def create_savurecon_yaml():
     """
     Creates yaml for savu reconstruction
@@ -941,6 +941,13 @@ def update_recon_yaml_stacked():
     recon_params.params['System']['output_suffix'] = suffix
     recon_params.params['Savu']['setup']['tilt_angles'] = rawtlt_file_list
     recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
+
+    # Change centre of rotation to centre of image by default
+    centre_of_rotation = []
+    for image in recon_params.params['Savu']['setup']['aligned_projections']:
+        mrc = mrcfile.open(image)
+        centre_of_rotation.append(float(mrc.header["nx"]/2)) # xdim/2
+    recon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
 
     # Write out YAML file
     with open(recon_yaml_name, 'w') as f:
