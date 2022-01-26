@@ -15,6 +15,7 @@
 
 import sys
 import os
+import argparse
 from glob import glob, glob1
 import yaml
 import pandas as pd
@@ -834,19 +835,52 @@ def run_ctfsim():
     Method to run simulator for CTF from CTFFIND4 outputs
     """
 
-    project_name = get_proj_name()
+    # project_name = get_proj_name()
 
-    rootname = input(f'Enter file rootname: (Default: {project_name})\n')
-    if len(rootname) == 0:
-        rootname = project_name
-    while rootname.endswith('/'):
-        rootname = rootname[:-1]
+    # rootname = input(f'Enter file rootname: (Default: {project_name})\n')
+    # if len(rootname) == 0:
+    #     rootname = project_name
+    # while rootname.endswith('/'):
+    #     rootname = rootname[:-1]
 
-    pixel_size = input(f'Enter pixel size of motion-corrected images (in Angstroms)\n')
-    pixel_size = float(pixel_size) * 1e-10
+    # pixel_size = input(f'Enter pixel size of motion-corrected images (in Angstroms)\n')
+    # pixel_size = float(pixel_size) * 1e-10
 
-    ds_factor = int(input(f'Enter downsampling factor (must be same as alignment/reconstruction)\n'))
+    # ds_factor = int(input(f'Enter downsampling factor (must be same as alignment/reconstruction)\n'))
 
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("pixel_res",
+                        type=float,
+                        help="Pixel resolution of motion-corrected images (in Angstroms)")
+    parser.add_argument("ds_factor",
+                        type=int,
+                        help="Downsampling factor (must be same as alignment/reconstruction)")
+    parser.add_argument("-rn", "--rootname",
+                        type=str,
+                        help="Rootname of current project (required if different from project name)")
+    parser.add_argument("-d", "--dims",
+                        type=str,
+                        help="Dimensions of simulated CTF in pixels (default: same as downsampled raw data)")
+
+    args = parser.parse_args()
+    project_name = args.project_name
+
+    rootname = project_name
+    if args.rootname is not None:
+        while args.rootname.endswith('/'):
+            rootname = args.rootname[:-1]
+
+    pixel_size = args.pixel_res * 1e-10
+    ds_factor = args.ds_factor
+
+    if args.dims is not None:
+        ctf_dims = [int(item) for item in args.dims.split(',')]
+
+    
     # Read in metadata from ctffind
     ctffind_md_file = project_name + '_ctffind_mdout.yaml'
     ctffind_obj = mdMod.read_md_yaml(project_name=project_name,
@@ -892,7 +926,16 @@ def run_ctfsim():
 
         # Write out psf stack
         with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:02}.mrc', overwrite=True) as f:
-            f.set_data(full_psf)
+            if args.dims is not None:
+                ctf_dims = [int(item) for item in args.dims.split(',')]
+                (xmin, ymin) = (
+                    (source_dim[-2]-ctf_dims[0]) // 2,
+                    (source_dim[-1]-ctf_dims[1]) // 2)
+                (xmax, ymax) = (xmin+ctf_dims[0], ymin+ctf_dims[1])
+
+                f.set_data(full_psf[:, xmin:xmax, ymin:ymax])
+            else:
+                f.set_data(full_psf)
 
 
         # Write out rawtlt file
