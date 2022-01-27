@@ -835,19 +835,6 @@ def run_ctfsim():
     Method to run simulator for CTF from CTFFIND4 outputs
     """
 
-    # project_name = get_proj_name()
-
-    # rootname = input(f'Enter file rootname: (Default: {project_name})\n')
-    # if len(rootname) == 0:
-    #     rootname = project_name
-    # while rootname.endswith('/'):
-    #     rootname = rootname[:-1]
-
-    # pixel_size = input(f'Enter pixel size of motion-corrected images (in Angstroms)\n')
-    # pixel_size = float(pixel_size) * 1e-10
-
-    # ds_factor = int(input(f'Enter downsampling factor (must be same as alignment/reconstruction)\n'))
-
     # Parse user inputs
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name",
@@ -949,30 +936,64 @@ def update_recon_yaml_stacked():
     Method to update yaml file for savu reconstruction --- if stacks already exist
     """
 
-    project_name = get_proj_name()
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("stacks_folder",
+                        type=str,
+                        help="Path to parent folder with stacks")
+    parser.add_argument("-rn", "--rootname",
+                        type=str,
+                        help="Rootname of current project (required if different from project name)")
+    parser.add_argument("-s", "--suffix",
+                        type=str,
+                        help="Suffix of project files")
+    parser.add_argument("-e", "--extension",
+                        type=str,
+                        help="File extension of stacks (Default: mrc)")
+    parser.add_argument("-is", "--imod_suffix",
+                        type=str,
+                        help="IMOD file suffix")
+    parser.add_argument("-o", "--output_path",
+                        type=str,
+                        help="Path to output folder (Default: ./savurecon/)")
 
-    # User prompt for file specifications
-    parent_path = input('Enter path of parent folder with stacks in: \n')
-    assert (os.path.isdir(parent_path)), \
-        "Error in main.update_recon_yaml_stacked: IMOD parent folder not found."
-    while parent_path.endswith('/'):
-        parent_path = parent_path[:-1]
+    args = parser.parse_args()
+    project_name = args.project_name
+    parent_path = args.stacks_folder
 
-    rootname = input('Enter rootname of project (remove final underscore): \n')
-    while rootname.endswith('_'):
-        rootname = rootname[:-1]
+    rootname = project_name
+    if args.rootname is not None:
+        while args.rootname.endswith('/'):
+            rootname = args.rootname[:-1]
 
-    suffix = input('Enter file suffix (leave empty if not applicable): \n')
-    pixel_size = input('Enter desired pixel size (in angstroms): \n')
+    suffix = ''
+    if args.suffix is not None:
+        suffix = args.suffix
 
+    imod_suffix = ''
+    if args.imod_suffix is not None:
+        imod_suffix = '_' + args.imod_suffix
+        
+    ext = 'mrc'
+    if args.extension is not None:
+        ext = args.extension
+
+    out_folder = './savurecon/'
+    if args.output_path is not None:
+        out_folder = args.output_path
+
+        
     # Find stack files
-    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.mrc')
+    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}{imod_suffix}.{ext}')
 
     # Find rawtlt files
     rawtlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
 
     # Extract tilt series number
-    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}.mrc', '')) for i in st_file_list]
+    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
 
     # Read in and update YAML parameters
     recon_yaml_name = project_name + '_savurecon.yaml'
@@ -981,6 +1002,7 @@ def update_recon_yaml_stacked():
 
     recon_params.params['System']['process_list'] = ts_list
     recon_params.params['System']['output_rootname'] = rootname
+    recon_params.params['System']['output_path'] = out_folder
     recon_params.params['System']['output_suffix'] = suffix
     recon_params.params['Savu']['setup']['tilt_angles'] = rawtlt_file_list
     recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
