@@ -60,7 +60,7 @@ setup(
             "o2r.recon.new_ext=Ot2Rec.main:create_recon_yaml_stacked",
             "o2r.recon.run_ext=Ot2Rec.main:run_savurecon",
 
-            "o2r.savu.new=Ot2Rec.main:create_savurecon_yaml",
+            "o2r.savu.new=Ot2Rec.main:create_recon_yaml_stacked",
             "o2r.savu.run=Ot2Rec.main:run_savurecon",
 
             "o2r.cleanup=Ot2Rec.main:cleanup",
