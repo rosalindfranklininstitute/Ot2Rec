@@ -363,22 +363,41 @@ def update_align_yaml_stacked():
     Method to update yaml file for IMOD newstack / alignment --- if stacks already exist
     """
 
-    project_name = get_proj_name()
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("parent_path",
+                        type=str,
+                        help="Path to parent folder with stacks in")
+    parser.add_argument("pixel_res",
+                        type=float,
+                        help="Pixel resolution of motion-corrected images (in Angstroms)")
+    parser.add_argument("-rn", "--rootname",
+                        type=str,
+                        help="Rootname of current project (required if different from project name)")
+    parser.add_argument("-s", "--suffix",
+                        type=str,
+                        help="Suffix of project files")
 
-    # User prompt for file specifications
-    parent_path = input('Enter path of parent folder with stacks in: \n')
+    args = parser.parse_args()
+    project_name = args.project_name
+    parnet_path = args.parent_path
     assert (os.path.isdir(parent_path)), \
         "Error in main.update_align_yaml_stacked: IMOD parent folder not found."
     while parent_path.endswith('/'):
         parent_path = parent_path[:-1]
+    
+    rootname = project_name
+    if args.rootname is not None:
+        while args.rootname.endswith('/'):
+            rootname = args.rootname[:-1]
 
-    rootname = input('Enter rootname of project (remove final underscore): \n')
-    while rootname.endswith('_'):
-        rootname = rootname[:-1]
-
-    suffix = input('Enter file suffix (leave empty if not applicable): \n')
-    pixel_size = input('Enter desired pixel size (in angstroms): \n')
-
+    pixel_size = args.pixel_res
+    suffix = args.suffix if args.suffix is not None else ''
+    
+    
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
 
