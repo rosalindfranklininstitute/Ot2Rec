@@ -950,9 +950,56 @@ def run_ctfsim():
                 f.writelines(str(angle) + '\n')
 
 
-def update_recon_yaml_stacked():
+def update_recon_yaml_stacked(project_name, parent_path, rootname, suffix, ext, imod_suffix, out_folder):
     """
     Method to update yaml file for savu reconstruction --- if stacks already exist
+
+    Args:
+    project_name (str) :: Name of current project
+    parent_path (str)  :: Path to the parent folder holding raw images
+    rootname (str)     :: IMOD rootname of files
+    suffix (str)       :: File suffixes
+    ext (str)          :: File extensions
+    imod_suffix (str)  :: IMOD suffix of files
+    out_folder (str)   :: Output folder for reconstructed images
+    """
+
+    # Find stack files
+    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}{imod_suffix}.{ext}')
+
+    # Find rawtlt files
+    rawtlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
+
+    # Extract tilt series number
+    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
+
+    # Read in and update YAML parameters
+    recon_yaml_name = project_name + '_savurecon.yaml'
+    recon_params = prmMod.read_yaml(project_name=project_name,
+                                    filename=recon_yaml_name)
+
+    recon_params.params['System']['process_list'] = ts_list
+    recon_params.params['System']['output_rootname'] = rootname
+    recon_params.params['System']['output_path'] = out_folder
+    recon_params.params['System']['output_suffix'] = suffix
+    recon_params.params['Savu']['setup']['tilt_angles'] = rawtlt_file_list
+    recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
+
+    # Change centre of rotation to centre of image by default
+    centre_of_rotation = []
+    for image in recon_params.params['Savu']['setup']['aligned_projections']:
+        mrc = mrcfile.open(image)
+        centre_of_rotation.append(float(mrc.header["nx"]/2)) # xdim/2
+    recon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
+
+    # Write out YAML file
+    with open(recon_yaml_name, 'w') as f:
+        yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
+
+
+def create_recon_yaml_stacked():
+    """
+    Subroutine to create new yaml file for IMOD reconstruction
     """
 
     # Parse user inputs
@@ -1004,50 +1051,15 @@ def update_recon_yaml_stacked():
     if args.output_path is not None:
         out_folder = args.output_path
 
-        
-    # Find stack files
-    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}{imod_suffix}.{ext}')
-
-    # Find rawtlt files
-    rawtlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
-
-    # Extract tilt series number
-    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
-
-    # Read in and update YAML parameters
-    recon_yaml_name = project_name + '_savurecon.yaml'
-    recon_params = prmMod.read_yaml(project_name=project_name,
-                                    filename=recon_yaml_name)
-
-    recon_params.params['System']['process_list'] = ts_list
-    recon_params.params['System']['output_rootname'] = rootname
-    recon_params.params['System']['output_path'] = out_folder
-    recon_params.params['System']['output_suffix'] = suffix
-    recon_params.params['Savu']['setup']['tilt_angles'] = rawtlt_file_list
-    recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
-
-    # Change centre of rotation to centre of image by default
-    centre_of_rotation = []
-    for image in recon_params.params['Savu']['setup']['aligned_projections']:
-        mrc = mrcfile.open(image)
-        centre_of_rotation.append(float(mrc.header["nx"]/2)) # xdim/2
-    recon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
-
-    # Write out YAML file
-    with open(recon_yaml_name, 'w') as f:
-        yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
-
-
-def create_recon_yaml_stacked():
-    """
-    Subroutine to create new yaml file for IMOD reconstruction
-    """
-
-    project_name = get_proj_name()
-
     # Create the yaml file, then automatically update it
     prmMod.new_savurecon_yaml(project_name)
-    update_recon_yaml_stacked()
+    update_recon_yaml_stacked(project_name=project_name,
+                              parent_path=parent_path,
+                              rootname=rootname,
+                              suffix=suffix,
+                              ext=ext,
+                              imod_suffix=imod_suffix,
+                              out_folder=out_folder)
 
 
 def run_recon_ext():
