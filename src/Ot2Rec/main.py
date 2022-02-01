@@ -950,20 +950,22 @@ def run_ctfsim():
                 f.writelines(str(angle) + '\n')
 
 
-def update_recon_yaml_stacked(project_name, parent_path, rootname, suffix, ext, imod_suffix, out_folder):
+def update_recon_yaml_stacked(project_name, param_dict):
     """
     Method to update yaml file for savu reconstruction --- if stacks already exist
 
     Args:
     project_name (str) :: Name of current project
-    parent_path (str)  :: Path to the parent folder holding raw images
-    rootname (str)     :: IMOD rootname of files
-    suffix (str)       :: File suffixes
-    ext (str)          :: File extensions
-    imod_suffix (str)  :: IMOD suffix of files
-    out_folder (str)   :: Output folder for reconstructed images
+    param_dict (dict)  :: Dictionary containing params
     """
 
+    parent_path = param_dict['parent_path']
+    rootname    = param_dict['rootname']
+    suffix      = param_dict['suffix']
+    ext         = param_dict['ext']
+    imod_suffix = param_dict['imod_suffix']
+    out_folder  = param_dict['out_folder']
+    
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}{imod_suffix}.{ext}')
 
@@ -1051,15 +1053,21 @@ def create_recon_yaml_stacked():
     if args.output_path is not None:
         out_folder = args.output_path
 
+    savu_params = dict({
+        'parent_path'  : parent_path,
+        'rootname'     : rootname,
+        'suffix'       : suffix,
+        'ext'          : ext,
+        'imod_suffix'  : imod_suffix,
+        'out_folder'   : out_folder
+    })
+        
+        
     # Create the yaml file, then automatically update it
     prmMod.new_savurecon_yaml(project_name)
     update_recon_yaml_stacked(project_name=project_name,
-                              parent_path=parent_path,
-                              rootname=rootname,
-                              suffix=suffix,
-                              ext=ext,
-                              imod_suffix=imod_suffix,
-                              out_folder=out_folder)
+                              param_dict=savu_params)
+
 
 
 def run_recon_ext():
