@@ -250,11 +250,15 @@ def run_mc2():
     Method to run motioncorr
     """
 
-    project_name = get_proj_name()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    args = parser.parse_args()
 
     # Check if prerequisite files exist
-    mc2_yaml = project_name + '_mc2.yaml'
-    master_md_file = project_name + '_master_md.yaml'
+    mc2_yaml = args.project_name + '_mc2.yaml'
+    master_md_file = args.project_name + '_master_md.yaml'
 
     if not os.path.isfile(mc2_yaml):
         raise IOError("Error in Ot2Rec.main.run_mc2: MC2 yaml config not found.")
@@ -262,9 +266,9 @@ def run_mc2():
         raise IOError("Error in Ot2Rec.main.run_mc2: Master metadata not found.")
 
     # Read in config and metadata
-    mc2_config = prmMod.read_yaml(project_name=project_name,
+    mc2_config = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml)
-    master_md = mdMod.read_md_yaml(project_name=project_name,
+    master_md = mdMod.read_md_yaml(project_name=args.project_name,
                                    job_type='motioncorr',
                                    filename=master_md_file)
 
@@ -272,7 +276,7 @@ def run_mc2():
     logger = logMod.Logger()
 
     # Create Motioncorr object
-    mc2_obj = mc2Mod.Motioncorr(project_name=project_name,
+    mc2_obj = mc2Mod.Motioncorr(project_name=args.project_name,
                                 mc2_params=mc2_config,
                                 md_in=master_md,
                                 logger=logger
