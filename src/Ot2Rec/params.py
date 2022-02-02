@@ -43,23 +43,23 @@ class Params:
 
         
 
-def new_master_yaml(project_name: str):
+def new_master_yaml(args):
     """
     Subroutine to create yaml file for processing master metadata
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace generated with user inputs
     """
 
-    master_yaml_name = project_name + '_proj.yaml'
+    master_yaml_name = args.project_name + '_proj.yaml'
     
     proj_yaml_dict = {
-        'source_folder': '../raw/',
-        'TS_folder_prefix': '*',
-        'file_prefix': project_name,
-        'image_stack_field': 0,
-        'image_tiltangle_field': 2,
-        'source_TIFF': True,
+        'source_folder': args.source_folder,
+        'TS_folder_prefix': args.folder_prefix,
+        'file_prefix': args.project_name,
+        'image_stack_field': args.stack_field,
+        'image_tiltangle_field': args.tiltangle_field,
+        'source_TIFF': args.tiffs,
     }
 
     with open(master_yaml_name, 'w') as f:

@@ -59,10 +59,39 @@ def new_proj():
     Subroutine executing actions when a new project has been initiated
     """
 
-    project_name = get_proj_name()
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("-s", "--source_folder",
+                        type=str,
+                        default='../raw/',
+                        help="Path to folder with raw images (Default: ../raw/)")
+    parser.add_argument("-fp", "--folder_prefix",
+                        type=str,
+                        default='',
+                        help="Common prefix of raw tilt series folder(s). Don't use this flag if all images are in the parent folder.")
+    parser.add_argument("-p", "--file_prefix",
+                        type=str,
+                        help="Common prefix of raw image files (Default: project name).")
+    parser.add_argument("-t", "--tiffs",
+                        action="store_true",
+                        help="Use this flag if the raw images are TIFFs.")
+    parser.add_argument("--stack_field",
+                        type=int,
+                        default=0,
+                        help="Field number of tilt series indices (Default: 0).")
+    parser.add_argument("--tiltangle_field",
+                        type=int,
+                        default=2,
+                        help="Field number of tilt angles (Default: 2).")
 
+
+    args = parser.parse_args()
+    
     # Create master yaml config file
-    prmMod.new_master_yaml(project_name)
+    prmMod.new_master_yaml(args)
 
 
 def get_master_metadata():
