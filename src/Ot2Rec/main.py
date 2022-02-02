@@ -99,17 +99,22 @@ def get_master_metadata():
     Subroutine to get master metadata from raw images
     """
 
-    project_name = get_proj_name()
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    args = parser.parse_args()
 
     # Create empty Metadata object
     # Master yaml file will be read automatically
-    meta = mdMod.Metadata(project_name=project_name,
+    meta = mdMod.Metadata(project_name=args.project_name,
                           job_type='master')
 
     # Create master metadata and serialise it as yaml file
     meta.create_master_metadata()
 
-    master_md_name = project_name + '_master_md.yaml'
+    master_md_name = args.project_name + '_master_md.yaml'
     with open(master_md_name, 'w') as f:
         yaml.dump(meta.metadata, f, indent=4)
 
