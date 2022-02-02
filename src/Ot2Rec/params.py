@@ -66,37 +66,37 @@ def new_master_yaml(args):
         yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False) 
 
 
-def new_mc2_yaml(project_name: str):
+def new_mc2_yaml(args):
     """
     Subroutine to create yaml file for motioncorr
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace generated with user inputs
     """
 
-    mc2_yaml_name = project_name + '_mc2.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
 
     mc2_yaml_dict = {
         'System': {
-            'process_list': 'all',
-            'output_path': './motioncor/',
-            'output_prefix': 'TS',
-            'use_gpu': 'auto',
-            'jobs_per_gpu': 2,
-            'gpu_memory_usage': 1,
-            'source_TIFF': True,
+            'process_list': None,
+            'output_path': args.output_folder,
+            'output_prefix': args.file_prefix if args.file_prefix is not None else args.project_name,
+            'use_gpu': 'auto' if not args.no_gpu else False,
+            'jobs_per_gpu': args.jobs_per_gpu,
+            'gpu_memory_usage': args.gpu_mem_usage,
+            'source_TIFF': None,
         },
         'MC2': {
-            'MC2_path': '/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110',
-            'gain_reference': 'nogain',
-            'pixel_size': 0.815,
-            'desired_pixel_size': 'ps_x2',
-            'discard_frames_top': 1,
-            'discard_frames_bottom': 0,
-            'tolerance': 0.5,
-            'max_iterations': 10,
-            'patch_size': [5, 5, 20],
-            'use_subgroups': True,
+            'MC2_path': args.mc2_path,
+            'gain_reference': 'nogain' if args.gain is None else args.gain,
+            'pixel_size': args.pixel_size,
+            'desired_pixel_size': args.pixel_size*2 if args.super_res else args.pixel_size,
+            'discard_frames_top': args.discard_top,
+            'discard_frames_bottom': args.discard_bottom,
+            'tolerance': args.tolerance,
+            'max_iterations': args.max_iter,
+            'patch_size': args.patch_size,
+            'use_subgroups': args.no_subgroups,
         },
     }
         

@@ -119,30 +119,31 @@ def get_master_metadata():
         yaml.dump(meta.metadata, f, indent=4)
 
 
-def update_mc2_yaml():
+def update_mc2_yaml(args):
     """
     Subroutine to update yaml file for motioncorr
+
+    ARGS:
+    args (Namespace) :: Arguments obtained from user
     """
 
-    project_name = get_proj_name()
-
     # Check if MC2 yaml exists
-    mc2_yaml_name = project_name + '_mc2.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
     if not os.path.isfile(mc2_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_mc2_yaml: File not found.")
 
     # Read in master yaml
-    master_yaml = project_name + '_proj.yaml'
+    master_yaml = args.project_name + '_proj.yaml'
     with open(master_yaml, 'r') as f:
         master_config = yaml.load(f, Loader=yaml.FullLoader)
 
     # Read in master metadata (as Pandas dataframe)
-    master_md_name = project_name + '_master_md.yaml'
+    master_md_name = args.project_name + '_master_md.yaml'
     with open(master_md_name, 'r') as f:
         master_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
 
     # Read in previous MC2 output metadata (as Pandas dataframe) for old projects
-    mc2_md_name = project_name + '_mc2_md.yaml'
+    mc2_md_name = args.project_name + '_mc2_md.yaml'
     if os.path.isfile(mc2_md_name):
         is_old_project = True
         with open(mc2_md_name, 'r') as f:
@@ -162,17 +163,10 @@ def update_mc2_yaml():
     unique_ts_numbers = unprocessed_images['ts'].sort_values(ascending=True).unique().tolist()
 
     # Read in MC2 yaml file, modify, and update
-    mc2_params = prmMod.read_yaml(project_name=project_name,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
-    mc2_params.params['System']['output_prefix'] = project_name
-
     mc2_params.params['System']['source_TIFF'] = master_config['source_TIFF']
-
-    if mc2_params.params['MC2']['desired_pixel_size'] == 'ps_x2':
-        mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size'] * 2
-    else:
-        mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size']
 
     with open(mc2_yaml_name, 'w') as f:
         yaml.dump(mc2_params.params, f, indent=4, sort_keys=False)
@@ -183,11 +177,72 @@ def create_mc2_yaml():
     Subroutine to create new yaml file for motioncorr
     """
 
-    project_name = get_proj_name()
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("-o", "--output_folder",
+                        type=str,
+                        default='./motioncor/',
+                        help="Path to folder for storing motion-corrected images (Default: ./motioncor/)")
+    parser.add_argument("-p", "--file_prefix",
+                        type=str,
+                        help="Common prefix of image files (Default: project name).")
+    parser.add_argument("--no_gpu",
+                        action="store_true",
+                        help="Use CPU only for motion-correction.")
+    parser.add_argument("-jpg", "--jobs_per_gpu",
+                        type=int,
+                        default=2,
+                        help="Number of job instance(s) per GPU. Only valid when --no_gpu is off.")
+    parser.add_argument("-m", "--gpu_mem_usage",
+                        type=float,
+                        default=1,
+                        help="MotionCor2 memory usage.")
+    parser.add_argument("--mc2_path",
+                        type=str,
+                        default='/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110',
+                        help="Path to MotionCor2 executable. (Default: /opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110)")
+    parser.add_argument("--gain",
+                        type=str,
+                        help="Path to gain reference file. (Default: None)")
+    parser.add_argument("pixel_size",
+                        type=float,
+                        help="Image pixel size in Angstroms.")
+    parser.add_argument("-sr", "--super_res",
+                        action="store_true",
+                        help="Use flag if images are super-resolution.")
+    parser.add_argument("-dt", "--discard_top",
+                        type=int,
+                        default=0,
+                        help="Number of frames discarded from top per image. (Default: 0)")
+    parser.add_argument("-db", "--discard_bottom",
+                        type=int,
+                        default=0,
+                        help="Number of frames discarded from bottom per image. (Default: 0)")
+    parser.add_argument("-tol", "--tolerance",
+                        type=float,
+                        default=0.5,
+                        help="Threshold of alignment errors in pixels. (Default: 0.5)")
+    parser.add_argument("--max_iter",
+                        type=int,
+                        default=10,
+                        help="Maximum number of iterations performed by MotionCor2.")
+    parser.add_argument("-ps", "--patch_size",
+                        nargs=3,
+                        type=int,
+                        default=[5, 5, 20],
+                        help="Size of patches used in alignment.")
+    parser.add_argument("--no_subgroups",
+                        action="store_false",
+                        help="Do not use subgroups in alignment.")
+    
+    args = parser.parse_args()
 
     # Create the yaml file, then automatically update it
-    prmMod.new_mc2_yaml(project_name)
-    update_mc2_yaml()
+    prmMod.new_mc2_yaml(args)
+    update_mc2_yaml(args)
 
 
 def run_mc2():
