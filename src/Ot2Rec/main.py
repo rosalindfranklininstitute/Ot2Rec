@@ -210,7 +210,7 @@ def create_mc2_yaml():
     parser.add_argument("pixel_size",
                         type=float,
                         help="Image pixel size in Angstroms.")
-    parser.add_argument("-sr", "--super_res",
+    parser.add_argument("--super_res",
                         action="store_true",
                         help="Use flag if images are super-resolution.")
     parser.add_argument("-dt", "--discard_top",
