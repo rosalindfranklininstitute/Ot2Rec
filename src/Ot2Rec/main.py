@@ -200,7 +200,7 @@ def create_mc2_yaml():
                         type=float,
                         default=1,
                         help="MotionCor2 memory usage.")
-    parser.add_argument("--mc2_path",
+    parser.add_argument("--exec_path",
                         type=str,
                         default='/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110',
                         help="Path to MotionCor2 executable. (Default: /opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110)")

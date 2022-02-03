@@ -87,7 +87,7 @@ def new_mc2_yaml(args):
             'source_TIFF': None,
         },
         'MC2': {
-            'MC2_path': args.mc2_path,
+            'MC2_path': args.exec_path,
             'gain_reference': 'nogain' if args.gain is None else args.gain,
             'pixel_size': args.pixel_size,
             'desired_pixel_size': args.pixel_size*2 if args.super_res else args.pixel_size,
