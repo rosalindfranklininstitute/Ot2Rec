@@ -290,16 +290,16 @@ def run_mc2():
         mc2_obj.export_metadata()
 
 
-def update_ctffind_yaml():
+def update_ctffind_yaml(args):
     """
     Subroutine to update yaml file for ctffind
+
+    ARGS:
+    args (Namespace) :: Arguments obtained from user
     """
-
-    project_name = get_proj_name()
-
     # Check if ctffind and motioncorr yaml files exist
-    ctf_yaml_name = project_name + '_ctffind.yaml'
-    mc2_yaml_name = project_name + '_mc2.yaml'
+    ctf_yaml_name = args.project_name + '_ctffind.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
     if not os.path.isfile(ctf_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_ctffind_yaml: ctffind config file not found.")
     if not os.path.isfile(mc2_yaml_name):
@@ -307,12 +307,12 @@ def update_ctffind_yaml():
 
     # Read in MC2 metadata (as Pandas dataframe)
     # We only need the TS number and the tilt angle for comparisons at this stage
-    mc2_md_name = project_name + '_mc2_mdout.yaml'
+    mc2_md_name = args.project_name + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
 
     # Read in previous ctffind output metadata (as Pandas dataframe) for old projects
-    ctf_md_name = project_name + '_ctffind_mdout.yaml'
+    ctf_md_name = args.project_name + '_ctffind_mdout.yaml'
     if os.path.isfile(ctf_md_name):
         is_old_project = True
         with open(ctf_md_name, 'r') as f:
@@ -333,12 +333,11 @@ def update_ctffind_yaml():
 
     # Read in ctffind yaml file, modify, and update
     # read in MC2 yaml as well (some parameters depend on MC2 settings)
-    ctf_params = prmMod.read_yaml(project_name=project_name,
+    ctf_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=ctf_yaml_name)
-    mc2_params = prmMod.read_yaml(project_name=project_name,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
 
-    ctf_params.params['System']['output_prefix'] = project_name
     ctf_params.params['System']['process_list'] = unique_ts_numbers
     ctf_params.params['ctffind']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size']
 
@@ -350,12 +349,67 @@ def create_ctffind_yaml():
     """
     Subroutine to create new yaml file for ctffind
     """
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("-o", "--output_folder",
+                        type=str,
+                        default='./motioncor/',
+                        help="Path to folder for storing motion-corrected images (Default: ./motioncor/)")
+    parser.add_argument("-p", "--file_prefix",
+                        type=str,
+                        help="Common prefix of image files (Default: project name).")
+    parser.add_argument("--exec_path",
+                        type=str,
+                        default='/opt/lmod/modules/ctffind/4.1.14/bin/ctffind',
+                        help="Path to MotionCor2 executable. (Default: /opt/lmod/modules/ctffind/4.1.14/bin/ctffind)")
+    parser.add_argument("-v", "--voltage",
+                        type=float,
+                        default=300.0,
+                        help="Electron beam voltage in keV. (Default: 300.0)")
+    parser.add_argument("-cs", "--spherical_aberration",
+                        type=float,
+                        default=2.7,
+                        help="Spherical aberration of objective lens in mrad. (Default: 2.7)")
+    parser.add_argument("-ac", "--amp_contrast",
+                        type=float,
+                        default=0.8,
+                        help="Relative amplitude contrast w1, range=(0, 1). (Default: 0.8)")
+    parser.add_argument("-ss", "--spec_size",
+                        type=int,
+                        default=512,
+                        help="Size of amplitude spectrum in pixels. (Default: 512)")
+    parser.add_argument("-res", "--res_range",
+                        type=float,
+                        nargs=2,
+                        default=[30, 5],
+                        help="Range of resolutions in target function in Angstroms. (Default: 30, 5)")
+    parser.add_argument("-d", "--defocus_range",
+                        type=float,
+                        nargs=3,
+                        default=[5000, 50000, 500],
+                        help="Min, max and step size of initial defocus search in Angstroms. (Default: 5000, 50000, 500)")
+    parser.add_argument("-at", "--astigm_type",
+                        type=str,
+                        help="Type of astigmatism. FLAG USE NOT RECOMMENDED.")
+    parser.add_argument("-e", "--exhaustive_search",
+                        action="store_true",
+                        help="Use exhaustive search algorithm for defocus. Use flag if True.")
+    parser.add_argument("-ar", "--astigm_restraint",
+                        type=int,
+                        help="Restraint on astigmatism in Angstroms.")
+    parser.add_argument("-ps", "--phase_shift",
+                        action="store_true",
+                        help="Estimate phase shift. Use flag if True.")
 
-    project_name = get_proj_name()
+    args = parser.parse_args()
+    
 
     # Create the yaml file, then automatically update it
-    prmMod.new_ctffind_yaml(project_name)
-    update_ctffind_yaml()
+    prmMod.new_ctffind_yaml(args)
+    update_ctffind_yaml(args)
 
 
 def run_ctffind():

@@ -104,38 +104,38 @@ def new_mc2_yaml(args):
         yaml.dump(mc2_yaml_dict, f, indent=4, sort_keys=False) 
 
 
-def new_ctffind_yaml(project_name: str):
+def new_ctffind_yaml(args):
     """
     Subroutine to create yaml file for ctffind
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace generated with user inputs
     """
 
-    ctf_yaml_name = project_name + '_ctffind.yaml'
+    ctf_yaml_name = args.project_name + '_ctffind.yaml'
 
     ctf_yaml_dict = {
         'System': {
             'process_list': 'all',
-            'output_path': './ctffind/',
-            'output_prefix': 'TS',
+            'output_path': args.output_folder,
+            'output_prefix': args.file_prefix if args.file_prefix is not None else args.project_name,
         },
         'ctffind': {
-            'ctffind_path': '/opt/lmod/modules/ctffind/4.1.14/bin/ctffind',
+            'ctffind_path': args.exec_path,
             'pixel_size': None,
-            'voltage': 300.,
-            'spherical_aberration': 2.7,
-            'amp_contrast': 0.8,
-            'amp_spec_size': 512,
-            'resolution_min': 30.,
-            'resolution_max': 5.,
-            'defocus_min': 5000.,
-            'defocus_max': 50000.,
-            'defocus_step': 500.,
-            'astigm_type': None,
-            'exhaustive_search': False,
-            'astigm_restraint': False,
-            'phase_shift': False,
+            'voltage': args.voltage,
+            'spherical_aberration': args.spherical_aberration,
+            'amp_contrast': args.amp_contrast,
+            'amp_spec_size': args.spec_size,
+            'resolution_min': max(args.res_range),
+            'resolution_max': min(args.res_range),
+            'defocus_min': args.defocus_range[0],
+            'defocus_max': args.defocus_range[1],
+            'defocus_step': args.defocus_range[2],
+            'astigm_type': args.astigm_type,
+            'exhaustive_search': args.exhaustive_search,
+            'astigm_restraint': args.astigm_restraint if args.astigm_restraint is not None else False,
+            'phase_shift': args.phase_shift,
         },
     }
         
