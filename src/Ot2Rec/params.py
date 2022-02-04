@@ -143,59 +143,59 @@ def new_ctffind_yaml(args):
         yaml.dump(ctf_yaml_dict, f, indent=4, sort_keys=False)
 
 
-def new_align_yaml(project_name: str):
+def new_align_yaml(args):
     """
     Subroutine to create yaml file for stack creation and BatchTomo (up till alignment)
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace generated with user inputs
     """
 
-    align_yaml_name = project_name + '_align.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
 
     align_yaml_dict = {
         'System' : {
             'process_list' : 'all',
-            'output_path' : './stacks/',
-            'output_rootname' : 'TS',
-            'output_suffix' : '',
+            'output_path' : args.output_folder,
+            'output_rootname' : args.file_prefix if args.file_prefix is not None else args.project_name,
+            'output_suffix' : args.file_suffix,
         },
         
         'BatchRunTomo': {
             'setup': {
-                'use_rawtlt': True,
-                'pixel_size': 'default',
-                'rot_angle': 86.,
-                'gold_size': 0.,
-                'adoc_template': '/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc',
-                'stack_bin_factor': 8,
+                'use_rawtlt': args.no_rawtlt,
+                'pixel_size': None,
+                'rot_angle': args.rot_angle,
+                'gold_size': args.fiducial_size,
+                'adoc_template': args.adoc_template,
+                'stack_bin_factor': args.stack_bin_factor,
             },
 
             'preprocessing': {
-                'delete_old_files': False,
-                'remove_xrays': True,
+                'delete_old_files': args.delete_old_files,
+                'remove_xrays': args.remove_xrays,
             },
 
             'coarse_align': {
-                'bin_factor': 8,
+                'bin_factor': args.coarse_align_bin_factor,
             },
 
             'patch_track': {
-                'size_of_patches': [300, 200],
-                'num_of_patches': [12, 8],
-                'num_iterations': 4,
-                'limits_on_shift': [2, 2],
-                'adjust_tilt_angles': True,
+                'size_of_patches': args.patch_sizes,
+                'num_of_patches': args.num_patches,
+                'num_iterations': args.num_iter,
+                'limits_on_shift': args.limits_on_shift,
+                'adjust_tilt_angles': args.adjust_tilt_angles,
             },
 
             'fine_align': {
-                'num_surfaces': 1,
-                'mag_option': 'fixed',
-                'tilt_option': 'fixed',
-                'rot_option': 'group',
-                'beam_tilt_option': 'fixed',
-                'use_robust_fitting': True,
-                'weight_all_contours': True,
+                'num_surfaces': args.num_surfaces,
+                'mag_option': args.mag_option,
+                'tilt_option': args.tilt_option,
+                'rot_option': args.rot_option,
+                'beam_tilt_option': args.beam_tilt_option,
+                'use_robust_fitting': args.no_robust_fitting,
+                'weight_all_contours': args.no_weight_contours,
             },
         }
     }

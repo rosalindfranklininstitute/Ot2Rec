@@ -454,16 +454,17 @@ def run_ctffind():
         ctffind_obj.run_ctffind()
 
 
-def update_align_yaml():
+def update_align_yaml(args):
     """
     Subroutine to update yaml file for IMOD newstack / alignment
+
+    ARGS:
+    args (Namespace) :: Namespace generated with user inputs
     """
 
-    project_name = get_proj_name()
-
     # Check if align and motioncorr yaml files exist
-    align_yaml_name = project_name + '_align.yaml'
-    mc2_yaml_name = project_name + '_mc2.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
     if not os.path.isfile(align_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_align_yaml: alignment config file not found.")
     if not os.path.isfile(mc2_yaml_name):
@@ -471,12 +472,12 @@ def update_align_yaml():
 
     # Read in MC2 metadata (as Pandas dataframe)
     # We only need the TS number and the tilt angle for comparisons at this stage
-    mc2_md_name = project_name + '_mc2_mdout.yaml'
+    mc2_md_name = args.project_name + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
-    align_md_name = project_name + '_align_mdout.yaml'
+    align_md_name = args.project_name + '_align_mdout.yaml'
     if os.path.isfile(align_md_name):
         is_old_project = True
         with open(align_md_name, 'r') as f:
@@ -497,12 +498,11 @@ def update_align_yaml():
 
     # Read in ctffind yaml file, modify, and update
     # read in MC2 yaml as well (some parameters depend on MC2 settings)
-    align_params = prmMod.read_yaml(project_name=project_name,
+    align_params = prmMod.read_yaml(project_name=args.project_name,
                                     filename=align_yaml_name)
-    mc2_params = prmMod.read_yaml(project_name=project_name,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
 
-    align_params.params['System']['output_rootname'] = project_name
     align_params.params['System']['process_list'] = unique_ts_numbers
     align_params.params['BatchRunTomo']['setup']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size'] * 0.1
 
@@ -577,11 +577,110 @@ def create_align_yaml():
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
 
-    project_name = get_proj_name()
-
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("-o", "--output_folder",
+                        type=str,
+                        default='./motioncor/',
+                        help="Path to folder for storing motion-corrected images (Default: ./motioncor/)")
+    parser.add_argument("-p", "--file_prefix",
+                        type=str,
+                        help="Common prefix of image files (Default: project name).")
+    parser.add_argument("-s", "--file_suffix",
+                        type=str,
+                        default='',
+                        help="Extra information attached as suffix to output filenames.")
+    parser.add_argument("--no_rawtlt",
+                        action="store_false",
+                        help="Use information in filenames to determine tilt angles (rather than using .rawtlt files).")
+    parser.add_argument("rot_angle",
+                        type=float,
+                        help="Rotational angle of electron beam. Can be obtained from MDOC files.")
+    parser.add_argument("-fs", "--fiducial_size",
+                        type=float,
+                        default=0.0,
+                        help="Size (in nm) of gold fiducial particles. Ignore flag if no fiducial.")
+    parser.add_argument("--adoc_template",
+                        type=str,
+                        default="/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc",
+                        help="Path to template file of BatchRunTomo directives. (Default: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc)")
+    parser.add_argument("-b", "--stack_bin_factor",
+                        type=int,
+                        default=4,
+                        help="Stack: Raw image stacks downsampling factor. (Default: 4)")
+    parser.add_argument("--delete_old_files",
+                        action="store_true",
+                        help="Preprocessing: Remove original stack when excluding views. Use flag if True.")
+    parser.add_argument("--remove_xrays",
+                        action="store_true",
+                        help="Preprocessing: Attempt to remove X-rays and other artefacts. Use flag if True.")
+    parser.add_argument("-ba", "--coarse_align_bin_factor",
+                        type=int,
+                        default=4,
+                        help="Coarse-alignment: Coarse aligned stack binning. (Default: 4)")
+    parser.add_argument("--patch_sizes",
+                        type=int,
+                        nargs=2,
+                        default=[200, 200],
+                        help="Patch-tracking: Size (in pixels) in X and Y of patches to track. (Default: 200, 200)")
+    parser.add_argument("--num_patches",
+                        type=int,
+                        nargs=2,
+                        default=[24, 24],
+                        help="Patch-tracking: Number of patches to track in X and Y. (Default: 200, 200)")
+    parser.add_argument("--num_iter",
+                        type=int,
+                        choices=[1, 2, 3, 4],
+                        default=4,
+                        help="Patch-tracking: Number of iterations. (Max. 4, Default: 4)")
+    parser.add_argument("--limits_on_shift",
+                        type=int,
+                        nargs=2,
+                        default=[2, 2],
+                        help="Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment. (Default: 2, 2)")
+    parser.add_argument("--adjust_tilt_angles",
+                        action="store_true",
+                        help="Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset. Use flag if True.")
+    parser.add_argument("--num_surfaces",
+                        type=int,
+                        choices=[1, 2],
+                        default=1,
+                        help="Fine-alignment: Number of surface(s) for angle analysis. (1|2, Default: 1)")
+    parser.add_argument("--mag_option",
+                        type=str,
+                        choices=['all', 'group', 'fixed'],
+                        default='fixed',
+                        help="Fine-alignment: Type of magnification solution. (all|group|fixed, Default: fixed)")
+    parser.add_argument("--tilt_option",
+                        type=str,
+                        choices=['all', 'group', 'fixed'],
+                        default='fixed',
+                        help="Fine-alignment: Type of tilt-angle solution. (all|group|fixed, Default: fixed)")
+    parser.add_argument("--rot_option",
+                        type=str,
+                        choices=['all', 'group', 'one', 'fixed'],
+                        default='group',
+                        help="Fine-alignment: Type of rotation solution. (all|group|one|fixed, Default: group)")
+    parser.add_argument("--beam_tilt_option",
+                        type=str,
+                        choices=['fixed', 'search'],
+                        default='fixed',
+                        help="Fine-alignment: Type of beam-tilt solution. (fixed|search, Default: fixed)")
+    parser.add_argument("--no_robust_fitting",
+                        action="store_false",
+                        help="Fine-alignment: Do not use robust fitting. Use flag if True.")
+    parser.add_argument("--no_weight_contours",
+                        action="store_false",
+                        help="Fine-alignment: Do not apply weighting to entire contours from patch-tracking. Use flag if True.")
+    
+    args = parser.parse_args()
+    
     # Create the yaml file, then automatically update it
-    prmMod.new_align_yaml(project_name)
-    update_align_yaml()
+    prmMod.new_align_yaml(args)
+    update_align_yaml(args)
 
 
 def create_align_yaml_stacked():
