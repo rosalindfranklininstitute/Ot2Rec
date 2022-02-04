@@ -204,15 +204,14 @@ def new_align_yaml(args):
         yaml.dump(align_yaml_dict, f, indent=4, sort_keys=False)
 
 
-def new_recon_yaml(project_name: str):
+def new_recon_yaml(args):
     """
     Subroutine to create yaml file for batchtomo (continuing from aligned stacks to full reconstruction)
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace generated with user inputs
     """
-
-    recon_yaml_name = project_name + '_recon.yaml'
+    recon_yaml_name = args.project_name + '_recon.yaml'
 
     recon_yaml_dict = {
         'System' : {
@@ -232,24 +231,24 @@ def new_recon_yaml(project_name: str):
             },
 
             'positioning': {
-                'do_positioning': False,
-                'unbinned_thickness': 3600,
+                'do_positioning': args.do_positioning,
+                'unbinned_thickness': args.unbinned_thickness,
             },
 
             'aligned_stack': {
-                'correct_ctf': False,
-                'erase_gold': False,
-                '2d_filtering': False,
-                'bin_factor': 8,
+                'correct_ctf': args.correct_ctf,
+                'erase_gold': args.erase_gold,
+                '2d_filtering': args.filtering,
+                'bin_factor': args.bin_factor,
             },
 
             'reconstruction': {
-                'thickness': 3600,
+                'thickness': args.thickness,
             },
 
             'postprocessing': {
-                'run_trimvol': True,
-                'trimvol_reorient': 'rotate',
+                'run_trimvol': args.no_trimvol,
+                'trimvol_reorient': args.trimvol_reorient,
             },
         }
     }

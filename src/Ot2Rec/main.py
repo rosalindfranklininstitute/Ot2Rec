@@ -522,7 +522,7 @@ def create_align_yaml():
                         help="Name of current project")
     parser.add_argument("-o", "--output_folder",
                         type=str,
-                        default='./motioncor/',
+                        default='./stacks/',
                         help="Path to folder for storing motion-corrected images (Default: ./motioncor/)")
     parser.add_argument("-p", "--file_prefix",
                         type=str,
@@ -844,28 +844,28 @@ def get_align_stats():
 
 
 
-def update_recon_yaml():
+def update_recon_yaml(args):
     """
     Subroutine to update yaml file for IMOD reconstruction
+
+    ARGS:
+    args (Namespace) :: Namespace generated with user inputs
     """
-
-    project_name = get_proj_name()
-
     # Check if recon and align yaml files exist
-    recon_yaml_name = project_name + '_recon.yaml'
-    align_yaml_name = project_name + '_align.yaml'
+    recon_yaml_name = args.project_name + '_recon.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
     if not os.path.isfile(recon_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_recon_yaml: reconstruction config file not found.")
     if not os.path.isfile(align_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_recon_yaml: alignment config file not found.")
 
     # Read in alignment metadata (as Pandas dataframe)
-    align_md_name = project_name + '_align_mdout.yaml'
+    align_md_name = args.project_name + '_align_mdout.yaml'
     with open(align_md_name, 'r') as f:
         align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
-    recon_md_name = project_name + '_recon_mdout.yaml'
+    recon_md_name = args.project_name + '_recon_mdout.yaml'
     if os.path.isfile(recon_md_name):
         is_old_project = True
         with open(recon_md_name, 'r') as f:
@@ -885,9 +885,9 @@ def update_recon_yaml():
 
     # Read in reconstruction yaml file, modify, and update
     # read in alignment yaml as well (some parameters depend on alignment settings)
-    recon_params = prmMod.read_yaml(project_name=project_name,
+    recon_params = prmMod.read_yaml(project_name=args.project_name,
                                     filename=recon_yaml_name)
-    align_params = prmMod.read_yaml(project_name=project_name,
+    align_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=align_yaml_name)
 
     recon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
@@ -896,7 +896,7 @@ def update_recon_yaml():
 
     recon_params.params['BatchRunTomo']['setup'] = {key: value for key, value in align_params.params['BatchRunTomo']['setup'].items() \
                                                     if key != 'stack_bin_factor'}
-
+    
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
 
@@ -905,12 +905,46 @@ def create_recon_yaml():
     """
     Subroutine to create new yaml file for IMOD reconstruction
     """
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("--do_positioning",
+                        action="store_true",
+                        help="Positioning: Perform positioning for the stack. Use flag if True.")
+    parser.add_argument("unbinned_thickness",
+                        type=int,
+                        help="Positioning: Unbinned thickness (in pixels) for samples or whole tomogram.")
+    parser.add_argument("--correct_ctf",
+                        action="store_true",
+                        help="Aligned stack: Correct CTF for aligned stacks. Use flag if True.")
+    parser.add_argument("--erase_gold",
+                        action="store_true",
+                        help="Aligned stack: Erase gold fiducials. Use flag if True.")
+    parser.add_argument("--filtering",
+                        action="store_true",
+                        help="Aligned stack: Perform 2D filtering. Use flag if True.")
+    parser.add_argument("-b", "--bin_factor",
+                        type=int,
+                        default=1,
+                        help="Aligned stack: Binning factor for aligned stack.")
+    parser.add_argument("thickness",
+                        type=int,
+                        help="Reconstruction: Thickness (in pixels) for reconstruction.")
+    parser.add_argument("--no_trimvol",
+                        action="store_false",
+                        help="Postprocessing: Do not run Trimvol on reconstruction. Use flag if True.")
+    parser.add_argument("--trimvol_reorient",
+                        type=str,
+                        choices=['none', 'flip', 'rotate'],
+                        help="Reorientation in Trimvol. (none|flip|rotate, Default: rotate)")
 
-    project_name = get_proj_name()
-
+    args = parser.parse_args()
+    
     # Create the yaml file, then automatically update it
-    prmMod.new_recon_yaml(project_name)
-    update_recon_yaml()
+    prmMod.new_recon_yaml(args)
+    update_recon_yaml(args)
 
 
 def run_recon():
