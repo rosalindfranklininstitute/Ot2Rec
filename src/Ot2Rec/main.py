@@ -356,7 +356,7 @@ def create_ctffind_yaml():
                         help="Name of current project")
     parser.add_argument("-o", "--output_folder",
                         type=str,
-                        default='./motioncor/',
+                        default='./ctffind/',
                         help="Path to folder for storing motion-corrected images (Default: ./motioncor/)")
     parser.add_argument("-p", "--file_prefix",
                         type=str,
