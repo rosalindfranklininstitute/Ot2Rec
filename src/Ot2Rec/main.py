@@ -938,6 +938,7 @@ def create_recon_yaml():
     parser.add_argument("--trimvol_reorient",
                         type=str,
                         choices=['none', 'flip', 'rotate'],
+                        default='rotate',
                         help="Reorientation in Trimvol. (none|flip|rotate, Default: rotate)")
 
     args = parser.parse_args()
