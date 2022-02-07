@@ -56,9 +56,8 @@ def get_proj_name():
 
 def new_proj():
     """
-    Subroutine executing actions when a new project has been initiated
+    Method to create a new project and get master metadata from raw images
     """
-
     # Parse user inputs
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name",
@@ -92,19 +91,6 @@ def new_proj():
     
     # Create master yaml config file
     prmMod.new_master_yaml(args)
-
-
-def get_master_metadata():
-    """
-    Subroutine to get master metadata from raw images
-    """
-
-    # Parse user inputs
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
-    args = parser.parse_args()
 
     # Create empty Metadata object
     # Master yaml file will be read automatically
