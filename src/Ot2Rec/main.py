@@ -1155,8 +1155,10 @@ def run_ctfsim():
                         type=str,
                         help="Rootname of current project (required if different from project name)")
     parser.add_argument("-d", "--dims",
-                        type=str,
-                        help="Dimensions of simulated CTF in pixels (default: same as downsampled raw data)")
+                        nargs=2,
+                        type=int,
+                        default=[100, 100],
+                        help="Dimensions of simulated CTF in pixels (Default: [100, 100])")
 
     args = parser.parse_args()
     project_name = args.project_name
@@ -1169,10 +1171,6 @@ def run_ctfsim():
     pixel_size = args.pixel_res * 1e-10
     ds_factor = args.ds_factor
 
-    if args.dims is not None:
-        ctf_dims = [int(item) for item in args.dims.split(',')]
-
-    
     # Read in metadata from ctffind
     ctffind_md_file = project_name + '_ctffind_mdout.yaml'
     ctffind_obj = mdMod.read_md_yaml(project_name=project_name,
@@ -1218,16 +1216,12 @@ def run_ctfsim():
 
         # Write out psf stack
         with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:02}.mrc', overwrite=True) as f:
-            if args.dims is not None:
-                ctf_dims = [int(item) for item in args.dims.split(',')]
-                (xmin, ymin) = (
-                    (source_dim[-2]-ctf_dims[0]) // 2,
-                    (source_dim[-1]-ctf_dims[1]) // 2)
-                (xmax, ymax) = (xmin+ctf_dims[0], ymin+ctf_dims[1])
+            (xmin, ymin) = (
+                (source_dim[-2]-args.dims[0]) // 2,
+                (source_dim[-1]-args.dims[1]) // 2)
+            (xmax, ymax) = (xmin+args.dims[0], ymin+args.dims[1])
 
-                f.set_data(full_psf[:, xmin:xmax, ymin:ymax])
-            else:
-                f.set_data(full_psf)
+            f.set_data(full_psf[:, xmin:xmax, ymin:ymax])
 
 
         # Write out rawtlt file
