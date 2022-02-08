@@ -90,10 +90,10 @@ class Recon:
         self._recon_images = pd.DataFrame(columns=['ts', 'align_output', 'recon_output'])
         for curr_ts in self.params['System']['process_list']:
             subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
-            _to_append = pd.Series(
-                {'ts': curr_ts,
-                 'align_output': f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_ali.mrc",
-                 'recon_output': f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_rec.mrc",
+            _to_append = pd.DataFrame(
+                {'ts': [curr_ts],
+                 'align_output': [f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_ali.mrc"],
+                 'recon_output': [f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_rec.mrc"],
                 }
             )
             self._recon_images = pd.concat([self._recon_images, _to_append],
@@ -222,7 +222,6 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
 
         # Get indices of usable CPUs
         temp_cpu = [str(i) for i in range(1, mp.cpu_count()+1)]
-
 
         cmd = ['batchruntomo',
                '-CPUMachineList', f"{temp_cpu}",

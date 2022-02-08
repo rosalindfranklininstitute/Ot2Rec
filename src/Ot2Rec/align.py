@@ -79,11 +79,11 @@ class Align:
         self._align_images = pd.DataFrame(columns=['ts', 'stack_output', 'align_output'])
         for curr_ts in self.params['System']['process_list']:
             subfolder_name = f'{self.rootname}_{curr_ts:02}{self.suffix}' 
-            _to_append =  pd.Series(
-                {'ts': curr_ts,
-                 'stack_output': f'{self.basis_folder}/{subfolder_name}/{subfolder_name}.st',
-                 'align_output': f'{self.basis_folder}/{subfolder_name}/{subfolder_name}_ali.mrc'
-                }
+            _to_append =  pd.DataFrame(
+                {'ts': [curr_ts],
+                 'stack_output': [f'{self.basis_folder}/{subfolder_name}/{subfolder_name}.st'],
+                 'align_output': [f'{self.basis_folder}/{subfolder_name}/{subfolder_name}_ali.mrc']
+                },
             )
             self._align_images = pd.concat([self._align_images, _to_append],
                                            ignore_index=True,
