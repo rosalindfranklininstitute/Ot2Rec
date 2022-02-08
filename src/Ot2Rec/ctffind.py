@@ -118,7 +118,7 @@ class ctffind():
         
             for curr_ts in self.params['System']['process_list']:
                 _to_append = self._missing[self._missing['ts']==curr_ts]
-                self._missing_specified = pd.concat((self._missing_specified, _to_append],
+                self._missing_specified = pd.concat([self._missing_specified, _to_append],
                                                     ignore_index=True,
                 )
             self._merged = self.meta_out.merge(self._missing_specified, how='left', indicator=True)
