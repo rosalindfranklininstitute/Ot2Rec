@@ -90,12 +90,14 @@ class Recon:
         self._recon_images = pd.DataFrame(columns=['ts', 'align_output', 'recon_output'])
         for curr_ts in self.params['System']['process_list']:
             subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
-            self._recon_images = self._recon_images.append(
-                pd.Series({
-                    'ts': curr_ts,
-                    'align_output': f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_ali.mrc",
-                    'recon_output': f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_rec.mrc"
-                }), ignore_index=True
+            _to_append = pd.Series(
+                {'ts': curr_ts,
+                 'align_output': f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_ali.mrc",
+                 'recon_output': f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_rec.mrc",
+                }
+            )
+            self._recon_images = pd.concat([self._recon_images, _to_append],
+                                           ignore_index=True,
             )
 
 
@@ -122,8 +124,9 @@ class Recon:
             self._missing_specified = pd.DataFrame(columns=self.meta.columns)
 
             for curr_ts in self.params['System']['process_list']:
-                self._missing_specified = self._missing_specified.append(self._missing[self._missing['ts']==curr_ts],
-                                                                         ignore_index=True,
+                _to_append = self._missing[self._missing['ts']==curr_ts]
+                self._missing_specified = pd.concat([self._missing_specified, _to_append],
+                                                    ignore_index=True,
                 )
             self._merged = self.meta_out.merge(self._missing_specified, how='left', indicator=True)
             self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
@@ -278,8 +281,9 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         # If the files don't exist, keep the line in the input metadata
         # If they do, move them to the output metadata
 
-        self.meta_out = self.meta_out.append(self._recon_images.loc[self._recon_images['recon_output'].apply(lambda x: os.path.isfile(x))],
-                                             ignore_index=True)
+        _to_append = self._recon_images.loc[self._recon_images['recon_output'].apply(lambda x: os.path.isfile(x))]
+        self.meta_out = pd.concat([self.meta_out, _to_append],
+                                  ignore_index=True)
         self._recon_images = self._recon_images.loc[~self._recon_images['recon_output'].apply(lambda x: os.path.isfile(x))]
 
         # Sometimes data might be duplicated (unlikely) -- need to drop the duplicates
