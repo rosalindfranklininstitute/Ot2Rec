@@ -509,7 +509,7 @@ def create_align_yaml():
     parser.add_argument("-o", "--output_folder",
                         type=str,
                         default='./stacks/',
-                        help="Path to folder for storing motion-corrected images (Default: ./motioncor/)")
+                        help="Path to folder for storing motion-corrected images (Default: ./stacks/)")
     parser.add_argument("-p", "--file_prefix",
                         type=str,
                         help="Common prefix of image files (Default: project name).")
