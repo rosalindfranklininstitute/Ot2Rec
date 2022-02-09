@@ -1294,7 +1294,7 @@ def create_savurecon_yaml():
 
     # Create the yaml file, then automatically update it
     prmMod.new_savurecon_yaml(args)
-    update_recon_yaml_stacked(args)
+    update_savurecon_yaml(args)
 
 
 def run_recon_ext():
