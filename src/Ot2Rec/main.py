@@ -1227,21 +1227,21 @@ def update_savurecon_yaml(args):
     parent_path = args.stacks_folder
     rootname    = args.project_name if args.rootname is None else args.rootname
     suffix      = args.suffix
-    ext         = args.ext
+    ext         = args.extension
     imod_suffix = args.imod_suffix
     
     # Find stack files
-    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}{imod_suffix}.{ext}')
+    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}')
 
     # Find rawtlt files
     rawtlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
 
     # Extract tilt series number
-    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
+    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'_{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
 
     # Read in and update YAML parameters
     recon_yaml_name = args.project_name + '_savurecon.yaml'
-    recon_params = prmMod.read_yaml(project_name=project_name,
+    recon_params = prmMod.read_yaml(project_name=args.project_name,
                                     filename=recon_yaml_name)
 
     recon_params.params['System']['process_list'] = ts_list
@@ -1278,12 +1278,15 @@ def create_savurecon_yaml():
                         help="Rootname of current project (required if different from project name)")
     parser.add_argument("-s", "--suffix",
                         type=str,
+                        default='',
                         help="Suffix of project files")
     parser.add_argument("-e", "--extension",
                         type=str,
+                        default='mrc',
                         help="File extension of stacks (Default: mrc)")
     parser.add_argument("-is", "--imod_suffix",
                         type=str,
+                        default='',
                         help="IMOD file suffix")
     parser.add_argument("-o", "--output_path",
                         type=str,
