@@ -79,12 +79,14 @@ class Align:
         self._align_images = pd.DataFrame(columns=['ts', 'stack_output', 'align_output'])
         for curr_ts in self.params['System']['process_list']:
             subfolder_name = f'{self.rootname}_{curr_ts:02}{self.suffix}' 
-            self._align_images = self._align_images.append(
-                pd.Series({
-                    'ts': curr_ts,
-                    'stack_output': f'{self.basis_folder}/{subfolder_name}/{subfolder_name}.st',
-                    'align_output': f'{self.basis_folder}/{subfolder_name}/{subfolder_name}_ali.mrc'
-                }), ignore_index=True
+            _to_append =  pd.DataFrame(
+                {'ts': [curr_ts],
+                 'stack_output': [f'{self.basis_folder}/{subfolder_name}/{subfolder_name}.st'],
+                 'align_output': [f'{self.basis_folder}/{subfolder_name}/{subfolder_name}_ali.mrc']
+                },
+            )
+            self._align_images = pd.concat([self._align_images, _to_append],
+                                           ignore_index=True,
             )
 
 
@@ -111,8 +113,9 @@ class Align:
             self._missing_specified = pd.DataFrame(columns=self.meta.columns)
         
             for curr_ts in self.params['System']['process_list']:
-                self._missing_specified = self._missing_specified.append(self._missing[self._missing['ts']==curr_ts],
-                                                                         ignore_index=True,
+                _to_append = self._missing[self._missing['ts']==curr_ts]
+                self._missing_specified = pd.concat([self._missing_specified, _to_append],
+                                                    ignore_index=True,
                 )
             self._merged = self.meta_out.merge(self._missing_specified, how='left', indicator=True)
             self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
@@ -394,8 +397,9 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
 
         if ext:
             self.meta_out = self._align_images
-        self.meta_out = self.meta_out.append(self._align_images.loc[self._align_images['align_output'].apply(lambda x: os.path.isfile(x))],
-                                             ignore_index=True)
+        _to_append = self._align_images.loc[self._align_images['align_output'].apply(lambda x: os.path.isfile(x))]
+        self.meta_out = pd.concat([self.meta_out, _to_append],
+                                  ignore_index=True)
         self._align_images = self._align_images.loc[~self._align_images['align_output'].apply(lambda x: os.path.isfile(x))]
 
         # Sometimes data might be duplicated (unlikely) -- need to drop the duplicates

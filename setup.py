@@ -39,7 +39,6 @@ setup(
     entry_points={
         "console_scripts": [
             "o2r.new=Ot2Rec.main:new_proj",
-            "o2r.get_master=Ot2Rec.main:get_master_metadata",
 
             "o2r.mc.new=Ot2Rec.main:create_mc2_yaml",
             "o2r.mc.run=Ot2Rec.main:run_mc2",
@@ -56,9 +55,6 @@ setup(
 
             "o2r.recon.new=Ot2Rec.main:create_recon_yaml",
             "o2r.recon.run=Ot2Rec.main:run_recon",
-
-            "o2r.recon.new_ext=Ot2Rec.main:create_recon_yaml_stacked",
-            "o2r.recon.run_ext=Ot2Rec.main:run_savurecon",
 
             "o2r.savu.new=Ot2Rec.main:create_savurecon_yaml",
             "o2r.savu.run=Ot2Rec.main:run_savurecon",

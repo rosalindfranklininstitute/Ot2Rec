@@ -15,6 +15,7 @@
 
 import sys
 import os
+import argparse
 from glob import glob, glob1
 import yaml
 import pandas as pd
@@ -55,59 +56,80 @@ def get_proj_name():
 
 def new_proj():
     """
-    Subroutine executing actions when a new project has been initiated
+    Method to create a new project and get master metadata from raw images
     """
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("-s", "--source_folder",
+                        type=str,
+                        default='../raw/',
+                        help="Path to folder with raw images (Default: ../raw/)")
+    parser.add_argument("-fp", "--folder_prefix",
+                        type=str,
+                        default='',
+                        help="Common prefix of raw tilt series folder(s). Don't use this flag if all images are in the parent folder.")
+    parser.add_argument("-p", "--file_prefix",
+                        type=str,
+                        help="Common prefix of raw image files (Default: project name).")
+    parser.add_argument("-t", "--tiffs",
+                        action="store_true",
+                        help="Use this flag if the raw images are TIFFs.")
+    parser.add_argument("--stack_field",
+                        type=int,
+                        default=0,
+                        help="Field number of tilt series indices (Default: 0).")
+    parser.add_argument("--tiltangle_field",
+                        type=int,
+                        default=2,
+                        help="Field number of tilt angles (Default: 2).")
 
-    project_name = get_proj_name()
 
+    args = parser.parse_args()
+    
     # Create master yaml config file
-    prmMod.new_master_yaml(project_name)
-
-
-def get_master_metadata():
-    """
-    Subroutine to get master metadata from raw images
-    """
-
-    project_name = get_proj_name()
+    prmMod.new_master_yaml(args)
 
     # Create empty Metadata object
     # Master yaml file will be read automatically
-    meta = mdMod.Metadata(project_name=project_name,
+    meta = mdMod.Metadata(project_name=args.project_name,
                           job_type='master')
 
     # Create master metadata and serialise it as yaml file
     meta.create_master_metadata()
 
-    master_md_name = project_name + '_master_md.yaml'
+    master_md_name = args.project_name + '_master_md.yaml'
     with open(master_md_name, 'w') as f:
         yaml.dump(meta.metadata, f, indent=4)
 
 
-def update_mc2_yaml():
+def update_mc2_yaml(args):
     """
     Subroutine to update yaml file for motioncorr
+
+    ARGS:
+    args (Namespace) :: Arguments obtained from user
     """
 
-    project_name = get_proj_name()
-
     # Check if MC2 yaml exists
-    mc2_yaml_name = project_name + '_mc2.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
     if not os.path.isfile(mc2_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_mc2_yaml: File not found.")
 
     # Read in master yaml
-    master_yaml = project_name + '_proj.yaml'
+    master_yaml = args.project_name + '_proj.yaml'
     with open(master_yaml, 'r') as f:
         master_config = yaml.load(f, Loader=yaml.FullLoader)
 
     # Read in master metadata (as Pandas dataframe)
-    master_md_name = project_name + '_master_md.yaml'
+    master_md_name = args.project_name + '_master_md.yaml'
     with open(master_md_name, 'r') as f:
         master_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
 
     # Read in previous MC2 output metadata (as Pandas dataframe) for old projects
-    mc2_md_name = project_name + '_mc2_md.yaml'
+    mc2_md_name = args.project_name + '_mc2_md.yaml'
     if os.path.isfile(mc2_md_name):
         is_old_project = True
         with open(mc2_md_name, 'r') as f:
@@ -127,17 +149,10 @@ def update_mc2_yaml():
     unique_ts_numbers = unprocessed_images['ts'].sort_values(ascending=True).unique().tolist()
 
     # Read in MC2 yaml file, modify, and update
-    mc2_params = prmMod.read_yaml(project_name=project_name,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
-    mc2_params.params['System']['output_prefix'] = project_name
-
     mc2_params.params['System']['source_TIFF'] = master_config['source_TIFF']
-
-    if mc2_params.params['MC2']['desired_pixel_size'] == 'ps_x2':
-        mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size'] * 2
-    else:
-        mc2_params.params['MC2']['desired_pixel_size'] = mc2_params.params['MC2']['pixel_size']
 
     with open(mc2_yaml_name, 'w') as f:
         yaml.dump(mc2_params.params, f, indent=4, sort_keys=False)
@@ -148,11 +163,72 @@ def create_mc2_yaml():
     Subroutine to create new yaml file for motioncorr
     """
 
-    project_name = get_proj_name()
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("-o", "--output_folder",
+                        type=str,
+                        default='./motioncor/',
+                        help="Path to folder for storing motion-corrected images (Default: ./motioncor/)")
+    parser.add_argument("-p", "--file_prefix",
+                        type=str,
+                        help="Common prefix of image files (Default: project name).")
+    parser.add_argument("--no_gpu",
+                        action="store_true",
+                        help="Use CPU only for motion-correction.")
+    parser.add_argument("-jpg", "--jobs_per_gpu",
+                        type=int,
+                        default=2,
+                        help="Number of job instance(s) per GPU. Only valid when --no_gpu is off.")
+    parser.add_argument("-m", "--gpu_mem_usage",
+                        type=float,
+                        default=1,
+                        help="MotionCor2 memory usage.")
+    parser.add_argument("--exec_path",
+                        type=str,
+                        default='/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110',
+                        help="Path to MotionCor2 executable. (Default: /opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110)")
+    parser.add_argument("--gain",
+                        type=str,
+                        help="Path to gain reference file. (Default: None)")
+    parser.add_argument("pixel_size",
+                        type=float,
+                        help="Image pixel size in Angstroms.")
+    parser.add_argument("--super_res",
+                        action="store_true",
+                        help="Use flag if images are super-resolution.")
+    parser.add_argument("-dt", "--discard_top",
+                        type=int,
+                        default=0,
+                        help="Number of frames discarded from top per image. (Default: 0)")
+    parser.add_argument("-db", "--discard_bottom",
+                        type=int,
+                        default=0,
+                        help="Number of frames discarded from bottom per image. (Default: 0)")
+    parser.add_argument("-tol", "--tolerance",
+                        type=float,
+                        default=0.5,
+                        help="Threshold of alignment errors in pixels. (Default: 0.5)")
+    parser.add_argument("--max_iter",
+                        type=int,
+                        default=10,
+                        help="Maximum number of iterations performed by MotionCor2.")
+    parser.add_argument("-ps", "--patch_size",
+                        nargs=3,
+                        type=int,
+                        default=[5, 5, 20],
+                        help="Size of patches used in alignment.")
+    parser.add_argument("--no_subgroups",
+                        action="store_false",
+                        help="Do not use subgroups in alignment.")
+    
+    args = parser.parse_args()
 
     # Create the yaml file, then automatically update it
-    prmMod.new_mc2_yaml(project_name)
-    update_mc2_yaml()
+    prmMod.new_mc2_yaml(args)
+    update_mc2_yaml(args)
 
 
 def run_mc2():
@@ -160,11 +236,15 @@ def run_mc2():
     Method to run motioncorr
     """
 
-    project_name = get_proj_name()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    args = parser.parse_args()
 
     # Check if prerequisite files exist
-    mc2_yaml = project_name + '_mc2.yaml'
-    master_md_file = project_name + '_master_md.yaml'
+    mc2_yaml = args.project_name + '_mc2.yaml'
+    master_md_file = args.project_name + '_master_md.yaml'
 
     if not os.path.isfile(mc2_yaml):
         raise IOError("Error in Ot2Rec.main.run_mc2: MC2 yaml config not found.")
@@ -172,9 +252,9 @@ def run_mc2():
         raise IOError("Error in Ot2Rec.main.run_mc2: Master metadata not found.")
 
     # Read in config and metadata
-    mc2_config = prmMod.read_yaml(project_name=project_name,
+    mc2_config = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml)
-    master_md = mdMod.read_md_yaml(project_name=project_name,
+    master_md = mdMod.read_md_yaml(project_name=args.project_name,
                                    job_type='motioncorr',
                                    filename=master_md_file)
 
@@ -182,7 +262,7 @@ def run_mc2():
     logger = logMod.Logger()
 
     # Create Motioncorr object
-    mc2_obj = mc2Mod.Motioncorr(project_name=project_name,
+    mc2_obj = mc2Mod.Motioncorr(project_name=args.project_name,
                                 mc2_params=mc2_config,
                                 md_in=master_md,
                                 logger=logger
@@ -196,16 +276,16 @@ def run_mc2():
         mc2_obj.export_metadata()
 
 
-def update_ctffind_yaml():
+def update_ctffind_yaml(args):
     """
     Subroutine to update yaml file for ctffind
+
+    ARGS:
+    args (Namespace) :: Arguments obtained from user
     """
-
-    project_name = get_proj_name()
-
     # Check if ctffind and motioncorr yaml files exist
-    ctf_yaml_name = project_name + '_ctffind.yaml'
-    mc2_yaml_name = project_name + '_mc2.yaml'
+    ctf_yaml_name = args.project_name + '_ctffind.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
     if not os.path.isfile(ctf_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_ctffind_yaml: ctffind config file not found.")
     if not os.path.isfile(mc2_yaml_name):
@@ -213,12 +293,12 @@ def update_ctffind_yaml():
 
     # Read in MC2 metadata (as Pandas dataframe)
     # We only need the TS number and the tilt angle for comparisons at this stage
-    mc2_md_name = project_name + '_mc2_mdout.yaml'
+    mc2_md_name = args.project_name + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
 
     # Read in previous ctffind output metadata (as Pandas dataframe) for old projects
-    ctf_md_name = project_name + '_ctffind_mdout.yaml'
+    ctf_md_name = args.project_name + '_ctffind_mdout.yaml'
     if os.path.isfile(ctf_md_name):
         is_old_project = True
         with open(ctf_md_name, 'r') as f:
@@ -239,12 +319,11 @@ def update_ctffind_yaml():
 
     # Read in ctffind yaml file, modify, and update
     # read in MC2 yaml as well (some parameters depend on MC2 settings)
-    ctf_params = prmMod.read_yaml(project_name=project_name,
+    ctf_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=ctf_yaml_name)
-    mc2_params = prmMod.read_yaml(project_name=project_name,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
 
-    ctf_params.params['System']['output_prefix'] = project_name
     ctf_params.params['System']['process_list'] = unique_ts_numbers
     ctf_params.params['ctffind']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size']
 
@@ -256,12 +335,67 @@ def create_ctffind_yaml():
     """
     Subroutine to create new yaml file for ctffind
     """
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("-o", "--output_folder",
+                        type=str,
+                        default='./ctffind/',
+                        help="Path to folder for storing motion-corrected images (Default: ./ctffind/)")
+    parser.add_argument("-p", "--file_prefix",
+                        type=str,
+                        help="Common prefix of image files (Default: project name).")
+    parser.add_argument("--exec_path",
+                        type=str,
+                        default='/opt/lmod/modules/ctffind/4.1.14/bin/ctffind',
+                        help="Path to MotionCor2 executable. (Default: /opt/lmod/modules/ctffind/4.1.14/bin/ctffind)")
+    parser.add_argument("-v", "--voltage",
+                        type=float,
+                        default=300.0,
+                        help="Electron beam voltage in keV. (Default: 300.0)")
+    parser.add_argument("-cs", "--spherical_aberration",
+                        type=float,
+                        default=2.7,
+                        help="Spherical aberration of objective lens in mrad. (Default: 2.7)")
+    parser.add_argument("-ac", "--amp_contrast",
+                        type=float,
+                        default=0.8,
+                        help="Relative amplitude contrast w1, range=(0, 1). (Default: 0.8)")
+    parser.add_argument("-ss", "--spec_size",
+                        type=int,
+                        default=512,
+                        help="Size of amplitude spectrum in pixels. (Default: 512)")
+    parser.add_argument("-res", "--res_range",
+                        type=float,
+                        nargs=2,
+                        default=[30, 5],
+                        help="Range of resolutions in target function in Angstroms. (Default: 30, 5)")
+    parser.add_argument("-d", "--defocus_range",
+                        type=float,
+                        nargs=3,
+                        default=[5000, 50000, 500],
+                        help="Min, max and step size of initial defocus search in Angstroms. (Default: 5000, 50000, 500)")
+    parser.add_argument("-at", "--astigm_type",
+                        type=str,
+                        help="Type of astigmatism. FLAG USE NOT RECOMMENDED.")
+    parser.add_argument("-e", "--exhaustive_search",
+                        action="store_true",
+                        help="Use exhaustive search algorithm for defocus. Use flag if True.")
+    parser.add_argument("-ar", "--astigm_restraint",
+                        type=int,
+                        help="Restraint on astigmatism in Angstroms.")
+    parser.add_argument("-ps", "--phase_shift",
+                        action="store_true",
+                        help="Estimate phase shift. Use flag if True.")
 
-    project_name = get_proj_name()
+    args = parser.parse_args()
+    
 
     # Create the yaml file, then automatically update it
-    prmMod.new_ctffind_yaml(project_name)
-    update_ctffind_yaml()
+    prmMod.new_ctffind_yaml(args)
+    update_ctffind_yaml(args)
 
 
 def run_ctffind():
@@ -269,11 +403,16 @@ def run_ctffind():
     Method to run ctffind
     """
 
-    project_name = get_proj_name()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+
+    args = parser.parse_args()
 
     # Check if prerequisite files exist
-    ctffind_yaml = project_name + '_ctffind.yaml'
-    mc2_md_file = project_name + '_mc2_mdout.yaml'
+    ctffind_yaml = args.project_name + '_ctffind.yaml'
+    mc2_md_file = args.project_name + '_mc2_mdout.yaml'
 
     if not os.path.isfile(ctffind_yaml):
         raise IOError("Error in Ot2Rec.main.run_ctffind: ctffind yaml config not found.")
@@ -281,9 +420,9 @@ def run_ctffind():
         raise IOError("Error in Ot2Rec.main.run_ctffind: MC2 output metadata not found.")
 
     # Read in config and metadata
-    ctffind_config = prmMod.read_yaml(project_name=project_name,
+    ctffind_config = prmMod.read_yaml(project_name=args.project_name,
                                       filename=ctffind_yaml)
-    mc2_md = mdMod.read_md_yaml(project_name=project_name,
+    mc2_md = mdMod.read_md_yaml(project_name=args.project_name,
                                 job_type='ctffind',
                                 filename=mc2_md_file)
 
@@ -291,7 +430,7 @@ def run_ctffind():
     logger = logMod.Logger()
 
     # Create ctffind object
-    ctffind_obj = ctfMod.ctffind(project_name=project_name,
+    ctffind_obj = ctfMod.ctffind(project_name=args.project_name,
                                  md_in=mc2_md,
                                  params_in=ctffind_config,
                                  logger_in=logger,
@@ -301,16 +440,17 @@ def run_ctffind():
         ctffind_obj.run_ctffind()
 
 
-def update_align_yaml():
+def update_align_yaml(args):
     """
     Subroutine to update yaml file for IMOD newstack / alignment
+
+    ARGS:
+    args (Namespace) :: Namespace generated with user inputs
     """
 
-    project_name = get_proj_name()
-
     # Check if align and motioncorr yaml files exist
-    align_yaml_name = project_name + '_align.yaml'
-    mc2_yaml_name = project_name + '_mc2.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
     if not os.path.isfile(align_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_align_yaml: alignment config file not found.")
     if not os.path.isfile(mc2_yaml_name):
@@ -318,12 +458,12 @@ def update_align_yaml():
 
     # Read in MC2 metadata (as Pandas dataframe)
     # We only need the TS number and the tilt angle for comparisons at this stage
-    mc2_md_name = project_name + '_mc2_mdout.yaml'
+    mc2_md_name = args.project_name + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
-    align_md_name = project_name + '_align_mdout.yaml'
+    align_md_name = args.project_name + '_align_mdout.yaml'
     if os.path.isfile(align_md_name):
         is_old_project = True
         with open(align_md_name, 'r') as f:
@@ -344,12 +484,11 @@ def update_align_yaml():
 
     # Read in ctffind yaml file, modify, and update
     # read in MC2 yaml as well (some parameters depend on MC2 settings)
-    align_params = prmMod.read_yaml(project_name=project_name,
+    align_params = prmMod.read_yaml(project_name=args.project_name,
                                     filename=align_yaml_name)
-    mc2_params = prmMod.read_yaml(project_name=project_name,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
 
-    align_params.params['System']['output_rootname'] = project_name
     align_params.params['System']['process_list'] = unique_ts_numbers
     align_params.params['BatchRunTomo']['setup']['pixel_size'] = mc2_params.params['MC2']['desired_pixel_size'] * 0.1
 
@@ -357,27 +496,157 @@ def update_align_yaml():
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
 
 
+def create_align_yaml():
+    """
+    Subroutine to create new yaml file for IMOD newstack / alignment
+    """
+
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("-o", "--output_folder",
+                        type=str,
+                        default='./stacks/',
+                        help="Path to folder for storing motion-corrected images (Default: ./stacks/)")
+    parser.add_argument("-p", "--file_prefix",
+                        type=str,
+                        help="Common prefix of image files (Default: project name).")
+    parser.add_argument("-s", "--file_suffix",
+                        type=str,
+                        default='',
+                        help="Extra information attached as suffix to output filenames.")
+    parser.add_argument("--no_rawtlt",
+                        action="store_false",
+                        help="Use information in filenames to determine tilt angles (rather than using .rawtlt files).")
+    parser.add_argument("rot_angle",
+                        type=float,
+                        help="Rotational angle of electron beam. Can be obtained from MDOC files.")
+    parser.add_argument("-fs", "--fiducial_size",
+                        type=float,
+                        default=0.0,
+                        help="Size (in nm) of gold fiducial particles. Ignore flag if no fiducial.")
+    parser.add_argument("--adoc_template",
+                        type=str,
+                        default="/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc",
+                        help="Path to template file of BatchRunTomo directives. (Default: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc)")
+    parser.add_argument("-b", "--stack_bin_factor",
+                        type=int,
+                        default=4,
+                        help="Stack: Raw image stacks downsampling factor. (Default: 4)")
+    parser.add_argument("--delete_old_files",
+                        action="store_true",
+                        help="Preprocessing: Remove original stack when excluding views. Use flag if True.")
+    parser.add_argument("--remove_xrays",
+                        action="store_true",
+                        help="Preprocessing: Attempt to remove X-rays and other artefacts. Use flag if True.")
+    parser.add_argument("-ba", "--coarse_align_bin_factor",
+                        type=int,
+                        default=4,
+                        help="Coarse-alignment: Coarse aligned stack binning. (Default: 4)")
+    parser.add_argument("--patch_sizes",
+                        type=int,
+                        nargs=2,
+                        default=[200, 200],
+                        help="Patch-tracking: Size (in pixels) in X and Y of patches to track. (Default: 200, 200)")
+    parser.add_argument("--num_patches",
+                        type=int,
+                        nargs=2,
+                        default=[24, 24],
+                        help="Patch-tracking: Number of patches to track in X and Y. (Default: 200, 200)")
+    parser.add_argument("--num_iter",
+                        type=int,
+                        choices=[1, 2, 3, 4],
+                        default=4,
+                        help="Patch-tracking: Number of iterations. (Max. 4, Default: 4)")
+    parser.add_argument("--limits_on_shift",
+                        type=int,
+                        nargs=2,
+                        default=[2, 2],
+                        help="Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment. (Default: 2, 2)")
+    parser.add_argument("--adjust_tilt_angles",
+                        action="store_true",
+                        help="Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset. Use flag if True.")
+    parser.add_argument("--num_surfaces",
+                        type=int,
+                        choices=[1, 2],
+                        default=1,
+                        help="Fine-alignment: Number of surface(s) for angle analysis. (1|2, Default: 1)")
+    parser.add_argument("--mag_option",
+                        type=str,
+                        choices=['all', 'group', 'fixed'],
+                        default='fixed',
+                        help="Fine-alignment: Type of magnification solution. (all|group|fixed, Default: fixed)")
+    parser.add_argument("--tilt_option",
+                        type=str,
+                        choices=['all', 'group', 'fixed'],
+                        default='fixed',
+                        help="Fine-alignment: Type of tilt-angle solution. (all|group|fixed, Default: fixed)")
+    parser.add_argument("--rot_option",
+                        type=str,
+                        choices=['all', 'group', 'one', 'fixed'],
+                        default='group',
+                        help="Fine-alignment: Type of rotation solution. (all|group|one|fixed, Default: group)")
+    parser.add_argument("--beam_tilt_option",
+                        type=str,
+                        choices=['fixed', 'search'],
+                        default='fixed',
+                        help="Fine-alignment: Type of beam-tilt solution. (fixed|search, Default: fixed)")
+    parser.add_argument("--no_robust_fitting",
+                        action="store_false",
+                        help="Fine-alignment: Do not use robust fitting. Use flag if True.")
+    parser.add_argument("--no_weight_contours",
+                        action="store_false",
+                        help="Fine-alignment: Do not apply weighting to entire contours from patch-tracking. Use flag if True.")
+    
+    args = parser.parse_args()
+    
+    # Create the yaml file, then automatically update it
+    prmMod.new_align_yaml(args)
+    update_align_yaml(args)
+
+    
 def update_align_yaml_stacked():
     """
     Method to update yaml file for IMOD newstack / alignment --- if stacks already exist
     """
 
-    project_name = get_proj_name()
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("parent_path",
+                        type=str,
+                        help="Path to parent folder with stacks in")
+    parser.add_argument("pixel_res",
+                        type=float,
+                        help="Pixel resolution of motion-corrected images (in Angstroms)")
+    parser.add_argument("-rn", "--rootname",
+                        type=str,
+                        help="Rootname of current project (required if different from project name)")
+    parser.add_argument("-s", "--suffix",
+                        type=str,
+                        help="Suffix of project files")
 
-    # User prompt for file specifications
-    parent_path = input('Enter path of parent folder with stacks in: \n')
+    args = parser.parse_args()
+    project_name = args.project_name
+    parnet_path = args.parent_path
     assert (os.path.isdir(parent_path)), \
         "Error in main.update_align_yaml_stacked: IMOD parent folder not found."
     while parent_path.endswith('/'):
         parent_path = parent_path[:-1]
+    
+    rootname = project_name
+    if args.rootname is not None:
+        while args.rootname.endswith('/'):
+            rootname = args.rootname[:-1]
 
-    rootname = input('Enter rootname of project (remove final underscore): \n')
-    while rootname.endswith('_'):
-        rootname = rootname[:-1]
-
-    suffix = input('Enter file suffix (leave empty if not applicable): \n')
-    pixel_size = input('Enter desired pixel size (in angstroms): \n')
-
+    pixel_size = args.pixel_res
+    suffix = args.suffix if args.suffix is not None else ''
+    
+    
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
 
@@ -398,18 +667,6 @@ def update_align_yaml_stacked():
     # Write out YAML file
     with open(align_yaml_name, 'w') as f:
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
-
-
-def create_align_yaml():
-    """
-    Subroutine to create new yaml file for IMOD newstack / alignment
-    """
-
-    project_name = get_proj_name()
-
-    # Create the yaml file, then automatically update it
-    prmMod.new_align_yaml(project_name)
-    update_align_yaml()
 
 
 def create_align_yaml_stacked():
@@ -573,28 +830,28 @@ def get_align_stats():
 
 
 
-def update_recon_yaml():
+def update_recon_yaml(args):
     """
     Subroutine to update yaml file for IMOD reconstruction
+
+    ARGS:
+    args (Namespace) :: Namespace generated with user inputs
     """
-
-    project_name = get_proj_name()
-
     # Check if recon and align yaml files exist
-    recon_yaml_name = project_name + '_recon.yaml'
-    align_yaml_name = project_name + '_align.yaml'
+    recon_yaml_name = args.project_name + '_recon.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
     if not os.path.isfile(recon_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_recon_yaml: reconstruction config file not found.")
     if not os.path.isfile(align_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_recon_yaml: alignment config file not found.")
 
     # Read in alignment metadata (as Pandas dataframe)
-    align_md_name = project_name + '_align_mdout.yaml'
+    align_md_name = args.project_name + '_align_mdout.yaml'
     with open(align_md_name, 'r') as f:
         align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
-    recon_md_name = project_name + '_recon_mdout.yaml'
+    recon_md_name = args.project_name + '_recon_mdout.yaml'
     if os.path.isfile(recon_md_name):
         is_old_project = True
         with open(recon_md_name, 'r') as f:
@@ -614,9 +871,9 @@ def update_recon_yaml():
 
     # Read in reconstruction yaml file, modify, and update
     # read in alignment yaml as well (some parameters depend on alignment settings)
-    recon_params = prmMod.read_yaml(project_name=project_name,
+    recon_params = prmMod.read_yaml(project_name=args.project_name,
                                     filename=recon_yaml_name)
-    align_params = prmMod.read_yaml(project_name=project_name,
+    align_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=align_yaml_name)
 
     recon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
@@ -625,7 +882,7 @@ def update_recon_yaml():
 
     recon_params.params['BatchRunTomo']['setup'] = {key: value for key, value in align_params.params['BatchRunTomo']['setup'].items() \
                                                     if key != 'stack_bin_factor'}
-
+    
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
 
@@ -634,12 +891,47 @@ def create_recon_yaml():
     """
     Subroutine to create new yaml file for IMOD reconstruction
     """
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("--do_positioning",
+                        action="store_true",
+                        help="Positioning: Perform positioning for the stack. Use flag if True.")
+    parser.add_argument("unbinned_thickness",
+                        type=int,
+                        help="Positioning: Unbinned thickness (in pixels) for samples or whole tomogram.")
+    parser.add_argument("--correct_ctf",
+                        action="store_true",
+                        help="Aligned stack: Correct CTF for aligned stacks. Use flag if True.")
+    parser.add_argument("--erase_gold",
+                        action="store_true",
+                        help="Aligned stack: Erase gold fiducials. Use flag if True.")
+    parser.add_argument("--filtering",
+                        action="store_true",
+                        help="Aligned stack: Perform 2D filtering. Use flag if True.")
+    parser.add_argument("-b", "--bin_factor",
+                        type=int,
+                        default=1,
+                        help="Aligned stack: Binning factor for aligned stack.")
+    parser.add_argument("thickness",
+                        type=int,
+                        help="Reconstruction: Thickness (in pixels) for reconstruction.")
+    parser.add_argument("--no_trimvol",
+                        action="store_false",
+                        help="Postprocessing: Do not run Trimvol on reconstruction. Use flag if True.")
+    parser.add_argument("--trimvol_reorient",
+                        type=str,
+                        choices=['none', 'flip', 'rotate'],
+                        default='rotate',
+                        help="Reorientation in Trimvol. (none|flip|rotate, Default: rotate)")
 
-    project_name = get_proj_name()
-
+    args = parser.parse_args()
+    
     # Create the yaml file, then automatically update it
-    prmMod.new_recon_yaml(project_name)
-    update_recon_yaml()
+    prmMod.new_recon_yaml(args)
+    update_recon_yaml(args)
 
 
 def run_recon():
@@ -729,7 +1021,7 @@ def update_savurecon_yaml():
         yaml.dump(savurecon_params.params, f, indent=4, sort_keys=False)
 
 
-
+    
 def create_savurecon_yaml():
     """
     Creates yaml for savu reconstruction
@@ -839,18 +1131,36 @@ def run_ctfsim():
     Method to run simulator for CTF from CTFFIND4 outputs
     """
 
-    project_name = get_proj_name()
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("pixel_res",
+                        type=float,
+                        help="Pixel resolution of motion-corrected images (in Angstroms)")
+    parser.add_argument("ds_factor",
+                        type=int,
+                        help="Downsampling factor (must be same as alignment/reconstruction)")
+    parser.add_argument("-rn", "--rootname",
+                        type=str,
+                        help="Rootname of current project (required if different from project name)")
+    parser.add_argument("-d", "--dims",
+                        nargs=2,
+                        type=int,
+                        default=[100, 100],
+                        help="Dimensions of simulated CTF in pixels (Default: [100, 100])")
 
-    rootname = input(f'Enter file rootname: (Default: {project_name})\n')
-    if len(rootname) == 0:
-        rootname = project_name
-    while rootname.endswith('/'):
-        rootname = rootname[:-1]
+    args = parser.parse_args()
+    project_name = args.project_name
 
-    pixel_size = input(f'Enter pixel size of motion-corrected images (in Angstroms)\n')
-    pixel_size = float(pixel_size) * 1e-10
+    rootname = project_name
+    if args.rootname is not None:
+        while args.rootname.endswith('/'):
+            rootname = args.rootname[:-1]
 
-    ds_factor = int(input(f'Enter downsampling factor (must be same as alignment/reconstruction)\n'))
+    pixel_size = args.pixel_res * 1e-10
+    ds_factor = args.ds_factor
 
     # Read in metadata from ctffind
     ctffind_md_file = project_name + '_ctffind_mdout.yaml'
@@ -897,7 +1207,12 @@ def run_ctfsim():
 
         # Write out psf stack
         with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:02}.mrc', overwrite=True) as f:
-            f.set_data(full_psf)
+            (xmin, ymin) = (
+                (source_dim[-2]-args.dims[0]) // 2,
+                (source_dim[-1]-args.dims[1]) // 2)
+            (xmax, ymax) = (xmin+args.dims[0], ymin+args.dims[1])
+
+            f.set_data(full_psf[:, xmin:xmax, ymin:ymax])
 
 
         # Write out rawtlt file
@@ -906,62 +1221,88 @@ def run_ctfsim():
                 f.writelines(str(angle) + '\n')
 
 
-def update_recon_yaml_stacked():
+def update_savurecon_yaml(args):
     """
     Method to update yaml file for savu reconstruction --- if stacks already exist
+
+    Args:
+    args (Namespace) :: Namespace containing user inputs
     """
 
-    project_name = get_proj_name()
-
-    # User prompt for file specifications
-    parent_path = input('Enter path of parent folder with stacks in: \n')
-    assert (os.path.isdir(parent_path)), \
-        "Error in main.update_recon_yaml_stacked: IMOD parent folder not found."
-    while parent_path.endswith('/'):
-        parent_path = parent_path[:-1]
-
-    rootname = input('Enter rootname of project (remove final underscore): \n')
-    while rootname.endswith('_'):
-        rootname = rootname[:-1]
-
-    suffix = input('Enter file suffix (leave empty if not applicable): \n')
-    pixel_size = input('Enter desired pixel size (in angstroms): \n')
-
+    parent_path = args.stacks_folder
+    rootname    = args.project_name if args.rootname is None else args.rootname
+    suffix      = args.suffix
+    ext         = args.extension
+    imod_suffix = args.imod_suffix
+    
     # Find stack files
-    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.mrc')
+    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}')
 
     # Find rawtlt files
     rawtlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
 
     # Extract tilt series number
-    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}.mrc', '')) for i in st_file_list]
+    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'_{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
 
     # Read in and update YAML parameters
-    recon_yaml_name = project_name + '_savurecon.yaml'
-    recon_params = prmMod.read_yaml(project_name=project_name,
+    recon_yaml_name = args.project_name + '_savurecon.yaml'
+    recon_params = prmMod.read_yaml(project_name=args.project_name,
                                     filename=recon_yaml_name)
 
     recon_params.params['System']['process_list'] = ts_list
-    recon_params.params['System']['output_rootname'] = rootname
-    recon_params.params['System']['output_suffix'] = suffix
     recon_params.params['Savu']['setup']['tilt_angles'] = rawtlt_file_list
     recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
+
+    # Change centre of rotation to centre of image by default
+    centre_of_rotation = []
+    for image in recon_params.params['Savu']['setup']['aligned_projections']:
+        mrc = mrcfile.open(image)
+        centre_of_rotation.append(float(mrc.header["nx"]/2)) # xdim/2
+    recon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
 
     # Write out YAML file
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
 
 
-def create_recon_yaml_stacked():
+def create_savurecon_yaml():
     """
-    Subroutine to create new yaml file for IMOD reconstruction
+    Subroutine to create new yaml file for Savu reconstruction
     """
 
-    project_name = get_proj_name()
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("stacks_folder",
+                        type=str,
+                        help="Path to parent folder with stacks")
+    parser.add_argument("-rn", "--rootname",
+                        type=str,
+                        help="Rootname of current project (required if different from project name)")
+    parser.add_argument("-s", "--suffix",
+                        type=str,
+                        default='',
+                        help="Suffix of project files")
+    parser.add_argument("-e", "--extension",
+                        type=str,
+                        default='mrc',
+                        help="File extension of stacks (Default: mrc)")
+    parser.add_argument("-is", "--imod_suffix",
+                        type=str,
+                        default='',
+                        help="IMOD file suffix")
+    parser.add_argument("-o", "--output_path",
+                        type=str,
+                        default="./savurecon/",
+                        help="Path to output folder (Default: ./savurecon/)")
+
+    args = parser.parse_args()
 
     # Create the yaml file, then automatically update it
-    prmMod.new_savurecon_yaml(project_name)
-    update_recon_yaml_stacked()
+    prmMod.new_savurecon_yaml(args)
+    update_savurecon_yaml(args)
 
 
 def run_recon_ext():

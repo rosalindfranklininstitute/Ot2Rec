@@ -43,60 +43,60 @@ class Params:
 
         
 
-def new_master_yaml(project_name: str):
+def new_master_yaml(args):
     """
     Subroutine to create yaml file for processing master metadata
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace generated with user inputs
     """
 
-    master_yaml_name = project_name + '_proj.yaml'
+    master_yaml_name = args.project_name + '_proj.yaml'
     
     proj_yaml_dict = {
-        'source_folder': '../raw/',
-        'TS_folder_prefix': '*',
-        'file_prefix': project_name,
-        'image_stack_field': 0,
-        'image_tiltangle_field': 2,
-        'source_TIFF': True,
+        'source_folder': args.source_folder,
+        'TS_folder_prefix': args.folder_prefix,
+        'file_prefix': args.project_name if args.file_prefix is None else args.file_prefix,
+        'image_stack_field': args.stack_field,
+        'image_tiltangle_field': args.tiltangle_field,
+        'source_TIFF': args.tiffs,
     }
 
     with open(master_yaml_name, 'w') as f:
         yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False) 
 
 
-def new_mc2_yaml(project_name: str):
+def new_mc2_yaml(args):
     """
     Subroutine to create yaml file for motioncorr
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace generated with user inputs
     """
 
-    mc2_yaml_name = project_name + '_mc2.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
 
     mc2_yaml_dict = {
         'System': {
-            'process_list': 'all',
-            'output_path': './motioncor/',
-            'output_prefix': 'TS',
-            'use_gpu': 'auto',
-            'jobs_per_gpu': 2,
-            'gpu_memory_usage': 1,
-            'source_TIFF': True,
+            'process_list': None,
+            'output_path': args.output_folder,
+            'output_prefix': args.file_prefix if args.file_prefix is not None else args.project_name,
+            'use_gpu': 'auto' if not args.no_gpu else False,
+            'jobs_per_gpu': args.jobs_per_gpu,
+            'gpu_memory_usage': args.gpu_mem_usage,
+            'source_TIFF': None,
         },
         'MC2': {
-            'MC2_path': '/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110',
-            'gain_reference': 'nogain',
-            'pixel_size': 0.815,
-            'desired_pixel_size': 'ps_x2',
-            'discard_frames_top': 1,
-            'discard_frames_bottom': 0,
-            'tolerance': 0.5,
-            'max_iterations': 10,
-            'patch_size': [5, 5, 20],
-            'use_subgroups': True,
+            'MC2_path': args.exec_path,
+            'gain_reference': 'nogain' if args.gain is None else args.gain,
+            'pixel_size': args.pixel_size,
+            'desired_pixel_size': args.pixel_size*2 if args.super_res else args.pixel_size,
+            'discard_frames_top': args.discard_top,
+            'discard_frames_bottom': args.discard_bottom,
+            'tolerance': args.tolerance,
+            'max_iterations': args.max_iter,
+            'patch_size': args.patch_size,
+            'use_subgroups': args.no_subgroups,
         },
     }
         
@@ -104,38 +104,38 @@ def new_mc2_yaml(project_name: str):
         yaml.dump(mc2_yaml_dict, f, indent=4, sort_keys=False) 
 
 
-def new_ctffind_yaml(project_name: str):
+def new_ctffind_yaml(args):
     """
     Subroutine to create yaml file for ctffind
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace generated with user inputs
     """
 
-    ctf_yaml_name = project_name + '_ctffind.yaml'
+    ctf_yaml_name = args.project_name + '_ctffind.yaml'
 
     ctf_yaml_dict = {
         'System': {
             'process_list': 'all',
-            'output_path': './ctffind/',
-            'output_prefix': 'TS',
+            'output_path': args.output_folder,
+            'output_prefix': args.file_prefix if args.file_prefix is not None else args.project_name,
         },
         'ctffind': {
-            'ctffind_path': '/opt/lmod/modules/ctffind/4.1.14/bin/ctffind',
+            'ctffind_path': args.exec_path,
             'pixel_size': None,
-            'voltage': 300.,
-            'spherical_aberration': 2.7,
-            'amp_contrast': 0.8,
-            'amp_spec_size': 512,
-            'resolution_min': 30.,
-            'resolution_max': 5.,
-            'defocus_min': 5000.,
-            'defocus_max': 50000.,
-            'defocus_step': 500.,
-            'astigm_type': None,
-            'exhaustive_search': False,
-            'astigm_restraint': False,
-            'phase_shift': False,
+            'voltage': args.voltage,
+            'spherical_aberration': args.spherical_aberration,
+            'amp_contrast': args.amp_contrast,
+            'amp_spec_size': args.spec_size,
+            'resolution_min': max(args.res_range),
+            'resolution_max': min(args.res_range),
+            'defocus_min': args.defocus_range[0],
+            'defocus_max': args.defocus_range[1],
+            'defocus_step': args.defocus_range[2],
+            'astigm_type': args.astigm_type,
+            'exhaustive_search': args.exhaustive_search,
+            'astigm_restraint': args.astigm_restraint if args.astigm_restraint is not None else False,
+            'phase_shift': args.phase_shift,
         },
     }
         
@@ -143,59 +143,59 @@ def new_ctffind_yaml(project_name: str):
         yaml.dump(ctf_yaml_dict, f, indent=4, sort_keys=False)
 
 
-def new_align_yaml(project_name: str):
+def new_align_yaml(args):
     """
     Subroutine to create yaml file for stack creation and BatchTomo (up till alignment)
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace generated with user inputs
     """
 
-    align_yaml_name = project_name + '_align.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
 
     align_yaml_dict = {
         'System' : {
             'process_list' : 'all',
-            'output_path' : './stacks/',
-            'output_rootname' : 'TS',
-            'output_suffix' : '',
+            'output_path' : args.output_folder,
+            'output_rootname' : args.file_prefix if args.file_prefix is not None else args.project_name,
+            'output_suffix' : args.file_suffix,
         },
         
         'BatchRunTomo': {
             'setup': {
-                'use_rawtlt': True,
-                'pixel_size': 'default',
-                'rot_angle': 86.,
-                'gold_size': 0.,
-                'adoc_template': '/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc',
-                'stack_bin_factor': 8,
+                'use_rawtlt': args.no_rawtlt,
+                'pixel_size': None,
+                'rot_angle': args.rot_angle,
+                'gold_size': args.fiducial_size,
+                'adoc_template': args.adoc_template,
+                'stack_bin_factor': args.stack_bin_factor,
             },
 
             'preprocessing': {
-                'delete_old_files': False,
-                'remove_xrays': True,
+                'delete_old_files': args.delete_old_files,
+                'remove_xrays': args.remove_xrays,
             },
 
             'coarse_align': {
-                'bin_factor': 8,
+                'bin_factor': args.coarse_align_bin_factor,
             },
 
             'patch_track': {
-                'size_of_patches': [300, 200],
-                'num_of_patches': [12, 8],
-                'num_iterations': 4,
-                'limits_on_shift': [2, 2],
-                'adjust_tilt_angles': True,
+                'size_of_patches': args.patch_sizes,
+                'num_of_patches': args.num_patches,
+                'num_iterations': args.num_iter,
+                'limits_on_shift': args.limits_on_shift,
+                'adjust_tilt_angles': args.adjust_tilt_angles,
             },
 
             'fine_align': {
-                'num_surfaces': 1,
-                'mag_option': 'fixed',
-                'tilt_option': 'fixed',
-                'rot_option': 'group',
-                'beam_tilt_option': 'fixed',
-                'use_robust_fitting': True,
-                'weight_all_contours': True,
+                'num_surfaces': args.num_surfaces,
+                'mag_option': args.mag_option,
+                'tilt_option': args.tilt_option,
+                'rot_option': args.rot_option,
+                'beam_tilt_option': args.beam_tilt_option,
+                'use_robust_fitting': args.no_robust_fitting,
+                'weight_all_contours': args.no_weight_contours,
             },
         }
     }
@@ -204,15 +204,14 @@ def new_align_yaml(project_name: str):
         yaml.dump(align_yaml_dict, f, indent=4, sort_keys=False)
 
 
-def new_recon_yaml(project_name: str):
+def new_recon_yaml(args):
     """
     Subroutine to create yaml file for batchtomo (continuing from aligned stacks to full reconstruction)
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace generated with user inputs
     """
-
-    recon_yaml_name = project_name + '_recon.yaml'
+    recon_yaml_name = args.project_name + '_recon.yaml'
 
     recon_yaml_dict = {
         'System' : {
@@ -232,24 +231,24 @@ def new_recon_yaml(project_name: str):
             },
 
             'positioning': {
-                'do_positioning': False,
-                'unbinned_thickness': 3600,
+                'do_positioning': args.do_positioning,
+                'unbinned_thickness': args.unbinned_thickness,
             },
 
             'aligned_stack': {
-                'correct_ctf': False,
-                'erase_gold': False,
-                '2d_filtering': False,
-                'bin_factor': 8,
+                'correct_ctf': args.correct_ctf,
+                'erase_gold': args.erase_gold,
+                '2d_filtering': args.filtering,
+                'bin_factor': args.bin_factor,
             },
 
             'reconstruction': {
-                'thickness': 3600,
+                'thickness': args.thickness,
             },
 
             'postprocessing': {
-                'run_trimvol': True,
-                'trimvol_reorient': 'rotate',
+                'run_trimvol': args.no_trimvol,
+                'trimvol_reorient': args.trimvol_reorient,
             },
         }
     }
@@ -258,28 +257,28 @@ def new_recon_yaml(project_name: str):
         yaml.dump(recon_yaml_dict, f, indent=4, sort_keys=False)
 
 
-def new_savurecon_yaml(project_name: str):
+def new_savurecon_yaml(args):
     """
     Subroutine to create yaml file for savurecon (continuing from aligned stacks to full reconstruction)
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace containing user parameter inputs
     """
 
-    savurecon_yaml_name = project_name + '_savurecon.yaml'
+    savurecon_yaml_name = args.project_name + '_savurecon.yaml'
 
     savurecon_yaml_dict = {
         'System' : {
-            'process_list' : 'all',
-            'output_path' : './savurecon/',
-            'output_rootname' : 'TS',
-            'output_suffix' : '',
+            'process_list' : None,
+            'output_path' : args.output_path,
+            'output_rootname' : args.project_name if args.rootname is None else args.rootname,
+            'output_suffix' : args.suffix,
         },
         
         'Savu': {
             'setup': {
-                'tilt_angles': '.tlt',
-                'aligned_projections': '*_ali.mrc',
+                'tilt_angles': None,
+                'aligned_projections': None,
                 'algorithm': 'CGLS_CUDA',
                 'centre_of_rotation': 'autocenter',
             }

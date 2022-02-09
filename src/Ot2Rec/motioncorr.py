@@ -92,8 +92,9 @@ class Motioncorr:
             self._missing_specified = pd.DataFrame(columns=self.meta.columns)
         
             for curr_ts in self.params['System']['process_list']:
-                self._missing_specified = self._missing_specified.append(self._missing[self._missing['ts']==curr_ts],
-                                                                         ignore_index=True,
+                _to_append = self._missing[self._missing['ts']==curr_ts]
+                self._missing_specified = pd.concat([self._missing_specified, _to_append],
+                                                    ignore_index=True,
                 )
             self._merged = self.meta_out.merge(self._missing_specified, how='left', indicator=True)
             self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
@@ -250,8 +251,9 @@ class Motioncorr:
         # If the files don't exist, keep the line in the input metadata
         # If they do, move them to the output metadata
 
-        self.meta_out = self.meta_out.append(self.meta.loc[self.meta['output'].apply(lambda x: os.path.isfile(x))],
-                                             ignore_index=True)
+        _to_append = self.meta.loc[self.meta['output'].apply(lambda x: os.path.isfile(x))]
+        self.meta_out = pd.concat([self.meta_out, _to_append],
+                                  ignore_index=True)
         self.meta = self.meta.loc[~self.meta['output'].apply(lambda x: os.path.isfile(x))]
         self._curr_meta = self._curr_meta.loc[~self._curr_meta['output'].apply(lambda x: os.path.isfile(x))]
 
