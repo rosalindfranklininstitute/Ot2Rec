@@ -1216,21 +1216,19 @@ def run_ctfsim():
                 f.writelines(str(angle) + '\n')
 
 
-def update_recon_yaml_stacked(project_name, param_dict):
+def update_savurecon_yaml(args):
     """
     Method to update yaml file for savu reconstruction --- if stacks already exist
 
     Args:
-    project_name (str) :: Name of current project
-    param_dict (dict)  :: Dictionary containing params
+    args (Namespace) :: Namespace containing user inputs
     """
 
-    parent_path = param_dict['parent_path']
-    rootname    = param_dict['rootname']
-    suffix      = param_dict['suffix']
-    ext         = param_dict['ext']
-    imod_suffix = param_dict['imod_suffix']
-    out_folder  = param_dict['out_folder']
+    parent_path = args.stacks_folder
+    rootname    = args.project_name if args.rootname is None else args.rootname
+    suffix      = args.suffix
+    ext         = args.ext
+    imod_suffix = args.imod_suffix
     
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}{imod_suffix}.{ext}')
@@ -1242,14 +1240,11 @@ def update_recon_yaml_stacked(project_name, param_dict):
     ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
 
     # Read in and update YAML parameters
-    recon_yaml_name = project_name + '_savurecon.yaml'
+    recon_yaml_name = args.project_name + '_savurecon.yaml'
     recon_params = prmMod.read_yaml(project_name=project_name,
                                     filename=recon_yaml_name)
 
     recon_params.params['System']['process_list'] = ts_list
-    recon_params.params['System']['output_rootname'] = rootname
-    recon_params.params['System']['output_path'] = out_folder
-    recon_params.params['System']['output_suffix'] = suffix
     recon_params.params['Savu']['setup']['tilt_angles'] = rawtlt_file_list
     recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
 
@@ -1265,9 +1260,9 @@ def update_recon_yaml_stacked(project_name, param_dict):
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
 
 
-def create_recon_yaml_stacked():
+def create_savurecon_yaml():
     """
-    Subroutine to create new yaml file for IMOD reconstruction
+    Subroutine to create new yaml file for Savu reconstruction
     """
 
     # Parse user inputs
@@ -1292,48 +1287,14 @@ def create_recon_yaml_stacked():
                         help="IMOD file suffix")
     parser.add_argument("-o", "--output_path",
                         type=str,
+                        default="./savurecon/",
                         help="Path to output folder (Default: ./savurecon/)")
 
     args = parser.parse_args()
-    project_name = args.project_name
-    parent_path = args.stacks_folder
 
-    rootname = project_name
-    if args.rootname is not None:
-        while args.rootname.endswith('/'):
-            rootname = args.rootname[:-1]
-
-    suffix = ''
-    if args.suffix is not None:
-        suffix = args.suffix
-
-    imod_suffix = ''
-    if args.imod_suffix is not None:
-        imod_suffix = '_' + args.imod_suffix
-        
-    ext = 'mrc'
-    if args.extension is not None:
-        ext = args.extension
-
-    out_folder = './savurecon/'
-    if args.output_path is not None:
-        out_folder = args.output_path
-
-    savu_params = dict({
-        'parent_path'  : parent_path,
-        'rootname'     : rootname,
-        'suffix'       : suffix,
-        'ext'          : ext,
-        'imod_suffix'  : imod_suffix,
-        'out_folder'   : out_folder
-    })
-        
-        
     # Create the yaml file, then automatically update it
-    prmMod.new_savurecon_yaml(project_name)
-    update_recon_yaml_stacked(project_name=project_name,
-                              param_dict=savu_params)
-
+    prmMod.new_savurecon_yaml(args)
+    update_recon_yaml_stacked(args)
 
 
 def run_recon_ext():

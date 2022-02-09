@@ -257,28 +257,28 @@ def new_recon_yaml(args):
         yaml.dump(recon_yaml_dict, f, indent=4, sort_keys=False)
 
 
-def new_savurecon_yaml(project_name: str):
+def new_savurecon_yaml(args):
     """
     Subroutine to create yaml file for savurecon (continuing from aligned stacks to full reconstruction)
 
     ARGS:
-    project_name :: Name of current project
+    args (Namespace) :: Namespace containing user parameter inputs
     """
 
-    savurecon_yaml_name = project_name + '_savurecon.yaml'
+    savurecon_yaml_name = args.project_name + '_savurecon.yaml'
 
     savurecon_yaml_dict = {
         'System' : {
-            'process_list' : 'all',
-            'output_path' : './savurecon/',
-            'output_rootname' : 'TS',
-            'output_suffix' : '',
+            'process_list' : None,
+            'output_path' : args.output_path,
+            'output_rootname' : args.project_name if args.rootname is None else args.rootname,
+            'output_suffix' : args.suffix,
         },
         
         'Savu': {
             'setup': {
-                'tilt_angles': '.tlt',
-                'aligned_projections': '*_ali.mrc',
+                'tilt_angles': None,
+                'aligned_projections': None,
                 'algorithm': 'CGLS_CUDA',
                 'centre_of_rotation': '0.0',
             }

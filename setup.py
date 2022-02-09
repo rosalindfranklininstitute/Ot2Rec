@@ -56,7 +56,7 @@ setup(
             "o2r.recon.new=Ot2Rec.main:create_recon_yaml",
             "o2r.recon.run=Ot2Rec.main:run_recon",
 
-            "o2r.savu.new=Ot2Rec.main:create_recon_yaml_stacked",
+            "o2r.savu.new=Ot2Rec.main:create_savurecon_yaml",
             "o2r.savu.run=Ot2Rec.main:run_savurecon",
 
             "o2r.cleanup=Ot2Rec.main:cleanup",
