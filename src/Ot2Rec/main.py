@@ -1435,4 +1435,10 @@ def run_rlf_deconv():
         'resAsUint8': args.uint,
     })
 
+    my_deconv = rlfMod.RLF_deconv(orig_path=arg.image_path,
+                                  kernel_path=arg.psf_path,
+                                  params_dict=deconv_params,
+                                  orig_mrc=arg.image_type=='mrc',
+                                  kernel_mrc=arg.psf_type=='mrc')
+
     
