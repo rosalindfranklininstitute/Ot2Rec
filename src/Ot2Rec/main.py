@@ -966,7 +966,7 @@ def run_recon():
     if not recon_obj.no_processes:
         recon_obj.recon_stack()
 
- 
+
 def run_savurecon():
     project_name = get_proj_name()
 

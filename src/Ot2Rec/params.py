@@ -280,7 +280,7 @@ def new_savurecon_yaml(args):
                 'tilt_angles': None,
                 'aligned_projections': None,
                 'algorithm': 'CGLS_CUDA',
-                'centre_of_rotation': '0.0',
+                'centre_of_rotation': 'autocenter',
             }
         }
     }

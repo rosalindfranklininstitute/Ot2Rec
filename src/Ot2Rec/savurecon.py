@@ -16,6 +16,7 @@
 import yaml
 import os
 import subprocess
+import mrcfile
 
 
 class SavuRecon:
@@ -99,12 +100,24 @@ class SavuRecon:
                 "Algorithm not supported. Please amend algorithm in savurecon.yaml to one of {}".format(algo_choices)
                 )
         
-        subfolder = os.path.abspath(self.md_out["savu_output_dir"][curr_ts])
+        # Get centre of rotation
+        # Set centre of rotation to centre if centre_of_rotation is autocenter
+        if self.params['Savu']['setup']['centre_of_rotation'] == 'autocenter':
+            mrc = mrcfile.open(self.params['Savu']['setup']['aligned_projections'][i])
+            cor = float(mrc.header["ny"]/2) # ydim/2
 
+        # Else if the centre of rotation is a single value to be used for all ts:
+        else:
+            try:
+                cor = float(self.params['Savu']['setup']['centre_of_rotation'])
+            except:
+                raise ValueError('Centre of rotation must be `autocenter` or a float')
+
+        subfolder = os.path.abspath(self.md_out["savu_output_dir"][curr_ts])
         cmd = ['add MrcLoader\n',
                 'mod 1.2 {}\n'.format(self.params['Savu']['setup']['tilt_angles'][i]),
                 'add AstraReconGpu\n',
-                'mod 2.1 {}\n'.format(self.params['Savu']['setup']['centre_of_rotation'][i]),
+                'mod 2.1 {}\n'.format(cor),
                 'mod 2.2 {}\n'.format(algo),
                 'add MrcSaver\n',
                 'mod 3.1 VOLUME_YZ\n',
