@@ -90,13 +90,15 @@ class Metadata:
         
         # Find files and check
         if len(self.params['TS_folder_prefix']) > 0:
-            raw_images_list = glob("{}/{}/*.{}".format(self.params['source_folder'],
-                                                       ts_subfolder_criterion,
-                                                       self.params['filetype'])
+            raw_images_list = glob("{}/{}/{}_*.{}".format(self.params['source_folder'],
+                                                         ts_subfolder_criterion,
+                                                         self.params['file_prefix'],
+                                                         self.params['filetype'])
             )
         else:
-            raw_images_list = glob("{}/*.{}".format(self.params['source_folder'],
-                                                    self.params['filetype'])
+            raw_images_list = glob("{}/{}_*.{}".format(self.params['source_folder'],
+                                                       self.params['file_prefix'],
+                                                       self.params['filetype'])
             )
             
         if (len(raw_images_list) == 0):
@@ -123,8 +125,10 @@ class Metadata:
 
             # Extract tilt angle
             try:
+                ic(curr_image, split_path_name[self.params['image_tiltangle_field']+prefix_length].replace(
+                    f".{self.params['filetype']}", '').replace('[', '').replace(']', ''))
                 tilt_angle = float(split_path_name[self.params['image_tiltangle_field']+prefix_length].replace(
-                    f'.{source_extension}', '').replace('[', '').replace(']', ''))
+                    f".{self.params['filetype']}", '').replace('[', '').replace(']', ''))
             except IndexError or ValueError as ierr:
                 raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt angle from file path {curr_image}.")
             self.tilt_angles.append(tilt_angle)
