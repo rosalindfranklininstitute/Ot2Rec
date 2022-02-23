@@ -84,11 +84,6 @@ class Metadata:
              len(self.params['TS_folder_prefix']) > 0:
             ts_subfolder_criterion = self.params['TS_folder_prefix'] + '_*'
             
-        if self.params['source_TIFF']:
-            source_extension = 'tif'
-        else:
-            source_extension = 'mrc'
-
         # Source folder should not end with forward slash so remove them
         while self.params['source_folder'].endswith('/'):
             self.params['source_folder'] = self.params['source_folder'][:-1]
@@ -97,11 +92,11 @@ class Metadata:
         if len(self.params['TS_folder_prefix']) > 0:
             raw_images_list = glob("{}/{}/*.{}".format(self.params['source_folder'],
                                                        ts_subfolder_criterion,
-                                                       source_extension)
+                                                       self.params['filetype'])
             )
         else:
             raw_images_list = glob("{}/*.{}".format(self.params['source_folder'],
-                                                    source_extension)
+                                                    self.params['filetype'])
             )
             
         if (len(raw_images_list) == 0):

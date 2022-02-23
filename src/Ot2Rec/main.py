@@ -74,9 +74,10 @@ def new_proj():
     parser.add_argument("-p", "--file_prefix",
                         type=str,
                         help="Common prefix of raw image files (Default: project name).")
-    parser.add_argument("-t", "--tiffs",
-                        action="store_true",
-                        help="Use this flag if the raw images are TIFFs.")
+    parser.add_argument("-e", "--ext",
+                        type=str,
+                        default='mrc',
+                        help="File extensions of raw images (Default: mrc).")
     parser.add_argument("--stack_field",
                         type=int,
                         default=0,
