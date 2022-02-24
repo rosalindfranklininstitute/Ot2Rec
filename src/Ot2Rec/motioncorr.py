@@ -178,10 +178,7 @@ class Motioncorr:
 
         in_path, out_path, gpu_number = image
 
-        if self.params['System']['source_TIFF']:
-            image_type = 'InTiff'
-        else:
-            image_type = 'InMrc'
+        image_type = 'In' + self.params['System']['filetype'].capitalize()
 
         # Set FtBin parameter for MC2
         ftbin = self.params['MC2']['desired_pixel_size'] / self.params['MC2']['pixel_size']
