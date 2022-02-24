@@ -108,7 +108,7 @@ class Metadata:
         raw_images_list = [os.path.abspath(image) for image in raw_images_list]
 
         # Extract information from image file names
-        self.image_paths, self.tilt_series, self.tilt_angles = [], [], []
+        self.image_paths, self.tilt_series, self.image_idx, self.tilt_angles = [], [], [], []
         for curr_image in raw_images_list:
             self.image_paths.append(curr_image)
 
@@ -123,10 +123,16 @@ class Metadata:
                 raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt series number from file path {curr_image}.")
             self.tilt_series.append(ts_index)
 
+            # Extract image index number
+            try:
+                idx = int(''.join(i for i in split_path_name[self.params['image_index_field']+prefix_length] if i.isdigit()))
+            except IndexError or ValueError:
+                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt series number from file path {curr_image}.")
+            self.image_idx.append(idx)
+            
+
             # Extract tilt angle
             try:
-                ic(curr_image, split_path_name[self.params['image_tiltangle_field']+prefix_length].replace(
-                    f".{self.params['filetype']}", '').replace('[', '').replace(']', ''))
                 tilt_angle = float(split_path_name[self.params['image_tiltangle_field']+prefix_length].replace(
                     f".{self.params['filetype']}", '').replace('[', '').replace(']', ''))
             except IndexError or ValueError as ierr:
@@ -136,6 +142,7 @@ class Metadata:
         # Save metadata as a dictionary --- easier to dump as yaml
         self.metadata = dict(file_paths=self.image_paths,
                              ts=[int(i) for i in self.tilt_series],
+                             image_idx=[int(i) for i in self.image_idx],
                              angles=self.tilt_angles)
 
         

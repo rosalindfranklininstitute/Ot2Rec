@@ -82,6 +82,10 @@ def new_proj():
                         type=int,
                         default=0,
                         help="Field number of tilt series indices (Default: 0).")
+    parser.add_argument("--index_field",
+                        type=int,
+                        default=1,
+                        help="Field number of image indices (Default: 1).")
     parser.add_argument("--tiltangle_field",
                         type=int,
                         default=2,
@@ -153,7 +157,7 @@ def update_mc2_yaml(args):
     mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
-    mc2_params.params['System']['source_TIFF'] = master_config['source_TIFF']
+    mc2_params.params['System']['filetype'] = master_config['filetype']
 
     with open(mc2_yaml_name, 'w') as f:
         yaml.dump(mc2_params.params, f, indent=4, sort_keys=False)
