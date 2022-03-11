@@ -1415,13 +1415,13 @@ def run_rlf_deconv():
     
     # Check provided files are present
     try:
-        len(glob(arg.image_path)) > 0
+        assert (len(glob(args.image_path)) > 0)
     except:
         logger("Error in main:run_rlf_deconv: Raw image doesn't exist. Aborting...")
         return
 
     try:
-        len(glob(arg.psf_path)) > 0
+        assert (len(glob(args.psf_path)) > 0)
     except:
         logger("Error in main:run_rlf_deconv: PSF image doesn't exist. Aborting...")
         return
@@ -1435,10 +1435,16 @@ def run_rlf_deconv():
         'resAsUint8': args.uint,
     })
 
-    my_deconv = rlfMod.RLF_deconv(orig_path=arg.image_path,
-                                  kernel_path=arg.psf_path,
+    my_deconv = rlfMod.RLF_deconv(orig_path=args.image_path,
+                                  kernel_path=args.psf_path,
                                   params_dict=deconv_params,
-                                  orig_mrc=arg.image_type=='mrc',
-                                  kernel_mrc=arg.psf_type=='mrc')
+                                  orig_mrc=args.image_type=='mrc',
+                                  kernel_mrc=args.psf_type=='mrc')
+
+    deconvd_image = my_deconv()
+    
+    # Save results
+    with mrcfile.new(args.output_path, overwrite=True) as f:
+        f.set_data(deconvd_image)
 
     

@@ -70,7 +70,7 @@ class RLF_deconv():
 
         # Deconvolve image
         out = self._deconv_array()
-        
+
         return out
 
 

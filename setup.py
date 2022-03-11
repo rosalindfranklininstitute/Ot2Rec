@@ -35,6 +35,7 @@ setup(
         'beautifultable',
         'scikit-image',
         'mrcfile',
+        'redlionfish',
     ],
     entry_points={
         "console_scripts": [
@@ -58,6 +59,8 @@ setup(
 
             "o2r.savu.new=Ot2Rec.main:create_recon_yaml_stacked",
             "o2r.savu.run=Ot2Rec.main:run_savurecon",
+
+            "o2r.deconv.run=Ot2Rec.main:run_rlf_deconv",
 
             "o2r.cleanup=Ot2Rec.main:cleanup",
             "o2r.runall=Ot2Rec.main:run_all",
