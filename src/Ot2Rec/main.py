@@ -38,6 +38,7 @@ from . import align as alignMod
 from . import recon as reconMod
 from . import ctfsim as ctfsimMod
 from . import savurecon as savuMod
+from . import rlf_deconv as rlfMod
 
 
 def get_proj_name():
@@ -1332,3 +1333,87 @@ def run_recon_ext():
     # Run IMOD
     if not recon_obj.no_processes:
         recon_obj.recon_stack(ext=True)
+
+
+def run_rlf_deconv():
+    """
+    Method to deconvolve image using a given kernel (point-spread function)
+    """
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("image_path",
+                        type=str,
+                        help="Path to raw image.")
+    parser.add_argument("psf_path",
+                        type=str,
+                        help="Path to PSF for deconvolving raw image.")
+    parser.add_argument("--image_type",
+                        type=str,
+                        choices=['mrc', 'tiff'],
+                        default='mrc',
+                        help="File type of raw image. (mrc/tiff, Default: mrc)")
+    parser.add_argument("--psf_type",
+                        type=str,
+                        choices=['mrc', 'tiff'],
+                        default='mrc',
+                        help="File type of PSF image. (mrc/tiff, Default: mrc)")
+    parser.add_argument("output_path",
+                        type=str,
+                        help="Path to output (deconvolved) image.")
+    parser.add_argument("-d", "--device",
+                        type=str,
+                        choices=['gpu', 'cpu'],
+                        default='gpu',
+                        help="Device to be used for deconvolution. (gpu/cpu, Default: gpu)")
+    parser.add_argument("-n", "--niter",
+                        type=int,
+                        default=10,
+                        help="Max number of iterations used in deconvolution.")
+    parser.add_argument("--block",
+                        action="store_true",
+                        help="Use block-iterative algorithm for deconvolution. Use flag if True.")
+    parser.add_argument("--uint",
+                        action="store_true",
+                        help="Store results as UInt8. Use flag if True.")
+
+    args = parser.parse_args()
+
+    # Create logger object
+    logger = logMod.Logger()
+    
+    # Check provided files are present
+    try:
+        assert (len(glob(args.image_path)) > 0)
+    except:
+        logger("Error in main:run_rlf_deconv: Raw image doesn't exist. Aborting...")
+        return
+
+    try:
+        assert (len(glob(args.psf_path)) > 0)
+    except:
+        logger("Error in main:run_rlf_deconv: PSF image doesn't exist. Aborting...")
+        return
+
+    # Define deconvolution parameters and object
+    deconv_params = dict({
+        'method': args.device,
+        'niter': args.niter,
+        'useBlockAlgorithm': args.block,
+        'callbkTickFunc': True,
+        'resAsUint8': args.uint,
+    })
+
+    my_deconv = rlfMod.RLF_deconv(orig_path=args.image_path,
+                                  kernel_path=args.psf_path,
+                                  params_dict=deconv_params,
+                                  orig_mrc=args.image_type=='mrc',
+                                  kernel_mrc=args.psf_type=='mrc')
+
+    deconvd_image = my_deconv()
+    
+    # Save results
+    with mrcfile.new(args.output_path, overwrite=True) as f:
+        f.set_data(deconvd_image)
+
+    
