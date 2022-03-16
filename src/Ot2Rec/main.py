@@ -696,13 +696,13 @@ def run_align():
     args = parser.parse_args()
 
     # Check if prerequisite files exist
-    align_yaml = arg.project_name + '_align.yaml'
-    mc2_md_file = arg.project_name + '_mc2_mdout.yaml'
+    align_yaml = args.project_name + '_align.yaml'
+    mc2_md_file = args.project_name + '_mc2_mdout.yaml'
 
     # Read in config and metadata
-    align_config = prmMod.read_yaml(project_name=project_name,
+    align_config = prmMod.read_yaml(project_name=args.project_name,
                                     filename=align_yaml)
-    mc2_md = mdMod.read_md_yaml(project_name=project_name,
+    mc2_md = mdMod.read_md_yaml(project_name=args.project_name,
                                 job_type='align',
                                 filename=mc2_md_file)
 
@@ -710,7 +710,7 @@ def run_align():
     logger = logMod.Logger()
 
     # Create Align object
-    align_obj = alignMod.Align(project_name=project_name,
+    align_obj = alignMod.Align(project_name=args.project_name,
                                md_in=mc2_md,
                                params_in=align_config,
                                logger_in=logger,
@@ -945,16 +945,21 @@ def run_recon():
     Method to run IMOD reconstruction
     """
 
-    project_name = get_proj_name()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+
+    args = parser.parse_args()
 
     # Check if prerequisite files exist
-    recon_yaml = project_name + '_recon.yaml'
-    align_md_file = project_name + '_align_mdout.yaml'
+    recon_yaml = args.project_name + '_recon.yaml'
+    align_md_file = args.project_name + '_align_mdout.yaml'
 
     # Read in config and metadata
-    recon_config = prmMod.read_yaml(project_name=project_name,
+    recon_config = prmMod.read_yaml(project_name=args.project_name,
                                     filename=recon_yaml)
-    align_md = mdMod.read_md_yaml(project_name=project_name,
+    align_md = mdMod.read_md_yaml(project_name=args.project_name,
                                   job_type='reconstruct',
                                   filename=align_md_file)
 
@@ -962,7 +967,7 @@ def run_recon():
     logger = logMod.Logger()
 
     # Create Recon object
-    recon_obj = reconMod.Recon(project_name=project_name,
+    recon_obj = reconMod.Recon(project_name=args.project_name,
                                md_in=align_md,
                                params_in=recon_config,
                                logger_in=logger,
