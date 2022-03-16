@@ -351,7 +351,7 @@ def create_ctffind_yaml():
     parser.add_argument("--exec_path",
                         type=str,
                         default='/opt/lmod/modules/ctffind/4.1.14/bin/ctffind',
-                        help="Path to MotionCor2 executable. (Default: /opt/lmod/modules/ctffind/4.1.14/bin/ctffind)")
+                        help="Path to CTFFind4 executable. (Default: /opt/lmod/modules/ctffind/4.1.14/bin/ctffind)")
     parser.add_argument("-v", "--voltage",
                         type=float,
                         default=300.0,
@@ -555,7 +555,7 @@ def create_align_yaml():
                         type=int,
                         nargs=2,
                         default=[24, 24],
-                        help="Patch-tracking: Number of patches to track in X and Y. (Default: 200, 200)")
+                        help="Patch-tracking: Number of patches to track in X and Y. (Default: 24, 24)")
     parser.add_argument("--num_iter",
                         type=int,
                         choices=[1, 2, 3, 4],
@@ -688,11 +688,16 @@ def run_align():
     Method to run IMOD newstack / alignment
     """
 
-    project_name = get_proj_name()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+
+    args = parser.parse_args()
 
     # Check if prerequisite files exist
-    align_yaml = project_name + '_align.yaml'
-    mc2_md_file = project_name + '_mc2_mdout.yaml'
+    align_yaml = arg.project_name + '_align.yaml'
+    mc2_md_file = arg.project_name + '_mc2_mdout.yaml'
 
     # Read in config and metadata
     align_config = prmMod.read_yaml(project_name=project_name,
