@@ -835,7 +835,6 @@ def get_align_stats():
     print(stats)
 
 
-
 def update_recon_yaml(args):
     """
     Subroutine to update yaml file for IMOD reconstruction
@@ -978,6 +977,90 @@ def run_recon():
         recon_obj.recon_stack()
 
 
+def update_savurecon_yaml(args):
+    """
+    Method to update yaml file for savu reconstruction --- if stacks already exist
+
+    Args:
+    args (Namespace) :: Namespace containing user inputs
+    """
+
+    parent_path = args.stacks_folder
+    rootname    = args.project_name if args.rootname is None else args.rootname
+    suffix      = args.suffix
+    ext         = args.extension
+    imod_suffix = args.imod_suffix
+    
+    # Find stack files
+    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}')
+
+    # Find rawtlt files
+    rawtlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
+
+    # Extract tilt series number
+    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'_{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
+
+    # Read in and update YAML parameters
+    recon_yaml_name = args.project_name + '_savurecon.yaml'
+    recon_params = prmMod.read_yaml(project_name=args.project_name,
+                                    filename=recon_yaml_name)
+
+    recon_params.params['System']['process_list'] = ts_list
+    recon_params.params['Savu']['setup']['tilt_angles'] = rawtlt_file_list
+    recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
+
+    # Change centre of rotation to centre of image by default
+    centre_of_rotation = []
+    for image in recon_params.params['Savu']['setup']['aligned_projections']:
+        mrc = mrcfile.open(image)
+        centre_of_rotation.append(float(mrc.header["nx"]/2)) # xdim/2
+    recon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
+
+    # Write out YAML file
+    with open(recon_yaml_name, 'w') as f:
+        yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
+
+
+def create_savurecon_yaml():
+    """
+    Subroutine to create new yaml file for Savu reconstruction
+    """
+
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("stacks_folder",
+                        type=str,
+                        help="Path to parent folder with stacks")
+    parser.add_argument("-rn", "--rootname",
+                        type=str,
+                        help="Rootname of current project (required if different from project name)")
+    parser.add_argument("-s", "--suffix",
+                        type=str,
+                        default='',
+                        help="Suffix of project files")
+    parser.add_argument("-e", "--extension",
+                        type=str,
+                        default='mrc',
+                        help="File extension of stacks (Default: mrc)")
+    parser.add_argument("-is", "--imod_suffix",
+                        type=str,
+                        default='',
+                        help="IMOD file suffix")
+    parser.add_argument("-o", "--output_path",
+                        type=str,
+                        default="./savurecon/",
+                        help="Path to output folder (Default: ./savurecon/)")
+
+    args = parser.parse_args()
+
+    # Create the yaml file, then automatically update it
+    prmMod.new_savurecon_yaml(args)
+    update_savurecon_yaml(args)
+
+
 def run_savurecon():
     project_name = get_proj_name()
 
@@ -999,76 +1082,6 @@ def run_savurecon():
 
     # Run Savu
     savurecon_obj.run_savu_all()
-
-
-def cleanup():
-    """
-    Method to clean up project folder to save space
-    """
-
-    project_name = get_proj_name()
-
-    mc2_yaml = project_name + '_mc2.yaml'
-    recon_yaml = project_name + '_recon.yaml'
-
-    # Create Logger object
-    logger = logMod.Logger()
-
-    if os.path.isfile(mc2_yaml):
-        mc2_config = prmMod.read_yaml(project_name=project_name,
-                                      filename=mc2_yaml)
-        mc2_path = mc2_config.params['System']['output_path']
-        if os.path.isdir(mc2_path):
-            logger(f"Deleting {mc2_path} folder and its contents...")
-            cmd = ['rm', '-rf', mc2_path]
-            del_mc2 = subprocess.run(cmd,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.STDOUT)
-
-    if os.path.isfile(recon_yaml):
-        recon_config = prmMod.read_yaml(project_name=project_name,
-                                        filename=recon_yaml)
-        recon_path = recon_config.params['System']['output_path']
-        if os.path.isdir(recon_path):
-            logger(f"Deleting intermediary IMOD files...")
-            files = glob(recon_path + 'stack*/*.*~') + \
-                glob(recon_path + 'stack*/*_full_rec.*')
-            cmd = ['rm', *files]
-            del_recon = subprocess.run(cmd,
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.STDOUT)
-
-
-def run_all():
-    """
-    Method to run all four processes in one go using default settings.
-    """
-
-    logger = logMod.Logger()
-
-    # Collect raw images and produce master metadata
-    logger("Collecting raw images...")
-    get_master_metadata()
-
-    # Motion correction
-    logger("Motion correction in progress...")
-    create_mc2_yaml()
-    run_mc2()
-
-    # CTF estimation
-    logger("CTF estimation in progress...")
-    create_ctffind_yaml()
-    run_ctffind()
-
-    # Alignment
-    logger("Alignment in progress...")
-    create_align_yaml()
-    run_align()
-
-    # Reconstruction
-    logger("Reconstruction in progress...")
-    create_recon_yaml()
-    run_recon()
 
 
 def run_ctfsim():
@@ -1164,90 +1177,6 @@ def run_ctfsim():
         with open(subfolder_path + f'/{rootname}_{curr_ts:02}.rawtlt', 'w') as f:
             for angle in sorted(angle_list):
                 f.writelines(str(angle) + '\n')
-
-
-def update_savurecon_yaml(args):
-    """
-    Method to update yaml file for savu reconstruction --- if stacks already exist
-
-    Args:
-    args (Namespace) :: Namespace containing user inputs
-    """
-
-    parent_path = args.stacks_folder
-    rootname    = args.project_name if args.rootname is None else args.rootname
-    suffix      = args.suffix
-    ext         = args.extension
-    imod_suffix = args.imod_suffix
-    
-    # Find stack files
-    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}')
-
-    # Find rawtlt files
-    rawtlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
-
-    # Extract tilt series number
-    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'_{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
-
-    # Read in and update YAML parameters
-    recon_yaml_name = args.project_name + '_savurecon.yaml'
-    recon_params = prmMod.read_yaml(project_name=args.project_name,
-                                    filename=recon_yaml_name)
-
-    recon_params.params['System']['process_list'] = ts_list
-    recon_params.params['Savu']['setup']['tilt_angles'] = rawtlt_file_list
-    recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
-
-    # Change centre of rotation to centre of image by default
-    centre_of_rotation = []
-    for image in recon_params.params['Savu']['setup']['aligned_projections']:
-        mrc = mrcfile.open(image)
-        centre_of_rotation.append(float(mrc.header["nx"]/2)) # xdim/2
-    recon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
-
-    # Write out YAML file
-    with open(recon_yaml_name, 'w') as f:
-        yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
-
-
-def create_savurecon_yaml():
-    """
-    Subroutine to create new yaml file for Savu reconstruction
-    """
-
-    # Parse user inputs
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
-    parser.add_argument("stacks_folder",
-                        type=str,
-                        help="Path to parent folder with stacks")
-    parser.add_argument("-rn", "--rootname",
-                        type=str,
-                        help="Rootname of current project (required if different from project name)")
-    parser.add_argument("-s", "--suffix",
-                        type=str,
-                        default='',
-                        help="Suffix of project files")
-    parser.add_argument("-e", "--extension",
-                        type=str,
-                        default='mrc',
-                        help="File extension of stacks (Default: mrc)")
-    parser.add_argument("-is", "--imod_suffix",
-                        type=str,
-                        default='',
-                        help="IMOD file suffix")
-    parser.add_argument("-o", "--output_path",
-                        type=str,
-                        default="./savurecon/",
-                        help="Path to output folder (Default: ./savurecon/)")
-
-    args = parser.parse_args()
-
-    # Create the yaml file, then automatically update it
-    prmMod.new_savurecon_yaml(args)
-    update_savurecon_yaml(args)
 
 
 def run_recon_ext():
@@ -1361,3 +1290,73 @@ def run_rlf_deconv():
         f.set_data(deconvd_image)
 
     
+def cleanup():
+    """
+    Method to clean up project folder to save space
+    """
+
+    project_name = get_proj_name()
+
+    mc2_yaml = project_name + '_mc2.yaml'
+    recon_yaml = project_name + '_recon.yaml'
+
+    # Create Logger object
+    logger = logMod.Logger()
+
+    if os.path.isfile(mc2_yaml):
+        mc2_config = prmMod.read_yaml(project_name=project_name,
+                                      filename=mc2_yaml)
+        mc2_path = mc2_config.params['System']['output_path']
+        if os.path.isdir(mc2_path):
+            logger(f"Deleting {mc2_path} folder and its contents...")
+            cmd = ['rm', '-rf', mc2_path]
+            del_mc2 = subprocess.run(cmd,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT)
+
+    if os.path.isfile(recon_yaml):
+        recon_config = prmMod.read_yaml(project_name=project_name,
+                                        filename=recon_yaml)
+        recon_path = recon_config.params['System']['output_path']
+        if os.path.isdir(recon_path):
+            logger(f"Deleting intermediary IMOD files...")
+            files = glob(recon_path + 'stack*/*.*~') + \
+                glob(recon_path + 'stack*/*_full_rec.*')
+            cmd = ['rm', *files]
+            del_recon = subprocess.run(cmd,
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.STDOUT)
+
+
+def run_all():
+    """
+    Method to run all four processes in one go using default settings.
+    """
+
+    logger = logMod.Logger()
+
+    # Collect raw images and produce master metadata
+    logger("Collecting raw images...")
+    get_master_metadata()
+
+    # Motion correction
+    logger("Motion correction in progress...")
+    create_mc2_yaml()
+    run_mc2()
+
+    # CTF estimation
+    logger("CTF estimation in progress...")
+    create_ctffind_yaml()
+    run_ctffind()
+
+    # Alignment
+    logger("Alignment in progress...")
+    create_align_yaml()
+    run_align()
+
+    # Reconstruction
+    logger("Reconstruction in progress...")
+    create_recon_yaml()
+    run_recon()
+
+
