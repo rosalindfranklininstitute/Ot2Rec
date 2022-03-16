@@ -85,7 +85,7 @@ class Metadata:
             ts_subfolder_criterion = self.params['TS_folder_prefix'] + '_*'
             
         if self.params['source_TIFF']:
-            source_extension = 'tif'
+            source_extension = 'tif*'
         else:
             source_extension = 'mrc'
 
