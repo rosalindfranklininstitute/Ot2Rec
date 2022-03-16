@@ -119,7 +119,7 @@ class SavuRecon:
                 'add AstraReconGpu\n',
                 'mod 2.1 {}\n'.format(cor),
                 'mod 2.2 {}\n'.format(algo),
-                'add TiffSaver\n',
+                'add MrcSaver\n',
                 'mod 3.1 VOLUME_YZ\n',
                 'save {}/{}_{}.nxs\n'.format(subfolder, ts_name, algo),
                 'y\n',
