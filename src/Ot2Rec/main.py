@@ -78,6 +78,17 @@ def new_proj():
                         type=str,
                         default='mrc',
                         help="File extensions of raw images (Default: mrc).")
+    parser.add_argument("--no_mdoc",
+                        action="store_true",
+                        help="Use flag if mdoc(s) are not provided.")
+    parser.add_argument("-nf", "--num_frames",
+                        type=int,
+                        default=15,
+                        help="Target number of frames per image for conversion from EER (Default: 15).")
+    parser.add_argument("-np", "--num_procs",
+                        type=int,
+                        default=8,
+                        help="Number of CPUs used for parallel metadata acquisition (Default: 8).")
     parser.add_argument("--stack_field",
                         type=int,
                         default=0,
@@ -99,12 +110,13 @@ def new_proj():
 
     # Create empty Metadata object
     # Master yaml file will be read automatically
-    meta = mdMod.Metadata(project_name=args.project_name,
+    meta = mdMod.Metadata(args_in=args,
                           job_type='master')
 
     # Create master metadata and serialise it as yaml file
     meta.create_master_metadata()
-    meta.get_mc2_temp()
+    if not args.no_mdoc:
+        meta.get_mc2_temp()
 
     master_md_name = args.project_name + '_master_md.yaml'
     with open(master_md_name, 'w') as f:

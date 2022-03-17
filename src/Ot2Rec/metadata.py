@@ -43,7 +43,7 @@ class Metadata:
 
 
     def __init__(self,
-                 project_name: str,
+                 args_in: object,
                  job_type: str,
                  md_in=None,
     ):
@@ -51,12 +51,13 @@ class Metadata:
         Initialise Metadata object
 
         ARGS:
-        project_name :: name of the current project
+        args_in      :: arguments parsed using argparse
         job_type     :: what job is being done (motioncorr/ctffind/align/reconstruct)
         md_in        :: dictionary read from yaml file containing existing metadata
         """
 
-        self.project_name = project_name
+        self.args = args_in
+        self.project_name = self.args.project_name
         self.job_type = job_type
         self.metadata = md_in
 
@@ -223,8 +224,8 @@ class Metadata:
             ts_image_idx_list = df[df['ts']==curr_ts]['image_idx'].to_list()
             ts_num_frame_list = self.get_num_frames_parallel(func=self.get_num_frames,
                                                              filelist=ts_image_list,
-                                                             target_frames=10,
-                                                             np=12
+                                                             target_frames=self.args.num_frames,
+                                                             np=self.args.num_procs
             )
 
             for curr_idx in ts_image_idx_list:
