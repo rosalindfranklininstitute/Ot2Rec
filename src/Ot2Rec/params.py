@@ -288,6 +288,48 @@ def new_savurecon_yaml(args):
     with open(savurecon_yaml_name, 'w') as f:
         yaml.dump(savurecon_yaml_dict, f, indent=4, sort_keys=False)
 
+
+def new_aretomo_yaml(args):
+    """
+    Subroutine to create yaml file for aretomo
+
+    ARGS:
+    args (Namespace) :: Namespace containing user parameter inputs
+    """
+
+    aretomo_yaml_name = args.project_name + "_aretomo.yaml"
+
+    aretomo_yaml_dict = {
+        "System" : {
+            "process_list" : None,
+            "output_path" : args.output_path,
+            "output_rootname" : args.project_name if args.rootname is None else args.rootname,
+            "output_suffix" : args.suffix,
+        },
+
+        "AreTomo_setup" : {
+            "aretomo_mode" : None,
+            "input_mrc" : None,
+            "output_mrc" :None,
+            "tilt_angles" : None,
+            "output_binning" : None
+        },
+
+        "AreTomo_recon" : {
+            "volz" : None,
+            "sample_thickness" : None,
+            "pixel_size" : None,
+            "recon_algo" : None,
+        },
+
+        "AreTomo_kwargs" : {
+            # placeholder for extra kwargs
+        },
+    }
+
+    with open(aretomo_yaml_name, "w") as f:
+        yaml.dump(aretomo_yaml_dict, f, indent=4, sort_keys=False)
+
         
 def read_yaml(project_name: str,
               filename: str):
