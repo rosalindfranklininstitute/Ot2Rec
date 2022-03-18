@@ -29,16 +29,16 @@ import subprocess
 import numpy as np
 import mrcfile
 
-from . import params as prmMod
-from . import metadata as mdMod
-from . import motioncorr as mc2Mod
-from . import logger as logMod
-from . import ctffind as ctfMod
-from . import align as alignMod
-from . import recon as reconMod
-from . import ctfsim as ctfsimMod
-from . import savurecon as savuMod
-from . import rlf_deconv as rlfMod
+from Ot2Rec import params as prmMod
+from Ot2Rec import metadata as mdMod
+from Ot2Rec import motioncorr as mc2Mod
+from Ot2Rec import logger as logMod
+from Ot2Rec import ctffind as ctfMod
+from Ot2Rec import align as alignMod
+from Ot2Rec import recon as reconMod
+from Ot2Rec import ctfsim as ctfsimMod
+from Ot2Rec import savurecon as savuMod
+from Ot2Rec import rlf_deconv as rlfMod
 
 
 def get_proj_name():
@@ -1360,16 +1360,28 @@ def run_all():
     run_recon()
 
 
-def update_aretomo_yaml(args):
+def update_aretomo_yaml(args, kwargs):
     """ Placeholder 
     Method to update yaml file for AreTomo
 
     Args:
     args (Namespace) :: Namespace containing user inputs
+    kwargs (list) :: List of extra inputs, used for extra AreTomo arguments
+                     beyond those implemented here
     """
     # Read in YAML, set mundane things
     rootname    = args.project_name if args.rootname is None else args.rootname
     suffix      = args.suffix
+
+    aretomo_yaml_name = args.project_name + "_aretomo.yaml"
+    aretomo_params = prmMod.read_yaml(
+        project_name=args.project_name,
+        filename=aretomo_yaml_name
+    )
+
+    # Add optional kwargs
+    for param in kwargs:
+        aretomo_params.params["AreTomo_kwargs"][param] = vars(args).get(param)
 
 
     # set InMrc, OutMrc, AngFile
@@ -1378,7 +1390,8 @@ def update_aretomo_yaml(args):
     # if volZ == -1...
     # check that samplethickness and pixel size are set
     # update and write yaml file
-    pass
+    with open(aretomo_yaml_name, "w") as f:
+        yaml.dump(aretomo_params.params, f, indent=4, sort_keys=False)
 
 
 def create_aretomo_yaml():
@@ -1413,7 +1426,7 @@ def create_aretomo_yaml():
                             " depending on the workflow")
     parser.add_argument("-o", "--output_path",
                         type=str,
-                        default=",/aretomo/",
+                        default="./aretomo/",
                         help="Path to output folder (Default: ./aretomo)")
     parser.add_argument("-ta", "--tilt_angles",
                         type=str,
@@ -1460,15 +1473,17 @@ def create_aretomo_yaml():
     
     # Slightly hacky way of adding optional arbitrary arguments, like **kwargs in argparse
     parsed, unknown = parser.parse_known_args()
+    kwargs = []
     for arg in unknown:
         if arg.startswith(("-", "--")):
-            parser.add_argument(arg.split('=')[0], type=str)
+            parser.add_argument(arg, type=str)
+            kwargs.append(arg.split("--")[1])
     
     args = parser.parse_args()
 
     # Create the yaml file, then automatically update it
     prmMod.new_aretomo_yaml(args)
-    update_aretomo_yaml(args)
+    update_aretomo_yaml(args, kwargs)
 
 
 def run_aretomo():
