@@ -249,6 +249,8 @@ class Align:
                                  f'on stack{curr_ts}.')
             else:
                 self.stdout = run_newstack.stdout
+                self.update_align_metadata(ext=False)
+                self.export_metadata()
 
             
     """
