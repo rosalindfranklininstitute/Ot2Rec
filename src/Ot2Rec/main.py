@@ -1384,11 +1384,27 @@ def update_aretomo_yaml(args, kwargs):
         aretomo_params.params["AreTomo_kwargs"][param] = vars(args).get(param)
 
 
-    # set InMrc, OutMrc, AngFile
+    # set process list, InMrc, OutMrc, AngFile
+
+    # Add the rest of the argparse values to aretomo_params
+    aretomo_params.params["AreTomo_setup"]["aretomo_mode"] = args.aretomo_mode
+    aretomo_params.params["AreTomo_setup"]["output_binning"] = args.output_binning
+    aretomo_params.params["AreTomo_recon"]["volz"] = args.volz
+    aretomo_params.params["AreTomo_recon"]["sample_thickness"] = args.sample_thickness
+    aretomo_params.params["AreTomo_recon"]["pixel_size"] = args.pixel_size
+    aretomo_params.params["AreTomo_recon"]["recon_algo"] = args.recon_algo
 
     # for workflows with reconstruction, set VolZ unless already overwritten
-    # if volZ == -1...
-    # check that samplethickness and pixel size are set
+    if args.aretomo_mode > 0:
+        if args.volz == -1:
+            if args.sample_thickness < 0:
+                raise ValueError("Please set sample thickness in nm to automatically calculate VolZ")
+            if args.pixel_size < 0:
+                raise ValueError("Please set pixel size in nm to automatically calculate VolZ")
+            aretomo_params.params["AreTomo_recon"]["volz"] = int(
+                (args.sample_thickness * args.pixel_size) + 200)
+
+
     # update and write yaml file
     with open(aretomo_yaml_name, "w") as f:
         yaml.dump(aretomo_params.params, f, indent=4, sort_keys=False)
