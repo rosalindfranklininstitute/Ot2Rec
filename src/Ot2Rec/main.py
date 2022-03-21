@@ -685,7 +685,8 @@ def create_align_yaml_stacked():
 
 def create_stacks():
     """
-    Method to only create stacks using IMOD but omit alignment
+    Method to only create stacks using IMOD but omit alignment.
+    Separated from the rest of alignment so users can continue processing with other program.
     """
     run_align(full_align=False)
 
