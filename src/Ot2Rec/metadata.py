@@ -89,6 +89,7 @@ class Metadata:
              len(self.params['TS_folder_prefix']) > 0:
             ts_subfolder_criterion = self.params['TS_folder_prefix'] + '_*'
             
+
         # Source folder should not end with forward slash so remove them
         while self.params['source_folder'].endswith('/'):
             self.params['source_folder'] = self.params['source_folder'][:-1]

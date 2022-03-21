@@ -468,3 +468,64 @@ To start the reconstruction process, the user should use this command
 ```
 o2r.recon.run demo
 ```
+
+## Singularity
+Ot2Rec has been containerized using singularity to save time installing all of its software dependencies. 
+To get started, the container must first be built. 
+
+Make sure that singularity is installed locally, then run the following
+```
+cd path/to/ot2rec/repository/singularity
+sudo singularity build ot2rec.sif ot2rec.def
+```
+alternatively, the --fakeroot flag allows you to bypass sudo priviledges
+```
+singularity build --fakeroot ot2rec.sif ot2rec.def
+```
+
+Once built, it is important that you store the location of the .sif file in the following environment variable
+```
+export O2R_SIF=path/to/sif/file
+```
+
+Finally, a script has been included that allows the user to start executing O2tRec commands straight away. The arguments to this script are the same as the arguments used when running Ot2Rec locally, only without the points. 
+
+For example:
+```
+o2r.new demo
+```
+becomes
+```
+./o2r new demo
+```
+
+Similarly:
+```
+o2r.ctffind.run demo
+```
+becomes
+```
+./o2r ctffind run demo
+```
+
+### For developers
+Inside the ./o2r script is the command used to start the container and activate the runscript:
+```
+singularity run --nv --env DISPLAY=$DISPLAY,XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR -B $XDG_RUNTIME_DIR $O2R_SIF $1 $2 $3
+```
+
+There's a lot going on here so lets break it down:
+
+**singularity run** starts the container and runs whatever is defined in the runscript. If there is no runscript, then the container will start with an interactive shell (as if using the singularity shell command). 
+If you wish to access a shell prompt directly, you can use the **singularity shell** command (with the same parameters). 
+Alternatively, if you wish to execute a command not defined in the runscript, then the **singularity exec** command will do this for you.
+
+**--nv** sets up the container’s environment to use an NVIDIA GPU and the basic CUDA libraries 
+
+**--env** is used to set environment variables at runtime. In this case there are two variables we need to set:
+* **DISPLAY** is used by X11 to identify your display, this is required to run GUI applications such as IMOD.
+* **XDG_RUNTIME_DIR** is also used by X11 as a runtime directory to launch GUI applications.
+
+Without either of these IMOD won't launch. Fortunately all of the diamond systems have these set by default, but there may be issues when using a personal machine.
+
+**-B** is the bind flag used to mount directories to the container. This allows the container access to the directories and the files within. In this case, we mound the XDG_RUNTIME_DIR path to enable the container access when running GUI applications.

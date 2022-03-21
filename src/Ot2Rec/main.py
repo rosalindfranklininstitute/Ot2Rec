@@ -38,6 +38,7 @@ from . import align as alignMod
 from . import recon as reconMod
 from . import ctfsim as ctfsimMod
 from . import savurecon as savuMod
+from . import rlf_deconv as rlfMod
 
 
 def get_proj_name():
@@ -368,7 +369,7 @@ def create_ctffind_yaml():
     parser.add_argument("--exec_path",
                         type=str,
                         default='/opt/lmod/modules/ctffind/4.1.14/bin/ctffind',
-                        help="Path to MotionCor2 executable. (Default: /opt/lmod/modules/ctffind/4.1.14/bin/ctffind)")
+                        help="Path to CTFFind4 executable. (Default: /opt/lmod/modules/ctffind/4.1.14/bin/ctffind)")
     parser.add_argument("-v", "--voltage",
                         type=float,
                         default=300.0,
@@ -572,7 +573,7 @@ def create_align_yaml():
                         type=int,
                         nargs=2,
                         default=[24, 24],
-                        help="Patch-tracking: Number of patches to track in X and Y. (Default: 200, 200)")
+                        help="Patch-tracking: Number of patches to track in X and Y. (Default: 24, 24)")
     parser.add_argument("--num_iter",
                         type=int,
                         choices=[1, 2, 3, 4],
@@ -705,16 +706,21 @@ def run_align():
     Method to run IMOD newstack / alignment
     """
 
-    project_name = get_proj_name()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+
+    args = parser.parse_args()
 
     # Check if prerequisite files exist
-    align_yaml = project_name + '_align.yaml'
-    mc2_md_file = project_name + '_mc2_mdout.yaml'
+    align_yaml = args.project_name + '_align.yaml'
+    mc2_md_file = args.project_name + '_mc2_mdout.yaml'
 
     # Read in config and metadata
-    align_config = prmMod.read_yaml(project_name=project_name,
+    align_config = prmMod.read_yaml(project_name=args.project_name,
                                     filename=align_yaml)
-    mc2_md = mdMod.read_md_yaml(project_name=project_name,
+    mc2_md = mdMod.read_md_yaml(project_name=args.project_name,
                                 job_type='align',
                                 filename=mc2_md_file)
 
@@ -722,7 +728,7 @@ def run_align():
     logger = logMod.Logger()
 
     # Create Align object
-    align_obj = alignMod.Align(project_name=project_name,
+    align_obj = alignMod.Align(project_name=args.project_name,
                                md_in=mc2_md,
                                params_in=align_config,
                                logger_in=logger,
@@ -957,16 +963,21 @@ def run_recon():
     Method to run IMOD reconstruction
     """
 
-    project_name = get_proj_name()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+
+    args = parser.parse_args()
 
     # Check if prerequisite files exist
-    recon_yaml = project_name + '_recon.yaml'
-    align_md_file = project_name + '_align_mdout.yaml'
+    recon_yaml = args.project_name + '_recon.yaml'
+    align_md_file = args.project_name + '_align_mdout.yaml'
 
     # Read in config and metadata
-    recon_config = prmMod.read_yaml(project_name=project_name,
+    recon_config = prmMod.read_yaml(project_name=args.project_name,
                                     filename=recon_yaml)
-    align_md = mdMod.read_md_yaml(project_name=project_name,
+    align_md = mdMod.read_md_yaml(project_name=args.project_name,
                                   job_type='reconstruct',
                                   filename=align_md_file)
 
@@ -974,7 +985,7 @@ def run_recon():
     logger = logMod.Logger()
 
     # Create Recon object
-    recon_obj = reconMod.Recon(project_name=project_name,
+    recon_obj = reconMod.Recon(project_name=args.project_name,
                                md_in=align_md,
                                params_in=recon_config,
                                logger_in=logger,
@@ -983,72 +994,6 @@ def run_recon():
     # Run IMOD
     if not recon_obj.no_processes:
         recon_obj.recon_stack()
-
-
-def update_savurecon_yaml():
-    """
-    Subroutine to update yaml file for savu reconstruction
-    """
-
-    project_name = get_proj_name()
-
-    # Check if savurecon, align, and align_mdout yaml files exist
-    savurecon_yaml_name = project_name + '_savurecon.yaml'
-    align_yaml_name = project_name + '_align.yaml'
-    align_md_name = project_name + '_align_mdout.yaml'
-    if not os.path.isfile(savurecon_yaml_name):
-        raise IOError("Error in Ot2Rec.main.update_savurecon_yaml: reconstruction config file not found.")
-    if not os.path.isfile(align_yaml_name):
-        raise IOError("Error in Ot2Rec.main.update_savurecon_yaml: align.yaml file not found")
-    if not os.path.isfile(align_md_name):
-        raise IOError("Error in Ot2Rec.main.update_savurecon_yaml: alignment mdout file not found.")
-
-    # Read in alignment metadata (as Pandas dataframe)
-    with open(align_md_name, 'r') as f:
-        align_md_df = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))
-        align_md_ts = align_md_df['ts']
-        align_output = align_md_df['align_output']
-
-    savurecon_params = prmMod.read_yaml(project_name=project_name,
-                                    filename=savurecon_yaml_name)
-    align_params = prmMod.read_yaml(project_name=project_name,
-                                  filename=align_yaml_name)
-
-    # Get tilt angle files
-    align_tilt_files = []
-    for f in align_md_df['stack_output']:
-        align_tilt_files.append(f.replace('.st', '.tlt'))
-
-    # Update savurecon yaml
-    savurecon_params.params['System']['process_list'] = align_md_ts.sort_values(ascending=True).unique().tolist()
-    savurecon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
-    savurecon_params.params['System']['output_suffix'] = align_params.params['System']['output_suffix']
-    savurecon_params.params['Savu']['setup']['tilt_angles'] = align_tilt_files
-    savurecon_params.params['Savu']['setup']['aligned_projections'] = align_output.sort_values(ascending=True).unique().tolist()
-
-
-    # Change centre of rotation to centre of image by default
-    # This is now done in savurecon.py on an image-by-image basis, so the following 5 lines are deprecated
-    # centre_of_rotation = []
-    # for image in savurecon_params.params['Savu']['setup']['aligned_projections']:
-    #     mrc = mrcfile.open(image)
-    #     centre_of_rotation.append(float(mrc.header["ny"]/2)) # ydim/2
-    # savurecon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
-    
-    with open(savurecon_yaml_name, 'w') as f:
-        yaml.dump(savurecon_params.params, f, indent=4, sort_keys=False)
-
-
-    
-def create_savurecon_yaml():
-    """
-    Creates yaml for savu reconstruction
-    """
-    project_name = get_proj_name()
-
-    # Create savurecon yaml file and automatically update it
-    prmMod.new_savurecon_yaml(project_name)
-    update_savurecon_yaml()
 
 
 def run_savurecon():
@@ -1350,3 +1295,87 @@ def run_recon_ext():
     # Run IMOD
     if not recon_obj.no_processes:
         recon_obj.recon_stack(ext=True)
+
+
+def run_rlf_deconv():
+    """
+    Method to deconvolve image using a given kernel (point-spread function)
+    """
+    # Parse user inputs
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("image_path",
+                        type=str,
+                        help="Path to raw image.")
+    parser.add_argument("psf_path",
+                        type=str,
+                        help="Path to PSF for deconvolving raw image.")
+    parser.add_argument("--image_type",
+                        type=str,
+                        choices=['mrc', 'tiff'],
+                        default='mrc',
+                        help="File type of raw image. (mrc/tiff, Default: mrc)")
+    parser.add_argument("--psf_type",
+                        type=str,
+                        choices=['mrc', 'tiff'],
+                        default='mrc',
+                        help="File type of PSF image. (mrc/tiff, Default: mrc)")
+    parser.add_argument("output_path",
+                        type=str,
+                        help="Path to output (deconvolved) image.")
+    parser.add_argument("-d", "--device",
+                        type=str,
+                        choices=['gpu', 'cpu'],
+                        default='gpu',
+                        help="Device to be used for deconvolution. (gpu/cpu, Default: gpu)")
+    parser.add_argument("-n", "--niter",
+                        type=int,
+                        default=10,
+                        help="Max number of iterations used in deconvolution.")
+    parser.add_argument("--block",
+                        action="store_true",
+                        help="Use block-iterative algorithm for deconvolution. Use flag if True.")
+    parser.add_argument("--uint",
+                        action="store_true",
+                        help="Store results as UInt8. Use flag if True.")
+
+    args = parser.parse_args()
+
+    # Create logger object
+    logger = logMod.Logger()
+    
+    # Check provided files are present
+    try:
+        assert (len(glob(args.image_path)) > 0)
+    except:
+        logger("Error in main:run_rlf_deconv: Raw image doesn't exist. Aborting...")
+        return
+
+    try:
+        assert (len(glob(args.psf_path)) > 0)
+    except:
+        logger("Error in main:run_rlf_deconv: PSF image doesn't exist. Aborting...")
+        return
+
+    # Define deconvolution parameters and object
+    deconv_params = dict({
+        'method': args.device,
+        'niter': args.niter,
+        'useBlockAlgorithm': args.block,
+        'callbkTickFunc': True,
+        'resAsUint8': args.uint,
+    })
+
+    my_deconv = rlfMod.RLF_deconv(orig_path=args.image_path,
+                                  kernel_path=args.psf_path,
+                                  params_dict=deconv_params,
+                                  orig_mrc=args.image_type=='mrc',
+                                  kernel_mrc=args.psf_type=='mrc')
+
+    deconvd_image = my_deconv()
+    
+    # Save results
+    with mrcfile.new(args.output_path, overwrite=True) as f:
+        f.set_data(deconvd_image)
+
+    
