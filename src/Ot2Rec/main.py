@@ -75,13 +75,29 @@ def new_proj():
     parser.add_argument("-p", "--file_prefix",
                         type=str,
                         help="Common prefix of raw image files (Default: project name).")
-    parser.add_argument("-t", "--tiffs",
+    parser.add_argument("-e", "--ext",
+                        type=str,
+                        default='mrc',
+                        help="File extensions of raw images (Default: mrc).")
+    parser.add_argument("--no_mdoc",
                         action="store_true",
-                        help="Use this flag if the raw images are TIFFs.")
+                        help="Use flag if mdoc(s) are not provided.")
+    parser.add_argument("-nf", "--num_frames",
+                        type=int,
+                        default=15,
+                        help="Target number of frames per image for conversion from EER (Default: 15).")
+    parser.add_argument("-np", "--num_procs",
+                        type=int,
+                        default=8,
+                        help="Number of CPUs used for parallel metadata acquisition (Default: 8).")
     parser.add_argument("--stack_field",
                         type=int,
                         default=0,
                         help="Field number of tilt series indices (Default: 0).")
+    parser.add_argument("--index_field",
+                        type=int,
+                        default=1,
+                        help="Field number of image indices (Default: 1).")
     parser.add_argument("--tiltangle_field",
                         type=int,
                         default=2,
@@ -100,6 +116,8 @@ def new_proj():
 
     # Create master metadata and serialise it as yaml file
     meta.create_master_metadata()
+    if not args.no_mdoc:
+        meta.get_mc2_temp()
 
     master_md_name = args.project_name + '_master_md.yaml'
     with open(master_md_name, 'w') as f:
@@ -153,7 +171,7 @@ def update_mc2_yaml(args):
     mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
-    mc2_params.params['System']['source_TIFF'] = master_config['source_TIFF']
+    mc2_params.params['System']['filetype'] = master_config['filetype']
 
     with open(mc2_yaml_name, 'w') as f:
         yaml.dump(mc2_params.params, f, indent=4, sort_keys=False)
