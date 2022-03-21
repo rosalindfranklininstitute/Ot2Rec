@@ -683,7 +683,14 @@ def create_align_yaml_stacked():
     update_align_yaml_stacked()
 
 
-def run_align():
+def create_stacks():
+    """
+    Method to only create stacks using IMOD but omit alignment
+    """
+    run_align(full_align=False)
+
+
+def run_align(full_align=True):
     """
     Method to run IMOD newstack / alignment
     """
@@ -722,7 +729,8 @@ def run_align():
         align_obj.create_stack_folders()
         align_obj.create_rawtlt()
         align_obj.create_stack()
-        align_obj.align_stack()
+        if full_align:
+            align_obj.align_stack()
 
 
 def run_align_ext():
