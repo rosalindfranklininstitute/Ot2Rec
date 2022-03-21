@@ -110,7 +110,7 @@ def new_proj():
 
     # Create empty Metadata object
     # Master yaml file will be read automatically
-    meta = mdMod.Metadata(args_in=args,
+    meta = mdMod.Metadata(project_name=args.project_name,
                           job_type='master')
 
     # Create master metadata and serialise it as yaml file

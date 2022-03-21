@@ -53,6 +53,8 @@ class Motioncorr:
         self.meta = pd.DataFrame(md_in.metadata)
         self.meta = self.meta[self.meta['ts'].isin(self._process_list)]
         self._set_output_path()
+
+        self._dose_data_present = 'frame_dose' in self.meta.columns
         
         # Get index of available GPU
         self.use_gpu = self._get_gpu_nvidia_smi()
@@ -165,39 +167,49 @@ class Motioncorr:
             f"{self.params['System']['output_prefix']}_{row['ts']:03}_{row['angles']}.mrc", axis=1)
         
 
-    def _get_command(self, image):
+    def _get_command(self, image, extra_info=None):
         """
         Subroutine to get commands for running MotionCor2
 
         ARGS:
-        image (tuple): metadata for current image (in_path, out_path, #GPU)
+        image (tuple)      :: metadata for current image (in_path, out_path, #GPU)
+        extra_info (tuple) :: extra information (#EER frames, binning factor, frame dose rate)
 
         RETURNS:
         list
         """
 
         in_path, out_path, gpu_number = image
+        if extra_info is not None:
+            frame, ds, dose = extra_info
+            with open('mc2.tmp', 'w') as f:
+                f.write(f"{frame} {ds} {dose}")
 
         image_type = 'In' + self.params['System']['filetype'].capitalize()
 
         # Set FtBin parameter for MC2
         ftbin = self.params['MC2']['desired_pixel_size'] / self.params['MC2']['pixel_size']
 
-        return [self.params['MC2']['MC2_path'],
-                f'-{image_type}', in_path,
-                '-OutMrc', out_path,
-                '-Gpu', gpu_number,
-                '-GpuMemUsage', str(self.params['System']['gpu_memory_usage']),
-                '-Gain', self.params['MC2']['gain_reference'],
-                '-Tol', str(self.params['MC2']['tolerance']),
-                '-Patch', ','.join(str(i) for i in self.params['MC2']['patch_size']),
-                '-Iter', str(self.params['MC2']['max_iterations']),
-                '-Group', '1' if self.params['MC2']['use_subgroups'] else '0',
-                '-FtBin', str(ftbin),
-                '-PixSize', str(self.params['MC2']['pixel_size']),
-                '-Throw', str(self.params['MC2']['discard_frames_top']),
-                '-Trunc', str(self.params['MC2']['discard_frames_bottom']),
+        cmd = [self.params['MC2']['MC2_path'],
+               f'-{image_type}', in_path,
+               '-OutMrc', out_path,
+               '-Gpu', gpu_number,
+               '-GpuMemUsage', str(self.params['System']['gpu_memory_usage']),
+               '-Gain', self.params['MC2']['gain_reference'],
+               '-Tol', str(self.params['MC2']['tolerance']),
+               '-Patch', ','.join(str(i) for i in self.params['MC2']['patch_size']),
+               '-Iter', str(self.params['MC2']['max_iterations']),
+               '-Group', '1' if self.params['MC2']['use_subgroups'] else '0',
+               '-FtBin', str(ftbin),
+               '-PixSize', str(self.params['MC2']['pixel_size']),
+               '-Throw', str(self.params['MC2']['discard_frames_top']),
+               '-Trunc', str(self.params['MC2']['discard_frames_bottom']),
         ]
+
+        if extra_info is not None:
+            cmd += ['-FmIntFile', 'mc2.tmp']
+
+        return cmd
     
         
     @staticmethod
@@ -224,8 +236,13 @@ class Motioncorr:
         
             while len(self._curr_meta) > 0:
                 # Get commands to run MC2
-                mc_commands = [self._get_command((_in, _out, _gpu))
-                               for _in, _out, _gpu in zip(self._curr_meta.file_paths, self._curr_meta.output, self._curr_meta.gpu)]
+                if self._dose_data_present:
+                    mc_commands = [self._get_command((_in, _out, _gpu), (_frame, _ds, _dose))
+                                   for _in, _out, _gpu, _frame, _ds, _dose in zip(self._curr_meta.file_paths, self._curr_meta.output, self._curr_meta.gpu, self._curr_meta.num_frames, self._curr_meta.ds_factor, self._curr_meta.frame_dose)]
+                else:
+                    mc_commands = [self._get_command((_in, _out, _gpu))
+                                   for _in, _out, _gpu in zip(self._curr_meta.file_paths, self._curr_meta.output, self._curr_meta.gpu)]                    
+
                 jobs = (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) for cmd in mc_commands)
             
                 # run subprocess by chunks of GPU

@@ -43,7 +43,7 @@ class Metadata:
 
 
     def __init__(self,
-                 args_in: object,
+                 project_name: str,
                  job_type: str,
                  md_in=None,
     ):
@@ -51,13 +51,12 @@ class Metadata:
         Initialise Metadata object
 
         ARGS:
-        args_in      :: arguments parsed using argparse
+        project_name :: project name
         job_type     :: what job is being done (motioncorr/ctffind/align/reconstruct)
         md_in        :: dictionary read from yaml file containing existing metadata
         """
 
-        self.args = args_in
-        self.project_name = self.args.project_name
+        self.project_name = project_name
         self.job_type = job_type
         self.metadata = md_in
 
