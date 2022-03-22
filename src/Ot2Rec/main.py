@@ -74,6 +74,8 @@ def new_proj():
 
     # Create master metadata and serialise it as yaml file
     meta.create_master_metadata()
+    if not args.no_mdoc:
+        meta.get_mc2_temp()
 
     master_md_name = args.project_name + '_master_md.yaml'
     with open(master_md_name, 'w') as f:
@@ -127,7 +129,7 @@ def update_mc2_yaml(args):
     mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
-    mc2_params.params['System']['source_TIFF'] = master_config['source_TIFF']
+    mc2_params.params['System']['filetype'] = master_config['filetype']
 
     with open(mc2_yaml_name, 'w') as f:
         yaml.dump(mc2_params.params, f, indent=4, sort_keys=False)

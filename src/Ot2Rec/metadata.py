@@ -15,6 +15,11 @@
 
 import yaml
 import os
+import re
+import itertools
+from functools import partial
+import multiprocessing as mp
+import subprocess
 from glob import glob
 import pandas as pd
 from icecream import ic
@@ -46,7 +51,7 @@ class Metadata:
         Initialise Metadata object
 
         ARGS:
-        project_name :: name of the current project
+        project_name :: project name
         job_type     :: what job is being done (motioncorr/ctffind/align/reconstruct)
         md_in        :: dictionary read from yaml file containing existing metadata
         """
@@ -84,10 +89,6 @@ class Metadata:
              len(self.params['TS_folder_prefix']) > 0:
             ts_subfolder_criterion = self.params['TS_folder_prefix'] + '_*'
             
-        if self.params['source_TIFF']:
-            source_extension = 'tif*'
-        else:
-            source_extension = 'mrc'
 
         # Source folder should not end with forward slash so remove them
         while self.params['source_folder'].endswith('/'):
@@ -95,23 +96,25 @@ class Metadata:
         
         # Find files and check
         if len(self.params['TS_folder_prefix']) > 0:
-            raw_images_list = glob("{}/{}/*.{}".format(self.params['source_folder'],
-                                                       ts_subfolder_criterion,
-                                                       source_extension)
+            raw_images_list = glob("{}/{}/{}_*.{}".format(self.params['source_folder'],
+                                                         ts_subfolder_criterion,
+                                                         self.params['file_prefix'],
+                                                         self.params['filetype'])
             )
         else:
-            raw_images_list = glob("{}/*.{}".format(self.params['source_folder'],
-                                                    source_extension)
+            raw_images_list = glob("{}/{}_*.{}".format(self.params['source_folder'],
+                                                       self.params['file_prefix'],
+                                                       self.params['filetype'])
             )
             
         if (len(raw_images_list) == 0):
             raise IOError("Error in Ot2Rec.metadata.Metadata.create_master_metadata: No vaild files found using given criteria.")
 
         # Convert potentially relative file paths to absolute paths
-        raw_images_list = [os.path.abspath(image) for image in raw_images_list]
+        raw_images_list = sorted([os.path.abspath(image) for image in raw_images_list])
 
         # Extract information from image file names
-        self.image_paths, self.tilt_series, self.tilt_angles = [], [], []
+        self.image_paths, self.tilt_series, self.image_idx, self.tilt_angles = [], [], [], []
         for curr_image in raw_images_list:
             self.image_paths.append(curr_image)
 
@@ -126,10 +129,18 @@ class Metadata:
                 raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt series number from file path {curr_image}.")
             self.tilt_series.append(ts_index)
 
+            # Extract image index number
+            try:
+                idx = int(''.join(i for i in split_path_name[self.params['image_index_field']+prefix_length] if i.isdigit()))
+            except IndexError or ValueError:
+                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt series number from file path {curr_image}.")
+            self.image_idx.append(idx)
+            
+
             # Extract tilt angle
             try:
                 tilt_angle = float(split_path_name[self.params['image_tiltangle_field']+prefix_length].replace(
-                    f'.{source_extension}', '').replace('[', '').replace(']', ''))
+                    f".{self.params['filetype']}", '').replace('[', '').replace(']', ''))
             except IndexError or ValueError as ierr:
                 raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt angle from file path {curr_image}.")
             self.tilt_angles.append(tilt_angle)
@@ -137,8 +148,98 @@ class Metadata:
         # Save metadata as a dictionary --- easier to dump as yaml
         self.metadata = dict(file_paths=self.image_paths,
                              ts=[int(i) for i in self.tilt_series],
+                             image_idx=[int(i) for i in self.image_idx],
                              angles=self.tilt_angles)
 
+    @staticmethod
+    def get_num_frames(curr_file, target_frames):
+        """
+        curr_file (str)     :: path to current file 
+        target_frames (int) :: target number of frames in the 'mrc'
+        """
+        
+        command = ["header", curr_file]
+        text = subprocess.run(command, capture_output=True)
+
+        text_split = str(text.stdout).split('\\n')
+
+        r = re.compile('^\s*Number')
+        line = list(filter(r.match, text_split))[0].lstrip()
+
+        num_frames = int(re.split('\s+', line)[-1])
+        sampling = max(1, num_frames // target_frames)
+
+        return [num_frames, sampling]
+
+
+    @staticmethod
+    def get_num_frames_parallel(func, filelist, target_frames=15, np=8):
+        """
+        func (func)     :: function to be parallelised
+        filelist (list) :: list of image files to be passed into the function
+        """
+        func_filelist = partial(func, target_frames=target_frames)
+        with mp.Pool(np) as p:
+            result = p.map(func_filelist, filelist)
+            
+        return result
+
+
+    @staticmethod
+    def get_ts_dose(mdoc_in, start=0):
+        with open(mdoc_in, 'r') as f:
+            lines = f.readlines()
+            lines = [line.rstrip() for line in lines]
+
+        blocks = [list(y) for x, y in itertools.groupby(lines, lambda z: z == '') if not x]
+        ts_all_info = [block for block in blocks if block[0].startswith(r'[ZValue')]
+
+        ts_dose_dict = dict()
+        for frame_idx in range(len(ts_all_info)):
+            file_idx = frame_idx + start
+        
+            image = ts_all_info[frame_idx]
+            image_split = [re.split('\s*=\s*', line) for line in image]
+            image_split_t = list(map(list, zip(*image_split)))
+            image_dict = dict(zip(image_split_t[0], image_split_t[1]))
+
+            ts_dose_dict[file_idx] = float(image_dict['ExposureDose'])
+
+        return ts_dose_dict
+    
+
+    def get_mc2_temp(self):
+        df = pd.DataFrame(self.metadata)
+        base_folder = '/'.join(df.file_paths.values[0].split('/')[:-1])
+
+        df['num_frames'] = None
+        df['ds_factor'] = None
+        df['frame_dose'] = None
+        for curr_ts in list(set(df.ts)):
+            ic(curr_ts)
+            mdoc_path = f"{base_folder}/{self.params['file_prefix']}_" + str(curr_ts) + ".mdoc"
+            ts_dose_dict = self.get_ts_dose(mdoc_path, 1)
+
+            ts_image_list = df[df['ts']==curr_ts]['file_paths'].to_list()
+            ts_image_idx_list = df[df['ts']==curr_ts]['image_idx'].to_list()
+            ts_num_frame_list = self.get_num_frames_parallel(func=self.get_num_frames,
+                                                             filelist=ts_image_list,
+                                                             target_frames=self.args.num_frames,
+                                                             np=self.args.num_procs
+            )
+
+            for curr_idx in ts_image_idx_list:
+                nf, dsf = ts_num_frame_list[curr_idx-1]
+                df.loc[(df.ts==curr_ts) & (df.image_idx==curr_idx), 'num_frames'] = nf
+                df.loc[(df.ts==curr_ts) & (df.image_idx==curr_idx), 'ds_factor'] = dsf
+                df.loc[(df.ts==curr_ts) & (df.image_idx==curr_idx), 'frame_dose'] = ts_dose_dict[curr_idx] / nf
+
+            ic(df.loc[df.ts==curr_ts])
+
+        self.metadata['num_frames'] = df.num_frames.to_list()
+        self.metadata['ds_factor'] = df.ds_factor.to_list()
+        self.metadata['frame_dose'] = df.frame_dose.to_list()
+        
         
 def read_md_yaml(project_name: str,
                  job_type: str,
