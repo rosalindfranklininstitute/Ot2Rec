@@ -126,3 +126,17 @@ class UserArgsTest(unittest.TestCase):
         self.assertTrue(args.no_robust_fitting)
         self.assertTrue(args.no_weight_contours)
         
+
+    def test_args_align_ext(self):
+        """
+        Method to test O2R.user_args:get_args_align_ext function
+        """
+        parser = uaMod.get_args_align_ext()
+        args = parser.parse_args(["test", "", "1.0"])
+
+        self.assertEqual(args.project_name, "test")
+        self.assertEqual(args.parent_path, "")
+        self.assertEqual(args.pixel_res, 1.0)
+
+        self.assertEqual(args.rootname, None)
+        self.assertEqual(args.suffix, None)
