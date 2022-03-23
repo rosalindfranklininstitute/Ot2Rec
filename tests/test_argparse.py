@@ -69,3 +69,25 @@ class UserArgsTest(unittest.TestCase):
         self.assertTrue(args.no_subgroups)
         
         
+    def test_args_ctffind(self):
+        """
+        Method to test O2R.user_args:get_args_ctffind function
+        """
+        parser = uaMod.get_args_ctffind()
+        args = parser.parse_args(["test"])
+
+        self.assertEqual(args.project_name, "test")
+
+        self.assertEqual(args.output_folder, "./ctffind/")
+        self.assertEqual(args.file_prefix, None)
+        self.assertEqual(args.exec_path, "/opt/lmod/modules/ctffind/4.1.14/bin/ctffind")
+        self.assertEqual(args.voltage, 300)
+        self.assertEqual(args.spherical_aberration, 2.7)
+        self.assertEqual(args.amp_contrast, 0.8)
+        self.assertEqual(args.spec_size, 512)
+        self.assertEqual(args.res_range, [30, 5])
+        self.assertEqual(args.defocus_range, [5000, 50000, 500])
+        self.assertEqual(args.astigm_type, None)
+        self.assertFalse(args.exhaustive_search)
+        self.assertEqual(args.astigm_restraint, None)
+        self.assertFalse(args.phase_shift)
