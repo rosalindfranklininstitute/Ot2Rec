@@ -32,7 +32,8 @@ class ParamsTest(unittest.TestCase):
     """
 
     def setUp(self):
-        test = pMod.Params(project_name="test")
+        self.proj_name = "test"
+        test = pMod.Params(project_name=self.proj_name)
 
 
     def tearDown(self):
@@ -105,3 +106,19 @@ class ParamsTest(unittest.TestCase):
     
         out_file = pl.Path(f"{args.project_name}_recon.yaml")
         self.assertTrue(out_file.is_file())
+
+
+    def test_savurecon_yaml(self):
+        """
+        Method to test O2R.params:new_savurecon_yaml function
+        """
+        parser = uaMod.get_args_savurecon()
+        args = parser.parse_args(["test", ""])
+
+        pMod.new_savurecon_yaml(args)
+    
+        out_file = pl.Path(f"{args.project_name}_savurecon.yaml")
+        self.assertTrue(out_file.is_file())
+
+
+    
