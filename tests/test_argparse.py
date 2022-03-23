@@ -38,8 +38,9 @@ class UserArgsTest(unittest.TestCase):
         self.assertEqual(args.source_folder, "../raw/")
         self.assertEqual(args.folder_prefix, "")
         self.assertEqual(args.file_prefix, None)
-        self.assertFalse(args.tiffs)
+        self.assertEqual(args.ext, "mrc")
         self.assertEqual(args.stack_field, 0)
+        self.assertEqual(args.index_field, 1)
         self.assertEqual(args.tiltangle_field, 2)
 
 
