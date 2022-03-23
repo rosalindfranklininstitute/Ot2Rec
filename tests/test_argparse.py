@@ -192,5 +192,22 @@ class UserArgsTest(unittest.TestCase):
         self.assertEqual(args.extension, "mrc")
         self.assertEqual(args.imod_suffix, "")
         self.assertEqual(args.output_path, "./savurecon/")
-        
 
+        
+    def test_args_rldeconv(self):
+        """
+        Method to test O2R.user_args:get_args_rldeconv function
+        """
+        parser = uaMod.get_args_rldeconv()
+        args = parser.parse_args(["", "", ""])
+
+        self.assertEqual(args.image_path, "")
+        self.assertEqual(args.psf_path, "")
+        self.assertEqual(args.output_path, "")
+
+        self.assertEqual(args.image_type, "mrc")
+        self.assertEqual(args.psf_type, "mrc")
+        self.assertEqual(args.device, "gpu")
+        self.assertEqual(args.niter, 10)
+        self.assertFalse(args.block)
+        self.assertFalse(args.uint)
