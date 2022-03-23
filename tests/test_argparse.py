@@ -162,4 +162,17 @@ class UserArgsTest(unittest.TestCase):
         self.assertEqual(args.trimvol_reorient, 'rotate')
         
         
-        
+    def test_args_ctfsim(self):
+        """
+        Method to test O2R.user_args:get_args_ctfsim function
+        """
+        parser = uaMod.get_args_ctfsim()
+        args = parser.parse_args(["test", "1.0", "10"])
+
+        self.assertEqual(args.project_name, "test")
+        self.assertEqual(args.pixel_res, 1.0)
+        self.assertEqual(args.ds_factor, 10)
+
+        self.assertEqual(args.rootname, None)
+        self.assertEqual(args.dims, [100, 100])
+    
