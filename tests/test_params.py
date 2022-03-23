@@ -117,6 +117,7 @@ class ParamsTest(unittest.TestCase):
         """
         Method to test O2R.params:read_yaml function
         """
+        self.test_savurecon_yaml()
         target_file = f"./{self.proj_name}_savurecon.yaml"
         test_obj = pMod.read_yaml(project_name=self.proj_name,
                                   filename=target_file,
