@@ -79,3 +79,18 @@ class ParamsTest(unittest.TestCase):
     
         out_file = pl.Path(f"{args.project_name}_ctffind.yaml")
         self.assertTrue(out_file.is_file())
+
+        
+    def test_align_yaml(self):
+        """
+        Method to test O2R.params:new_align_yaml function
+        """
+        parser = uaMod.get_args_align()
+        args = parser.parse_args(["test", "-90.0"])
+
+        pMod.new_align_yaml(args)
+    
+        out_file = pl.Path(f"{args.project_name}_align.yaml")
+        self.assertTrue(out_file.is_file())
+
+    
