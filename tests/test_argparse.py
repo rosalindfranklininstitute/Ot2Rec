@@ -91,3 +91,38 @@ class UserArgsTest(unittest.TestCase):
         self.assertFalse(args.exhaustive_search)
         self.assertEqual(args.astigm_restraint, None)
         self.assertFalse(args.phase_shift)
+
+
+    def test_args_align(self):
+        """
+        Method to test O2R.user_args:get_args_align function
+        """
+        parser = uaMod.get_args_align()
+        args = parser.parse_args(["test", "-90.0"])
+
+        self.assertEqual(args.project_name, "test")
+        self.assertEqual(args.rot_angle, -90)
+
+        self.assertEqual(args.output_folder, "./stacks/")
+        self.assertEqual(args.file_prefix, None)
+        self.assertEqual(args.file_suffix, '')
+        self.assertTrue(args.no_rawtlt)
+        self.assertEqual(args.fiducial_size, 0)
+        self.assertEqual(args.adoc_template, '/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc')
+        self.assertEqual(args.stack_bin_factor, 4)
+        self.assertFalse(args.delete_old_files)
+        self.assertFalse(args.remove_xrays)
+        self.assertEqual(args.coarse_align_bin_factor, 4)
+        self.assertEqual(args.patch_sizes, [200, 200])
+        self.assertEqual(args.num_patches, [24, 24])
+        self.assertEqual(args.num_iter, 4)
+        self.assertEqual(args.limits_on_shift, [2, 2])
+        self.assertFalse(args.adjust_tilt_angles)
+        self.assertEqual(args.num_surfaces, 1)
+        self.assertEqual(args.mag_option, 'fixed')
+        self.assertEqual(args.tilt_option, 'fixed')
+        self.assertEqual(args.rot_option, 'group')
+        self.assertEqual(args.beam_tilt_option, 'fixed')
+        self.assertTrue(args.no_robust_fitting)
+        self.assertTrue(args.no_weight_contours)
+        
