@@ -176,3 +176,21 @@ class UserArgsTest(unittest.TestCase):
         self.assertEqual(args.rootname, None)
         self.assertEqual(args.dims, [100, 100])
     
+
+    def test_args_savurecon(self):
+        """
+        Method to test O2R.user_args:get_args_savurecon function
+        """
+        parser = uaMod.get_args_savurecon()
+        args = parser.parse_args(["test", ""])
+
+        self.assertEqual(args.project_name, "test")
+        self.assertEqual(args.stacks_folder, "")
+
+        self.assertEqual(args.rootname, None)
+        self.assertEqual(args.suffix, "")
+        self.assertEqual(args.extension, "mrc")
+        self.assertEqual(args.imod_suffix, "")
+        self.assertEqual(args.output_path, "./savurecon/")
+        
+
