@@ -53,3 +53,16 @@ class ParamsTest(unittest.TestCase):
 
         out_file = pl.Path(f"{args.project_name}_proj.yaml")
         self.assertTrue(out_file.is_file())
+
+
+    def test_mc2_yaml(self):
+        """
+        Method to test O2R.params:new_mc2_yaml function
+        """
+        parser = uaMod.get_args_mc2()
+        args = parser.parse_args(["test", "1.0"])
+
+        pMod.new_mc2_yaml(args)
+    
+        out_file = pl.Path(f"{args.project_name}_mc2.yaml")
+        self.assertTrue(out_file.is_file())
