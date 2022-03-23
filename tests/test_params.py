@@ -33,15 +33,7 @@ class ParamsTest(unittest.TestCase):
 
     def setUp(self):
         self.proj_name = "test"
-        test = pMod.Params(project_name=self.proj_name)
 
-
-    def tearDown(self):
-        yaml_list = glob("./*.yaml")
-        if len(yaml_list) > 0:
-            for curr_file in yaml_list:
-                subprocess.run(["rm", f"{curr_file}"])
-        
 
     def test_master_yaml(self):
         """
@@ -121,4 +113,24 @@ class ParamsTest(unittest.TestCase):
         self.assertTrue(out_file.is_file())
 
 
-    
+    def test_read_yaml(self):
+        """
+        Method to test O2R.params:read_yaml function
+        """
+        target_file = f"./{self.proj_name}_savurecon.yaml"
+        test_obj = pMod.read_yaml(project_name=self.proj_name,
+                                  filename=target_file,
+        )
+
+        # Randomly check if output path matches with expectation (default)
+        self.assertEqual(test_obj.params["System"]["output_path"], "./savurecon/")
+
+        
+    def tearDown(self):
+        yaml_list = glob("./*.yaml")
+        if len(yaml_list) > 0:
+            for curr_file in yaml_list:
+                subprocess.run(["rm", f"{curr_file}"])
+        
+
+        
