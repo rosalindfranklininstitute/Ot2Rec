@@ -66,3 +66,16 @@ class ParamsTest(unittest.TestCase):
     
         out_file = pl.Path(f"{args.project_name}_mc2.yaml")
         self.assertTrue(out_file.is_file())
+
+
+    def test_ctffind_yaml(self):
+        """
+        Method to test O2R.params:new_ctffind_yaml function
+        """
+        parser = uaMod.get_args_ctffind()
+        args = parser.parse_args(["test"])
+
+        pMod.new_ctffind_yaml(args)
+    
+        out_file = pl.Path(f"{args.project_name}_ctffind.yaml")
+        self.assertTrue(out_file.is_file())
