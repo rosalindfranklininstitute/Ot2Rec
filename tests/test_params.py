@@ -94,3 +94,14 @@ class ParamsTest(unittest.TestCase):
         self.assertTrue(out_file.is_file())
 
     
+    def test_recon_yaml(self):
+        """
+        Method to test O2R.params:new_recon_yaml function
+        """
+        parser = uaMod.get_args_recon()
+        args = parser.parse_args(["test", "1500", "1500"])
+
+        pMod.new_recon_yaml(args)
+    
+        out_file = pl.Path(f"{args.project_name}_recon.yaml")
+        self.assertTrue(out_file.is_file())
