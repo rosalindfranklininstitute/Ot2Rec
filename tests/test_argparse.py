@@ -140,3 +140,26 @@ class UserArgsTest(unittest.TestCase):
 
         self.assertEqual(args.rootname, None)
         self.assertEqual(args.suffix, None)
+
+
+    def test_args_recon(self):
+        """
+        Method to test O2R.user_args:get_args_recon function
+        """
+        parser = uaMod.get_args_recon()
+        args = parser.parse_args(["test", "1500", "1500"])
+
+        self.assertEqual(args.project_name, "test")
+        self.assertEqual(args.unbinned_thickness, 1500)
+        self.assertEqual(args.thickness, 1500)
+
+        self.assertFalse(args.do_positioning)
+        self.assertFalse(args.correct_ctf)
+        self.assertFalse(args.erase_gold)
+        self.assertFalse(args.filtering)
+        self.assertEqual(args.bin_factor, 1)
+        self.assertTrue(args.no_trimvol)
+        self.assertEqual(args.trimvol_reorient, 'rotate')
+        
+        
+        
