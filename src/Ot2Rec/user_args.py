@@ -57,6 +57,8 @@ def get_args_new_proj():
                         type=int,
                         default=2,
                         help="Field number of tilt angles (Default: 2).")
+    parser.add_argument("--no_mdoc",
+                        action="store_true",)
 
     return parser
 
