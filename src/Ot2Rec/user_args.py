@@ -41,13 +41,18 @@ def get_args_new_proj():
     parser.add_argument("-p", "--file_prefix",
                         type=str,
                         help="Common prefix of raw image files (Default: project name).")
-    parser.add_argument("-t", "--tiffs",
-                        action="store_true",
-                        help="Use this flag if the raw images are TIFFs.")
+    parser.add_argument("--ext",
+                        type=str,
+                        default='mrc',
+                        help="File extension of raw images.")
     parser.add_argument("--stack_field",
                         type=int,
                         default=0,
                         help="Field number of tilt series indices (Default: 0).")
+    parser.add_argument("--index_field",
+                        type=int,
+                        default=1,
+                        help="Field number of image indices (Default: 1).")
     parser.add_argument("--tiltangle_field",
                         type=int,
                         default=2,
