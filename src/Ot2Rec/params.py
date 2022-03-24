@@ -58,8 +58,9 @@ def new_master_yaml(args):
         'TS_folder_prefix': args.folder_prefix,
         'file_prefix': args.project_name if args.file_prefix is None else args.file_prefix,
         'image_stack_field': args.stack_field,
+        'image_index_field': args.index_field,
         'image_tiltangle_field': args.tiltangle_field,
-        'source_TIFF': args.tiffs,
+        'filetype': args.ext,
     }
 
     with open(master_yaml_name, 'w') as f:
