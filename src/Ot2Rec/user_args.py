@@ -504,3 +504,97 @@ def get_args_rldeconv():
                         help="Store results as UInt8. Use flag if True.")
     
     return parser
+
+
+def get_args_aretomo():
+    """
+    Function to add arguments to parser for AreTomo
+
+    ARGS:
+    None
+
+    OUTPUTs:
+    Namespace
+    kwargs (list) : list of extra parameters to pass to AreTomo, empty if none are passed
+
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    parser.add_argument("aretomo_mode",
+                        type=int,
+                        default=-1,
+                        help=
+                            "Processes to be run in AreTomo, must be set."
+                            " 0: alignment only,"
+                            " 1: reconstruction only,"
+                            " 2: alignment + reconstruction")
+    parser.add_argument("-rn", "--rootname",
+                        type=str,
+                        help="Rootname of current project (required if different from project name)")
+    parser.add_argument("-s", "--suffix",
+                        type=str,
+                        default='',
+                        help="Suffix of project files")
+    parser.add_argument("-in", "--input_mrc",
+                        type=str,
+                        help=
+                            "Input tilt series images (aligned or unaligned"
+                            " depending on the workflow")
+    parser.add_argument("-o", "--output_path",
+                        type=str,
+                        default="./aretomo/",
+                        help="Path to output folder (Default: ./aretomo)")
+    parser.add_argument("-ta", "--tilt_angles",
+                        type=str,
+                        help=
+                            "Path to text file containing tilt angles, usually .tlt."
+                            " Defaults to <project_name>_<suffix>.tlt")
+    parser.add_argument("--volz",
+                        type=int,
+                        default=-1,
+                        help=
+                            "Z-height of reconstructed volume in voxels (unbinned),"
+                            " ignored if only alignment is performed."
+                            " Defaults to -1, where this will be set automatically"
+                            " by the rule of thumb."
+                            " VolZ = 200 + sample_thickness * pixel_size"
+                            " Setting value > 0 overrides automatic setting")
+    parser.add_argument("--sample_thickness",
+                        type=float,
+                        default=-1,
+                        help=
+                            "Sample thickness in nm, used to set VolZ automatically."
+                            " Ignored if VolZ is set to >0, or only alignment is done")
+    parser.add_argument("--pixel_size",
+                        type=float,
+                        default=-1,
+                        help=
+                            "Pixel size in nm, used to set VolZ automatically,"
+                            " or if dose correction is enabled."
+                            " Ignored if VolZ is set to >0, or in alignment if"
+                            " dose correction is not applied")
+    parser.add_argument("--output_binning",
+                        type=int,
+                        default=4,
+                        help=
+                            "Binning to be applied to saved .mrc file."
+                            " Default = 4")
+    parser.add_argument("--recon_algo",
+                        type=int,
+                        default=0,
+                        help=
+                            "Reconstruction algorithm to be used."
+                            " 0: WBP (default),"
+                            " 1: SART")
+    
+    # Slightly hacky way of adding optional arbitrary arguments, like **kwargs in argparse
+    parsed, unknown = parser.parse_known_args()
+    kwargs = []
+    for arg in unknown:
+        if arg.startswith(("-", "--")):
+            parser.add_argument(arg, type=str)
+            kwargs.append(arg.split("--")[1])
+    
+    return parser, kwargs
