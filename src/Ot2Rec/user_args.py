@@ -78,6 +78,9 @@ def get_args_mc2():
     parser.add_argument("project_name",
                         type=str,
                         help="Name of current project")
+    parser.add_argument("pixel_size",
+                        type=float,
+                        help="Image pixel size in Angstroms.")
     parser.add_argument("-o", "--output_folder",
                         type=str,
                         default='./motioncor/',
@@ -103,9 +106,6 @@ def get_args_mc2():
     parser.add_argument("--gain",
                         type=str,
                         help="Path to gain reference file. (Default: None)")
-    parser.add_argument("pixel_size",
-                        type=float,
-                        help="Image pixel size in Angstroms.")
     parser.add_argument("--super_res",
                         action="store_true",
                         help="Use flag if images are super-resolution.")
@@ -218,6 +218,9 @@ def get_args_align():
     parser.add_argument("project_name",
                         type=str,
                         help="Name of current project")
+    parser.add_argument("rot_angle",
+                        type=float,
+                        help="Rotational angle of electron beam. Can be obtained from MDOC files.")
     parser.add_argument("-o", "--output_folder",
                         type=str,
                         default='./stacks/',
@@ -232,9 +235,6 @@ def get_args_align():
     parser.add_argument("--no_rawtlt",
                         action="store_true",
                         help="Use information in filenames to determine tilt angles (rather than using .rawtlt files).")
-    parser.add_argument("rot_angle",
-                        type=float,
-                        help="Rotational angle of electron beam. Can be obtained from MDOC files.")
     parser.add_argument("-fs", "--fiducial_size",
                         type=float,
                         default=0.0,
