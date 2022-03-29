@@ -103,7 +103,7 @@ def get_args_mc2():
     parser.add_argument("--gain",
                         type=str,
                         help="Path to gain reference file. (Default: None)")
-    parser.add_argument("pixel_size",
+    parser.add_argument("--pixel_size",
                         type=float,
                         help="Image pixel size in Angstroms.")
     parser.add_argument("--super_res",
