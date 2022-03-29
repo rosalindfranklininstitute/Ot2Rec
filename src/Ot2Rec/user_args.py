@@ -329,18 +329,107 @@ def get_args_align_ext():
     parser.add_argument("project_name",
                         type=str,
                         help="Name of current project")
-    parser.add_argument("parent_path",
-                        type=str,
-                        help="Path to parent folder with stacks in")
-    parser.add_argument("pixel_res",
+    parser.add_argument("rot_angle",
                         type=float,
-                        help="Pixel resolution of motion-corrected images (in Angstroms)")
-    parser.add_argument("-rn", "--rootname",
+                        help="Rotational angle of electron beam. Can be obtained from MDOC files.")
+    parser.add_argument("pixel_size",
+                        type=float,
+                        help="Image pixel size in Angstroms.")
+    parser.add_argument("-i", "--input_folder",
                         type=str,
-                        help="Rootname of current project (required if different from project name)")
-    parser.add_argument("-s", "--suffix",
+                        default='./stacks/',
+                        help="Path to folder for storing motion-corrected images (Default: ./stacks/)")
+    parser.add_argument("-o", "--output_folder",
                         type=str,
-                        help="Suffix of project files")
+                        default='./stacks/',
+                        help="Path to folder for storing motion-corrected images (Default: ./stacks/)")
+    parser.add_argument("-p", "--file_prefix",
+                        type=str,
+                        help="Common prefix of image files (Default: project name).")
+    parser.add_argument("-s", "--file_suffix",
+                        type=str,
+                        default='',
+                        help="Extra information attached as suffix to output filenames.")
+    parser.add_argument("--no_rawtlt",
+                        action="store_true",
+                        help="Use information in filenames to determine tilt angles (rather than using .rawtlt files).")
+    parser.add_argument("-fs", "--fiducial_size",
+                        type=float,
+                        default=0.0,
+                        help="Size (in nm) of gold fiducial particles. Ignore flag if no fiducial.")
+    parser.add_argument("--adoc_template",
+                        type=str,
+                        default="/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc",
+                        help="Path to template file of BatchRunTomo directives. (Default: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc)")
+    parser.add_argument("-b", "--stack_bin_factor",
+                        type=int,
+                        default=4,
+                        help="Stack: Raw image stacks downsampling factor. (Default: 4)")
+    parser.add_argument("--delete_old_files",
+                        action="store_true",
+                        help="Preprocessing: Remove original stack when excluding views. Use flag if True.")
+    parser.add_argument("--remove_xrays",
+                        action="store_true",
+                        help="Preprocessing: Attempt to remove X-rays and other artefacts. Use flag if True.")
+    parser.add_argument("-ba", "--coarse_align_bin_factor",
+                        type=int,
+                        default=4,
+                        help="Coarse-alignment: Coarse aligned stack binning. (Default: 4)")
+    parser.add_argument("--patch_sizes",
+                        type=int,
+                        nargs=2,
+                        default=[200, 200],
+                        help="Patch-tracking: Size (in pixels) in X and Y of patches to track. (Default: 200, 200)")
+    parser.add_argument("--num_patches",
+                        type=int,
+                        nargs=2,
+                        default=[24, 24],
+                        help="Patch-tracking: Number of patches to track in X and Y. (Default: 24, 24)")
+    parser.add_argument("--num_iter",
+                        type=int,
+                        choices=[1, 2, 3, 4],
+                        default=4,
+                        help="Patch-tracking: Number of iterations. (Max. 4, Default: 4)")
+    parser.add_argument("--limits_on_shift",
+                        type=int,
+                        nargs=2,
+                        default=[2, 2],
+                        help="Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment. (Default: 2, 2)")
+    parser.add_argument("--adjust_tilt_angles",
+                        action="store_true",
+                        help="Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset. Use flag if True.")
+    parser.add_argument("--num_surfaces",
+                        type=int,
+                        choices=[1, 2],
+                        default=1,
+                        help="Fine-alignment: Number of surface(s) for angle analysis. (1|2, Default: 1)")
+    parser.add_argument("--mag_option",
+                        type=str,
+                        choices=['all', 'group', 'fixed'],
+                        default='fixed',
+                        help="Fine-alignment: Type of magnification solution. (all|group|fixed, Default: fixed)")
+    parser.add_argument("--tilt_option",
+                        type=str,
+                        choices=['all', 'group', 'fixed'],
+                        default='fixed',
+                        help="Fine-alignment: Type of tilt-angle solution. (all|group|fixed, Default: fixed)")
+    parser.add_argument("--rot_option",
+                        type=str,
+                        choices=['all', 'group', 'one', 'fixed'],
+                        default='group',
+                        help="Fine-alignment: Type of rotation solution. (all|group|one|fixed, Default: group)")
+    parser.add_argument("--beam_tilt_option",
+                        type=str,
+                        choices=['fixed', 'search'],
+                        default='fixed',
+                        help="Fine-alignment: Type of beam-tilt solution. (fixed|search, Default: fixed)")
+    parser.add_argument("--no_robust_fitting",
+                        action="store_true",
+                        help="Fine-alignment: Do not use robust fitting. Use flag if True.")
+    parser.add_argument("--no_weight_contours",
+                        action="store_true",
+                        help="Fine-alignment: Do not apply weighting to entire contours from patch-tracking. Use flag if True.")
+
 
     return parser
 
