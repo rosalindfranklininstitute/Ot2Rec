@@ -141,7 +141,7 @@ def create_mc2_yaml():
     """
 
     # Parse user inputs
-    parser = ua.get_args_mc2()
+    parser = uaMod.get_args_mc2()
     args = parser.parse_args()
 
     # Create the yaml file, then automatically update it
@@ -965,7 +965,7 @@ def run_rlf_deconv():
     Method to deconvolve image using a given kernel (point-spread function)
     """
     # Parse user inputs
-    parser = ua.get_args_rldeconv()
+    parser = uaMod.get_args_rldeconv()
     args = parser.parse_args()
 
     # Create logger object
