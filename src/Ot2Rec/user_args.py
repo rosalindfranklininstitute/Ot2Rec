@@ -131,7 +131,7 @@ def get_args_mc2():
                         default=[5, 5, 20],
                         help="Size of patches used in alignment.")
     parser.add_argument("--no_subgroups",
-                        action="store_false",
+                        action="store_true",
                         help="Do not use subgroups in alignment.")
 
     return parser
@@ -230,7 +230,7 @@ def get_args_align():
                         default='',
                         help="Extra information attached as suffix to output filenames.")
     parser.add_argument("--no_rawtlt",
-                        action="store_false",
+                        action="store_true",
                         help="Use information in filenames to determine tilt angles (rather than using .rawtlt files).")
     parser.add_argument("rot_angle",
                         type=float,
@@ -306,10 +306,10 @@ def get_args_align():
                         default='fixed',
                         help="Fine-alignment: Type of beam-tilt solution. (fixed|search, Default: fixed)")
     parser.add_argument("--no_robust_fitting",
-                        action="store_false",
+                        action="store_true",
                         help="Fine-alignment: Do not use robust fitting. Use flag if True.")
     parser.add_argument("--no_weight_contours",
-                        action="store_false",
+                        action="store_true",
                         help="Fine-alignment: Do not apply weighting to entire contours from patch-tracking. Use flag if True.")
 
     return parser
@@ -382,7 +382,7 @@ def get_args_recon():
                         type=int,
                         help="Reconstruction: Thickness (in pixels) for reconstruction.")
     parser.add_argument("--no_trimvol",
-                        action="store_false",
+                        action="store_true",
                         help="Postprocessing: Do not run Trimvol on reconstruction. Use flag if True.")
     parser.add_argument("--trimvol_reorient",
                         type=str,

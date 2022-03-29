@@ -97,7 +97,7 @@ def new_mc2_yaml(args):
             'tolerance': args.tolerance,
             'max_iterations': args.max_iter,
             'patch_size': args.patch_size,
-            'use_subgroups': args.no_subgroups,
+            'use_subgroups': not args.no_subgroups,
         },
     }
         
@@ -164,7 +164,7 @@ def new_align_yaml(args):
         
         'BatchRunTomo': {
             'setup': {
-                'use_rawtlt': args.no_rawtlt,
+                'use_rawtlt': not args.no_rawtlt,
                 'pixel_size': None,
                 'rot_angle': args.rot_angle,
                 'gold_size': args.fiducial_size,
@@ -195,8 +195,8 @@ def new_align_yaml(args):
                 'tilt_option': args.tilt_option,
                 'rot_option': args.rot_option,
                 'beam_tilt_option': args.beam_tilt_option,
-                'use_robust_fitting': args.no_robust_fitting,
-                'weight_all_contours': args.no_weight_contours,
+                'use_robust_fitting': not args.no_robust_fitting,
+                'weight_all_contours': not args.no_weight_contours,
             },
         }
     }
@@ -248,7 +248,7 @@ def new_recon_yaml(args):
             },
 
             'postprocessing': {
-                'run_trimvol': args.no_trimvol,
+                'run_trimvol': not args.no_trimvol,
                 'trimvol_reorient': args.trimvol_reorient,
             },
         }
