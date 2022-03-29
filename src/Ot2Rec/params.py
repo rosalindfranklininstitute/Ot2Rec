@@ -85,7 +85,6 @@ def new_mc2_yaml(args):
             'use_gpu': 'auto' if not args.no_gpu else False,
             'jobs_per_gpu': args.jobs_per_gpu,
             'gpu_memory_usage': args.gpu_mem_usage,
-            'source_TIFF': None,
         },
         'MC2': {
             'MC2_path': args.exec_path,
