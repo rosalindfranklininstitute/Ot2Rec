@@ -103,7 +103,7 @@ def get_args_mc2():
     parser.add_argument("--gain",
                         type=str,
                         help="Path to gain reference file. (Default: None)")
-    parser.add_argument("--pixel_size",
+    parser.add_argument("pixel_size",
                         type=float,
                         help="Image pixel size in Angstroms.")
     parser.add_argument("--super_res",
@@ -232,7 +232,7 @@ def get_args_align():
     parser.add_argument("--no_rawtlt",
                         action="store_true",
                         help="Use information in filenames to determine tilt angles (rather than using .rawtlt files).")
-    parser.add_argument("--rot_angle",
+    parser.add_argument("rot_angle",
                         type=float,
                         help="Rotational angle of electron beam. Can be obtained from MDOC files.")
     parser.add_argument("-fs", "--fiducial_size",
