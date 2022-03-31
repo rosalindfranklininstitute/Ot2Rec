@@ -186,6 +186,8 @@ class Motioncorr:
                 f.write(f"{frame} {ds} {dose}")
 
         image_type = 'In' + self.params['System']['filetype'].capitalize()
+        if self.params['System']['filetype'] == 'tif':
+            image_type += 'f'
 
         # Set FtBin parameter for MC2
         ftbin = self.params['MC2']['desired_pixel_size'] / self.params['MC2']['pixel_size']

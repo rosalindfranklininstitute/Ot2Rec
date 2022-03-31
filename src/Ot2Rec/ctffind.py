@@ -16,6 +16,7 @@
 import os
 import subprocess
 import yaml
+from tqdm import tqdm
 import pandas as pd
 from icecream import ic
 
@@ -174,7 +175,9 @@ class ctffind():
         Method to run ctffind on tilt-series sequentially
         """
 
-        for index, curr_image in self.ctf_images.iterrows():
+        ts_list =  [i for i in self.ctf_images.iterrows()]
+        tqdm_iter = tqdm(ts_list, ncols=100)
+        for index, curr_image in tqdm_iter:
             # Get the command and inputs for current tilt-series
             self._get_ctffind_command(curr_image)
             ctffind_run = subprocess.run(self.cmd,
