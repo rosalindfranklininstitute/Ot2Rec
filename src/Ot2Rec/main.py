@@ -141,7 +141,7 @@ def create_mc2_yaml():
     """
 
     # Parse user inputs
-    parser = ua.get_args_mc2()
+    parser = uaMod.get_args_mc2()
     args = parser.parse_args()
 
     # Create the yaml file, then automatically update it
@@ -373,32 +373,29 @@ def create_align_yaml():
     update_align_yaml(args)
 
     
-def update_align_yaml_stacked():
+def update_align_yaml_stacked(args):
     """
     Method to update yaml file for IMOD newstack / alignment --- if stacks already exist
+
+    ARGS:
+    args (Namespace) :: User input parameters
     """
 
-    # Parse user inputs
-    parser = uaMod.get_args_align_ext()
-    args = parser.parse_args()
-
     project_name = args.project_name
-    parnet_path = args.parent_path
+    parent_path = args.input_folder
     assert (os.path.isdir(parent_path)), \
         "Error in main.update_align_yaml_stacked: IMOD parent folder not found."
     while parent_path.endswith('/'):
         parent_path = parent_path[:-1]
     
-    rootname = project_name
-    if args.rootname is not None:
-        while args.rootname.endswith('/'):
-            rootname = args.rootname[:-1]
+    rootname = args.file_prefix if args.file_prefix is not None else args.project_name
 
-    pixel_size = args.pixel_res
-    suffix = args.suffix if args.suffix is not None else ''
+    pixel_size = args.pixel_size
+    suffix = args.file_suffix if args.file_suffix is not None else ''
     
     
     # Find stack files
+    ic(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
 
     # Extract tilt series number
@@ -409,7 +406,7 @@ def update_align_yaml_stacked():
     align_params = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml_name)
 
-    align_params.params['System']['output_path'] = parent_path
+    align_params.params['System']['output_path'] = args.output_folder
     align_params.params['System']['output_rootname'] = rootname
     align_params.params['System']['output_suffix'] = suffix
     align_params.params['System']['process_list'] = ts_list
@@ -426,11 +423,13 @@ def create_align_yaml_stacked():
     prestack (bool) :: if stacks already exist
     """
 
-    project_name = get_proj_name()
+    # Parse user inputs
+    parser = uaMod.get_args_align_ext()
+    args = parser.parse_args()
 
     # Create the yaml file, then automatically update it
-    prmMod.new_align_yaml(project_name)
-    update_align_yaml_stacked()
+    prmMod.new_align_yaml(args)
+    update_align_yaml_stacked(args)
 
 
 def create_stacks():
@@ -965,7 +964,7 @@ def run_rlf_deconv():
     Method to deconvolve image using a given kernel (point-spread function)
     """
     # Parse user inputs
-    parser = ua.get_args_rldeconv()
+    parser = uaMod.get_args_rldeconv()
     args = parser.parse_args()
 
     # Create logger object

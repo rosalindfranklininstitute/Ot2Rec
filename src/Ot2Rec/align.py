@@ -51,6 +51,7 @@ class Align:
         self.logObj = logger_in
         
         self.mObj = md_in
+        self.meta = pd.DataFrame()
         if self.mObj is not None:
             self.meta = pd.DataFrame(self.mObj.metadata)
         
