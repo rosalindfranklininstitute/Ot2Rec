@@ -621,12 +621,17 @@ def get_args_aretomo():
                         help="Name of current project")
     parser.add_argument("aretomo_mode",
                         type=int,
-                        default=-1,
                         help=
                             "Processes to be run in AreTomo, must be set."
                             " 0: alignment only,"
                             " 1: reconstruction only,"
                             " 2: alignment + reconstruction")
+    parser.add_argument("rot_angle",
+                        type=float,
+                        help="Rotational angle of electron beam. Can be obtained from MDOC files.")
+    parser.add_argument("--pixel_size",
+                        type=float,
+                        help="Image pixel size in nm.")
     parser.add_argument("-rn", "--rootname",
                         type=str,
                         help="Rootname of current project (required if different from project name)")
@@ -664,14 +669,6 @@ def get_args_aretomo():
                         help=
                             "Sample thickness in nm, used to set VolZ automatically."
                             " Ignored if VolZ is set to >0, or only alignment is done")
-    parser.add_argument("--pixel_size",
-                        type=float,
-                        default=-1,
-                        help=
-                            "Pixel size in nm, used to set VolZ automatically,"
-                            " or if dose correction is enabled."
-                            " Ignored if VolZ is set to >0, or in alignment if"
-                            " dose correction is not applied")
     parser.add_argument("--output_binning",
                         type=int,
                         default=4,

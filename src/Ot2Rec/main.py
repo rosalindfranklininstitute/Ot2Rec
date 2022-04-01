@@ -360,13 +360,16 @@ def update_align_yaml(args):
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
 
 
-def create_align_yaml():
+def create_align_yaml(args_to_pass=None):
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
     # Parse user inputs
     parser = uaMod.get_args_align()
-    args = parser.parse_args()
+    if args_to_pass is not None:
+        args = parser.parse_args(args_to_pass)
+    else:
+        args = parser.parse_args()
     
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
@@ -440,7 +443,7 @@ def create_stacks():
     run_align(full_align=False)
 
 
-def run_align(full_align=True):
+def run_align(full_align=True, args_to_pass=None):
     """
     Method to run IMOD newstack / alignment
     """
@@ -449,8 +452,10 @@ def run_align(full_align=True):
     parser.add_argument("project_name",
                         type=str,
                         help="Name of current project")
-
-    args = parser.parse_args()
+    if args_to_pass is not None:
+        args = parser.parse_args(args_to_pass)
+    else:
+        args = parser.parse_args()
 
     # Check if prerequisite files exist
     align_yaml = args.project_name + '_align.yaml'
@@ -1089,7 +1094,7 @@ def run_all():
 
 
 def update_aretomo_yaml(args, kwargs):
-    """ Placeholder 
+    """
     Method to update yaml file for AreTomo
 
     Args:
@@ -1107,12 +1112,42 @@ def update_aretomo_yaml(args, kwargs):
         filename=aretomo_yaml_name
     )
 
+    # Check that AreTomo Mode is 0-3
+    if (args.aretomo_mode < 0) or (args.aretomo_mode > 3):
+        raise ValueError("AreTomo mode must be 0, 1, 2, or 3")
+
     # Add optional kwargs
     for param in kwargs:
         aretomo_params.params["AreTomo_kwargs"][param] = vars(args).get(param)
 
 
-    # set process list, InMrc, OutMrc, AngFile
+    # Uses align to create the InMrc and AngFile in correct form
+    create_align_yaml([
+        args.project_name, 
+        str(args.rot_angle),
+        '-o',
+        args.output_path])
+    run_align(full_align=False, args_to_pass=[args.project_name])
+    print("Created stacks for input to AreTomo")
+    
+    # Set InMrc
+    st_file_list = glob(f'{args.output_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
+    aretomo_params.params["AreTomo_setup"]["input_mrc"] = st_file_list
+
+    # Set AngFile
+    tlt_file_list = glob(f'{args.output_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
+    aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
+
+    # Set OutputMrc
+    if args.aretomo_mode == 0:
+        out_file_list = ["{}_ali.mrc".format(os.path.splitext(file)[0]) for file in st_file_list]
+    elif args.aretomo_mode > 0:
+        out_file_list = ["{}_rec.mrc".format(os.path.splitext(file)[0]) for file in st_file_list]
+    aretomo_params.params["AreTomo_setup"]["output_mrc"] = out_file_list
+
+    # Set process list
+    ts_list = [int(file.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}.st', '')) for file in st_file_list]
+    aretomo_params.params["System"]["process_list"] = ts_list
 
     # Add the rest of the argparse values to aretomo_params
     aretomo_params.params["AreTomo_setup"]["aretomo_mode"] = args.aretomo_mode

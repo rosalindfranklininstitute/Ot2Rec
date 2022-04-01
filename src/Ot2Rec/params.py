@@ -308,7 +308,8 @@ def new_aretomo_yaml(args):
         },
 
         "AreTomo_setup" : {
-            "aretomo_mode" : None,
+            "aretomo_mode" : args.aretomo_mode,
+            "rot_angle" : args.rot_angle,
             "input_mrc" : None,
             "output_mrc" :None,
             "tilt_angles" : None,
@@ -318,7 +319,7 @@ def new_aretomo_yaml(args):
         "AreTomo_recon" : {
             "volz" : None,
             "sample_thickness" : None,
-            "pixel_size" : None,
+            "pixel_size" : args.pixel_size,
             "recon_algo" : None,
         },
 
