@@ -67,7 +67,7 @@ class UserArgsTest(unittest.TestCase):
         self.assertEqual(args.tolerance, 0.5)
         self.assertEqual(args.max_iter, 10)
         self.assertEqual(args.patch_size, [5, 5, 20])
-        self.assertTrue(args.no_subgroups)
+        self.assertFalse(args.no_subgroups)
         
         
     def test_args_ctffind(self):
@@ -107,7 +107,7 @@ class UserArgsTest(unittest.TestCase):
         self.assertEqual(args.output_folder, "./stacks/")
         self.assertEqual(args.file_prefix, None)
         self.assertEqual(args.file_suffix, '')
-        self.assertTrue(args.no_rawtlt)
+        self.assertFalse(args.no_rawtlt)
         self.assertEqual(args.fiducial_size, 0)
         self.assertEqual(args.adoc_template, '/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc')
         self.assertEqual(args.stack_bin_factor, 4)
@@ -124,8 +124,8 @@ class UserArgsTest(unittest.TestCase):
         self.assertEqual(args.tilt_option, 'fixed')
         self.assertEqual(args.rot_option, 'group')
         self.assertEqual(args.beam_tilt_option, 'fixed')
-        self.assertTrue(args.no_robust_fitting)
-        self.assertTrue(args.no_weight_contours)
+        self.assertFalse(args.no_robust_fitting)
+        self.assertFalse(args.no_weight_contours)
         
 
     def test_args_align_ext(self):
@@ -133,14 +133,11 @@ class UserArgsTest(unittest.TestCase):
         Method to test O2R.user_args:get_args_align_ext function
         """
         parser = uaMod.get_args_align_ext()
-        args = parser.parse_args(["test", "", "1.0"])
+        args = parser.parse_args(["test", "90", "1.0"])
 
         self.assertEqual(args.project_name, "test")
-        self.assertEqual(args.parent_path, "")
-        self.assertEqual(args.pixel_res, 1.0)
-
-        self.assertEqual(args.rootname, None)
-        self.assertEqual(args.suffix, None)
+        self.assertEqual(args.rot_angle, 90.0)
+        self.assertEqual(args.pixel_size, 1.0)
 
 
     def test_args_recon(self):
@@ -159,7 +156,7 @@ class UserArgsTest(unittest.TestCase):
         self.assertFalse(args.erase_gold)
         self.assertFalse(args.filtering)
         self.assertEqual(args.bin_factor, 1)
-        self.assertTrue(args.no_trimvol)
+        self.assertFalse(args.no_trimvol)
         self.assertEqual(args.trimvol_reorient, 'rotate')
         
         
