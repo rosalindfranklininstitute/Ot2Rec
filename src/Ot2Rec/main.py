@@ -29,6 +29,7 @@ import subprocess
 import numpy as np
 import mrcfile
 
+from Ot2Rec import aretomo as aretomoMod
 from Ot2Rec import params as prmMod
 from Ot2Rec import metadata as mdMod
 from Ot2Rec import motioncorr as mc2Mod
@@ -1188,5 +1189,35 @@ def create_aretomo_yaml():
 
 
 def run_aretomo():
-    """ Placeholder """                 
-    pass
+    """ 
+    Method to run AreTomo
+    """                 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")    
+    args = parser.parse_args()
+
+    # Check if prerequisite files exist
+    aretomo_yaml = args.project_name + "_aretomo.yaml"
+    if not os.path.isfile(aretomo_yaml):
+        raise IOError("Error in Ot2Rec.main.run_aretomo: AreTomo yaml file not found.")
+
+    # Read in config and metadata
+    aretomo_config = prmMod.read_yaml(
+        project_name=args.project_name,
+        filename=aretomo_yaml
+    )
+
+    # Create logger object
+    logger = logMod.Logger()
+
+    # Create AreTomo object
+    aretomo_obj = aretomoMod.AreTomo(
+        project_name=args.project_name,
+        params_in=aretomo_config,
+        logger_in=logger
+    )
+
+    # Run AreTomo commands
+    aretomo_obj.run_aretomo_all()

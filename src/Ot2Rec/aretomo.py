@@ -30,7 +30,7 @@ class AreTomo:
                  logger_in,
     ):
         """
-        Initialising a SavuRecon object
+        Initialising a AreTomo object
 
         ARGS:
         project_name (str) :: name of current project
@@ -93,15 +93,15 @@ class AreTomo:
             '-AngFile',
             self.params['AreTomo_setup']['tilt_angles'][i],
             '-VolZ',
-            0,
+            '0',
             '-OutBin',
-            self.params['AreTomo_setup']['output_binning']
+            str(self.params['AreTomo_setup']['output_binning']),
             ]
         
         return cmd
     
 
-    def __get_aretomo_recon_command(self, i):
+    def _get_aretomo_recon_command(self, i):
         """
         Method to get command to set up AreTomo reconstruction
 
@@ -117,19 +117,21 @@ class AreTomo:
             '-AngFile',
             self.params['AreTomo_setup']['tilt_angles'][i],
             '-VolZ',
-            self.params['AreTomo_recon']['volz'],
+            str(self.params['AreTomo_recon']['volz']),
             '-OutBin',
-            self.params['AreTomo_setup']['output_binning'],
+            str(self.params['AreTomo_setup']['output_binning']),
             '-Align',
-            0
+            '0'
         ]
 
         if self.params['AreTomo_recon']['recon_algo'] == 0:
             # WBP
-            cmd.append('-Wbp', 1)
-        else if self.params['AreTomo_recon']['recon_algo'] == 1:
+            cmd.append('-Wbp')
+            cmd.append('1')
+        elif self.params['AreTomo_recon']['recon_algo'] == 1:
             # SART
-            cmd.append('-Wbp', 0)
+            cmd.append('-Wbp')
+            cmd.append('0')
 
         return cmd
 
@@ -140,20 +142,16 @@ class AreTomo:
         """
         curr_ts = self.params['System']['process_list'][i]
 
-        cmd = []
         # check AreTomo mode
         if self.params['AreTomo_setup']['aretomo_mode'] == 0:
-            align_cmd = self._get_aretomo_align_command()
-            cmd.append(align_cmd)
-        if self.params['AreTomo_setup']['aretomo_mode'] == 1:
-            recon_cmd = self.__get_aretomo_recon_command()
-            cmd.append(recon_cmd)
-        if self.params['AreTomo_setup']['aretomo_mode'] == 2:
-            align_cmd = self._get_aretomo_align_command()
-            recon_cmd = self.__get_aretomo_recon_command()
-            cmd = [align_cmd, recon_cmd]
+            align_cmd = self._get_aretomo_align_command(i)
+            cmd = align_cmd
+        else:
+            recon_cmd = self._get_aretomo_recon_command(i)
+            cmd = recon_cmd
 
         # Add extra kwargs
+        
 
         # Run aretomo
         aretomo_run = subprocess.run(cmd,
