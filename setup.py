@@ -46,7 +46,8 @@ setup(
 
             "o2r.ctffind.new=Ot2Rec.ctffind:create_yaml",
             "o2r.ctffind.run=Ot2Rec.ctffind:run",
-            "o2r.ctfsim.run=Ot2Rec.main:run_ctfsim",
+            
+            "o2r.ctfsim.run=Ot2Rec.ctfsim:run",
 
             "o2r.align.new=Ot2Rec.main:create_align_yaml",
             "o2r.align.stacks=Ot2Rec.main:create_stacks",
