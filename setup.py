@@ -44,8 +44,8 @@ setup(
             "o2r.mc.new=Ot2Rec.motioncorr:create_yaml",
             "o2r.mc.run=Ot2Rec.motioncorr:run",
 
-            "o2r.ctffind.new=Ot2Rec.main:create_ctffind_yaml",
-            "o2r.ctffind.run=Ot2Rec.main:run_ctffind",
+            "o2r.ctffind.new=Ot2Rec.ctffind:create_yaml",
+            "o2r.ctffind.run=Ot2Rec.ctffind:run",
             "o2r.ctfsim.run=Ot2Rec.main:run_ctfsim",
 
             "o2r.align.new=Ot2Rec.main:create_align_yaml",
