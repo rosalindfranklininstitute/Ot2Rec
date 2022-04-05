@@ -14,6 +14,7 @@
 
 
 import os
+import argparse
 import subprocess
 import itertools
 import pandas as pd
@@ -24,6 +25,7 @@ from icecream import ic         # for debugging
 
 from . import metadata as mdMod
 from . import user_args as uaMod
+from . import logger as logMod
 from . import params as prmMod
 
 
@@ -300,7 +302,7 @@ def create_yaml():
 
     # Create the yaml file, then automatically update it
     prmMod.new_mc2_yaml(args)
-    update_mc2_yaml(args)
+    update_yaml(args)
 
 
 def update_yaml(args):
@@ -386,10 +388,10 @@ def run():
     logger = logMod.Logger()
 
     # Create Motioncorr object
-    mc2_obj = mc2Mod.Motioncorr(project_name=args.project_name,
-                                mc2_params=mc2_config,
-                                md_in=master_md,
-                                logger=logger
+    mc2_obj = Motioncorr(project_name=args.project_name,
+                         mc2_params=mc2_config,
+                         md_in=master_md,
+                         logger=logger
     )
 
     if not mc2_obj.no_processes:
