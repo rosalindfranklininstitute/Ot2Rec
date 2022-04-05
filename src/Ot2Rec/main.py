@@ -341,35 +341,6 @@ def create_savurecon_yaml():
     update_savurecon_yaml(args)
 
 
-def run_recon_ext():
-    """
-    Method to run IMOD reconstruction
-    """
-
-    project_name = get_proj_name()
-
-    # Check if prerequisite files exist
-    recon_yaml = project_name + '_recon.yaml'
-
-    # Read in config and metadata
-    recon_config = prmMod.read_yaml(project_name=project_name,
-                                    filename=recon_yaml)
-
-    # Create Logger object
-    logger = logMod.Logger()
-
-    # Create Align object
-    recon_obj = reconMod.Recon(project_name=project_name,
-                               md_in=None,
-                               params_in=recon_config,
-                               logger_in=logger,
-    )
-
-    # Run IMOD
-    if not recon_obj.no_processes:
-        recon_obj.recon_stack(ext=True)
-
-
 def run_rlf_deconv():
     """
     Method to deconvolve image using a given kernel (point-spread function)
