@@ -82,20 +82,6 @@ def new_proj():
         yaml.dump(meta.metadata, f, indent=4)
 
 
-def mc2_create_yaml():
-    """
-    Wrapper for creating config for MC2
-    """
-    mc2Mod.create_yaml()
-
-
-def mc2_run():
-    """
-    Wrapper for running MC2
-    """
-    mc2Mod.run()
-    
-
 def update_ctffind_yaml(args):
     """
     Subroutine to update yaml file for ctffind
