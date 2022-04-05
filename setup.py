@@ -41,8 +41,8 @@ setup(
         "console_scripts": [
             "o2r.new=Ot2Rec.main:new_proj",
 
-            "o2r.mc.new=Ot2Rec.main:create_mc2_yaml",
-            "o2r.mc.run=Ot2Rec.main:run_mc2",
+            "o2r.mc.new=Ot2Rec.main:mc2_create_yaml",
+            "o2r.mc.run=Ot2Rec.main:mc2_run",
 
             "o2r.ctffind.new=Ot2Rec.main:create_ctffind_yaml",
             "o2r.ctffind.run=Ot2Rec.main:run_ctffind",
