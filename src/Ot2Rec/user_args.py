@@ -528,9 +528,8 @@ def get_args_savurecon():
     parser.add_argument("project_name",
                         type=str,
                         help="Name of current project")
-    parser.add_argument("--stacks_folder",
+    parser.add_argument("stacks_folder",
                         type=str,
-                        default='./stacks',
                         help="Path to parent folder with stacks")
     parser.add_argument("-rn", "--rootname",
                         type=str,
@@ -545,7 +544,7 @@ def get_args_savurecon():
                         help="File extension of stacks (Default: mrc)")
     parser.add_argument("-is", "--imod_suffix",
                         type=str,
-                        default='ali',
+                        default='',
                         help="IMOD file suffix")
     parser.add_argument("-o", "--output_path",
                         type=str,
