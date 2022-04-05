@@ -60,8 +60,8 @@ setup(
             "o2r.recon.new=Ot2Rec.main:create_recon_yaml",
             "o2r.recon.run=Ot2Rec.main:run_recon",
 
-            "o2r.savu.new=Ot2Rec.savurecon:create_yaml",
-            "o2r.savu.run=Ot2Rec.savurecon:run",
+            "o2r.savu.new=Ot2Rec.main:create_savurecon_yaml",
+            "o2r.savu.run=Ot2Rec.main:run_savurecon",
 
             "o2r.deconv.run=Ot2Rec.main:run_rlf_deconv",
 
