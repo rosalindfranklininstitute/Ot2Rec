@@ -58,8 +58,8 @@ setup(
 
             "o2r.imod.align.stats=Ot2Rec.align:get_align_stats",
             
-            "o2r.recon.new=Ot2Rec.main:create_recon_yaml",
-            "o2r.recon.run=Ot2Rec.main:run_recon",
+            "o2r.imod.recon.new=Ot2Rec.recon:create_yaml",
+            "o2r.imod.recon.run=Ot2Rec.recon:run",
 
             "o2r.savu.new=Ot2Rec.main:create_savurecon_yaml",
             "o2r.savu.run=Ot2Rec.main:run_savurecon",
