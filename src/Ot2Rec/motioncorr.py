@@ -23,6 +23,8 @@ from tqdm import tqdm
 from icecream import ic         # for debugging
 
 from . import metadata as mdMod
+from . import user_args as uaMod
+from . import params as prmMod
 
 
 class Motioncorr:
@@ -284,3 +286,115 @@ class Motioncorr:
         with open(yaml_file, 'w') as f:
             yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False) 
 
+
+"""
+PLUGIN METHODS
+"""
+def create_yaml():
+    """
+    Subroutine to create new yaml file for motioncorr
+    """
+    # Parse user inputs
+    parser = uaMod.get_args_mc2()
+    args = parser.parse_args()
+
+    # Create the yaml file, then automatically update it
+    prmMod.new_mc2_yaml(args)
+    update_mc2_yaml(args)
+
+
+def update_yaml(args):
+    """
+    Subroutine to update yaml file for motioncorr
+
+    ARGS:
+    args (Namespace) :: Arguments obtained from user
+    """
+
+    # Check if MC2 yaml exists
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
+    if not os.path.isfile(mc2_yaml_name):
+        raise IOError("Error in Ot2Rec.main.update_mc2_yaml: File not found.")
+
+    # Read in master yaml
+    master_yaml = args.project_name + '_proj.yaml'
+    with open(master_yaml, 'r') as f:
+        master_config = yaml.load(f, Loader=yaml.FullLoader)
+
+    # Read in master metadata (as Pandas dataframe)
+    master_md_name = args.project_name + '_master_md.yaml'
+    with open(master_md_name, 'r') as f:
+        master_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+
+    # Read in previous MC2 output metadata (as Pandas dataframe) for old projects
+    mc2_md_name = args.project_name + '_mc2_md.yaml'
+    if os.path.isfile(mc2_md_name):
+        is_old_project = True
+        with open(mc2_md_name, 'r') as f:
+            mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+    else:
+        is_old_project = False
+
+    # Diff the two dataframes to get numbers of tilt-series with unprocessed data
+    if is_old_project:
+        merged_md = master_md.merge(mc2_md,
+                                    how='outer',
+                                    indicator=True)
+        unprocessed_images = merged_md.loc[lambda x: x['_merge']=='left_only']
+    else:
+        unprocessed_images = master_md
+
+    unique_ts_numbers = unprocessed_images['ts'].sort_values(ascending=True).unique().tolist()
+
+    # Read in MC2 yaml file, modify, and update
+    mc2_params = prmMod.read_yaml(project_name=args.project_name,
+                                  filename=mc2_yaml_name)
+    mc2_params.params['System']['process_list'] = unique_ts_numbers
+    mc2_params.params['System']['filetype'] = master_config['filetype']
+
+    with open(mc2_yaml_name, 'w') as f:
+        yaml.dump(mc2_params.params, f, indent=4, sort_keys=False)
+
+
+def run():
+    """
+    Method to run motioncorr
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    args = parser.parse_args()
+
+    # Check if prerequisite files exist
+    mc2_yaml = args.project_name + '_mc2.yaml'
+    master_md_file = args.project_name + '_master_md.yaml'
+
+    if not os.path.isfile(mc2_yaml):
+        raise IOError("Error in Ot2Rec.main.run_mc2: MC2 yaml config not found.")
+    if not os.path.isfile(master_md_file):
+        raise IOError("Error in Ot2Rec.main.run_mc2: Master metadata not found.")
+
+    # Read in config and metadata
+    mc2_config = prmMod.read_yaml(project_name=args.project_name,
+                                  filename=mc2_yaml)
+    master_md = mdMod.read_md_yaml(project_name=args.project_name,
+                                   job_type='motioncorr',
+                                   filename=master_md_file)
+
+    # Create Logger object
+    logger = logMod.Logger()
+
+    # Create Motioncorr object
+    mc2_obj = mc2Mod.Motioncorr(project_name=args.project_name,
+                                mc2_params=mc2_config,
+                                md_in=master_md,
+                                logger=logger
+    )
+
+    if not mc2_obj.no_processes:
+        # Run MC2 recursively (and update input/output metadata) until nothing is left in the input metadata list
+        mc2_obj.run_mc2()
+
+        # Once all specified images are processed, export output metadata
+        mc2_obj.export_metadata()
