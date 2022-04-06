@@ -13,33 +13,17 @@
 # language governing permissions and limitations under the License.
 
 
-import sys
 import os
-import argparse
-from glob import glob, glob1
-import yaml
-import pandas as pd
-from icecream import ic
-from beautifultable import BeautifulTable as bt
-from tqdm import tqdm
-import skimage.transform as skt
-
-import re
 import subprocess
-import numpy as np
-import mrcfile
+import sys
+from glob import glob
 
-from . import user_args as uaMod
-from . import params as prmMod
-from . import metadata as mdMod
-from . import motioncorr as mc2Mod
+import yaml
+
 from . import logger as logMod
-from . import ctffind as ctfMod
-from . import align as alignMod
-from . import recon as reconMod
-from . import ctfsim as ctfsimMod
-from . import savurecon as savuMod
-from . import rlf_deconv as rlfMod
+from . import metadata as mdMod
+from . import params as prmMod
+from . import user_args as uaMod
 
 
 def get_proj_name():
@@ -80,29 +64,6 @@ def new_proj():
     master_md_name = args.project_name + '_master_md.yaml'
     with open(master_md_name, 'w') as f:
         yaml.dump(meta.metadata, f, indent=4)
-
-
-def run_savurecon():
-    project_name = get_proj_name()
-
-    # Check if prerequisite files exist
-    savurecon_yaml = project_name + '_savurecon.yaml'
-
-    # Read in config and metadata
-    savurecon_params = prmMod.read_yaml(project_name=project_name,
-                                        filename=savurecon_yaml)
-
-    # Create Logger object
-    logger = logMod.Logger()
-
-    # Create SavuRecon object
-    savurecon_obj = savuMod.SavuRecon(project_name=project_name,
-                                  params_in=savurecon_params,
-                                  logger_in=logger,
-                                 )
-
-    # Run Savu
-    savurecon_obj.run_savu_all()
 
 
 def cleanup():
@@ -173,62 +134,4 @@ def run_all():
     logger("Reconstruction in progress...")
     create_recon_yaml()
     run_recon()
-
-
-def update_savurecon_yaml(args):
-    """
-    Method to update yaml file for savu reconstruction --- if stacks already exist
-
-    Args:
-    args (Namespace) :: Namespace containing user inputs
-    """
-
-    parent_path = args.stacks_folder
-    rootname    = args.project_name if args.rootname is None else args.rootname
-    suffix      = args.suffix
-    ext         = args.extension
-    imod_suffix = args.imod_suffix
-    
-    # Find stack files
-    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}')
-
-    # Find rawtlt files
-    rawtlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
-
-    # Extract tilt series number
-    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'_{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
-
-    # Read in and update YAML parameters
-    recon_yaml_name = args.project_name + '_savurecon.yaml'
-    recon_params = prmMod.read_yaml(project_name=args.project_name,
-                                    filename=recon_yaml_name)
-
-    recon_params.params['System']['process_list'] = ts_list
-    recon_params.params['Savu']['setup']['tilt_angles'] = rawtlt_file_list
-    recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
-
-    # Change centre of rotation to centre of image by default
-    centre_of_rotation = []
-    for image in recon_params.params['Savu']['setup']['aligned_projections']:
-        mrc = mrcfile.open(image)
-        centre_of_rotation.append(float(mrc.header["nx"]/2)) # xdim/2
-    recon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
-
-    # Write out YAML file
-    with open(recon_yaml_name, 'w') as f:
-        yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
-
-
-def create_savurecon_yaml():
-    """
-    Subroutine to create new yaml file for Savu reconstruction
-    """
-
-    # Parse user inputs
-    parser = uaMod.get_args_savurecon()
-    args = parser.parse_args()
-
-    # Create the yaml file, then automatically update it
-    prmMod.new_savurecon_yaml(args)
-    update_savurecon_yaml(args)
 
