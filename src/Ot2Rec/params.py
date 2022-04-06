@@ -297,7 +297,12 @@ def new_aretomo_yaml(args):
     args (Namespace) :: Namespace containing user parameter inputs
     """
 
-    aretomo_yaml_name = args.project_name + "_aretomo.yaml"
+    aretomo_yaml_names = {0: args.project_name + "_aretomo_align.yaml",
+                         1: args.project_name + "_aretomo_recon.yaml",
+                         2: args.project_name + "_aretomo_align-recon.yaml"}
+
+    aretomo_yaml_name = aretomo_yaml_names[int(args.aretomo_mode)]
+    print("{} created".format(aretomo_yaml_name))
 
     aretomo_yaml_dict = {
         "System" : {
