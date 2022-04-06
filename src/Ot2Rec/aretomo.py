@@ -228,21 +228,23 @@ def update_yaml(args, kwargs):
         raise ValueError("AreTomo mode must be 0, 1, 2, or 3")
 
     # Add optional kwargs
-    for param in kwargs:
-        aretomo_params.params["AreTomo_kwargs"][param] = vars(args).get(param)
-
+    aretomo_params.params['AreTomo_kwargs'] = kwargs
+    
     if args.aretomo_mode != 1: # for workflows with alignment
         # Uses align to create the InMrc and AngFile in correct form
-        align.create_yaml([
-            args.project_name, 
-            str(args.rot_angle),
-            '-o',
-            args.output_path])
-        align.run(
-            newstack=True, 
-            do_align=False, 
-            args_pass=[args.project_name])
-        print("Created stacks for input to AreTomo")
+        try:
+            align.create_yaml([
+                args.project_name, 
+                str(args.rot_angle),
+                '-o',
+                args.output_path])
+            align.run(
+                newstack=True, 
+                do_align=False, 
+                args_pass=[args.project_name])
+            print("Created stacks for input to AreTomo")
+        except:
+            print("IMOD might not be loaded")
         
         # Set InMrc
         st_file_list = glob(f'{args.output_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
@@ -312,8 +314,8 @@ def create_yaml():
     """
 
     # Parse user inputs
-    parser, kwargs = uaMod.get_args_aretomo()
-    args = parser.parse_args()
+    parser = uaMod.get_args_aretomo()
+    args, kwargs = parser.parse_known_args()
 
     # Create the yaml file, then automatically update it
     prmMod.new_aretomo_yaml(args)
