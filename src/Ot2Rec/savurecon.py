@@ -13,11 +13,17 @@
 # language governing permissions and limitations under the License.
 
 
+import argparse
+from glob import glob
 import yaml
 import os
 import subprocess
 import mrcfile
 
+from . import metadata as mdMod
+from . import user_args as uaMod
+from . import logger as logMod
+from . import params as prmMod
 
 class SavuRecon:
     """
@@ -32,7 +38,6 @@ class SavuRecon:
     ):
         """
         Initialising a SavuRecon object
-
         ARGS:
         project_name (str) :: name of current project
         params_in (Params) :: parameters for stack creation
@@ -81,7 +86,6 @@ class SavuRecon:
     def _get_savuconfig_recon_command(self, i):
         """
         Method to get command to set up Savu process list
-
         ARGS:
         i (int): The i-th tilt series to process
         """
@@ -102,14 +106,14 @@ class SavuRecon:
         
         # Get centre of rotation
         # Set centre of rotation to centre if centre_of_rotation is autocenter
-        if self.params['Savu']['setup']['centre_of_rotation'] == 'autocenter':
+        if self.params['Savu']['setup']['centre_of_rotation'][i] == 'autocenter':
             mrc = mrcfile.open(self.params['Savu']['setup']['aligned_projections'][i])
             cor = float(mrc.header["ny"]/2) # ydim/2
 
         # Else if the centre of rotation is a single value to be used for all ts:
         else:
             try:
-                cor = float(self.params['Savu']['setup']['centre_of_rotation'])
+                cor = float(self.params['Savu']['setup']['centre_of_rotation'][i])
             except:
                 raise ValueError('Centre of rotation must be `autocenter` or a float')
 
@@ -212,3 +216,96 @@ class SavuRecon:
 
         with open(yaml_file, 'w') as f:
             yaml.dump(self.md_out, f, indent=4, sort_keys=False)
+
+
+"""
+PLUGIN METHODS
+"""
+
+
+def create_yaml():
+    """
+    Subroutine to create new yaml file for Savu reconstruction
+    """
+
+    # Parse user inputs
+    parser = uaMod.get_args_savurecon()
+    args = parser.parse_args()
+
+    # Create the yaml file, then automatically update it
+    prmMod.new_savurecon_yaml(args)
+    update_yaml(args)
+
+
+def update_yaml(args):
+    """
+    Method to update yaml file for savu reconstruction --- if stacks already exist
+    Args:
+    args (Namespace) :: Namespace containing user inputs
+    """
+
+    parent_path = args.stacks_folder
+    rootname    = args.project_name if args.rootname is None else args.rootname
+    suffix      = args.suffix
+    ext         = args.extension
+    imod_suffix = args.imod_suffix
+    
+    # Find stack files
+    st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}')
+
+    # Find tlt files
+    # tlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.tlt')
+    tlt_file_list = [st_file.replace(f'_{imod_suffix}.{ext}', '.tlt') for st_file in st_file_list]
+
+    # Extract tilt series number
+    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'_{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
+
+    # Read in and update YAML parameters
+    recon_yaml_name = args.project_name + '_savurecon.yaml'
+    recon_params = prmMod.read_yaml(project_name=args.project_name,
+                                    filename=recon_yaml_name)
+
+    recon_params.params['System']['process_list'] = ts_list
+    recon_params.params['Savu']['setup']['tilt_angles'] = tlt_file_list
+    recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
+
+    # Change centre of rotation to centre of image by default
+    centre_of_rotation = []
+    for image in recon_params.params['Savu']['setup']['aligned_projections']:
+        mrc = mrcfile.open(image)
+        centre_of_rotation.append(float(mrc.header["nx"]/2)) # xdim/2
+    recon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
+
+    # Write out YAML file
+    with open(recon_yaml_name, 'w') as f:
+        yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
+
+
+def run():
+    """
+    Method to run SavuRecon
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project_name",
+                        type=str,
+                        help="Name of current project")
+    args = parser.parse_args()
+
+    # Check if prerequisite files exist
+    savurecon_yaml = args.project_name + '_savurecon.yaml'
+
+    # Read in config and metadata
+    savurecon_params = prmMod.read_yaml(project_name=args.project_name,
+                                        filename=savurecon_yaml)
+
+    # Create Logger object
+    logger = logMod.Logger()
+
+    # Create SavuRecon object
+    savurecon_obj = SavuRecon(project_name=args.project_name,
+                              params_in=savurecon_params,
+                              logger_in=logger,
+                              )
+
+    # Run Savu
+    savurecon_obj.run_savu_all()
