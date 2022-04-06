@@ -65,6 +65,9 @@ setup(
             "o2r.savu.recon.new=Ot2Rec.savurecon:create_yaml",
             "o2r.savu.recon.run=Ot2Rec.savurecon:run",
 
+            "o2r.aretomo.new=Ot2Rec.aretomo:create_yaml",
+            "o2r.aretomo.run=Ot2Rec.aretomo:run",
+
             "o2r.deconv.run=Ot2Rec.rlf_deconv:run",
 
             "o2r.cleanup=Ot2Rec.main:cleanup",
