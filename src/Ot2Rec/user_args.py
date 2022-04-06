@@ -684,12 +684,4 @@ def get_args_aretomo():
                             " 0: WBP (default),"
                             " 1: SART")
     
-    # Slightly hacky way of adding optional arbitrary arguments, like **kwargs in argparse
-    parsed, unknown = parser.parse_known_args()
-    kwargs = []
-    for arg in unknown:
-        if arg.startswith(("-", "--")):
-            parser.add_argument(arg, type=str)
-            kwargs.append(arg.split("--")[1])
-    
-    return parser, kwargs
+    return parser
