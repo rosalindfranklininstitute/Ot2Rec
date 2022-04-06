@@ -35,6 +35,7 @@ setup(
         'beautifultable',
         'scikit-image',
         'mrcfile',
+        'tifffile',
         'redlionfish',
     ],
     entry_points={
@@ -49,21 +50,22 @@ setup(
             
             "o2r.ctfsim.run=Ot2Rec.ctfsim:run",
 
-            "o2r.align.new=Ot2Rec.main:create_align_yaml",
-            "o2r.align.stacks=Ot2Rec.main:create_stacks",
-            "o2r.align.run=Ot2Rec.main:run_align",
-            "o2r.align.stats=Ot2Rec.main:get_align_stats",
+            "o2r.imod.align.new=Ot2Rec.align:create_yaml",
+            "o2r.imod.align.stacks=Ot2Rec.align:imod_create_stacks",
+            "o2r.imod.align.run=Ot2Rec.align:imod_standard_align",
 
-            "o2r.align.new_ext=Ot2Rec.main:create_align_yaml_stacked",
-            "o2r.align.run_ext=Ot2Rec.main:run_align_ext",
+            "o2r.imod.align.new_ext=Ot2Rec.align:create_yaml_stacked",
+            "o2r.imod.align.run_ext=Ot2Rec.align:imod_align_ext",
 
-            "o2r.recon.new=Ot2Rec.main:create_recon_yaml",
-            "o2r.recon.run=Ot2Rec.main:run_recon",
+            "o2r.imod.align.stats=Ot2Rec.align:get_align_stats",
+            
+            "o2r.imod.recon.new=Ot2Rec.recon:create_yaml",
+            "o2r.imod.recon.run=Ot2Rec.recon:run",
 
             "o2r.savu.new=Ot2Rec.main:create_savurecon_yaml",
             "o2r.savu.run=Ot2Rec.main:run_savurecon",
 
-            "o2r.deconv.run=Ot2Rec.main:run_rlf_deconv",
+            "o2r.deconv.run=Ot2Rec.rlf_deconv:run",
 
             "o2r.cleanup=Ot2Rec.main:cleanup",
             "o2r.runall=Ot2Rec.main:run_all",
