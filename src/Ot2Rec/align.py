@@ -429,13 +429,16 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
 """
 PLUGIN METHODS
 """
-def create_yaml():
+def create_yaml(args_pass=None):
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
     # Parse user inputs
     parser = uaMod.get_args_align()
-    args = parser.parse_args()
+    if args_pass is not None:
+        args = parser.parse_args(args_pass)
+    else:
+        args = parser.parse_args()
     
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
@@ -553,7 +556,7 @@ def update_yaml_stacked(args):
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
 
 
-def run(newstack=False, do_align=True, ext=False):
+def run(newstack=False, do_align=True, ext=False, args_pass=None):
     """
     Method to run IMOD newstack / alignment
 
@@ -566,7 +569,10 @@ def run(newstack=False, do_align=True, ext=False):
     parser.add_argument("project_name",
                         type=str,
                         help="Name of current project")
-    args = parser.parse_args()
+    if args_pass is not None:
+        args = parser.parse_args(args_pass)
+    else:
+        args = parser.parse_args()
 
     # Check if prerequisite files exist
     align_yaml = args.project_name + '_align.yaml'
