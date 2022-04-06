@@ -15,7 +15,7 @@
 
 import re
 import os
-from glob import glob, glob1
+from glob import glob1
 import pandas as pd
 import numpy as np
 import scipy.constants as spk
