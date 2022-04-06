@@ -640,11 +640,11 @@ def get_args_aretomo():
                         type=str,
                         default='',
                         help="Suffix of project files")
-    parser.add_argument("-in", "--input_mrc",
+    parser.add_argument("-in", "--input_mrc_folder",
                         type=str,
+                        default='./aretomo/',
                         help=
-                            "Input tilt series images (aligned or unaligned"
-                            " depending on the workflow")
+                            "Folder containing input mrcs (Default: ./aretomo)")
     parser.add_argument("-o", "--output_path",
                         type=str,
                         default="./aretomo/",
