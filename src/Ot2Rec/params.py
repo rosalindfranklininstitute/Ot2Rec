@@ -14,11 +14,7 @@
 
 
 import os
-from glob import glob
 import yaml
-import pandas as pd
-import multiprocess as mp
-import datetime as dt
 
 
 class Params:
@@ -302,7 +298,7 @@ def new_aretomo_yaml(args):
                          2: args.project_name + "_aretomo_align-recon.yaml"}
 
     aretomo_yaml_name = aretomo_yaml_names[int(args.aretomo_mode)]
-    print("{} created".format(aretomo_yaml_name))
+    print(f"{aretomo_yaml_name} created")
 
     aretomo_yaml_dict = {
         "System" : {
