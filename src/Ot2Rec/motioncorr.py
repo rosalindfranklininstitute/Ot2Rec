@@ -21,8 +21,6 @@ import pandas as pd
 import yaml
 from tqdm import tqdm
 
-from icecream import ic         # for debugging
-
 from . import metadata as mdMod
 from . import user_args as uaMod
 from . import logger as logMod
@@ -73,7 +71,9 @@ class Motioncorr:
             subprocess.run(['mkdir', self.params['System']['output_path']],
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE,
-                           encoding='ascii')
+                           encoding='ascii',
+                           check=True,
+            )
 
 
     def _check_processed_images(self):
@@ -106,14 +106,15 @@ class Motioncorr:
             self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
 
             if len(self._missing_specified) > 0:
-                self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. Will be added back for processing.")
+                self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. "
+                            "Will be added back for processing.")
             
         # Drop the items in input metadata if they are in the output record 
         _ignored = self.meta[self.meta.output.isin(self.meta_out.output)]
         if len(_ignored) > 0 and len(_ignored) < len(self.meta):
             self.logObj(f"Info: {len(_ignored)} images had been processed and will be omitted.")
         elif len(_ignored) == len(self.meta):
-            self.logObj(f"Info: All specified images had been processed. Nothing will be done.")
+            self.logObj("Info: All specified images had been processed. Nothing will be done.")
             self.no_processes = True
             
         self.meta = self.meta[~self.meta.output.isin(self.meta_out.output)]
@@ -128,38 +129,44 @@ class Motioncorr:
         nv_uuid = subprocess.run(['nvidia-smi', '--list-gpus'],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
-                                 encoding='ascii')
+                                 encoding='ascii',
+                                 check=True,
+        )
         nv_processes = subprocess.run(['nvidia-smi', '--query-compute-apps=gpu_uuid', '--format=csv'],
                                       stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE,
-                                      encoding='ascii')
+                                      encoding='ascii',
+                                      check=True,
+        )
 
         # catch the visible GPUs
         if nv_uuid.returncode != 0 or nv_processes.returncode != 0:
             raise AssertionError(f"Error in Ot2Rec.Motioncorr._get_gpu_from_nvidia_smi: "
                                  f"nvidia-smi returned an error: {nv_uuid.stderr}")
-        else:
-            nv_uuid = nv_uuid.stdout.strip('\n').split('\n')
-            nv_processes = subprocess.run(['nvidia-smi', '--query-compute-apps=gpu_uuid', '--format=csv'],
-                                          stdout=subprocess.PIPE,
-                                          stderr=subprocess.PIPE,
-                                          encoding='ascii')
-            visible_gpu = []
-            for gpu in nv_uuid:
-                id_idx = gpu.find('GPU ')
-                uuid_idx = gpu.find('UUID')
 
-                gpu_id = gpu[id_idx + 4:id_idx + 6].strip(' ').strip(':')
-                gpu_uuid = gpu[uuid_idx + 5:-1].strip(' ')
+        nv_uuid = nv_uuid.stdout.strip('\n').split('\n')
+        nv_processes = subprocess.run(['nvidia-smi', '--query-compute-apps=gpu_uuid', '--format=csv'],
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.PIPE,
+                                      encoding='ascii',
+                                      check=True,
+        )
+        visible_gpu = []
+        for gpu in nv_uuid:
+            id_idx = gpu.find('GPU ')
+            uuid_idx = gpu.find('UUID')
+            
+            gpu_id = gpu[id_idx + 4:id_idx + 6].strip(' ').strip(':')
+            gpu_uuid = gpu[uuid_idx + 5:-1].strip(' ')
 
-                # discard the GPU hosting a process
-                if gpu_uuid not in nv_processes.stdout.split('\n'):
-                    visible_gpu.append(gpu_id)
+            # discard the GPU hosting a process
+            if gpu_uuid not in nv_processes.stdout.split('\n'):
+                visible_gpu.append(gpu_id)
 
-        if visible_gpu:
-            return visible_gpu
-        else:
-            raise ValueError(f'Error in metadata._get_gpu_from_nvidia_smi: {len(nv_uuid)} GPU detected, but none of them is free.')
+        if not visible_gpu:
+            raise ValueError(f"Error in metadata._get_gpu_from_nvidia_smi: {len(nv_uuid)} GPU detected, "
+                             "but none of them is free.")
+        return visible_gpu
 
 
     def _set_output_path(self):
@@ -225,7 +232,7 @@ class Motioncorr:
         """
         iterator = iter(iterable)
         for first in iterator:
-             yield itertools.chain([first], itertools.islice(iterator, size - 1))
+            yield itertools.chain([first], itertools.islice(iterator, size - 1))
 
 
     def run_mc2(self):
@@ -255,7 +262,7 @@ class Motioncorr:
                 chunks = self._yield_chunks(jobs, len(self.use_gpu) * self.params['System']['jobs_per_gpu'])
                 for job in chunks:
                     # from the moment the next line is read, every process in job are spawned
-                    for process in [i for i in job]:
+                    for process in list(job):
                         self.log.append(process.communicate()[0].decode('UTF-8'))
 
                         self.update_mc2_metadata()

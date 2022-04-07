@@ -14,16 +14,18 @@
 
 
 import argparse
-from glob import glob
-import yaml
 import os
 import subprocess
+from glob import glob
+
+import yaml
 import mrcfile
 
 from . import metadata as mdMod
 from . import user_args as uaMod
 from . import logger as logMod
 from . import params as prmMod
+
 
 class SavuRecon:
     """
@@ -51,7 +53,7 @@ class SavuRecon:
 
         self.logObj = logger_in
 
-        self.md_out = dict()
+        self.md_out = {}
 
         self._get_internal_metadata()
 
@@ -73,7 +75,7 @@ class SavuRecon:
             self.suffix = self.suffix[:-1]
         
         # Create the folders and dictionary for future reference
-        self._path_dict = dict()
+        self._path_dict = {}
         for curr_ts in self.params['System']['process_list']:
             subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
             os.makedirs(subfolder, exist_ok=True)
@@ -100,9 +102,8 @@ class SavuRecon:
         algo = self.params['Savu']['setup']['algorithm']
         algo_choices = ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA", "BP_CUDA", "SIRT3D_CUDA", "CGLS3D_CUDA"]
         if algo not in algo_choices:
-            raise ValueError(
-                "Algorithm not supported. Please amend algorithm in savurecon.yaml to one of {}".format(algo_choices)
-                )
+            raise ValueError("Algorithm not supported. "
+                             f"Please amend algorithm in savurecon.yaml to one of {algo_choices}")
         
         # Get centre of rotation
         # Set centre of rotation to centre if centre_of_rotation is autocenter
@@ -115,7 +116,7 @@ class SavuRecon:
             try:
                 cor = float(self.params['Savu']['setup']['centre_of_rotation'][i])
             except:
-                raise ValueError('Centre of rotation must be `autocenter` or a float')
+                raise ValueError("Centre of rotation must be 'autocenter' or a float")
 
         subfolder = os.path.abspath(self.md_out["savu_output_dir"][curr_ts])
         cmd = ['add MrcLoader\n',
@@ -130,7 +131,7 @@ class SavuRecon:
                 'exit\n',
                 'y\n'
                 ]
-        if algo=="SIRT_CUDA" or algo=="SART_CUDA" or algo=="CGLS_CUDA":
+        if algo in ("SIRT_CUDA", "SART_CUDA", "CGLS_CUDA"):
             cmd.insert(4, "mod 2.2 5\n")
         
         # Add location of .nxs file to metadata
@@ -161,7 +162,7 @@ class SavuRecon:
         # For some reason, if you call savu_config.communicate in any way at the end of this
         # we don't have the problem of moving on to running process lists before they exist
         if savu_config.communicate()[1] is None:
-            print("Process list created: {}".format(self.md_out['savu_process_lists'][curr_ts]))
+            print(f"Process list created: {self.md_out['savu_process_lists'][curr_ts]}.")
 
 
     def _run_savurecon(self, i):
@@ -174,10 +175,11 @@ class SavuRecon:
                                    self.params['Savu']['setup']['aligned_projections'][i],
                                    self.md_out['savu_process_lists'][curr_ts],
                                    self.md_out['savu_output_dir'][curr_ts]],
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT,
-                                   encoding='ascii',
-                                   )
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.STDOUT,
+                                  encoding='ascii',
+                                  check=True,
+        )
         print(savu_run.stdout)
 
 
@@ -203,7 +205,7 @@ class SavuRecon:
             self._create_savurecon_process_list(i)
             self._run_savurecon(i)
             # self._dummy_runner(i)
-            print("Savu reconstruction complete for {}_{}".format(self.proj_name, curr_ts))
+            print(f"Savu reconstruction complete for {self.proj_name}_{curr_ts}")
         self.export_metadata()
 
     
@@ -211,7 +213,6 @@ class SavuRecon:
         """
         Method to export metadata as yaml
         """
-
         yaml_file = self.proj_name + "_savurecon_mdout.yaml"
 
         with open(yaml_file, 'w') as f:
@@ -258,7 +259,8 @@ def update_yaml(args):
     tlt_file_list = [st_file.replace(f'_{imod_suffix}.{ext}', '.tlt') for st_file in st_file_list]
 
     # Extract tilt series number
-    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'_{suffix}{imod_suffix}.{ext}', '')) for i in st_file_list]
+    ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'_{suffix}{imod_suffix}.{ext}', ''))
+               for i in st_file_list]
 
     # Read in and update YAML parameters
     recon_yaml_name = args.project_name + '_savurecon.yaml'

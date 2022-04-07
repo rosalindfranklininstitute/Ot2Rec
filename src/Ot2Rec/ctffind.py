@@ -19,7 +19,6 @@ import subprocess
 import yaml
 from tqdm import tqdm
 import pandas as pd
-from icecream import ic
 
 from . import user_args as uaMod
 from . import metadata as mdMod
@@ -70,7 +69,9 @@ class ctffind():
             subprocess.run(['mkdir', self.params['System']['output_path']],
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE,
-                           encoding='ascii')
+                           encoding='ascii',
+                           check=True,
+            )
         
         
     def _get_images(self):
@@ -130,14 +131,15 @@ class ctffind():
             self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
 
             if len(self._missing_specified) > 0:
-                self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. Will be added back for processing.")
+                self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. "
+                            "Will be added back for processing.")
             
         # Drop the items in input metadata if they are in the output record 
         _ignored = self.ctf_images[self.ctf_images.output.isin(self.meta_out.file_paths)]
         if len(_ignored) > 0 and len(_ignored) < len(self.ctf_images):
             self.logObj(f"Info: {len(_ignored)} images had been processed and will be omitted.")
         elif len(_ignored) == len(self.ctf_images):
-            self.logObj(f"Info: All specified images had been processed. Nothing will be done.")
+            self.logObj("Info: All specified images had been processed. Nothing will be done.")
             self.no_processes = True
 
         self._merged = self.ctf_images.merge(_ignored, how='left', indicator=True)
@@ -179,7 +181,7 @@ class ctffind():
         Method to run ctffind on tilt-series sequentially
         """
 
-        ts_list =  [i for i in self.ctf_images.iterrows()]
+        ts_list =  list(self.ctf_images.iterrows())
         tqdm_iter = tqdm(ts_list, ncols=100)
         for index, curr_image in tqdm_iter:
             # Get the command and inputs for current tilt-series
@@ -188,15 +190,17 @@ class ctffind():
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.STDOUT,
                                          input=self.input_string,
-                                         encoding='ascii')
+                                         encoding='ascii',
+                                         check=True,
+            )
 
             if ctffind_run.stderr:
                 raise ValueError(f'Ctffind: An error has occurred ({ctffind_run.returncode}) '
-                                 f'on stack{stack_padded}.')
-            else:
-                self.stdout = ctffind_run.stdout
-                self.update_ctffind_metadata()
-                self.export_metadata()
+                                 f'on stack{index}.')
+
+            self.stdout = ctffind_run.stdout
+            self.update_ctffind_metadata()
+            self.export_metadata()
 
                 
     def update_ctffind_metadata(self):
