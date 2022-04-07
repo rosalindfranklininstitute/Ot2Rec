@@ -17,12 +17,12 @@ import os
 import re
 import argparse
 import subprocess
-import multiprocess as mp
 from glob import glob
+import multiprocess as mp
+
 import pandas as pd
 from tqdm import tqdm
 import yaml
-from icecream import ic
 from beautifultable import BeautifulTable as bt
 
 from . import user_args as uaMod
@@ -128,14 +128,15 @@ class Align:
             self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
 
             if len(self._missing_specified) > 0:
-                self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. Will be added back for processing.")
+                self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. "
+                            "Will be added back for processing.")
             
         # Drop the items in input metadata if they are in the output record 
         _ignored = self._align_images[self._align_images.align_output.isin(self.meta_out.align_output)]
         if len(_ignored) > 0 and len(_ignored) < len(self._align_images):
             self.logObj(f"Info: {len(_ignored)} images had been processed and will be omitted.")
         elif len(_ignored) == len(self._align_images):
-            self.logObj(f"Info: All specified images had been processed. Nothing will be done.")
+            self.logObj("Info: All specified images had been processed. Nothing will be done.")
             self.no_processes = True
 
         self._merged = self._align_images.merge(_ignored, how='left', indicator=True)
@@ -163,7 +164,7 @@ class Align:
         self.suffix = self.params['System']['output_suffix']
 
         # Create the folders and dictionary for future reference
-        self._path_dict = dict()
+        self._path_dict = {}
         for curr_ts in self._process_list:
             subfolder_path = f'{self.basis_folder}/{self.rootname}_{curr_ts:02}{self.suffix}'
             os.makedirs(subfolder_path, exist_ok=True)
@@ -205,7 +206,8 @@ class Align:
         
         for curr_ts in self._process_list:
             # Define path where the new rawtlt file should go
-            rawtlt_file = f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}_{curr_ts:02}{self.params['System']['output_suffix']}.rawtlt"
+            rawtlt_file = (f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}_"
+                           "{curr_ts:02}{self.params['System']['output_suffix']}.rawtlt")
         
             # Sort the filtered metadata
             # Metadata is fetched in the _sort_tilt_angles method
@@ -235,7 +237,9 @@ class Align:
             meta_ts = self._sort_tilt_angles(curr_ts)
 
             # Create template for newstack
-            self._filename_fileinlist = f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}_{curr_ts:02}{self.params['System']['output_suffix']}_sources.txt"
+            self._filename_fileinlist = \
+                (f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}"
+                 "_{curr_ts:02}{self.params['System']['output_suffix']}_sources.txt")
             self._stack_template = f"{len(meta_ts)}\n" + '\n0\n'.join(meta_ts['output']) + '\n0\n'
             with open(self._filename_fileinlist, 'w') as f:
                 f.write(self._stack_template)
@@ -249,15 +253,17 @@ class Align:
             # Run newstack to create stack
             run_newstack = subprocess.run(cmd,
                                           stdout=subprocess.PIPE,
-                                          stderr=subprocess.STDOUT)
+                                          stderr=subprocess.STDOUT,
+                                          check=True,
+            )
 
             if run_newstack.stderr:
                 raise ValueError(f'newstack: An error has occurred ({run_newstack.returncode}) '
                                  f'on stack{curr_ts}.')
-            else:
-                self.stdout = run_newstack.stdout
-                self.update_align_metadata(ext=False)
-                self.export_metadata()
+
+            self.stdout = run_newstack.stdout
+            self.update_align_metadata(ext=False)
+            self.export_metadata()
 
             
     """
@@ -269,38 +275,38 @@ class Align:
         """
 
         # Template for directive file
-        adoc_temp = f"""
-setupset.currentStackExt = st
-setupset.copyarg.stackext = st
-setupset.copyarg.userawtlt = <use_rawtlt>
-setupset.copyarg.pixel = <pixel_size>
-setupset.copyarg.rotation = <rot_angle>
-setupset.copyarg.gold = <gold_size>
-setupset.systemTemplate = <adoc_template>
+        adoc_temp = """
+        setupset.currentStackExt = st
+        setupset.copyarg.stackext = st
+        setupset.copyarg.userawtlt = <use_rawtlt>
+        setupset.copyarg.pixel = <pixel_size>
+        setupset.copyarg.rotation = <rot_angle>
+        setupset.copyarg.gold = <gold_size>
+        setupset.systemTemplate = <adoc_template>
 
-runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
-runtime.Preprocessing.any.removeXrays = <remove_xrays>
+        runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
+        runtime.Preprocessing.any.removeXrays = <remove_xrays>
 
-comparam.prenewst.newstack.BinByFactor = <ca_bin_factor>
+        comparam.prenewst.newstack.BinByFactor = <ca_bin_factor>
 
-runtime.Fiducials.any.trackingMethod = 1
+        runtime.Fiducials.any.trackingMethod = 1
 
-comparam.xcorr_pt.tiltxcorr.SizeOfPatchesXandY = <size_of_patches>
-comparam.xcorr_pt.tiltxcorr.NumberOfPatchesXandY = <num_of_patches>
-comparam.xcorr_pt.tiltxcorr.ShiftLimitsXandY = <limits_on_shift>
-comparam.xcorr_pt.tiltxcorr.IterateCorrelations = <num_iterations>
-runtime.PatchTracking.any.adjustTiltAngles = <adj_tilt_angles>
-comparam.xcorr_pt.imodchopconts.LengthOfPieces = -1
+        comparam.xcorr_pt.tiltxcorr.SizeOfPatchesXandY = <size_of_patches>
+        comparam.xcorr_pt.tiltxcorr.NumberOfPatchesXandY = <num_of_patches>
+        comparam.xcorr_pt.tiltxcorr.ShiftLimitsXandY = <limits_on_shift>
+        comparam.xcorr_pt.tiltxcorr.IterateCorrelations = <num_iterations>
+        runtime.PatchTracking.any.adjustTiltAngles = <adj_tilt_angles>
+        comparam.xcorr_pt.imodchopconts.LengthOfPieces = -1
 
-comparam.align.tiltalign.SurfacesToAnalyze = <num_surfaces>
-comparam.align.tiltalign.MagOption = <mag_option>
-comparam.align.tiltalign.TiltOption = <tilt_option>
-comparam.align.tiltalign.RotOption = <rot_option>
-comparam.align.tiltalign.BeamTiltOption = <beamtilt_option>
-comparam.align.tiltalign.RobustFitting = <use_robust>
-comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
-
-runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
+        comparam.align.tiltalign.SurfacesToAnalyze = <num_surfaces>
+        comparam.align.tiltalign.MagOption = <mag_option>
+        comparam.align.tiltalign.TiltOption = <tilt_option>
+        comparam.align.tiltalign.RotOption = <rot_option>
+        comparam.align.tiltalign.BeamTiltOption = <beamtilt_option>
+        comparam.align.tiltalign.RobustFitting = <use_robust>
+        comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
+        
+        runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
         """
 
         convert_dict = {
@@ -379,20 +385,19 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
             tqdm_iter.set_description(f"Aligning TS {curr_ts}...")
 
             # Get command for current tilt-series
-            cmd_ts = self._get_brt_align_command(curr_ts)
-
             batchruntomo = subprocess.run(self._get_brt_align_command(curr_ts),
                                           stdout=subprocess.PIPE,
                                           stderr=subprocess.STDOUT,
-                                          encoding='ascii')
+                                          encoding='ascii',
+                                          check=True,
+            )
 
             if batchruntomo.stderr:
                 raise ValueError(f'Batchtomo: An error has occurred ({batchruntomo.returncode}) '
                                  f'on stack{curr_ts}.')
-            else:
-                self.stdout = batchruntomo.stdout
-                self.update_align_metadata(ext)
-                self.export_metadata()
+            self.stdout = batchruntomo.stdout
+            self.update_align_metadata(ext)
+            self.export_metadata()
 
                 
     def update_align_metadata(self, ext=False):
@@ -692,17 +697,17 @@ def get_align_stats():
         with open(target_file_path, 'r') as f:
             lines = f.readlines()
 
-        mean_sd_criterion = re.compile('^\s*Residual error mean')
+        mean_sd_criterion = re.compile(r'^\s*Residual error mean')
         filtered = list(filter(mean_sd_criterion.match, lines))
-        filter_split = re.split('\s+', filtered[0])
+        filter_split = re.split(r'\s+', filtered[0])
 
         get_mean_sd = re.compile('[0-9]+.[0-9]+')
         mean = float(list(filter(get_mean_sd.match, filter_split))[0])
         sd = float(list(filter(get_mean_sd.match, filter_split))[1])
 
-        weighted_mean_criterion = re.compile('^\s*Residual error weighted mean')
+        weighted_mean_criterion = re.compile(r'^\s*Residual error weighted mean')
         filtered = list(filter(weighted_mean_criterion.match, lines))
-        filter_split = re.split('\s+', filtered[0])
+        filter_split = re.split(r'\s+', filtered[0])
 
         get_weighted_crit = re.compile('[0-9]+.[0-9]+')
         weighted_error = float(list(filter(get_weighted_crit.match, filter_split))[0])
