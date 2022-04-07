@@ -95,7 +95,7 @@ def cleanup():
                                         filename=recon_yaml)
         recon_path = recon_config.params['System']['output_path']
         if os.path.isdir(recon_path):
-            logger(f"Deleting intermediary IMOD files...")
+            logger("Deleting intermediary IMOD files...")
             files = glob(recon_path + 'stack*/*.*~') + \
                 glob(recon_path + 'stack*/*_full_rec.*')
             cmd = ['rm', *files]
@@ -104,34 +104,34 @@ def cleanup():
                                        stderr=subprocess.STDOUT)
 
 
-def run_all():
-    """
-    Method to run all four processes in one go using default settings.
-    """
+# def run_all():
+#     """
+#     Method to run all four processes in one go using default settings.
+#     """
 
-    logger = logMod.Logger()
+#     logger = logMod.Logger()
 
-    # Collect raw images and produce master metadata
-    logger("Collecting raw images...")
-    get_master_metadata()
+#     # Collect raw images and produce master metadata
+#     logger("Collecting raw images...")
+#     get_master_metadata()
 
-    # Motion correction
-    logger("Motion correction in progress...")
-    create_mc2_yaml()
-    run_mc2()
+#     # Motion correction
+#     logger("Motion correction in progress...")
+#     create_mc2_yaml()
+#     run_mc2()
 
-    # CTF estimation
-    logger("CTF estimation in progress...")
-    create_ctffind_yaml()
-    run_ctffind()
+#     # CTF estimation
+#     logger("CTF estimation in progress...")
+#     create_ctffind_yaml()
+#     run_ctffind()
 
-    # Alignment
-    logger("Alignment in progress...")
-    create_align_yaml()
-    run_align()
+#     # Alignment
+#     logger("Alignment in progress...")
+#     create_align_yaml()
+#     run_align()
 
-    # Reconstruction
-    logger("Reconstruction in progress...")
-    create_recon_yaml()
-    run_recon()
+#     # Reconstruction
+#     logger("Reconstruction in progress...")
+#     create_recon_yaml()
+#     run_recon()
 

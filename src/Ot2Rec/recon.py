@@ -17,11 +17,9 @@ import os
 import argparse
 import subprocess
 import multiprocess as mp
-from glob import glob
 import pandas as pd
 from tqdm import tqdm
 import yaml
-from icecream import ic
 
 from . import metadata as mdMod
 from . import params as prmMod
@@ -85,7 +83,7 @@ class Recon:
             self.suffix = self.suffix[:-1]
 
         # Create the folders and dictionary for future reference
-        self._path_dict = dict()
+        self._path_dict = {}
         for curr_ts in self.params['System']['process_list']:
             subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
             os.makedirs(subfolder, exist_ok=True)
@@ -136,7 +134,8 @@ class Recon:
             self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
 
             if len(self._missing_specified) > 0:
-                self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. Will be added back for processing.")
+                self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. "
+                            "Will be added back for processing.")
 
         # Drop the items in input metadata if they are in the output record
         _ignored = self._recon_images[self._recon_images.recon_output.isin(self.meta_out.recon_output)]
