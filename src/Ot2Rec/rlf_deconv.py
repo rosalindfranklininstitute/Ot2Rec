@@ -13,13 +13,11 @@
 # language governing permissions and limitations under the License.
 
 
-import RedLionfishDeconv as rlf
-from glob import glob, glob1
-import numpy as np
-from scipy.signal import convolve as conv
+from glob import glob
 import mrcfile
 import tifffile
-from icecream import ic
+
+import RedLionfishDeconv as rlf
 
 from . import user_args as uaMod
 from . import logger as logMod
@@ -54,6 +52,10 @@ class RLF_deconv():
         self.orig_mrc = orig_mrc
         self.kernel_mrc = kernel_mrc
 
+        # Initiating variables for later use
+        self.orig = None
+        self.kernel = None
+        
         
     def __call__(self):
         """

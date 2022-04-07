@@ -52,9 +52,9 @@ class Logger():
         now = dt.datetime.now().strftime("%d%b%Y-%H:%M:%S")
         with self.lock:
             if newline:
-                message = '\n{} - {}'.format(now, log)
+                message = f'\n{now} - {log}'
             else:
-                message = '{} - {}'.format(now, log)
+                message = f'{now} - {log}'
 
             if stdout:
                 print(message)

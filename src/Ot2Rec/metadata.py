@@ -13,7 +13,6 @@
 # language governing permissions and limitations under the License.
 
 
-import yaml
 import os
 import re
 import itertools
@@ -21,6 +20,8 @@ from functools import partial
 import multiprocessing as mp
 import subprocess
 from glob import glob
+
+import yaml
 import pandas as pd
 from icecream import ic
 
@@ -63,6 +64,9 @@ class Metadata:
         # Obtain parameters first
         if self.job_type in ['master', 'motioncorr', 'ctffind', 'align', 'reconstruct']:
             self.get_param()
+
+        # Define empty lists for later use
+        self.image_paths, self.tilt_series, self.image_idx, self.tilt_angles = [], [], [], []
 
 
     def get_param(self):
@@ -108,13 +112,13 @@ class Metadata:
             )
             
         if (len(raw_images_list) == 0):
-            raise IOError("Error in Ot2Rec.metadata.Metadata.create_master_metadata: No vaild files found using given criteria.")
+            raise IOError("Error in Ot2Rec.metadata.Metadata.create_master_metadata: "
+                          "No vaild files found using given criteria.")
 
         # Convert potentially relative file paths to absolute paths
         raw_images_list = sorted([os.path.abspath(image) for image in raw_images_list])
 
         # Extract information from image file names
-        self.image_paths, self.tilt_series, self.image_idx, self.tilt_angles = [], [], [], []
         for curr_image in raw_images_list:
             self.image_paths.append(curr_image)
 
@@ -124,16 +128,20 @@ class Metadata:
             # Extract tilt series number
             split_path_name = curr_image.split('/')[-1].replace('[', '_').split('_')
             try:
-                ts_index = int(''.join(i for i in split_path_name[self.params['image_stack_field']+prefix_length] if i.isdigit()))
-            except IndexError or ValueError:
-                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt series number from file path {curr_image}.")
+                ts_index = int(''.join(i for i in split_path_name[self.params['image_stack_field']+
+                                                                  prefix_length] if i.isdigit()))
+            except (IndexError, ValueError):
+                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. "
+                                 f"Failed to get tilt series number from file path {curr_image}.")
             self.tilt_series.append(ts_index)
 
             # Extract image index number
             try:
-                idx = int(''.join(i for i in split_path_name[self.params['image_index_field']+prefix_length] if i.isdigit()))
-            except IndexError or ValueError:
-                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt series number from file path {curr_image}.")
+                idx = int(''.join(i for i in split_path_name[self.params['image_index_field']+prefix_length]
+                                  if i.isdigit()))
+            except (IndexError, ValueError):
+                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. "
+                                 f"Failed to get tilt series number from file path {curr_image}.")
             self.image_idx.append(idx)
             
 
@@ -141,8 +149,9 @@ class Metadata:
             try:
                 tilt_angle = float(split_path_name[self.params['image_tiltangle_field']+prefix_length].replace(
                     f".{self.params['filetype']}", '').replace('[', '').replace(']', ''))
-            except IndexError or ValueError as ierr:
-                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. Failed to get tilt angle from file path {curr_image}.")
+            except (IndexError, ValueError):
+                raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. "
+                                 f"Failed to get tilt angle from file path {curr_image}.")
             self.tilt_angles.append(tilt_angle)
 
         # Save metadata as a dictionary --- easier to dump as yaml
@@ -159,14 +168,14 @@ class Metadata:
         """
         
         command = ["header", curr_file]
-        text = subprocess.run(command, capture_output=True)
+        text = subprocess.run(command, capture_output=True, check=True)
 
         text_split = str(text.stdout).split('\\n')
 
-        r = re.compile('^\s*Number')
+        r = re.compile(r'^\s*Number')
         line = list(filter(r.match, text_split))[0].lstrip()
 
-        num_frames = int(re.split('\s+', line)[-1])
+        num_frames = int(re.split(r'\s+', line)[-1])
         sampling = max(1, num_frames // target_frames)
 
         return [num_frames, sampling]
@@ -194,12 +203,12 @@ class Metadata:
         blocks = [list(y) for x, y in itertools.groupby(lines, lambda z: z == '') if not x]
         ts_all_info = [block for block in blocks if block[0].startswith(r'[ZValue')]
 
-        ts_dose_dict = dict()
+        ts_dose_dict = {}
         for frame_idx in range(len(ts_all_info)):
             file_idx = frame_idx + start
         
             image = ts_all_info[frame_idx]
-            image_split = [re.split('\s*=\s*', line) for line in image]
+            image_split = [re.split(r'\s*=\s*', line) for line in image]
             image_split_t = list(map(list, zip(*image_split)))
             image_dict = dict(zip(image_split_t[0], image_split_t[1]))
 
@@ -216,7 +225,6 @@ class Metadata:
         df['ds_factor'] = None
         df['frame_dose'] = None
         for curr_ts in list(set(df.ts)):
-            ic(curr_ts)
             mdoc_path = f"{base_folder}/{self.params['file_prefix']}_" + str(curr_ts) + ".mdoc"
             ts_dose_dict = self.get_ts_dose(mdoc_path, 1)
 
@@ -224,8 +232,6 @@ class Metadata:
             ts_image_idx_list = df[df['ts']==curr_ts]['image_idx'].to_list()
             ts_num_frame_list = self.get_num_frames_parallel(func=self.get_num_frames,
                                                              filelist=ts_image_list,
-                                                             target_frames=self.args.num_frames,
-                                                             np=self.args.num_procs
             )
 
             for curr_idx in ts_image_idx_list:
