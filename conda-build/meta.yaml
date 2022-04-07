@@ -8,22 +8,28 @@ source:
 build:
   number: 0
   entry_points:
-     - o2r.new = Ot2Rec.main:new_proj
-     - o2r.get_master = Ot2Rec.main:get_master_metadata
-     - o2r.mc.new=Ot2Rec.main:create_mc2_yaml
-     - o2r.mc.run=Ot2Rec.main:run_mc2
-     - o2r.ctffind.new=Ot2Rec.main:create_ctffind_yaml
-     - o2r.ctffind.run=Ot2Rec.main:run_ctffind
-     - o2r.align.new=Ot2Rec.main:create_align_yaml
-     - o2r.align.new_ext=Ot2Rec.main:create_align_yaml_stacked
-     - o2r.align.run=Ot2Rec.main:run_align
-     - o2r.align.run_ext=Ot2Rec.main:run_align_ext
-     - o2r.align.stats=Ot2Rec.main:get_align_stats
-     - o2r.recon.new=Ot2Rec.main:create_recon_yaml
-     - o2r.recon.run=Ot2Rec.main:run_recon
-     - o2r.cleanup=Ot2Rec.main:cleanup
-     - o2r.runall=Ot2Rec.main:run_all
-
+    -  o2r.new=Ot2Rec.main:new_proj
+    -  o2r.mc.new=Ot2Rec.main:create_mc2_yaml
+    -  o2r.mc.run=Ot2Rec.main:run_mc2
+    -  o2r.ctffind.new=Ot2Rec.main:create_ctffind_yaml
+    -  o2r.ctffind.run=Ot2Rec.main:run_ctffind
+    -  o2r.ctfsim.run=Ot2Rec.main:run_ctfsim
+    -  o2r.align.new=Ot2Rec.main:create_align_yaml
+    -  o2r.align.stacks=Ot2Rec.main:create_stacks
+    -  o2r.align.run=Ot2Rec.main:run_align
+    -  o2r.align.stats=Ot2Rec.main:get_align_stats
+    -  o2r.align.new_ext=Ot2Rec.main:create_align_yaml_stacked
+    -  o2r.align.run_ext=Ot2Rec.main:run_align_ext
+    -  o2r.recon.new=Ot2Rec.main:create_recon_yaml
+    -  o2r.recon.run=Ot2Rec.main:run_recon
+    -  o2r.savu.new=Ot2Rec.main:create_savurecon_yaml
+    -  o2r.savu.run=Ot2Rec.main:run_savurecon
+    -  o2r.aretomo.new=Ot2Rec.main:create_aretomo_yaml
+    -  o2r.aretomo.run=Ot2Rec.main:run_aretomo
+    -  o2r.deconv.run=Ot2Rec.main:run_rlf_deconv
+    -  o2r.cleanup=Ot2Rec.main:cleanup
+    -  o2r.runall=Ot2Rec.main:run_all
+	    
 requirements:
   host:
     - python
@@ -38,6 +44,9 @@ requirements:
     - multiprocess
     - icecream
     - beautifultable
+    - scikit-image
+    - mrcfile
+    - redlionfish
 
 about:
   home: https://github.com/RosalindFranklinInstitute/Ot2Rec
