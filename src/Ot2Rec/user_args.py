@@ -37,7 +37,8 @@ def get_args_new_proj():
     parser.add_argument("-fp", "--folder_prefix",
                         type=str,
                         default='',
-                        help="Common prefix of raw tilt series folder(s). Don't use this flag if all images are in the parent folder.")
+                        help=("Common prefix of raw tilt series folder(s). "
+                              "Don't use this flag if all images are in the parent folder."))
     parser.add_argument("-p", "--file_prefix",
                         type=str,
                         help="Common prefix of raw image files (Default: project name).")
@@ -102,7 +103,8 @@ def get_args_mc2():
     parser.add_argument("--exec_path",
                         type=str,
                         default='/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110',
-                        help="Path to MotionCor2 executable. (Default: /opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110)")
+                        help=("Path to MotionCor2 executable. "
+                              "(Default: /opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110)"))
     parser.add_argument("--gain",
                         type=str,
                         help="Path to gain reference file. (Default: None)")
@@ -187,7 +189,8 @@ def get_args_ctffind():
                         type=float,
                         nargs=3,
                         default=[5000, 50000, 500],
-                        help="Min, max and step size of initial defocus search in Angstroms. (Default: 5000, 50000, 500)")
+                        help=("Min, max and step size of initial defocus search in Angstroms. "
+                              "(Default: 5000, 50000, 500)"))
     parser.add_argument("-at", "--astigm_type",
                         type=str,
                         help="Type of astigmatism. FLAG USE NOT RECOMMENDED.")
@@ -242,7 +245,8 @@ def get_args_align():
     parser.add_argument("--adoc_template",
                         type=str,
                         default="/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc",
-                        help="Path to template file of BatchRunTomo directives. (Default: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc)")
+                        help=("Path to template file of BatchRunTomo directives. "
+                              "(Default: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc)"))
     parser.add_argument("-b", "--stack_bin_factor",
                         type=int,
                         default=4,
@@ -276,7 +280,8 @@ def get_args_align():
                         type=int,
                         nargs=2,
                         default=[2, 2],
-                        help="Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment. (Default: 2, 2)")
+                        help=("Patch-tracking: Maximum extent (in pixels) to which patches are allowed to "
+                              "move during alignment. (Default: 2, 2)"))
     parser.add_argument("--adjust_tilt_angles",
                         action="store_true",
                         help="Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset. Use flag if True.")
@@ -310,7 +315,8 @@ def get_args_align():
                         help="Fine-alignment: Do not use robust fitting. Use flag if True.")
     parser.add_argument("--no_weight_contours",
                         action="store_true",
-                        help="Fine-alignment: Do not apply weighting to entire contours from patch-tracking. Use flag if True.")
+                        help=("Fine-alignment: Do not apply weighting to entire contours from patch-tracking. "
+                              "Use flag if True."))
 
     return parser
 
@@ -360,7 +366,8 @@ def get_args_align_ext():
     parser.add_argument("--adoc_template",
                         type=str,
                         default="/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc",
-                        help="Path to template file of BatchRunTomo directives. (Default: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc)")
+                        help=("Path to template file of BatchRunTomo directives. "
+                              "(Default: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc)"))
     parser.add_argument("-b", "--stack_bin_factor",
                         type=int,
                         default=4,
@@ -394,7 +401,8 @@ def get_args_align_ext():
                         type=int,
                         nargs=2,
                         default=[2, 2],
-                        help="Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment. (Default: 2, 2)")
+                        help=("Patch-tracking: Maximum extent (in pixels) to which patches are allowed "
+                              "to move during alignment. (Default: 2, 2)"))
     parser.add_argument("--adjust_tilt_angles",
                         action="store_true",
                         help="Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset. Use flag if True.")
