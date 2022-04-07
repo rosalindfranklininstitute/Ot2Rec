@@ -202,7 +202,7 @@ class Align:
         for curr_ts in self._process_list:
             # Define path where the new rawtlt file should go
             rawtlt_file = (f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}_"
-                           "{curr_ts:02}{self.params['System']['output_suffix']}.rawtlt")
+                           f"{curr_ts:02}{self.params['System']['output_suffix']}.rawtlt")
 
             # Sort the filtered metadata
             # Metadata is fetched in the _sort_tilt_angles method
@@ -233,7 +233,7 @@ class Align:
             # Create template for newstack
             self._filename_fileinlist = \
                 (f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}"
-                 "_{curr_ts:02}{self.params['System']['output_suffix']}_sources.txt")
+                 f"_{curr_ts:02}{self.params['System']['output_suffix']}_sources.txt")
             self._stack_template = f"{len(meta_ts)}\n" + '\n0\n'.join(meta_ts['output']) + '\n0\n'
             with open(self._filename_fileinlist, 'w') as f:
                 f.write(self._stack_template)
@@ -455,9 +455,9 @@ def update_yaml(args):
     align_yaml_name = args.project_name + '_align.yaml'
     mc2_yaml_name = args.project_name + '_mc2.yaml'
     if not os.path.isfile(align_yaml_name):
-        raise IOError("Error in Ot2Rec.main.update_align_yaml: alignment config file not found.")
+        raise IOError("Error in Ot2Rec.align.update_yaml: alignment config file not found.")
     if not os.path.isfile(mc2_yaml_name):
-        raise IOError("Error in Ot2Rec.main.update_align_yaml: motioncorr config file not found.")
+        raise IOError("Error in Ot2Rec.align.update__yaml: motioncorr config file not found.")
 
     # Read in MC2 metadata (as Pandas dataframe)
     # We only need the TS number and the tilt angle for comparisons at this stage

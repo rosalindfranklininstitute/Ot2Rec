@@ -24,31 +24,29 @@ from Ot2Rec import aretomo
 from Ot2Rec import user_args as uaMod
 from Ot2Rec import params as prmMod
 
+
 class AreTomoTest(unittest.TestCase):
     """
     Tests the AreTomo plugin
     """
-    
+
     def setUp(self):
         """
         Creates prerequisite files
         """
         self._temp_dir = tempfile.TemporaryDirectory()
         self.temp_path = pathlib.Path(self._temp_dir.name)
-        os.mkdir(self.temp_path/'aretomo')
-        os.mkdir(self.temp_path/'aretomo/TS_01')
-        self._create_file(self.temp_path/'aretomo/TS_01/TS_01.st', '')
-        self._create_file(self.temp_path/'aretomo/TS_01/TS_01.rawtlt', '')
-    
+        os.mkdir(self.temp_path / 'aretomo')
+        os.mkdir(self.temp_path / 'aretomo/TS_01')
+        self._create_file(self.temp_path / 'aretomo/TS_01/TS_01.st', '')
+        self._create_file(self.temp_path / 'aretomo/TS_01/TS_01.rawtlt', '')
 
     def tearDown(self):
         self._temp_dir.cleanup()
 
-
     def _create_file(self, path, data):
         with open(path, 'w') as f:
             f.write(data)
-    
 
     def _generate_yaml(self, working_dir, args, kwargs):
         """
@@ -66,26 +64,23 @@ class AreTomoTest(unittest.TestCase):
         )
 
         return aretomo_params
-    
 
     def _get_aretomo_yaml_name(self, args):
         aretomo_yaml_names = {
             0: args.project_name + "_aretomo_align.yaml",
             1: args.project_name + "_aretomo_recon.yaml",
             2: args.project_name + "_aretomo_align-recon.yaml"
-            }
+        }
 
         aretomo_yaml_name = aretomo_yaml_names[int(args.aretomo_mode)]
 
         return aretomo_yaml_name
 
-
     def test_prereq_files(self):
         """
         Tests that prerequisite files are created correctly
         """
-        self.assertEqual(len(os.listdir(self.temp_path/'aretomo/TS_01')), 2)
-
+        self.assertEqual(len(os.listdir(self.temp_path / 'aretomo/TS_01')), 2)
 
     def test_aretomo_align_defaults(self):
         """
@@ -124,7 +119,6 @@ class AreTomoTest(unittest.TestCase):
             aretomo_params.params["AreTomo_setup"]["tilt_angles"][0],
             './aretomo/TS_01/TS_01.rawtlt'
         )
-    
 
     def test_aretomo_extra_kwargs(self):
         """
@@ -138,7 +132,7 @@ class AreTomoTest(unittest.TestCase):
             '--extra',
             'kwargs'
         ])
-        
+
         aretomo_params = self._generate_yaml(
             self.temp_path,
             args,
@@ -147,14 +141,13 @@ class AreTomoTest(unittest.TestCase):
 
         self.assertEqual(aretomo_params.params['AreTomo_kwargs'], ['--extra', 'kwargs'])
 
-
     def test_aretomo_recon_defaults(self):
         """
         Tests that aretomo_recon.yaml is created correctly
         """
         # Add .ali and .tlt files
-        self._create_file(self.temp_path/'aretomo/TS_01/TS_01_ali.mrc', '')
-        self._create_file(self.temp_path/'aretomo/TS_01/TS_01_ali.tlt', '')
+        self._create_file(self.temp_path / 'aretomo/TS_01/TS_01_ali.mrc', '')
+        self._create_file(self.temp_path / 'aretomo/TS_01/TS_01_ali.tlt', '')
 
         parser = uaMod.get_args_aretomo()
         args, kwargs = parser.parse_known_args([
@@ -191,7 +184,6 @@ class AreTomoTest(unittest.TestCase):
         self.assertTrue(
             aretomo_params.params["AreTomo_recon"]["volz"] > 0
         )
-
 
     def test_aretomo_alignrecon_defaults(self):
         """
@@ -233,6 +225,7 @@ class AreTomoTest(unittest.TestCase):
         self.assertTrue(
             aretomo_params.params["AreTomo_recon"]["volz"] > 0
         )
+
 
 if __name__ == "__main__":
     unittest.main()

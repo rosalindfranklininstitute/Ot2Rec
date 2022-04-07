@@ -203,7 +203,7 @@ def get_args_ctffind():
     parser.add_argument("-ps", "--phase_shift",
                         action="store_true",
                         help="Estimate phase shift. Use flag if True.")
-    
+
     return parser
 
 
@@ -438,7 +438,6 @@ def get_args_align_ext():
                         action="store_true",
                         help="Fine-alignment: Do not apply weighting to entire contours from patch-tracking. Use flag if True.")
 
-
     return parser
 
 
@@ -608,7 +607,7 @@ def get_args_rldeconv():
     parser.add_argument("--uint",
                         action="store_true",
                         help="Store results as UInt8. Use flag if True.")
-    
+
     return parser
 
 
@@ -630,11 +629,10 @@ def get_args_aretomo():
                         help="Name of current project")
     parser.add_argument("aretomo_mode",
                         type=int,
-                        help=
-                            "Processes to be run in AreTomo, must be set."
-                            " 0: alignment only,"
-                            " 1: reconstruction only,"
-                            " 2: alignment + reconstruction")
+                        help="Processes to be run in AreTomo, must be set."
+                             " 0: alignment only,"
+                             " 1: reconstruction only,"
+                             " 2: alignment + reconstruction")
     parser.add_argument("rot_angle",
                         type=float,
                         help="Rotational angle of electron beam. Can be obtained from MDOC files.")
@@ -651,45 +649,39 @@ def get_args_aretomo():
     parser.add_argument("-in", "--input_mrc_folder",
                         type=str,
                         default='./aretomo/',
-                        help=
-                            "Folder containing input mrcs (Default: ./aretomo)")
+                        help="Folder containing input mrcs (Default: ./aretomo)")
     parser.add_argument("-o", "--output_path",
                         type=str,
                         default="./aretomo/",
                         help="Path to output folder (Default: ./aretomo)")
     parser.add_argument("-ta", "--tilt_angles",
                         type=str,
-                        help=
-                            "Path to text file containing tilt angles, usually .tlt."
-                            " Defaults to <project_name>_<suffix>.tlt")
+                        help="Path to text file containing tilt angles, usually .tlt."
+                             " Defaults to <project_name>_<suffix>.tlt")
     parser.add_argument("--volz",
                         type=int,
                         default=-1,
-                        help=
-                            "Z-height of reconstructed volume in voxels (unbinned),"
-                            " ignored if only alignment is performed."
-                            " Defaults to -1, where this will be set automatically"
-                            " by the rule of thumb."
-                            " VolZ = 200 + sample_thickness * pixel_size"
-                            " Setting value > 0 overrides automatic setting")
+                        help="Z-height of reconstructed volume in voxels (unbinned),"
+                             " ignored if only alignment is performed."
+                             " Defaults to -1, where this will be set automatically"
+                             " by the rule of thumb."
+                             " VolZ = 200 + sample_thickness * pixel_size"
+                             " Setting value > 0 overrides automatic setting")
     parser.add_argument("--sample_thickness",
                         type=float,
                         default=-1,
-                        help=
-                            "Sample thickness in nm, used to set VolZ automatically."
-                            " Ignored if VolZ is set to >0, or only alignment is done")
+                        help="Sample thickness in nm, used to set VolZ automatically."
+                             " Ignored if VolZ is set to >0, or only alignment is done")
     parser.add_argument("--output_binning",
                         type=int,
                         default=4,
-                        help=
-                            "Binning to be applied to saved .mrc file."
-                            " Default = 4")
+                        help="Binning to be applied to saved .mrc file."
+                             " Default = 4")
     parser.add_argument("--recon_algo",
                         type=int,
                         default=0,
-                        help=
-                            "Reconstruction algorithm to be used."
-                            " 0: WBP (default),"
-                            " 1: SART")
-    
+                        help="Reconstruction algorithm to be used."
+                             " 0: WBP (default),"
+                             " 1: SART")
+
     return parser

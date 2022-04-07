@@ -24,16 +24,18 @@ from . import logger as logMod
 
 
 itick = 0
+
+
 def tickCallBack():
     global itick
     itick += 1
 
-    
+
 class RLF_deconv():
     """
     Class encapsulating an RLF_deconv object
     """
-    
+
     def __init__(self, orig_path, kernel_path, params_dict, orig_mrc, kernel_mrc):
         """
         Initialise the RLF_deconv object
@@ -55,8 +57,7 @@ class RLF_deconv():
         # Initiating variables for later use
         self.orig = None
         self.kernel = None
-        
-        
+
     def __call__(self):
         """
         Method to start deconvolution
@@ -77,7 +78,6 @@ class RLF_deconv():
 
         return out
 
-
     @staticmethod
     def read_mrc(path):
         """
@@ -88,9 +88,8 @@ class RLF_deconv():
         """
         with mrcfile.open(path) as image:
             data = image.data
-            
-        return data
 
+        return data
 
     @staticmethod
     def read_tiff(path):
@@ -103,8 +102,7 @@ class RLF_deconv():
         data = tifffile.imread(path)
 
         return data
-    
-    
+
     def _deconv_array(self):
         """
         Method to use RLF to deconvolve image
@@ -124,6 +122,8 @@ class RLF_deconv():
 """
 PLUGIN METHODS
 """
+
+
 def run():
     """
     Method to deconvolve image using a given kernel (point-spread function)
@@ -134,7 +134,7 @@ def run():
 
     # Create logger object
     logger = logMod.Logger()
-    
+
     # Check provided files are present
     try:
         assert (len(glob(args.image_path)) > 0)
@@ -160,13 +160,11 @@ def run():
     my_deconv = RLF_deconv(orig_path=args.image_path,
                            kernel_path=args.psf_path,
                            params_dict=deconv_params,
-                           orig_mrc=args.image_type=='mrc',
-                           kernel_mrc=args.psf_type=='mrc')
+                           orig_mrc=args.image_type == 'mrc',
+                           kernel_mrc=args.psf_type == 'mrc')
 
     deconvd_image = my_deconv()
-    
+
     # Save results
     with mrcfile.new(args.output_path, overwrite=True) as f:
         f.set_data(deconvd_image)
-
-    

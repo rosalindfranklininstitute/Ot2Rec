@@ -42,12 +42,11 @@ class Metadata:
         'reconstruct': 'recon',
     }
 
-
     def __init__(self,
                  project_name: str,
                  job_type: str,
                  md_in=None,
-    ):
+                 ):
         """
         Initialise Metadata object
 
@@ -68,7 +67,6 @@ class Metadata:
         # Define empty lists for later use
         self.image_paths, self.tilt_series, self.image_idx, self.tilt_angles = [], [], [], []
 
-
     def get_param(self):
         """
         Subroutine to get parameters for current job
@@ -78,7 +76,6 @@ class Metadata:
         self.prmObj = prmMod.read_yaml(project_name=self.project_name,
                                        filename=param_file)
         self.params = self.prmObj.params
-        
 
     def create_master_metadata(self):
         """
@@ -90,27 +87,28 @@ class Metadata:
         if self.params['TS_folder_prefix'] == '*':
             ts_subfolder_criterion = '*'
         elif self.params['TS_folder_prefix'] != '*' and \
-             len(self.params['TS_folder_prefix']) > 0:
+                len(self.params['TS_folder_prefix']) > 0:
             ts_subfolder_criterion = self.params['TS_folder_prefix'] + '_*'
-            
 
         # Source folder should not end with forward slash so remove them
         while self.params['source_folder'].endswith('/'):
             self.params['source_folder'] = self.params['source_folder'][:-1]
-        
+
         # Find files and check
         if len(self.params['TS_folder_prefix']) > 0:
-            raw_images_list = glob("{}/{}/{}_*.{}".format(self.params['source_folder'],
-                                                         ts_subfolder_criterion,
-                                                         self.params['file_prefix'],
-                                                         self.params['filetype'])
+            raw_images_list = glob("{}/{}/{}_*.{}".format(
+                self.params['source_folder'],
+                ts_subfolder_criterion,
+                self.params['file_prefix'],
+                self.params['filetype'])
             )
         else:
-            raw_images_list = glob("{}/{}_*.{}".format(self.params['source_folder'],
-                                                       self.params['file_prefix'],
-                                                       self.params['filetype'])
+            raw_images_list = glob("{}/{}_*.{}".format(
+                self.params['source_folder'],
+                self.params['file_prefix'],
+                self.params['filetype'])
             )
-            
+
         if (len(raw_images_list) == 0):
             raise IOError("Error in Ot2Rec.metadata.Metadata.create_master_metadata: "
                           "No vaild files found using given criteria.")
@@ -122,14 +120,14 @@ class Metadata:
         for curr_image in raw_images_list:
             self.image_paths.append(curr_image)
 
-            # Get length of filename prefix 
+            # Get length of filename prefix
             prefix_length = len(self.params['file_prefix'].split('_'))
-            
+
             # Extract tilt series number
             split_path_name = curr_image.split('/')[-1].replace('[', '_').split('_')
             try:
-                ts_index = int(''.join(i for i in split_path_name[self.params['image_stack_field']+
-                                                                  prefix_length] if i.isdigit()))
+                ts_index = int(''.join(i for i in split_path_name[
+                    self.params['image_stack_field'] + prefix_length] if i.isdigit()))
             except (IndexError, ValueError):
                 raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. "
                                  f"Failed to get tilt series number from file path {curr_image}.")
@@ -137,17 +135,16 @@ class Metadata:
 
             # Extract image index number
             try:
-                idx = int(''.join(i for i in split_path_name[self.params['image_index_field']+prefix_length]
+                idx = int(''.join(i for i in split_path_name[self.params['image_index_field'] + prefix_length]
                                   if i.isdigit()))
             except (IndexError, ValueError):
                 raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. "
                                  f"Failed to get tilt series number from file path {curr_image}.")
             self.image_idx.append(idx)
-            
 
             # Extract tilt angle
             try:
-                tilt_angle = float(split_path_name[self.params['image_tiltangle_field']+prefix_length].replace(
+                tilt_angle = float(split_path_name[self.params['image_tiltangle_field'] + prefix_length].replace(
                     f".{self.params['filetype']}", '').replace('[', '').replace(']', ''))
             except (IndexError, ValueError):
                 raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. "
@@ -163,10 +160,10 @@ class Metadata:
     @staticmethod
     def get_num_frames(curr_file, target_frames):
         """
-        curr_file (str)     :: path to current file 
+        curr_file (str)     :: path to current file
         target_frames (int) :: target number of frames in the 'mrc'
         """
-        
+
         command = ["header", curr_file]
         text = subprocess.run(command, capture_output=True, check=True)
 
@@ -180,7 +177,6 @@ class Metadata:
 
         return [num_frames, sampling]
 
-
     @staticmethod
     def get_num_frames_parallel(func, filelist, target_frames=15, np=8):
         """
@@ -190,9 +186,8 @@ class Metadata:
         func_filelist = partial(func, target_frames=target_frames)
         with mp.Pool(np) as p:
             result = p.map(func_filelist, filelist)
-            
-        return result
 
+        return result
 
     @staticmethod
     def get_ts_dose(mdoc_in, start=0):
@@ -206,7 +201,7 @@ class Metadata:
         ts_dose_dict = {}
         for frame_idx in range(len(ts_all_info)):
             file_idx = frame_idx + start
-        
+
             image = ts_all_info[frame_idx]
             image_split = [re.split(r'\s*=\s*', line) for line in image]
             image_split_t = list(map(list, zip(*image_split)))
@@ -215,7 +210,6 @@ class Metadata:
             ts_dose_dict[file_idx] = float(image_dict['ExposureDose'])
 
         return ts_dose_dict
-    
 
     def get_mc2_temp(self):
         df = pd.DataFrame(self.metadata)
@@ -228,29 +222,29 @@ class Metadata:
             mdoc_path = f"{base_folder}/{self.params['file_prefix']}_" + str(curr_ts) + ".mdoc"
             ts_dose_dict = self.get_ts_dose(mdoc_path, 1)
 
-            ts_image_list = df[df['ts']==curr_ts]['file_paths'].to_list()
-            ts_image_idx_list = df[df['ts']==curr_ts]['image_idx'].to_list()
+            ts_image_list = df[df['ts'] == curr_ts]['file_paths'].to_list()
+            ts_image_idx_list = df[df['ts'] == curr_ts]['image_idx'].to_list()
             ts_num_frame_list = self.get_num_frames_parallel(func=self.get_num_frames,
                                                              filelist=ts_image_list,
-            )
+                                                             )
 
             for curr_idx in ts_image_idx_list:
-                nf, dsf = ts_num_frame_list[curr_idx-1]
-                df.loc[(df.ts==curr_ts) & (df.image_idx==curr_idx), 'num_frames'] = nf
-                df.loc[(df.ts==curr_ts) & (df.image_idx==curr_idx), 'ds_factor'] = dsf
-                df.loc[(df.ts==curr_ts) & (df.image_idx==curr_idx), 'frame_dose'] = ts_dose_dict[curr_idx] / nf
+                nf, dsf = ts_num_frame_list[curr_idx - 1]
+                df.loc[(df.ts == curr_ts) & (df.image_idx == curr_idx), 'num_frames'] = nf
+                df.loc[(df.ts == curr_ts) & (df.image_idx == curr_idx), 'ds_factor'] = dsf
+                df.loc[(df.ts == curr_ts) & (df.image_idx == curr_idx), 'frame_dose'] = ts_dose_dict[curr_idx] / nf
 
-            ic(df.loc[df.ts==curr_ts])
+            ic(df.loc[df.ts == curr_ts])
 
         self.metadata['num_frames'] = df.num_frames.to_list()
         self.metadata['ds_factor'] = df.ds_factor.to_list()
         self.metadata['frame_dose'] = df.frame_dose.to_list()
-        
-        
+
+
 def read_md_yaml(project_name: str,
                  job_type: str,
                  filename: str,
-):
+                 ):
     """
     Function to read in YAML file containing metadata
 

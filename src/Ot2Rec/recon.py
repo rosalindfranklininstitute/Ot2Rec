@@ -37,7 +37,7 @@ class Recon:
                  md_in,
                  params_in,
                  logger_in,
-    ):
+                 ):
         """
         Initialising a Recon object
 
@@ -65,7 +65,6 @@ class Recon:
         self._process_list = self.params['System']['process_list']
         self._check_reconned_images()
 
-
     def _get_internal_metadata(self):
         """
         Method to prepare internal metadata for processing and checking
@@ -92,16 +91,14 @@ class Recon:
         self._recon_images = pd.DataFrame(columns=['ts', 'align_output', 'recon_output'])
         for curr_ts in self.params['System']['process_list']:
             subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
-            _to_append = pd.DataFrame(
-                {'ts': [curr_ts],
-                 'align_output': [f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_ali.mrc"],
-                 'recon_output': [f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_rec.mrc"],
-                }
-            )
+            _to_append = pd.DataFrame({
+                'ts': [curr_ts],
+                'align_output': [f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_ali.mrc"],
+                'recon_output': [f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_rec.mrc"],
+            })
             self._recon_images = pd.concat([self._recon_images, _to_append],
                                            ignore_index=True,
-            )
-
+                                           )
 
     def _check_reconned_images(self):
         """
@@ -126,12 +123,12 @@ class Recon:
             self._missing_specified = pd.DataFrame(columns=self.meta.columns)
 
             for curr_ts in self.params['System']['process_list']:
-                _to_append = self._missing[self._missing['ts']==curr_ts]
+                _to_append = self._missing[self._missing['ts'] == curr_ts]
                 self._missing_specified = pd.concat([self._missing_specified, _to_append],
                                                     ignore_index=True,
-                )
+                                                    )
             self._merged = self.meta_out.merge(self._missing_specified, how='left', indicator=True)
-            self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
+            self.meta_out = self.meta_out[self._merged['_merge'] == 'left_only']
 
             if len(self._missing_specified) > 0:
                 self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. "
@@ -146,9 +143,8 @@ class Recon:
             self.no_processes = True
 
         self._merged = self._recon_images.merge(_ignored, how='left', indicator=True)
-        self._recon_images = self._recon_images[self._merged['_merge']=='left_only']
+        self._recon_images = self._recon_images[self._merged['_merge'] == 'left_only']
         self._process_list = self._recon_images['ts'].sort_values(ascending=True).unique().tolist()
-
 
     def _get_adoc(self):
         """
@@ -199,7 +195,8 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
             'recon_thickness': self.params['BatchRunTomo']['reconstruction']['thickness'],
 
             'run_trimvol': 1 if self.params['BatchRunTomo']['postprocessing']['run_trimvol'] else 0,
-            'trimvol_reorient': {'none': 0, 'flip': 1, 'rotate': 2}[self.params['BatchRunTomo']['postprocessing']['trimvol_reorient']]
+            'trimvol_reorient': {'none': 0, 'flip': 1, 'rotate': 2}[
+                self.params['BatchRunTomo']['postprocessing']['trimvol_reorient']]
         }
 
         for param in list(convert_dict.keys()):
@@ -208,11 +205,10 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         with open('./recon.adoc', 'w') as f:
             f.write(adoc_temp)
 
-
     def _get_brt_recon_command(self,
                                curr_ts: int,
                                ext=False,
-    ):
+                               ):
         """
         Method to get command to run batchtomo for reconstruction
 
@@ -224,7 +220,7 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         """
 
         # Get indices of usable CPUs
-        temp_cpu = [str(i) for i in range(1, mp.cpu_count()+1)]
+        temp_cpu = [str(i) for i in range(1, mp.cpu_count() + 1)]
 
         cmd = ['batchruntomo',
                '-CPUMachineList', f"{temp_cpu}",
@@ -234,10 +230,9 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
                '-CurrentLocation', self._path_dict[curr_ts],
                '-StartingStep', '8' if not ext else '0',
                '-EndingStep', '20' if not ext else '0',
-        ]
+               ]
 
         return cmd
-
 
     def recon_stack(self, ext=False):
         """
@@ -273,7 +268,6 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
                 self.update_recon_metadata()
                 self.export_metadata()
 
-
     def update_recon_metadata(self):
         """
         Subroutine to update metadata after one set of runs
@@ -286,11 +280,11 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         _to_append = self._recon_images.loc[self._recon_images['recon_output'].apply(lambda x: os.path.isfile(x))]
         self.meta_out = pd.concat([self.meta_out, _to_append],
                                   ignore_index=True)
-        self._recon_images = self._recon_images.loc[~self._recon_images['recon_output'].apply(lambda x: os.path.isfile(x))]
+        self._recon_images = self._recon_images.loc[~self._recon_images['recon_output'].apply(
+            lambda x: os.path.isfile(x))]
 
         # Sometimes data might be duplicated (unlikely) -- need to drop the duplicates
         self.meta_out.drop_duplicates(inplace=True)
-
 
     def export_metadata(self):
         """
@@ -306,6 +300,8 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
 """
 PLUGIN METHODS
 """
+
+
 def create_yaml():
     """
     Subroutine to create new yaml file for IMOD reconstruction
@@ -313,7 +309,7 @@ def create_yaml():
     # Parse user inputs
     parser = uaMod.get_args_recon()
     args = parser.parse_args()
-    
+
     # Create the yaml file, then automatically update it
     prmMod.new_recon_yaml(args)
     update_yaml(args)
@@ -353,7 +349,7 @@ def update_yaml(args):
         merged_md = align_md.merge(recon_md,
                                    how='outer',
                                    indicator=True)
-        unprocessed_images = merged_md.loc[lambda x: x['_merge']=='left_only']
+        unprocessed_images = merged_md.loc[lambda x: x['_merge'] == 'left_only']
     else:
         unprocessed_images = align_md
     unique_ts_numbers = unprocessed_images['ts'].sort_values(ascending=True).unique().tolist()
@@ -363,7 +359,7 @@ def update_yaml(args):
     recon_params = prmMod.read_yaml(project_name=args.project_name,
                                     filename=recon_yaml_name)
     align_params = prmMod.read_yaml(project_name=args.project_name,
-                                  filename=align_yaml_name)
+                                    filename=align_yaml_name)
 
     recon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
     recon_params.params['System']['output_suffix'] = align_params.params['System']['output_suffix']
@@ -371,7 +367,7 @@ def update_yaml(args):
 
     recon_params.params['BatchRunTomo']['setup'] = {key: value for key, value in align_params.params['BatchRunTomo']['setup'].items() \
                                                     if key != 'stack_bin_factor'}
-    
+
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
 
@@ -406,10 +402,8 @@ def run():
                       md_in=align_md,
                       params_in=recon_config,
                       logger_in=logger,
-    )
+                      )
 
     # Run IMOD
     if not recon_obj.no_processes:
         recon_obj.recon_stack()
-
-
