@@ -30,12 +30,11 @@ class AreTomo:
     Class encapsulating a AreTomo object
     """
 
-
     def __init__(self,
                  project_name,
                  params_in,
                  logger_in,
-    ):
+                 ):
         """
         Initialising a AreTomo object
 
@@ -52,10 +51,9 @@ class AreTomo:
 
         self.logObj = logger_in
 
-        self.md_out = dict()
+        self.md_out = {}
 
         self._get_internal_metadata()
-
 
     def _get_internal_metadata(self):
         """
@@ -64,17 +62,17 @@ class AreTomo:
         self.basis_folder = self.params['System']['output_path']
         if self.basis_folder.endswith('/'):
             self.basis_folder = self.basis_folder[:-1]
-        
+
         self.rootname = self.params['System']['output_rootname']
         if self.rootname.endswith('_'):
             self.rootname = self.rootname[:-1]
-        
+
         self.suffix = self.params['System']['output_suffix']
         if self.suffix.endswith('_'):
             self.suffix = self.suffix[:-1]
-        
+
         # Create the folders and dictionary for future reference
-        self._path_dict = dict()
+        self._path_dict = {}
         for curr_ts in self.params['System']['process_list']:
             subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
             os.makedirs(subfolder, exist_ok=True)
@@ -82,7 +80,6 @@ class AreTomo:
             if "aretomo_output_dir" not in list(self.md_out.keys()):
                 self.md_out["aretomo_output_dir"] = {}
             self.md_out["aretomo_output_dir"][curr_ts] = subfolder
-        
 
     def _get_aretomo_align_command(self, i):
         """
@@ -103,10 +100,9 @@ class AreTomo:
             '0',
             '-OutBin',
             str(self.params['AreTomo_setup']['output_binning']),
-            ]
-        
+        ]
+
         return cmd
-    
 
     def _get_aretomo_recon_command(self, i):
         """
@@ -142,7 +138,6 @@ class AreTomo:
 
         return cmd
 
-
     def _run_aretomo(self, i):
         """
         Method to run AreTomo workflows
@@ -173,9 +168,9 @@ class AreTomo:
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.STDOUT,
                                      encoding='ascii',
+                                     check=True,
                                      )
         print(aretomo_run.stdout)
-   
 
     def run_aretomo_all(self):
         """
@@ -183,10 +178,9 @@ class AreTomo:
         """
         for i, curr_ts in enumerate(self.params['System']['process_list']):
             self._run_aretomo(i)
-            print("Ran AreTomo on {}_{}".format(self.proj_name, curr_ts))
+            print(f"Ran AreTomo on {self.proj_name}_{curr_ts}")
         self.export_metadata()
 
-    
     def export_metadata(self):
         """
         Method to export metadata as yaml
@@ -210,12 +204,12 @@ def update_yaml(args, kwargs):
                      beyond those implemented here
     """
     # Read in YAML, set mundane things
-    rootname    = args.project_name if args.rootname is None else args.rootname
-    suffix      = args.suffix
+    rootname = args.project_name if args.rootname is None else args.rootname
+    suffix = args.suffix
 
     aretomo_yaml_names = {0: args.project_name + "_aretomo_align.yaml",
-                         1: args.project_name + "_aretomo_recon.yaml",
-                         2: args.project_name + "_aretomo_align-recon.yaml"}
+                          1: args.project_name + "_aretomo_recon.yaml",
+                          2: args.project_name + "_aretomo_align-recon.yaml"}
 
     aretomo_yaml_name = aretomo_yaml_names[int(args.aretomo_mode)]
     aretomo_params = prmMod.read_yaml(
@@ -229,23 +223,23 @@ def update_yaml(args, kwargs):
 
     # Add optional kwargs
     aretomo_params.params['AreTomo_kwargs'] = kwargs
-    
-    if args.aretomo_mode != 1: # for workflows with alignment
+
+    if args.aretomo_mode != 1:  # for workflows with alignment
         # Uses align to create the InMrc and AngFile in correct form
         try:
             align.create_yaml([
-                args.project_name, 
+                args.project_name,
                 str(args.rot_angle),
                 '-o',
                 args.output_path])
             align.run(
-                newstack=True, 
-                do_align=False, 
+                newstack=True,
+                do_align=False,
                 args_pass=[args.project_name])
             print("Created stacks for input to AreTomo")
         except:
             print("IMOD might not be loaded")
-        
+
         # Set InMrc
         st_file_list = glob(f'{args.output_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
         aretomo_params.params["AreTomo_setup"]["input_mrc"] = st_file_list
@@ -258,18 +252,20 @@ def update_yaml(args, kwargs):
         aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
 
         # Set process list
-        ts_list = [int(file.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}.st', '')) for file in st_file_list]
+        ts_list = [int(file.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}.st', ''))
+                   for file in st_file_list]
         aretomo_params.params["System"]["process_list"] = ts_list
-    
+
     if args.aretomo_mode == 1:
         # Set InMrc
         st_file_list = glob(f'{args.input_mrc_folder}/{rootname}_*{suffix}/{rootname}_*{suffix}_ali.mrc')
         aretomo_params.params["AreTomo_setup"]["input_mrc"] = st_file_list
 
         # Set process list
-        ts_list = [int(file.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}_ali.mrc', '')) for file in st_file_list]
+        ts_list = [int(file.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}_ali.mrc', ''))
+                   for file in st_file_list]
         aretomo_params.params["System"]["process_list"] = ts_list
-        
+
         # Set AngFile
         if args.tilt_angles is None:
             tlt_file_list = glob(f'{args.output_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.tlt')
@@ -279,9 +275,9 @@ def update_yaml(args, kwargs):
 
     # Set OutputMrc
     if args.aretomo_mode == 0:
-        out_file_list = ["{}_ali.mrc".format(os.path.splitext(file)[0]) for file in st_file_list]
+        out_file_list = [f"{os.path.splitext(file)[0]}_ali.mrc" for file in st_file_list]
     elif args.aretomo_mode > 0:
-        out_file_list = ["{}_rec.mrc".format(os.path.splitext(file)[0]) for file in st_file_list]
+        out_file_list = [f"{os.path.splitext(file)[0]}_rec.mrc" for file in st_file_list]
     aretomo_params.params["AreTomo_setup"]["output_mrc"] = out_file_list
 
     # Add the rest of the argparse values to aretomo_params
@@ -301,7 +297,6 @@ def update_yaml(args, kwargs):
                 raise ValueError("Please set pixel size in nm to automatically calculate VolZ")
             aretomo_params.params["AreTomo_recon"]["volz"] = int(
                 (args.sample_thickness * args.pixel_size) + 200)
-
 
     # update and write yaml file
     with open(aretomo_yaml_name, "w") as f:
@@ -323,27 +318,26 @@ def create_yaml():
 
 
 def run():
-    """ 
+    """
     Method to run AreTomo
-    """                 
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name",
                         type=str,
                         help="Name of current project")
     parser.add_argument("aretomo_mode",
                         type=int,
-                        help=
-                        "Processes to be run in AreTomo, must be set."
+                        help="Processes to be run in AreTomo, must be set."
                         " 0: alignment only,"
                         " 1: reconstruction only,"
                         " 2: alignment + reconstruction"
-                        )    
+                        )
     args = parser.parse_args()
 
     # Check if prerequisite files exist
     aretomo_yaml_names = {0: args.project_name + "_aretomo_align.yaml",
-                         1: args.project_name + "_aretomo_recon.yaml",
-                         2: args.project_name + "_aretomo_align-recon.yaml"}
+                          1: args.project_name + "_aretomo_recon.yaml",
+                          2: args.project_name + "_aretomo_align-recon.yaml"}
 
     aretomo_yaml_name = aretomo_yaml_names[int(args.aretomo_mode)]
     if not os.path.isfile(aretomo_yaml_name):

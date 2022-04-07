@@ -47,7 +47,7 @@ class Motioncorr:
 
         self.logObj = logger
         self.log = []
-        
+
         self.prmObj = mc2_params
         self.params = self.prmObj.params
 
@@ -57,7 +57,7 @@ class Motioncorr:
         self._set_output_path()
 
         self._dose_data_present = 'frame_dose' in self.meta.columns
-        
+
         # Get index of available GPU
         self.use_gpu = self._get_gpu_nvidia_smi()
 
@@ -73,8 +73,7 @@ class Motioncorr:
                            stderr=subprocess.PIPE,
                            encoding='ascii',
                            check=True,
-            )
-
+                           )
 
     def _check_processed_images(self):
         """
@@ -83,7 +82,7 @@ class Motioncorr:
         # Create new empty internal output metadata if no record exists
         if not os.path.isfile(self.proj_name + '_mc2_mdout.yaml'):
             self.meta_out = pd.DataFrame(columns=self.meta.columns)
-            
+
         # Read in serialised metadata and turn into DataFrame if record exists
         else:
             _meta_record = mdMod.read_md_yaml(project_name=self.proj_name,
@@ -96,30 +95,29 @@ class Motioncorr:
         if len(self.meta_out) > 0:
             self._missing = self.meta_out.loc[~self.meta_out['output'].apply(lambda x: os.path.isfile(x))]
             self._missing_specified = pd.DataFrame(columns=self.meta.columns)
-        
+
             for curr_ts in self.params['System']['process_list']:
-                _to_append = self._missing[self._missing['ts']==curr_ts]
+                _to_append = self._missing[self._missing['ts'] == curr_ts]
                 self._missing_specified = pd.concat([self._missing_specified, _to_append],
                                                     ignore_index=True,
-                )
+                                                    )
             self._merged = self.meta_out.merge(self._missing_specified, how='left', indicator=True)
-            self.meta_out = self.meta_out[self._merged['_merge']=='left_only']
+            self.meta_out = self.meta_out[self._merged['_merge'] == 'left_only']
 
             if len(self._missing_specified) > 0:
                 self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. "
                             "Will be added back for processing.")
-            
-        # Drop the items in input metadata if they are in the output record 
+
+        # Drop the items in input metadata if they are in the output record
         _ignored = self.meta[self.meta.output.isin(self.meta_out.output)]
         if len(_ignored) > 0 and len(_ignored) < len(self.meta):
             self.logObj(f"Info: {len(_ignored)} images had been processed and will be omitted.")
         elif len(_ignored) == len(self.meta):
             self.logObj("Info: All specified images had been processed. Nothing will be done.")
             self.no_processes = True
-            
+
         self.meta = self.meta[~self.meta.output.isin(self.meta_out.output)]
-            
-            
+
     @staticmethod
     def _get_gpu_nvidia_smi():
         """
@@ -131,13 +129,13 @@ class Motioncorr:
                                  stderr=subprocess.PIPE,
                                  encoding='ascii',
                                  check=True,
-        )
+                                 )
         nv_processes = subprocess.run(['nvidia-smi', '--query-compute-apps=gpu_uuid', '--format=csv'],
                                       stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE,
                                       encoding='ascii',
                                       check=True,
-        )
+                                      )
 
         # catch the visible GPUs
         if nv_uuid.returncode != 0 or nv_processes.returncode != 0:
@@ -150,12 +148,12 @@ class Motioncorr:
                                       stderr=subprocess.PIPE,
                                       encoding='ascii',
                                       check=True,
-        )
+                                      )
         visible_gpu = []
         for gpu in nv_uuid:
             id_idx = gpu.find('GPU ')
             uuid_idx = gpu.find('UUID')
-            
+
             gpu_id = gpu[id_idx + 4:id_idx + 6].strip(' ').strip(':')
             gpu_uuid = gpu[uuid_idx + 5:-1].strip(' ')
 
@@ -168,7 +166,6 @@ class Motioncorr:
                              "but none of them is free.")
         return visible_gpu
 
-
     def _set_output_path(self):
         """
         Subroutine to set output path for motioncorr'd images
@@ -176,7 +173,6 @@ class Motioncorr:
         self.meta['output'] = self.meta.apply(
             lambda row: f"{self.params['System']['output_path']}"
             f"{self.params['System']['output_prefix']}_{row['ts']:03}_{row['angles']}.mrc", axis=1)
-        
 
     def _get_command(self, image, extra_info=None):
         """
@@ -217,14 +213,13 @@ class Motioncorr:
                '-PixSize', str(self.params['MC2']['pixel_size']),
                '-Throw', str(self.params['MC2']['discard_frames_top']),
                '-Trunc', str(self.params['MC2']['discard_frames_bottom']),
-        ]
+               ]
 
         if extra_info is not None:
             cmd += ['-FmIntFile', 'mc2.tmp']
 
         return cmd
-    
-        
+
     @staticmethod
     def _yield_chunks(iterable, size):
         """
@@ -233,7 +228,6 @@ class Motioncorr:
         iterator = iter(iterable)
         for first in iterator:
             yield itertools.chain([first], itertools.islice(iterator, size - 1))
-
 
     def run_mc2(self):
         """
@@ -245,19 +239,23 @@ class Motioncorr:
         tqdm_iter = tqdm(ts_list, ncols=100)
         for curr_ts in tqdm_iter:
             tqdm_iter.set_description(f"Processing TS {curr_ts}...")
-            self._curr_meta = self.meta.loc[self.meta.ts==curr_ts]
-        
+            self._curr_meta = self.meta.loc[self.meta.ts == curr_ts]
+
             while len(self._curr_meta) > 0:
                 # Get commands to run MC2
                 if self._dose_data_present:
                     mc_commands = [self._get_command((_in, _out, _gpu), (_frame, _ds, _dose))
-                                   for _in, _out, _gpu, _frame, _ds, _dose in zip(self._curr_meta.file_paths, self._curr_meta.output, self._curr_meta.gpu, self._curr_meta.num_frames, self._curr_meta.ds_factor, self._curr_meta.frame_dose)]
+                                   for _in, _out, _gpu, _frame, _ds, _dose in zip(
+                                       self._curr_meta.file_paths, self._curr_meta.output, self._curr_meta.gpu,
+                                       self._curr_meta.num_frames, self._curr_meta.ds_factor,
+                                       self._curr_meta.frame_dose)]
                 else:
                     mc_commands = [self._get_command((_in, _out, _gpu))
-                                   for _in, _out, _gpu in zip(self._curr_meta.file_paths, self._curr_meta.output, self._curr_meta.gpu)]                    
+                                   for _in, _out, _gpu in zip(
+                                       self._curr_meta.file_paths, self._curr_meta.output, self._curr_meta.gpu)]
 
                 jobs = (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) for cmd in mc_commands)
-            
+
                 # run subprocess by chunks of GPU
                 chunks = self._yield_chunks(jobs, len(self.use_gpu) * self.params['System']['jobs_per_gpu'])
                 for job in chunks:
@@ -267,7 +265,6 @@ class Motioncorr:
 
                         self.update_mc2_metadata()
                         self.export_metadata()
-        
 
     def update_mc2_metadata(self):
         """
@@ -284,7 +281,6 @@ class Motioncorr:
         self.meta = self.meta.loc[~self.meta['output'].apply(lambda x: os.path.isfile(x))]
         self._curr_meta = self._curr_meta.loc[~self._curr_meta['output'].apply(lambda x: os.path.isfile(x))]
 
-
     def export_metadata(self):
         """
         Method to serialise output metadata, export as yaml
@@ -293,12 +289,14 @@ class Motioncorr:
         yaml_file = self.proj_name + '_mc2_mdout.yaml'
 
         with open(yaml_file, 'w') as f:
-            yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False) 
+            yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False)
 
 
 """
 PLUGIN METHODS
 """
+
+
 def create_yaml():
     """
     Subroutine to create new yaml file for motioncorr
@@ -349,7 +347,7 @@ def update_yaml(args):
         merged_md = master_md.merge(mc2_md,
                                     how='outer',
                                     indicator=True)
-        unprocessed_images = merged_md.loc[lambda x: x['_merge']=='left_only']
+        unprocessed_images = merged_md.loc[lambda x: x['_merge'] == 'left_only']
     else:
         unprocessed_images = master_md
 
@@ -399,7 +397,7 @@ def run():
                          mc2_params=mc2_config,
                          md_in=master_md,
                          logger=logger
-    )
+                         )
 
     if not mc2_obj.no_processes:
         # Run MC2 recursively (and update input/output metadata) until nothing is left in the input metadata list

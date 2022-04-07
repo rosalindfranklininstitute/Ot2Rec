@@ -27,7 +27,7 @@ class Params:
                  params_in=None):
         """
         Initialise Params object
-       
+
         ARGS:
         project_name :: Name of current project
         params_in    :: Parameters being read in
@@ -36,8 +36,6 @@ class Params:
         self.project_name = project_name
         self.params = params_in
 
-
-        
 
 def new_master_yaml(args):
     """
@@ -48,7 +46,7 @@ def new_master_yaml(args):
     """
 
     master_yaml_name = args.project_name + '_proj.yaml'
-    
+
     proj_yaml_dict = {
         'source_folder': args.source_folder,
         'TS_folder_prefix': args.folder_prefix,
@@ -60,7 +58,7 @@ def new_master_yaml(args):
     }
 
     with open(master_yaml_name, 'w') as f:
-        yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False) 
+        yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False)
 
 
 def new_mc2_yaml(args):
@@ -86,7 +84,7 @@ def new_mc2_yaml(args):
             'MC2_path': args.exec_path,
             'gain_reference': 'nogain' if args.gain is None else args.gain,
             'pixel_size': args.pixel_size,
-            'desired_pixel_size': args.pixel_size*2 if args.super_res else args.pixel_size,
+            'desired_pixel_size': args.pixel_size * 2 if args.super_res else args.pixel_size,
             'discard_frames_top': args.discard_top,
             'discard_frames_bottom': args.discard_bottom,
             'tolerance': args.tolerance,
@@ -95,9 +93,9 @@ def new_mc2_yaml(args):
             'use_subgroups': not args.no_subgroups,
         },
     }
-        
+
     with open(mc2_yaml_name, 'w') as f:
-        yaml.dump(mc2_yaml_dict, f, indent=4, sort_keys=False) 
+        yaml.dump(mc2_yaml_dict, f, indent=4, sort_keys=False)
 
 
 def new_ctffind_yaml(args):
@@ -134,7 +132,7 @@ def new_ctffind_yaml(args):
             'phase_shift': args.phase_shift,
         },
     }
-        
+
     with open(ctf_yaml_name, 'w') as f:
         yaml.dump(ctf_yaml_dict, f, indent=4, sort_keys=False)
 
@@ -150,13 +148,13 @@ def new_align_yaml(args):
     align_yaml_name = args.project_name + '_align.yaml'
 
     align_yaml_dict = {
-        'System' : {
-            'process_list' : 'all',
-            'output_path' : args.output_folder,
-            'output_rootname' : args.file_prefix if args.file_prefix is not None else args.project_name,
-            'output_suffix' : args.file_suffix,
+        'System': {
+            'process_list': 'all',
+            'output_path': args.output_folder,
+            'output_rootname': args.file_prefix if args.file_prefix is not None else args.project_name,
+            'output_suffix': args.file_suffix,
         },
-        
+
         'BatchRunTomo': {
             'setup': {
                 'use_rawtlt': not args.no_rawtlt,
@@ -195,7 +193,7 @@ def new_align_yaml(args):
             },
         }
     }
-                
+
     with open(align_yaml_name, 'w') as f:
         yaml.dump(align_yaml_dict, f, indent=4, sort_keys=False)
 
@@ -210,13 +208,13 @@ def new_recon_yaml(args):
     recon_yaml_name = args.project_name + '_recon.yaml'
 
     recon_yaml_dict = {
-        'System' : {
-            'process_list' : 'all',
-            'output_path' : './stacks/',
-            'output_rootname' : 'TS',
-            'output_suffix' : '',
+        'System': {
+            'process_list': 'all',
+            'output_path': './stacks/',
+            'output_rootname': 'TS',
+            'output_suffix': '',
         },
-        
+
         'BatchRunTomo': {
             'setup': {
                 'use_rawtlt': True,
@@ -248,7 +246,7 @@ def new_recon_yaml(args):
             },
         }
     }
-                
+
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_yaml_dict, f, indent=4, sort_keys=False)
 
@@ -264,13 +262,13 @@ def new_savurecon_yaml(args):
     savurecon_yaml_name = args.project_name + '_savurecon.yaml'
 
     savurecon_yaml_dict = {
-        'System' : {
-            'process_list' : None,
-            'output_path' : args.output_path,
-            'output_rootname' : args.project_name if args.rootname is None else args.rootname,
-            'output_suffix' : args.suffix,
+        'System': {
+            'process_list': None,
+            'output_path': args.output_path,
+            'output_rootname': args.project_name if args.rootname is None else args.rootname,
+            'output_suffix': args.suffix,
         },
-        
+
         'Savu': {
             'setup': {
                 'tilt_angles': None,
@@ -280,7 +278,7 @@ def new_savurecon_yaml(args):
             }
         }
     }
-                
+
     with open(savurecon_yaml_name, 'w') as f:
         yaml.dump(savurecon_yaml_dict, f, indent=4, sort_keys=False)
 
@@ -294,37 +292,37 @@ def new_aretomo_yaml(args):
     """
 
     aretomo_yaml_names = {0: args.project_name + "_aretomo_align.yaml",
-                         1: args.project_name + "_aretomo_recon.yaml",
-                         2: args.project_name + "_aretomo_align-recon.yaml"}
+                          1: args.project_name + "_aretomo_recon.yaml",
+                          2: args.project_name + "_aretomo_align-recon.yaml"}
 
     aretomo_yaml_name = aretomo_yaml_names[int(args.aretomo_mode)]
-    print("{} created".format(aretomo_yaml_name))
+    print(f"{aretomo_yaml_name} created")
 
     aretomo_yaml_dict = {
-        "System" : {
-            "process_list" : None,
-            "output_path" : args.output_path,
-            "output_rootname" : args.project_name if args.rootname is None else args.rootname,
-            "output_suffix" : args.suffix,
+        "System": {
+            "process_list": None,
+            "output_path": args.output_path,
+            "output_rootname": args.project_name if args.rootname is None else args.rootname,
+            "output_suffix": args.suffix,
         },
 
-        "AreTomo_setup" : {
-            "aretomo_mode" : args.aretomo_mode,
-            "rot_angle" : args.rot_angle,
-            "input_mrc" : None,
-            "output_mrc" :None,
-            "tilt_angles" : None,
-            "output_binning" : None
+        "AreTomo_setup": {
+            "aretomo_mode": args.aretomo_mode,
+            "rot_angle": args.rot_angle,
+            "input_mrc": None,
+            "output_mrc": None,
+            "tilt_angles": None,
+            "output_binning": None
         },
 
-        "AreTomo_recon" : {
-            "volz" : None,
-            "sample_thickness" : None,
-            "pixel_size" : args.pixel_size,
-            "recon_algo" : None,
+        "AreTomo_recon": {
+            "volz": None,
+            "sample_thickness": None,
+            "pixel_size": args.pixel_size,
+            "recon_algo": None,
         },
 
-        "AreTomo_kwargs" : {
+        "AreTomo_kwargs": {
             # placeholder for extra kwargs
         },
     }
@@ -332,7 +330,7 @@ def new_aretomo_yaml(args):
     with open(aretomo_yaml_name, "w") as f:
         yaml.dump(aretomo_yaml_dict, f, indent=4, sort_keys=False)
 
-        
+
 def read_yaml(project_name: str,
               filename: str):
     """

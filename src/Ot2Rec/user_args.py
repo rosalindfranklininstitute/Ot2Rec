@@ -37,7 +37,8 @@ def get_args_new_proj():
     parser.add_argument("-fp", "--folder_prefix",
                         type=str,
                         default='',
-                        help="Common prefix of raw tilt series folder(s). Don't use this flag if all images are in the parent folder.")
+                        help=("Common prefix of raw tilt series folder(s). "
+                              "Don't use this flag if all images are in the parent folder."))
     parser.add_argument("-p", "--file_prefix",
                         type=str,
                         help="Common prefix of raw image files (Default: project name).")
@@ -102,7 +103,8 @@ def get_args_mc2():
     parser.add_argument("--exec_path",
                         type=str,
                         default='/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110',
-                        help="Path to MotionCor2 executable. (Default: /opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110)")
+                        help=("Path to MotionCor2 executable. "
+                              "(Default: /opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110)"))
     parser.add_argument("--gain",
                         type=str,
                         help="Path to gain reference file. (Default: None)")
@@ -187,7 +189,8 @@ def get_args_ctffind():
                         type=float,
                         nargs=3,
                         default=[5000, 50000, 500],
-                        help="Min, max and step size of initial defocus search in Angstroms. (Default: 5000, 50000, 500)")
+                        help=("Min, max and step size of initial defocus search in Angstroms. "
+                              "(Default: 5000, 50000, 500)"))
     parser.add_argument("-at", "--astigm_type",
                         type=str,
                         help="Type of astigmatism. FLAG USE NOT RECOMMENDED.")
@@ -200,7 +203,7 @@ def get_args_ctffind():
     parser.add_argument("-ps", "--phase_shift",
                         action="store_true",
                         help="Estimate phase shift. Use flag if True.")
-    
+
     return parser
 
 
@@ -242,7 +245,8 @@ def get_args_align():
     parser.add_argument("--adoc_template",
                         type=str,
                         default="/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc",
-                        help="Path to template file of BatchRunTomo directives. (Default: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc)")
+                        help=("Path to template file of BatchRunTomo directives. "
+                              "(Default: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc)"))
     parser.add_argument("-b", "--stack_bin_factor",
                         type=int,
                         default=4,
@@ -276,7 +280,8 @@ def get_args_align():
                         type=int,
                         nargs=2,
                         default=[2, 2],
-                        help="Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment. (Default: 2, 2)")
+                        help=("Patch-tracking: Maximum extent (in pixels) to which patches are allowed to "
+                              "move during alignment. (Default: 2, 2)"))
     parser.add_argument("--adjust_tilt_angles",
                         action="store_true",
                         help="Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset. Use flag if True.")
@@ -310,7 +315,8 @@ def get_args_align():
                         help="Fine-alignment: Do not use robust fitting. Use flag if True.")
     parser.add_argument("--no_weight_contours",
                         action="store_true",
-                        help="Fine-alignment: Do not apply weighting to entire contours from patch-tracking. Use flag if True.")
+                        help=("Fine-alignment: Do not apply weighting to entire contours from patch-tracking. "
+                              "Use flag if True."))
 
     return parser
 
@@ -360,7 +366,8 @@ def get_args_align_ext():
     parser.add_argument("--adoc_template",
                         type=str,
                         default="/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc",
-                        help="Path to template file of BatchRunTomo directives. (Default: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc)")
+                        help=("Path to template file of BatchRunTomo directives. "
+                              "(Default: /opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc)"))
     parser.add_argument("-b", "--stack_bin_factor",
                         type=int,
                         default=4,
@@ -394,7 +401,8 @@ def get_args_align_ext():
                         type=int,
                         nargs=2,
                         default=[2, 2],
-                        help="Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment. (Default: 2, 2)")
+                        help=("Patch-tracking: Maximum extent (in pixels) to which patches are allowed "
+                              "to move during alignment. (Default: 2, 2)"))
     parser.add_argument("--adjust_tilt_angles",
                         action="store_true",
                         help="Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset. Use flag if True.")
@@ -429,7 +437,6 @@ def get_args_align_ext():
     parser.add_argument("--no_weight_contours",
                         action="store_true",
                         help="Fine-alignment: Do not apply weighting to entire contours from patch-tracking. Use flag if True.")
-
 
     return parser
 
@@ -600,7 +607,7 @@ def get_args_rldeconv():
     parser.add_argument("--uint",
                         action="store_true",
                         help="Store results as UInt8. Use flag if True.")
-    
+
     return parser
 
 
@@ -622,11 +629,10 @@ def get_args_aretomo():
                         help="Name of current project")
     parser.add_argument("aretomo_mode",
                         type=int,
-                        help=
-                            "Processes to be run in AreTomo, must be set."
-                            " 0: alignment only,"
-                            " 1: reconstruction only,"
-                            " 2: alignment + reconstruction")
+                        help="Processes to be run in AreTomo, must be set."
+                             " 0: alignment only,"
+                             " 1: reconstruction only,"
+                             " 2: alignment + reconstruction")
     parser.add_argument("rot_angle",
                         type=float,
                         help="Rotational angle of electron beam. Can be obtained from MDOC files.")
@@ -643,45 +649,39 @@ def get_args_aretomo():
     parser.add_argument("-in", "--input_mrc_folder",
                         type=str,
                         default='./aretomo/',
-                        help=
-                            "Folder containing input mrcs (Default: ./aretomo)")
+                        help="Folder containing input mrcs (Default: ./aretomo)")
     parser.add_argument("-o", "--output_path",
                         type=str,
                         default="./aretomo/",
                         help="Path to output folder (Default: ./aretomo)")
     parser.add_argument("-ta", "--tilt_angles",
                         type=str,
-                        help=
-                            "Path to text file containing tilt angles, usually .tlt."
-                            " Defaults to <project_name>_<suffix>.tlt")
+                        help="Path to text file containing tilt angles, usually .tlt."
+                             " Defaults to <project_name>_<suffix>.tlt")
     parser.add_argument("--volz",
                         type=int,
                         default=-1,
-                        help=
-                            "Z-height of reconstructed volume in voxels (unbinned),"
-                            " ignored if only alignment is performed."
-                            " Defaults to -1, where this will be set automatically"
-                            " by the rule of thumb."
-                            " VolZ = 200 + sample_thickness * pixel_size"
-                            " Setting value > 0 overrides automatic setting")
+                        help="Z-height of reconstructed volume in voxels (unbinned),"
+                             " ignored if only alignment is performed."
+                             " Defaults to -1, where this will be set automatically"
+                             " by the rule of thumb."
+                             " VolZ = 200 + sample_thickness * pixel_size"
+                             " Setting value > 0 overrides automatic setting")
     parser.add_argument("--sample_thickness",
                         type=float,
                         default=-1,
-                        help=
-                            "Sample thickness in nm, used to set VolZ automatically."
-                            " Ignored if VolZ is set to >0, or only alignment is done")
+                        help="Sample thickness in nm, used to set VolZ automatically."
+                             " Ignored if VolZ is set to >0, or only alignment is done")
     parser.add_argument("--output_binning",
                         type=int,
                         default=4,
-                        help=
-                            "Binning to be applied to saved .mrc file."
-                            " Default = 4")
+                        help="Binning to be applied to saved .mrc file."
+                             " Default = 4")
     parser.add_argument("--recon_algo",
                         type=int,
                         default=0,
-                        help=
-                            "Reconstruction algorithm to be used."
-                            " 0: WBP (default),"
-                            " 1: SART")
-    
+                        help="Reconstruction algorithm to be used."
+                             " 0: WBP (default),"
+                             " 1: SART")
+
     return parser

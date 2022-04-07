@@ -47,7 +47,7 @@ def new_proj():
     # Parse user inputs
     parser = uaMod.get_args_new_proj()
     args = parser.parse_args()
-    
+
     # Create master yaml config file
     prmMod.new_master_yaml(args)
 
@@ -134,5 +134,3 @@ def cleanup():
 #     logger("Reconstruction in progress...")
 #     create_recon_yaml()
 #     run_recon()
-
-

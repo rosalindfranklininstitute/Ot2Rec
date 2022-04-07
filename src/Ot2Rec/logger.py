@@ -23,8 +23,8 @@ class Logger():
     """
 
     def __init__(self,
-                 log_path: str=None,
-    ):
+                 log_path: str = None,
+                 ):
         """
         Initialise Logger object
 
@@ -35,11 +35,10 @@ class Logger():
         self.lock = threading.Lock()
         self.log_path = log_path
 
-
     def __call__(self,
                  log: str,
-                 stdout: bool=True,
-                 newline: bool=False):
+                 stdout: bool = True,
+                 newline: bool = False):
         """
         Send a string to stdout and log file one process at a time.
 

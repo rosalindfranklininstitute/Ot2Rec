@@ -27,7 +27,6 @@ from . import user_args as uaMod
 from . import metadata as mdMod
 
 
-
 def get_psf(ctffile, point_source_recip, k2_grid, alpha_g):
     """
     Method to calculate PSF from CTFFIND4 outputs
@@ -51,16 +50,16 @@ def get_psf(ctffile, point_source_recip, k2_grid, alpha_g):
 
     # Calculate defocus df
     ddf = df1 - df2
-    df = 0.5 * (df1 + df2 + ddf*np.cos(2*(alpha_g-alpha_ast)))
+    df = 0.5 * (df1 + df2 + ddf * np.cos(2 * (alpha_g - alpha_ast)))
 
     # Calculate beam wavelength
     hc = spk.h * spk.c
-    denom = np.sqrt(voltage * spk.e * (2*spk.m_e*spk.c**2 + voltage * spk.e))
+    denom = np.sqrt(voltage * spk.e * (2 * spk.m_e * spk.c**2 + voltage * spk.e))
     wvl = hc / denom
 
     # Calculate phase shift chi
-    chi = np.pi * wvl * k2_grid * (df - 0.5*wvl**2*k2_grid*cs) + \
-        (dphi + np.arctan2(w2, np.sqrt(1-w2**2)))
+    chi = np.pi * wvl * k2_grid * (df - 0.5 * wvl**2 * k2_grid * cs) + \
+        (dphi + np.arctan2(w2, np.sqrt(1 - w2**2)))
 
     # Calculate CTF
     ctf = -np.sin(chi, dtype=np.float32)
@@ -116,8 +115,8 @@ def run():
     # Read in metadata from ctffind
     ctffind_md_file = project_name + '_ctffind_mdout.yaml'
     ctffind_obj = mdMod.read_md_yaml(project_name=project_name,
-                                    job_type='ctfsim',
-                                    filename=ctffind_md_file)
+                                     job_type='ctfsim',
+                                     filename=ctffind_md_file)
     ctffind_md = pd.DataFrame(ctffind_obj.metadata)
 
     # Read image to get dimensions
@@ -127,11 +126,11 @@ def run():
 
     # Generate point source
     ps = np.zeros(source_dim[-2:], dtype=np.float32)
-    ps[ps.shape[0]//2, ps.shape[1]//2] = 1
+    ps[ps.shape[0] // 2, ps.shape[1] // 2] = 1
     ps_k = np.fft.fft2(ps).astype(np.cdouble)
 
     # Calculate the grids in reciprocal space
-    k2_grid, alpha_g_grid = calculate_k_grids(source_dim, pixel_size*ds_factor)
+    k2_grid, alpha_g_grid = calculate_k_grids(source_dim, pixel_size * ds_factor)
 
     # Grab tilt series numbers and tilt angles from metadata
     ts_list = sorted(pd.Series(ctffind_md['ts']).unique())
@@ -159,12 +158,11 @@ def run():
         # Write out psf stack
         with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:02}.mrc', overwrite=True) as f:
             (xmin, ymin) = (
-                (source_dim[-2]-args.dims[0]) // 2,
-                (source_dim[-1]-args.dims[1]) // 2)
-            (xmax, ymax) = (xmin+args.dims[0], ymin+args.dims[1])
+                (source_dim[-2] - args.dims[0]) // 2,
+                (source_dim[-1] - args.dims[1]) // 2)
+            (xmax, ymax) = (xmin + args.dims[0], ymin + args.dims[1])
 
             f.set_data(full_psf[:, xmin:xmax, ymin:ymax])
-
 
         # Write out rawtlt file
         with open(subfolder_path + f'/{rootname}_{curr_ts:02}.rawtlt', 'w') as f:
