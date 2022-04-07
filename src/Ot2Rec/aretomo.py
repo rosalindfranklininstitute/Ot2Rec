@@ -52,7 +52,7 @@ class AreTomo:
 
         self.logObj = logger_in
 
-        self.md_out = dict()
+        self.md_out = {}
 
         self._get_internal_metadata()
 
@@ -74,7 +74,7 @@ class AreTomo:
             self.suffix = self.suffix[:-1]
         
         # Create the folders and dictionary for future reference
-        self._path_dict = dict()
+        self._path_dict = {}
         for curr_ts in self.params['System']['process_list']:
             subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
             os.makedirs(subfolder, exist_ok=True)
@@ -173,7 +173,8 @@ class AreTomo:
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.STDOUT,
                                      encoding='ascii',
-                                     )
+                                     check=True,
+        )
         print(aretomo_run.stdout)
    
 
@@ -183,7 +184,7 @@ class AreTomo:
         """
         for i, curr_ts in enumerate(self.params['System']['process_list']):
             self._run_aretomo(i)
-            print("Ran AreTomo on {}_{}".format(self.proj_name, curr_ts))
+            print(f"Ran AreTomo on {self.proj_name}_{curr_ts}")
         self.export_metadata()
 
     
@@ -258,7 +259,8 @@ def update_yaml(args, kwargs):
         aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
 
         # Set process list
-        ts_list = [int(file.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}.st', '')) for file in st_file_list]
+        ts_list = [int(file.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}.st', ''))
+                   for file in st_file_list]
         aretomo_params.params["System"]["process_list"] = ts_list
     
     if args.aretomo_mode == 1:
@@ -267,7 +269,8 @@ def update_yaml(args, kwargs):
         aretomo_params.params["AreTomo_setup"]["input_mrc"] = st_file_list
 
         # Set process list
-        ts_list = [int(file.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}_ali.mrc', '')) for file in st_file_list]
+        ts_list = [int(file.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}_ali.mrc', ''))
+                   for file in st_file_list]
         aretomo_params.params["System"]["process_list"] = ts_list
         
         # Set AngFile
@@ -279,9 +282,9 @@ def update_yaml(args, kwargs):
 
     # Set OutputMrc
     if args.aretomo_mode == 0:
-        out_file_list = ["{}_ali.mrc".format(os.path.splitext(file)[0]) for file in st_file_list]
+        out_file_list = [f"{os.path.splitext(file)[0]}_ali.mrc" for file in st_file_list]
     elif args.aretomo_mode > 0:
-        out_file_list = ["{}_rec.mrc".format(os.path.splitext(file)[0]) for file in st_file_list]
+        out_file_list = [f"{os.path.splitext(file)[0]}_rec.mrc" for file in st_file_list]
     aretomo_params.params["AreTomo_setup"]["output_mrc"] = out_file_list
 
     # Add the rest of the argparse values to aretomo_params
