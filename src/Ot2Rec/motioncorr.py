@@ -234,6 +234,9 @@ class Motioncorr:
         Subroutine to run MotionCor2
         """
 
+        # Add log entry when job starts
+        self.logObj("Ot2Rec-MotionCor2 started.")
+
         # Process tilt-series one at a time
         ts_list = self.params['System']['process_list']
         tqdm_iter = tqdm(ts_list, ncols=100)
@@ -265,6 +268,9 @@ class Motioncorr:
 
                         self.update_mc2_metadata()
                         self.export_metadata()
+
+        self.logObj("Ot2Rec-MotionCor2 ended.")
+
 
     def update_mc2_metadata(self):
         """
@@ -390,7 +396,7 @@ def run():
                                    filename=master_md_file)
 
     # Create Logger object
-    logger = logMod.Logger()
+    logger = logMod.Logger(log_path="./o2r_mc.log")
 
     # Create Motioncorr object
     mc2_obj = Motioncorr(project_name=args.project_name,
