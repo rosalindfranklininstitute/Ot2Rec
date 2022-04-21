@@ -264,12 +264,15 @@ class Motioncorr:
                 for job in chunks:
                     # from the moment the next line is read, every process in job are spawned
                     for process in list(job):
-                        self.log.append(process.communicate()[0].decode('UTF-8'))
+                        try:
+                            self.log.append(process.communicate()[0].decode('UTF-8'))
+                        except:
+                            self.logObj("Ot2Rec-MotionCor2 job failed.")
 
                         self.update_mc2_metadata()
                         self.export_metadata()
 
-        self.logObj("Ot2Rec-MotionCor2 ended.")
+        self.logObj("Ot2Rec-MotionCor2 jobs finished.")
 
 
     def update_mc2_metadata(self):
@@ -396,7 +399,12 @@ def run():
                                    filename=master_md_file)
 
     # Create Logger object
-    logger = logMod.Logger(log_path="./o2r_mc.log")
+    log_path = "./o2r_mc.log"
+    try:
+        os.remove(log_path)
+    except:
+        pass
+    logger = logMod.Logger(log_path=log_path)
 
     # Create Motioncorr object
     mc2_obj = Motioncorr(project_name=args.project_name,
