@@ -284,37 +284,37 @@ class Align:
 
         # Template for directive file
         adoc_temp = """
-        setupset.currentStackExt = st
-        setupset.copyarg.stackext = st
-        setupset.copyarg.userawtlt = <use_rawtlt>
-        setupset.copyarg.pixel = <pixel_size>
-        setupset.copyarg.rotation = <rot_angle>
-        setupset.copyarg.gold = <gold_size>
-        setupset.systemTemplate = <adoc_template>
+setupset.currentStackExt = st
+setupset.copyarg.stackext = st
+setupset.copyarg.userawtlt = <use_rawtlt>
+setupset.copyarg.pixel = <pixel_size>
+setupset.copyarg.rotation = <rot_angle>
+setupset.copyarg.gold = <gold_size>
+setupset.systemTemplate = <adoc_template>
 
-        runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
-        runtime.Preprocessing.any.removeXrays = <remove_xrays>
+runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
+runtime.Preprocessing.any.removeXrays = <remove_xrays>
 
-        comparam.prenewst.newstack.BinByFactor = <ca_bin_factor>
+comparam.prenewst.newstack.BinByFactor = <ca_bin_factor>
 
-        runtime.Fiducials.any.trackingMethod = 1
+runtime.Fiducials.any.trackingMethod = 1
 
-        comparam.xcorr_pt.tiltxcorr.SizeOfPatchesXandY = <size_of_patches>
-        comparam.xcorr_pt.tiltxcorr.NumberOfPatchesXandY = <num_of_patches>
-        comparam.xcorr_pt.tiltxcorr.ShiftLimitsXandY = <limits_on_shift>
-        comparam.xcorr_pt.tiltxcorr.IterateCorrelations = <num_iterations>
-        runtime.PatchTracking.any.adjustTiltAngles = <adj_tilt_angles>
-        comparam.xcorr_pt.imodchopconts.LengthOfPieces = -1
+comparam.xcorr_pt.tiltxcorr.SizeOfPatchesXandY = <size_of_patches>
+comparam.xcorr_pt.tiltxcorr.NumberOfPatchesXandY = <num_of_patches>
+comparam.xcorr_pt.tiltxcorr.ShiftLimitsXandY = <limits_on_shift>
+comparam.xcorr_pt.tiltxcorr.IterateCorrelations = <num_iterations>
+runtime.PatchTracking.any.adjustTiltAngles = <adj_tilt_angles>
+comparam.xcorr_pt.imodchopconts.LengthOfPieces = -1
 
-        comparam.align.tiltalign.SurfacesToAnalyze = <num_surfaces>
-        comparam.align.tiltalign.MagOption = <mag_option>
-        comparam.align.tiltalign.TiltOption = <tilt_option>
-        comparam.align.tiltalign.RotOption = <rot_option>
-        comparam.align.tiltalign.BeamTiltOption = <beamtilt_option>
-        comparam.align.tiltalign.RobustFitting = <use_robust>
-        comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
+comparam.align.tiltalign.SurfacesToAnalyze = <num_surfaces>
+comparam.align.tiltalign.MagOption = <mag_option>
+comparam.align.tiltalign.TiltOption = <tilt_option>
+comparam.align.tiltalign.RotOption = <rot_option>
+comparam.align.tiltalign.BeamTiltOption = <beamtilt_option>
+comparam.align.tiltalign.RobustFitting = <use_robust>
+comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
 
-        runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
+runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
         """
 
         convert_dict = {
