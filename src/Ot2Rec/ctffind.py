@@ -178,6 +178,7 @@ class ctffind():
         # Add log entry when job starts
         self.logObj("Ot2Rec-CTFFind4 started.")
 
+        error_count = 0
         ts_list = list(self.ctf_images.iterrows())
         tqdm_iter = tqdm(ts_list, ncols=100)
         for index, curr_image in tqdm_iter:
@@ -194,7 +195,8 @@ class ctffind():
             try:
                 assert(not ctffind_run.stderr)
             except:
-                self.logObj(f"CTFFind: An error has occurred ({ctffind_run.returncode}) "
+                error_count += 1
+                self.logObj(f"CTFFind4: An error has occurred ({ctffind_run.returncode}) "
                             f"on stack{index}.")
 
             self.stdout = ctffind_run.stdout
@@ -202,7 +204,12 @@ class ctffind():
             self.export_metadata()
 
         # Log progress when all jobs have successfully terminated
-        self.logObj("All Ot2Rec-CTFFind4 jobs successfully finished.")
+        if error_count == 0:
+            self.logObj("All Ot2Rec-CTFFind4 jobs successfully finished.")
+        else:
+            self.logObj("WARNING: All Ot2Rec-CTTFFind4 jobs finished."
+                        f"{error_count} of {len(tqdm_iter)} jobs failed."
+            )
 
 
     def update_ctffind_metadata(self):
