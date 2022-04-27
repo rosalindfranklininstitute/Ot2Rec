@@ -265,10 +265,11 @@ class Motioncorr:
                     # from the moment the next line is read, every process in job are spawned
                     for process in list(job):
                         try:
-                            self.log.append(process.communicate()[0].decode('UTF-8'))
+                            assert(process.returncode is None)
                         except:
                             self.logObj("Ot2Rec-MotionCor2 job failed.")
 
+                        self.log.append(process.communicate()[0].decode('UTF-8'))
                         self.update_mc2_metadata()
                         self.export_metadata()
 
