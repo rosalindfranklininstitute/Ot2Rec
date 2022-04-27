@@ -175,6 +175,8 @@ class ctffind():
         """
         Method to run ctffind on tilt-series sequentially
         """
+        # Add log entry when job starts
+        self.logObj("Ot2Rec-CTFFind4 started.")
 
         ts_list = list(self.ctf_images.iterrows())
         tqdm_iter = tqdm(ts_list, ncols=100)
@@ -189,13 +191,19 @@ class ctffind():
                                          check=True,
                                          )
 
-            if ctffind_run.stderr:
-                raise ValueError(f'Ctffind: An error has occurred ({ctffind_run.returncode}) '
-                                 f'on stack{index}.')
+            try:
+                assert(not ctffind_run.stderr)
+            except:
+                self.logObj(f"CTFFind: An error has occurred ({ctffind_run.returncode}) "
+                            f"on stack{index}.")
 
             self.stdout = ctffind_run.stdout
             self.update_ctffind_metadata()
             self.export_metadata()
+
+        # Log progress when all jobs have successfully terminated
+        self.logObj("All Ot2Rec-CTFFind4 jobs successfully finished.")
+
 
     def update_ctffind_metadata(self):
         """
@@ -325,7 +333,12 @@ def run():
                                 filename=mc2_md_file)
 
     # Create Logger object
-    logger = logMod.Logger()
+    log_path = "./o2r_ctffind.log"
+    try:
+        os.remove(log_path)
+    except:
+        pass
+    logger = logMod.Logger(log_path=log_path)
 
     # Create ctffind object
     ctffind_obj = ctffind(project_name=args.project_name,
