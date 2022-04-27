@@ -395,7 +395,12 @@ def run():
                                   filename=align_md_file)
 
     # Create Logger object
-    logger = logMod.Logger()
+    log_path = "./o2r_recon.log"
+    try:
+        os.remove(log_path)
+    except:
+        pass
+    logger = logMod.Logger(log_path=log_path)
 
     # Create Recon object
     recon_obj = Recon(project_name=args.project_name,
