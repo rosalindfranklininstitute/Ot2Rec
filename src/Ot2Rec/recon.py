@@ -238,35 +238,52 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         """
         Method to reconstruct specified stack(s) using IMOD batchtomo
         """
+        # Add log entry when job starts
+        self.logObj("Ot2Rec-reconstruction (IMOD) started.")
 
         # Create adoc file
         self._get_adoc()
 
+        error_count = 0
         tqdm_iter = tqdm(self._process_list, ncols=100)
         for curr_ts in tqdm_iter:
             tqdm_iter.set_description(f"Reconstructing TS {curr_ts}...")
 
             # Get command for current tilt-series
-            cmd_ts = self._get_brt_recon_command(curr_ts)
-
             if ext:
                 batchruntomo = subprocess.run(self._get_brt_recon_command(curr_ts, ext=True),
                                               stdout=subprocess.PIPE,
                                               stderr=subprocess.STDOUT,
-                                              encoding='ascii')
+                                              encoding='ascii',
+                                              check=True
+                )
 
             batchruntomo = subprocess.run(self._get_brt_recon_command(curr_ts, ext=False),
                                           stdout=subprocess.PIPE,
                                           stderr=subprocess.STDOUT,
-                                          encoding='ascii')
+                                          encoding='ascii',
+                                          check=True
+            )
 
-            if batchruntomo.stderr:
-                raise ValueError(f'Batchtomo: An error has occurred ({batchruntomo.returncode}) '
-                                 f'on stack{curr_ts}.')
+            try:
+                assert (not batchruntomo.stderr)
+            except:
+                error_count += 1
+                self.logObj(f'Batchtomo: An error has occurred ({batchruntomo.returncode}) '
+                            f'on stack{curr_ts}.')
             else:
                 self.stdout = batchruntomo.stdout
                 self.update_recon_metadata()
                 self.export_metadata()
+
+        # Add log entry when job finishes
+        if error_count == 0:
+            self.logObj("All Ot2Rec-recon (IMOD) jobs successfully finished.")
+        else:
+            self.logObj("WARNING: All Ot2Rec-recon (IMOD) jobs finished."
+                        f"{error_count} of {len(tqdm_iter)} jobs failed."
+            )
+
 
     def update_recon_metadata(self):
         """
