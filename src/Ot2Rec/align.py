@@ -218,7 +218,10 @@ class Align:
         """
         Method to create stack file for a given tilt-series.
         """
+        # Add log entry when job starts
+        self.logObj("Ot2Rec-align (IMOD) started: newstack.")
 
+        error_count = 0
         tqdm_iter = tqdm(self._process_list, ncols=100)
         for curr_ts in tqdm_iter:
             tqdm_iter.set_description(f"Creating stack for TS {curr_ts}...")
@@ -251,13 +254,24 @@ class Align:
                                           check=True,
                                           )
 
-            if run_newstack.stderr:
-                raise ValueError(f'newstack: An error has occurred ({run_newstack.returncode}) '
-                                 f'on stack{curr_ts}.')
+            try:
+                assert(not run_newstack.stderr)
+            except:
+                error_count += 1
+                self.logObj(f'newstack: An error has occurred ({run_newstack.returncode}) '
+                            f'on stack{curr_ts}.')
 
             self.stdout = run_newstack.stdout
             self.update_align_metadata(ext=False)
             self.export_metadata()
+
+        if error_count == 0:
+            self.logObj("All Ot2Rec-align (IMOD): newstack jobs successfully finished.")
+        else:
+            self.logObj("WARNING: All Ot2Rec-align (IMOD): newstack jobs finished."
+                        f"{error_count} of {len(tqdm_iter)} jobs failed."
+            )
+
 
     """
     ALIGNMENT - BATCHTOMO
@@ -369,10 +383,13 @@ class Align:
         """
         Method to align specified stack(s) using IMOD batchtomo
         """
+        # Add log entry when job starts
+        self.logObj("Ot2Rec-align (IMOD) started: batchruntomo.")
 
         # Create adoc file
         self._get_adoc()
 
+        error_count = 0
         tqdm_iter = tqdm(self._process_list, ncols=100)
         for curr_ts in tqdm_iter:
             tqdm_iter.set_description(f"Aligning TS {curr_ts}...")
@@ -385,12 +402,24 @@ class Align:
                                           check=True,
                                           )
 
-            if batchruntomo.stderr:
-                raise ValueError(f'Batchtomo: An error has occurred ({batchruntomo.returncode}) '
-                                 f'on stack{curr_ts}.')
+            try:
+                assert (not batchruntomo.stderr)
+            except:
+                error_count += 1
+                self.logObj(f'Batchruntomo: An error has occurred ({batchruntomo.returncode}) '
+                            f'on stack{curr_ts}.')
             self.stdout = batchruntomo.stdout
             self.update_align_metadata(ext)
             self.export_metadata()
+
+        # Add log entry when job finishes
+        if error_count == 0:
+            self.logObj("All Ot2Rec-align (IMOD) jobs successfully finished.")
+        else:
+            self.logObj("WARNING: All Ot2Rec-align (IMOD) jobs finished."
+                        f"{error_count} of {len(tqdm_iter)} jobs failed."
+            )
+
 
     def update_align_metadata(self, ext=False):
         """
@@ -586,7 +615,12 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None):
                                     filename=mc2_md_file)
 
     # Create Logger object
-    logger = logMod.Logger()
+    log_path = "./o2r_align.log"
+    try:
+        os.remove(log_path)
+    except:
+        pass
+    logger = logMod.Logger(log_path=log_path)
 
     # Create Align object
     align_obj = Align(project_name=args.project_name,
