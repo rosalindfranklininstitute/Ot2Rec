@@ -78,15 +78,19 @@ def get_args_new_proj(
     result_widget=False,
 
     project_name={"label": "Project name *"},
-    pixel_size={"label": "Pixel size (A) *"},
+    pixel_size={"label": "Pixel size (A) *",
+                "step": 0.001},
     output_folder={"label": "MC2 output folder"},
     file_prefix={"label": "File prefix (if different from project name)"},
+    exec_path={"label": "Path to MC2 executable"},
+    no_gpu={"label": "CPU only?"},
     jobs_per_gpu={"label": "Jobs per GPU",
                   "min": 1},
     gpu_mem_usage={"label": "GPU memory usage (if applicable)",
                    "widget_type": "FloatSlider",
                    "min": 0.1,
                    "max": 2.0},
+    use_gain={"label": "Use gain reference?"},
     gain={"label": "Gain reference file (if applicable)",
           "widget_type": "FileEdit",
           "mode": "w"},
@@ -100,17 +104,18 @@ def get_args_new_proj(
     max_iter={"label": "Maximum MC2 iterations",
               "min": 1},
     patch_size={"label": "Patch configurations (Nx, Ny, %overlap)"},
-    no_subgroups={"label": "Do NOT use subgroups in alignments"}
+    use_subgroups={"label": "Use subgroups in alignments"}
 )
 def get_args_mc2(
         project_name="",
-        pixel_size=None,
-        output_folder=Path("./motioncor/"),
+        pixel_size=0.0,
+        output_folder=Path(Path.cwd() / "motioncor"),
         file_prefix="",
+        exec_path=Path("/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110"),
         no_gpu=False,
         jobs_per_gpu=2,
         gpu_mem_usage=1.0,
-        exec_path=Path("/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110"),
+        use_gain=False,
         gain="",
         super_res=False,
         discard_top=0,
@@ -118,7 +123,7 @@ def get_args_mc2(
         tolerance=0.5,
         max_iter=10,
         patch_size=[5,5,20],
-        no_subgroups=False,
+        use_subgroups=True,
 ):
     """
     Function to add arguments to parser for MotionCor
@@ -132,14 +137,15 @@ def get_args_mc2(
     jobs_per_gpu (int) :: Number of job instance(s) per GPU
     gpu_mem_usage (float) :: MotionCor2 GPU memory usage
     exec_path (str) :: Path to MotionCor2 executable
-    gain (str) :: Path to gain reference file (leave blank if none)
+    use_gain (bool) :: Whether to use gain reference file
+    gain (str) :: Path to gain reference file (leave blank if use_gain==False)
     super_res (bool) :: True if super-resolution images used
     discard_top (int) :: Number of frames discarded from top per image
     discard_bottom (int) :: Number of frames discarded from bottom per image
     tolerance (float) :: Threshold of alignment errors in pixels
     max_iter (int) :: Maximum number of iterations performed by MotionCor2
     patch_size (int) :: Size of patches used in alignment
-    no_subgroups (bool) :: Do not use subgroups in alignment
+    use_subgroups (bool) :: Use subgroups in alignment
 
     OUTPUTs:
     Namespace
