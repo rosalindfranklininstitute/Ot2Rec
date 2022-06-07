@@ -45,16 +45,16 @@ def new_master_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
 
-    master_yaml_name = args.project_name + '_proj.yaml'
+    master_yaml_name = args.project_name.value + '_proj.yaml'
 
     proj_yaml_dict = {
-        'source_folder': args.source_folder,
-        'TS_folder_prefix': args.folder_prefix,
-        'file_prefix': args.project_name if args.file_prefix is None else args.file_prefix,
-        'image_stack_field': args.stack_field,
-        'image_index_field': args.index_field,
-        'image_tiltangle_field': args.tiltangle_field,
-        'filetype': args.ext,
+        'source_folder': str(args.source_folder.value),
+        'TS_folder_prefix': args.folder_prefix.value,
+        'file_prefix': args.project_name.value if args.file_prefix.value=="" else args.file_prefix.value,
+        'image_stack_field': args.stack_field.value,
+        'image_index_field': args.index_field.value,
+        'image_tiltangle_field': args.tiltangle_field.value,
+        'filetype': args.ext.value,
     }
 
     with open(master_yaml_name, 'w') as f:

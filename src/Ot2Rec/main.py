@@ -53,7 +53,7 @@ def new_proj():
 
     # Create empty Metadata object
     # Master yaml file will be read automatically
-    meta = mdMod.Metadata(project_name=args.project_name,
+    meta = mdMod.Metadata(project_name=args.project_name.value,
                           job_type='master')
 
     # Create master metadata and serialise it as yaml file
@@ -61,7 +61,7 @@ def new_proj():
     if not args.no_mdoc:
         meta.get_mc2_temp()
 
-    master_md_name = args.project_name + '_master_md.yaml'
+    master_md_name = args.project_name.value + '_master_md.yaml'
     with open(master_md_name, 'w') as f:
         yaml.dump(meta.metadata, f, indent=4)
 
