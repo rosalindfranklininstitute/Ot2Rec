@@ -145,51 +145,59 @@ def new_align_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
 
-    align_yaml_name = args.project_name + '_align.yaml'
+    # Calculate patch sizes
+    import numpy as np
+    image_dims = np.array(args.image_dims.value)
+    n_patches = np.array(args.num_patches.value)
+    overlap = args.patch_overlap.value * 0.01
+    denom = n_patches - n_patches*overlap + overlap
+    patch_dims = (image_dims / denom).astype(int)
+
+    align_yaml_name = args.project_name.value + '_align.yaml'
 
     align_yaml_dict = {
         'System': {
             'process_list': 'all',
-            'output_path': args.output_folder,
-            'output_rootname': args.file_prefix if args.file_prefix is not None else args.project_name,
-            'output_suffix': args.file_suffix,
+            'output_path': str(args.output_folder.value),
+            'output_rootname': args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value,
+            'output_suffix': args.file_suffix.value,
         },
 
         'BatchRunTomo': {
             'setup': {
-                'use_rawtlt': not args.no_rawtlt,
+                'use_rawtlt': not args.no_rawtlt.value,
                 'pixel_size': None,
-                'rot_angle': args.rot_angle,
-                'gold_size': args.fiducial_size,
-                'adoc_template': args.adoc_template,
-                'stack_bin_factor': args.stack_bin_factor,
+                'rot_angle': args.rot_angle.value,
+                'gold_size': args.fiducial_size.value,
+                'adoc_template': str(args.adoc_template.value),
+                'stack_bin_factor': args.stack_bin_factor.value,
             },
 
             'preprocessing': {
-                'delete_old_files': args.delete_old_files,
-                'remove_xrays': args.remove_xrays,
+                'delete_old_files': args.delete_old_files.value,
+                'remove_xrays': args.remove_xrays.value,
             },
 
             'coarse_align': {
-                'bin_factor': args.coarse_align_bin_factor,
+                'bin_factor': args.coarse_align_bin_factor.value,
             },
 
             'patch_track': {
-                'size_of_patches': args.patch_sizes,
-                'num_of_patches': args.num_patches,
-                'num_iterations': args.num_iter,
-                'limits_on_shift': args.limits_on_shift,
-                'adjust_tilt_angles': args.adjust_tilt_angles,
+                'size_of_patches': patch_dims.tolist(),
+                'num_of_patches': list(args.num_patches.value),
+                'num_iterations': args.num_iter.value,
+                'limits_on_shift': list(args.limits_on_shift.value),
+                'adjust_tilt_angles': args.adjust_tilt_angles.value,
             },
 
             'fine_align': {
-                'num_surfaces': args.num_surfaces,
-                'mag_option': args.mag_option,
-                'tilt_option': args.tilt_option,
-                'rot_option': args.rot_option,
-                'beam_tilt_option': args.beam_tilt_option,
-                'use_robust_fitting': not args.no_robust_fitting,
-                'weight_all_contours': not args.no_weight_contours,
+                'num_surfaces': args.num_surfaces.value,
+                'mag_option': args.mag_option.value,
+                'tilt_option': args.tilt_option.value,
+                'rot_option': args.rot_option.value,
+                'beam_tilt_option': args.beam_tilt_option.value,
+                'use_robust_fitting': args.robust_fitting.value,
+                'weight_all_contours': args.weight_contours.value,
             },
         }
     }

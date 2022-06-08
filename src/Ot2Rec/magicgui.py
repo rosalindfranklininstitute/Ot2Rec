@@ -103,7 +103,8 @@ def get_args_new_proj(
                "min": 0},
     max_iter={"label": "Maximum MC2 iterations",
               "min": 1},
-    patch_size={"label": "Patch configurations (Nx, Ny, %overlap)"},
+    patch_size={"widget_type": "LiteralEvalLineEdit",
+                "label": "Patch configurations (Nx, Ny, %overlap)"},
     use_subgroups={"label": "Use subgroups in alignments"}
 )
 def get_args_mc2(
@@ -159,9 +160,10 @@ def get_args_mc2(
     result_widget=False,
 
     project_name={"label": "Project name *"},
-    output_folder={"label": "CTFFind4 output folder"},
+    output_folder={"label": "CTFFind4 output folder",
+                   "mode": "d"},
     file_prefix={"label": "File prefix (if different from project name)"},
-    exec_path={"label": "Path to MC2 executable"},
+    exec_path={"label": "Path to CTFFind4 executable"},
     voltage={"label": "Electron beam voltage (in keV)"},
     spherical_aberration={"label": "Objective lens spherical aberration (in mrad)",
                           "step": 0.1},
@@ -200,19 +202,139 @@ def get_args_ctffind(
     Function to add arguments to parser for CTFFind
 
     ARGS:
-    project_name (str)    :: Name of current project
-    output_folder (str) :: Path to folder for storing CTFFind4 outputs
-    file_prefix (str)     :: Common prefix of raw image files (Default: project)
-    exec_path (str)       :: Path to MotionCor2 executable
-    voltage (float) :: Electron beam voltage in keV
+    project_name (str)           :: Name of current project
+    output_folder (str)          :: Path to folder for storing CTFFind4 outputs
+    file_prefix (str)            :: Common prefix of raw image files (Default: project)
+    exec_path (str)              :: Path to IMOD executable
+    voltage (float)              :: Electron beam voltage in keV
     spherical_aberration (float) :: Spherical aberration of objective lens in mrad
-    amp_contrast (float) :: Relative amplitude contrast w1
-    res_range (float) :: Range of resolutions in target function in Angstroms
-    defocus_range (float) :: Min, max and step size of initial defocus search in Angstroms
-    astigm_type (str) :: Type of astigmatism. FLAG USE NOT RECOMMENDED
-    exhaustive_search (bool) :: Use exhaustive search algorithm for defocus
-    astigm_restraint (int) :: Restraint on astigmatism in Angstroms
-    phase_shift (bool) :: Estimate phase shift
+    amp_contrast (float)         :: Relative amplitude contrast w1
+    res_range (float)            :: Range of resolutions in target function in Angstroms
+    defocus_range (float)        :: Min, max and step size of initial defocus search in Angstroms
+    astigm_type (str)            :: Type of astigmatism. FLAG USE NOT RECOMMENDED
+    exhaustive_search (bool)     :: Use exhaustive search algorithm for defocus
+    astigm_restraint (int)       :: Restraint on astigmatism in Angstroms
+    phase_shift (bool)           :: Estimate phase shift
+
+    OUTPUTs:
+    Namespace
+    """
+
+    return locals()
+
+
+@mg(
+    call_button="Create config file",
+    layout="vertical",
+    result_widget=False,
+
+    project_name={"label": "Project name *"},
+    rot_angle={"label": "Beam rotation angle *",
+               "min": -180.00,
+               "max": 180.00,
+               "step": 0.01},
+    image_dims={"widget_type": "LiteralEvalLineEdit",
+                "label": "Image dimensions (in pixels) *"},
+    output_folder={"label": "IMOD output folder",
+                   "mode": "d"},
+    file_prefix={"label": "File prefix (if different from project name)"},
+    file_suffix={"label": "IMOD file suffix (if applicable)"},
+    no_rawtlt={"label": "Ignore .rawtlt files?"},
+    fiducial_size={"label": "Size of fiducial particles in nm (0.0 if fiducial-free)",
+                   "min": 0.0,
+                   "step": 0.01},
+    adoc_template={"label": "Path to BatchRunTomo directives template"},
+    stack_bin_factor={"label": "Stack: Raw image stacks downsampling factor",
+                      "min": 1},
+    delete_old_files={"label": "Preprocessing: Remove original stack when excluding views"},
+    remove_xrays={"label": "Preprocessing: Remove X-rays and other artefacts"},
+    coarse_align_bin_factor={"label": "Coarse-alignment: Coarse aligned stack binning",
+                             "min": 1},
+    num_patches={"widget_type": "LiteralEvalLineEdit",
+                 "label": "Patch-tracking: Number of patches to track in X and Y (Nx, Ny)"},
+    patch_overlap={"label": "Patch-tracking: % overlap between patches",
+                   "min": 0,
+                   "max": 100},
+    num_iter={"label": "Patch-tracking: Number of iterations (1-4)",
+              "min": 1,
+              "max": 4},
+    limits_on_shift={"widget_type": "LiteralEvalLineEdit",
+                     "label": "Patch-tracking: Limits on shifts (in pixels)"},
+    adjust_tilt_angles={"label": "Patch-tracking: Rerun patch-tracking with tilt-angle offset"},
+    num_surfaces={"widget_type": "RadioButtons",
+                  "label": "Fine-alignment: Number of surface(s) for angle analysis.",
+                  "choices": [1, 2]},
+    mag_option={"widget_type": "ComboBox",
+                "label": "Fine-alignment: Type of magnification solution",
+                "choices": ['all', 'group', 'fixed']},
+    tilt_option={"widget_type": "ComboBox",
+                 "label": "Fine-alignment: Type of tilt-angle solution",
+                 "choices": ['all', 'group', 'fixed']},
+    rot_option={"widget_type": "ComboBox",
+                "label": "Fine-alignment: Type of rotation solution",
+                "choices": ['all', 'group', 'one', 'fixed']},
+    beam_tilt_option={"widget_type": "ComboBox",
+                      "label": "Fine-alignment: Type of beam tilt-angle solution",
+                      "choices": ['fixed', 'search']},
+    robust_fitting={"label": "Fine-alignment: Use robust fitting?"},
+    weight_contours={"label": "Fine-alignment: Apply weighting to entire contours from patch-tracking"},
+)
+def get_args_align(
+        project_name="",
+        rot_angle=0.00,
+        image_dims=[1000, 1000],
+        output_folder=Path("./stacks"),
+        file_prefix="",
+        file_suffix="",
+        no_rawtlt=False,
+        fiducial_size=0.0,
+        adoc_template=Path("/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc"),
+        stack_bin_factor=4,
+        delete_old_files=False,
+        remove_xrays=False,
+        coarse_align_bin_factor=4,
+        num_patches=[24, 24],
+        patch_overlap=25,
+        num_iter=4,
+        limits_on_shift=[2, 2],
+        adjust_tilt_angles=True,
+        num_surfaces=1,
+        mag_option="fixed",
+        tilt_option="fixed",
+        rot_option="group",
+        beam_tilt_option="fixed",
+        robust_fitting=True,
+        weight_contours=True,
+):
+    """
+    Function to add arguments to parser for IMOD alignment
+
+    ARGS:
+    project_name (str)            :: Name of current project
+    rot_angle (float)             :: Rotational angle of electron beam. Can be obtained from MDOC files
+    image_dims (int)              :: Image dimensions (in pixels)
+    output_folder (str)           :: Path to folder for storing IMOD outputs
+    file_prefix (str)             :: Common prefix of raw image files (Default: project)
+    file_suffix (str)             :: Extra information attached as suffix to output filenames
+    no_rawtlt (bool)              :: Use information in filenames to determine tilt angles (rather than using .rawtlt files)
+    fiducial_size (float)         :: Size (in nm) of gold fiducial particles
+    adoc_template (str)           :: Path to template file of BatchRunTomo directives
+    stack_bin_factor (int)        :: Stack: Raw image stacks downsampling factor
+    delete_old_files (bool)       :: Preprocessing: Remove original stack when excluding views
+    remove_xrays (bool)           :: Preprocessing: Attempt to remove X-rays and other artefacts
+    coarse_align_bin_factor (int) :: Coarse-alignment: Coarse aligned stack binning
+    num_patches (int)             :: Patch-tracking: Number of patches to track in X and Y
+    patch_overlap (int)           :: Patch-tracking: % overlap between patches
+    num_iter (int)                :: Patch-tracking: Number of iterations. (Max. 4)
+    limits_on_shift (int)         :: Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment
+    adjust_tilt_angles (bool)     :: Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset
+    num_surfaces (int)            :: Fine-alignment: Number of surface(s) for angle analysis
+    mag_option (str)              :: Fine-alignment: Type of magnification solution
+    tilt_option (str)             :: Fine-alignment: Type of tilt-angle solution
+    rot_option (str)              :: Fine-alignment: Type of rotation solution
+    beam_tilt_option (str)        :: Fine-alignment: Type of beam-tilt solution
+    robust_fitting (bool)         :: Fine-alignment: Use robust fitting
+    weight_contours (bool)        :: Fine-alignment: Apply weighting to entire contours from patch-tracking
 
     OUTPUTs:
     Namespace
