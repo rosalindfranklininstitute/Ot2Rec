@@ -291,7 +291,7 @@ def get_args_align(
         adoc_template=Path("/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc"),
         stack_bin_factor=4,
         delete_old_files=False,
-        remove_xrays=False,
+        remove_xrays=True,
         coarse_align_bin_factor=4,
         num_patches=[24, 24],
         patch_overlap=25,
