@@ -469,3 +469,61 @@ def get_args_align_ext(
     """
 
     return locals()
+
+
+@mg(
+    call_button="Create config file",
+    layout="vertical",
+    result_widget=False,
+
+    project_name={"label": "Project name *"},
+    do_positioning={"label": "Positioning: Do positioning?"},
+    unbinned_thickness={"label": "Positioning: Unbinned thickness (in pixels) for samples or whole tomogram *",
+                        "min": 0,
+                        "max": 5000,
+                        "step": 100},
+    correct_ctf={"label": "Aligned stack: Correct CTF for aligned stacks?"},
+    erase_gold={"label": "Aligned stack: Erase gold fiducials?"},
+    filtering={"label": "Aligned stack: Perform 2D filtering?"},
+    bin_factor={"label": "Aligned stack: Binning factor for aligned stack",
+                "min": 1},
+    thickness={"label": "Reconstruction: Thickness (in pixels) for reconstruction *",
+               "min": 0,
+               "max": 5000,
+               "step": 100},
+    trimvol={"label": "Postprocessing: Run Trimvol on reconstruction"},
+    trimvol_reorient={"widget_type": "RadioButtons",
+                      "label": "Postprocessing: Reorientation in Trimvol (if applicable)",
+                      "choices": ["none", "flip", "rotate"]}
+)
+def get_args_recon(
+        project_name="",
+        do_positioning=False,
+        unbinned_thickness=1500,
+        correct_ctf=False,
+        erase_gold=False,
+        filtering=False,
+        bin_factor=1,
+        thickness=1500,
+        trimvol=True,
+        trimvol_reorient="rotate"
+):
+    """
+    Function to add arguments to parser for IMOD reconstruction
+
+    ARGS:
+    project_name (str)            :: Name of current project
+    do_positioning (bool) :: Whether to perform positioning
+    unbinned_thickness (int) :: Unbinned thickness (in pixels) for samples or whole tomogram for positioning
+    correct_ctf (bool) :: Whether to correct CTF for aligned stacks
+    erase_gold (bool) :: Whether to erase gold fiducials
+    filtering (bool) :: Whether to perform 2D filtering
+    bin_factor (int) :: Binning factor for aligned stack
+    thickness (int) :: Thickness (in pixels) for reconstruction
+    trimvol (bool) :: Run Trimvol on reconstruction
+    trimvol_reorient (str) :: Reorientation in Trimvol
+
+    OUTPUTs:
+    Namespace
+    """
+    return locals()
