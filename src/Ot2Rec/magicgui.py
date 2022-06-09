@@ -512,18 +512,57 @@ def get_args_recon(
     Function to add arguments to parser for IMOD reconstruction
 
     ARGS:
-    project_name (str)            :: Name of current project
-    do_positioning (bool) :: Whether to perform positioning
+    project_name (str)       :: Name of current project
+    do_positioning (bool)    :: Whether to perform positioning
     unbinned_thickness (int) :: Unbinned thickness (in pixels) for samples or whole tomogram for positioning
-    correct_ctf (bool) :: Whether to correct CTF for aligned stacks
-    erase_gold (bool) :: Whether to erase gold fiducials
-    filtering (bool) :: Whether to perform 2D filtering
-    bin_factor (int) :: Binning factor for aligned stack
-    thickness (int) :: Thickness (in pixels) for reconstruction
-    trimvol (bool) :: Run Trimvol on reconstruction
-    trimvol_reorient (str) :: Reorientation in Trimvol
+    correct_ctf (bool)       :: Whether to correct CTF for aligned stacks
+    erase_gold (bool)        :: Whether to erase gold fiducials
+    filtering (bool)         :: Whether to perform 2D filtering
+    bin_factor (int)         :: Binning factor for aligned stack
+    thickness (int)          :: Thickness (in pixels) for reconstruction
+    trimvol (bool)           :: Run Trimvol on reconstruction
+    trimvol_reorient (str)   :: Reorientation in Trimvol
 
     OUTPUTs:
     Namespace
     """
+    return locals()
+
+
+@mg(
+    call_button="Get parameters",
+    layout="vertical",
+    result_widget=False,
+
+    project_name={"label": "Project name *"},
+    pixel_res={"label": "Pixel resolution (in angstroms) *",
+               "min": 0.0,
+               "step": 0.001},
+    ds_factor={"label": "Alignment / reconstruction downsampling factor *",
+               "min": 1},
+    rootname={"label": "Rootname of project (if different from project name)"},
+    dims={"widget_type": "LiteralEvalLineEdit",
+          "label": "Dimensions of simulated CTF (in pixels)"},
+)
+def get_args_ctfsim(
+        project_name="",
+        pixel_res=0.000,
+        ds_factor=4,
+        rootname="",
+        dims=[100, 100],
+):
+    """
+    Function to add arguments to parser for O2R-CTFsim
+
+    ARGS:
+    project_name (str) :: Name of current project
+    pixel_res (float)  :: Pixel resolution of motion-corrected images (in Angstroms)
+    ds_factor (int)    :: Downsampling factor (must be same as alignment/reconstruction)
+    rootname (str)     :: Rootname of project (if different from project name)
+    dims (int*2)       :: Dimensions of simulated CTF (in pixels)
+
+    OUTPUTs:
+    Namespace
+    """
+
     return locals()
