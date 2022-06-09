@@ -502,8 +502,7 @@ def create_yaml_stacked():
     prestack (bool) :: if stacks already exist
     """
     # Parse user inputs
-    parser = uaMod.get_args_align_ext()
-    args = parser.parse_args()
+    args = mgMod.get_args_align_ext.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
@@ -517,17 +516,17 @@ def update_yaml_stacked(args):
     ARGS:
     args (Namespace) :: User input parameters
     """
-    project_name = args.project_name
-    parent_path = args.input_folder
+    project_name = args.project_name.value
+    parent_path = str(args.input_folder.value)
     assert (os.path.isdir(parent_path)), \
         "Error in main.update_align_yaml_stacked: IMOD parent folder not found."
     while parent_path.endswith('/'):
         parent_path = parent_path[:-1]
 
-    rootname = args.file_prefix if args.file_prefix is not None else args.project_name
+    rootname = args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value
 
-    pixel_size = args.pixel_size
-    suffix = args.file_suffix if args.file_suffix is not None else ''
+    pixel_size = args.pixel_size.value * 0.1
+    suffix = args.file_suffix.value
 
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
@@ -540,7 +539,7 @@ def update_yaml_stacked(args):
     align_params = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml_name)
 
-    align_params.params['System']['output_path'] = args.output_folder
+    align_params.params['System']['output_path'] = str(args.output_folder.value)
     align_params.params['System']['output_rootname'] = rootname
     align_params.params['System']['output_suffix'] = suffix
     align_params.params['System']['process_list'] = ts_list
