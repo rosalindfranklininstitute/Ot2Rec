@@ -37,7 +37,8 @@ setup(
         'mrcfile',
         'tifffile',
         'redlionfish',
-        'magicgui'
+        'magicgui',
+        'pyqt5',
     ],
     entry_points={
         "console_scripts": [
