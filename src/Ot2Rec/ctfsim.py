@@ -24,6 +24,7 @@ from tqdm import tqdm
 import mrcfile
 
 from . import user_args as uaMod
+from . import magicgui as mgMod
 from . import metadata as mdMod
 
 
@@ -100,17 +101,16 @@ def run():
     Method to run simulator for CTF from CTFFIND4 outputs
     """
     # Parse user inputs
-    parser = uaMod.get_args_ctfsim()
-    args = parser.parse_args()
+    args = mgMod.get_args_ctfsim.show(run=True)
 
-    project_name = args.project_name
+    project_name = args.project_name.value
     rootname = project_name
-    if args.rootname is not None:
-        while args.rootname.endswith('/'):
-            rootname = args.rootname[:-1]
+    if args.rootname.value != "":
+        while args.rootname.value.endswith('/'):
+            rootname = args.rootname.value[:-1]
 
-    pixel_size = args.pixel_res * 1e-10
-    ds_factor = args.ds_factor
+    pixel_size = args.pixel_res.value * 1e-10
+    ds_factor = args.ds_factor.value
 
     # Read in metadata from ctffind
     ctffind_md_file = project_name + '_ctffind_mdout.yaml'
@@ -158,9 +158,9 @@ def run():
         # Write out psf stack
         with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:02}.mrc', overwrite=True) as f:
             (xmin, ymin) = (
-                (source_dim[-2] - args.dims[0]) // 2,
-                (source_dim[-1] - args.dims[1]) // 2)
-            (xmax, ymax) = (xmin + args.dims[0], ymin + args.dims[1])
+                (source_dim[-2] - args.dims.value[0]) // 2,
+                (source_dim[-1] - args.dims.value[1]) // 2)
+            (xmax, ymax) = (xmin + args.dims.value[0], ymin + args.dims.value[1])
 
             f.set_data(full_psf[:, xmin:xmax, ymin:ymax])
 
