@@ -27,7 +27,6 @@ from . import logger as logMod
 itick = 0
 def tickCallBack():
     global itick
-    print(f"{itick}")
     itick += 1
 
 
@@ -111,18 +110,12 @@ class RLF_deconv():
         image_deconvolved = rlf.doRLDeconvolutionFromNpArrays(
             self.orig, self.kernel,
             niter=self.params['niter'],
-            method=self.params['method'],
+            method=self.params['method'].lower(),
             useBlockAlgorithm=self.params['useBlockAlgorithm'],
             callbkTickFunc=tickCallBack(), # if self.params['callbkTickFunc'] else None,
             resAsUint8=self.params['resAsUint8']
         )
 
-        print(
-            self.orig.shape,
-            self.kernel.shape,
-            self.params
-        )
-        print(type(image_deconvolved))
         return image_deconvolved
 
 
@@ -170,7 +163,6 @@ def run():
                            kernel_mrc=args.psf_type.value == 'mrc')
 
     deconvd_image = my_deconv()
-    print(type(deconvd_image)); exit()
 
     # Save results
     with mrcfile.new(str(args.output_path.value), overwrite=True) as f:
