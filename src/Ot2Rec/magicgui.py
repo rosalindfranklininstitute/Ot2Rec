@@ -623,3 +623,40 @@ def get_args_rldeconv(
     """
 
     return locals()
+
+
+@mg(
+    call_button="Create config file",
+    layout="vertical",
+    result_widget=False,
+
+    project_name={"label": "Project name *"},
+    stacks_folder={"label": "Path to parent folder with stacks",
+                   "mode": "d"},
+    output_path={"label": "Path to output folder",
+                 "mode": "d"},
+    rootname={"label": "Rootname of current project (if different from project name)"},
+    suffix={"label": "Suffix of project files"},
+    extension={"label": "File extension of stacks *"},
+    imod_suffix={"label": "IMOD file suffix"}
+)
+def get_args_savurecon(
+        project_name="",
+        stacks_folder=Path("./stacks"),
+        output_path=Path("./savurecon"),
+        rootname="",
+        suffix="",
+        extension="mrc",
+        imod_suffix="ali"
+):
+    """
+    Function to add arguments to parser for Savu reconstruction
+
+    ARGS:
+    None
+
+    OUTPUTs:
+    Namespace
+    """
+
+    return locals()
