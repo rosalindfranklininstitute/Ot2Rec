@@ -566,3 +566,61 @@ def get_args_ctfsim(
     """
 
     return locals()
+
+
+@mg(
+    call_button="Get parameters",
+    layout="vertical",
+    result_widget=False,
+
+    image_path={"widget_type": "FileEdit",
+                "label": "Path to raw image"},
+    psf_path={"widget_type": "FileEdit",
+              "label": "Path to PSF for deconvolution"},
+    image_type={"widget_type": "ComboBox",
+                "label": "File type of raw image",
+                "choices": ["mrc", "tiff"]},
+    psf_type={"widget_type": "ComboBox",
+              "label": "File type of PSF stack",
+              "choices": ["mrc", "tiff"]},
+    output_path={"widget_type": "FileEdit",
+                 "label": "Path to deconvolved image",
+                 "mode":"w"},
+    device={"widget_type": "ComboBox",
+            "label": "Device to be used for deconvolution",
+            "choices": ["GPU", "CPU"]},
+    niter={"label": "Max number of iterations used in deconvolution",
+           "min": 1},
+    block={"label": "Use block-iterative algorithm?"},
+    uint={"label": "Store results as UInt8?"}
+)
+def get_args_rldeconv(
+        image_path=Path("./stacks/"),
+        image_type="mrc",
+        psf_path=Path("./PSF/"),
+        psf_type="mrc",
+        output_path=Path("."),
+        device="GPU",
+        niter=10,
+        block=False,
+        uint=True,
+):
+    """
+    Function to add arguments to parser for RedLionfish deconvolution
+
+    ARGS:
+    image_path (str) :: Path to raw image
+    image_type (str) :: File type of raw image
+    psf_path (str) :: Path to PSF for deconvolution
+    psf_type (str) :: File type of PSF stack
+    output_path (str) :: Path to deconvolved image
+    device (str) :: Device used for deconvolution
+    niter (int) :: Max number of iteration in deconvolution
+    block (bool) :: Whether to use block iterative algorithm for deconvolution
+    uint (int) :: Whether to encode results as UInt8
+
+    OUTPUTs:
+    Namespace
+    """
+
+    return locals()
