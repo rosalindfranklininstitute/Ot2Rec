@@ -26,6 +26,9 @@ from . import params as prmMod
 from . import user_args as uaMod
 from . import magicgui as mgMod
 
+from . import motioncorr as mcMod
+from . import ctffind as ctffindMod
+
 
 def get_proj_name():
     """
@@ -64,6 +67,8 @@ def new_proj():
     master_md_name = args.project_name.value + '_master_md.yaml'
     with open(master_md_name, 'w') as f:
         yaml.dump(meta.metadata, f, indent=4)
+
+    return args
 
 
 def cleanup():
@@ -108,29 +113,48 @@ def run_all():
     """
     Method to run all processes in one go using default settings.
     """
-
     logger = logMod.Logger()
 
     # Collect raw images and produce master metadata
+    proj_arg = new_proj()
     logger("Collecting raw images...")
-    new_proj()
+
+    # Get essential user inputs for IMOD route
+    user_args = mgMod.get_args_imod_route.show(run=True)
 
     # Motion correction
+    mc2_args = mgMod.get_args_mc2
+    mc2_args.project_name.value = proj_arg.project_name.value
+    mc2_args.exec_path.value = user_args.mc2_path.value
+    mc2_args.pixel_size.value = user_args.pixel_size.value
+    mc2_args.use_gain.value = user_args.use_gain.value
+    mc2_args.gain.value = user_args.gain.value
+
+    prmMod.new_mc2_yaml(mc2_args)
+    mcMod.update_yaml(mc2_args)
+
     logger("Motion correction in progress...")
-    create_mc2_yaml()
-    run_mc2()
+    mcMod.run(exclusive=False,
+              args_in=mc2_args)
 
     # CTF estimation
+    ctffind_args = mgMod.get_args_ctffind
+    ctffind_args.project_name.value = proj_arg.project_name.value
+    ctffind_args.exec_path.value = user_args.ctffind_path.value
+
+    prmMod.new_ctffind_yaml(ctffind_args)
+    ctffindMod.update_yaml(ctffind_args)
+
     logger("CTF estimation in progress...")
-    create_ctffind_yaml()
-    run_ctffind()
+    ctffindMod.run(exclusive=False,
+                   args_in=ctffind_args)
 
-    # Alignment
-    logger("Alignment in progress...")
-    create_align_yaml()
-    run_align()
+    # # Alignment
+    # logger("Alignment in progress...")
+    # create_align_yaml()
+    # run_align()
 
-    # Reconstruction
-    logger("Reconstruction in progress...")
-    create_recon_yaml()
-    run_recon()
+    # # Reconstruction
+    # logger("Reconstruction in progress...")
+    # create_recon_yaml()
+    # run_recon()
