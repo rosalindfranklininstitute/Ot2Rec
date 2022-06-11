@@ -668,7 +668,8 @@ def get_args_savurecon(
     result_widget=False,
 
     mc2_path={"label": "Path to MC2 executable"},
-    ctffind_path={"label": "Path to CTFFind4 executable"},
+    do_ctffind={"label": "Estimate CTF?"},
+    ctffind_path={"label": "Path to CTFFind4 executable (if applicable)"},
     image_dims={"widget_type": "LiteralEvalLineEdit",
                 "label": "Image dimensions (in pixels)"},
     pixel_size={"label": "Pixel size (A)",
@@ -694,6 +695,7 @@ def get_args_savurecon(
 )
 def get_args_imod_route(
         mc2_path=Path("/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110"),
+        do_ctffind=False,
         ctffind_path=Path("/opt/lmod/modules/ctffind/4.1.14/bin/ctffind"),
         image_dims=[1000, 1000],
         pixel_size=0.000,

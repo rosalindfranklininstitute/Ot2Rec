@@ -14,6 +14,7 @@
 
 
 import os
+import time
 import subprocess
 import sys
 from glob import glob
@@ -28,6 +29,7 @@ from . import magicgui as mgMod
 
 from . import motioncorr as mcMod
 from . import ctffind as ctffindMod
+from . import align as alignMod
 
 
 def get_proj_name():
@@ -109,7 +111,7 @@ def cleanup():
                                        stderr=subprocess.STDOUT)
 
 
-def run_all():
+def run_all_imod():
     """
     Method to run all processes in one go using default settings.
     """
@@ -137,22 +139,38 @@ def run_all():
     mcMod.run(exclusive=False,
               args_in=mc2_args)
 
+    time.sleep(2)
+
     # CTF estimation
-    ctffind_args = mgMod.get_args_ctffind
-    ctffind_args.project_name.value = proj_arg.project_name.value
-    ctffind_args.exec_path.value = user_args.ctffind_path.value
+    if user_args.do_ctffind.value:
+        ctffind_args = mgMod.get_args_ctffind
+        ctffind_args.project_name.value = proj_arg.project_name.value
+        ctffind_args.exec_path.value = user_args.ctffind_path.value
 
-    prmMod.new_ctffind_yaml(ctffind_args)
-    ctffindMod.update_yaml(ctffind_args)
+        prmMod.new_ctffind_yaml(ctffind_args)
+        ctffindMod.update_yaml(ctffind_args)
 
-    logger("CTF estimation in progress...")
-    ctffindMod.run(exclusive=False,
-                   args_in=ctffind_args)
+        logger("CTF estimation in progress...")
+        ctffindMod.run(exclusive=False,
+                       args_in=ctffind_args)
 
-    # # Alignment
-    # logger("Alignment in progress...")
-    # create_align_yaml()
-    # run_align()
+        time.sleep(2)
+
+    # Alignment
+    align_args = mgMod.get_args_align
+    align_args.project_name.value = proj_arg.project_name.value
+    align_args.rot_angle.value = user_args.rot_angle.value
+    align_args.image_dims.value = align_args.image_dims.value
+
+    prmMod.new_align_yaml(align_args)
+    alignMod.update_yaml(align_args)
+
+    logger("Alignment in progress...")
+    alignMod.run(exclusive=False,
+                 args_in=align_args,
+                 newstack=True,
+    )
+
 
     # # Reconstruction
     # logger("Reconstruction in progress...")

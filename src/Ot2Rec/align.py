@@ -550,7 +550,7 @@ def update_yaml_stacked(args):
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
 
 
-def run(newstack=False, do_align=True, ext=False, args_pass=None):
+def run(newstack=False, do_align=True, ext=False, args_pass=None, exclusive=True, args_in=None):
     """
     Method to run IMOD newstack / alignment
 
@@ -559,25 +559,29 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None):
     do_align (bool) :: whether to perform IMOD alignment
     ext (bool)      :: whether external stack(s) are available and to be used
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
-    if args_pass is not None:
-        args = parser.parse_args(args_pass)
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name",
+                            type=str,
+                            help="Name of current project")
+        if args_pass is not None:
+            args = parser.parse_args(args_pass)
+        else:
+            args = parser.parse_args()
+        project_name = args.project_name
     else:
-        args = parser.parse_args()
+        project_name = args_in.project_name.value
 
     # Check if prerequisite files exist
-    align_yaml = args.project_name + '_align.yaml'
+    align_yaml = project_name + '_align.yaml'
     if not ext:
-        mc2_md_file = args.project_name + '_mc2_mdout.yaml'
+        mc2_md_file = project_name + '_mc2_mdout.yaml'
 
     # Read in config and metadata
-    align_config = prmMod.read_yaml(project_name=args.project_name,
+    align_config = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml)
     if not ext:
-        mc2_md = mdMod.read_md_yaml(project_name=args.project_name,
+        mc2_md = mdMod.read_md_yaml(project_name=project_name,
                                     job_type='align',
                                     filename=mc2_md_file)
 
@@ -585,7 +589,7 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None):
     logger = logMod.Logger()
 
     # Create Align object
-    align_obj = Align(project_name=args.project_name,
+    align_obj = Align(project_name=project_name,
                       md_in=mc2_md if not ext else None,
                       params_in=align_config,
                       logger_in=logger,
