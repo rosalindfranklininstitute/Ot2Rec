@@ -660,3 +660,59 @@ def get_args_savurecon(
     """
 
     return locals()
+
+
+@mg(
+    call_button="Get parameters",
+    layout="vertical",
+    result_widget=False,
+
+    mc2_path={"label": "Path to MC2 executable"},
+    ctffind_path={"label": "Path to CTFFind4 executable"},
+    image_dims={"widget_type": "LiteralEvalLineEdit",
+                "label": "Image dimensions (in pixels)"},
+    pixel_size={"label": "Pixel size (A)",
+                "step": 0.001},
+    rot_angle={"label": "Beam rotation angle",
+               "min": -180.00,
+               "max": 180.00,
+               "step": 0.01},
+    super_res={"label": "Super-resolution images?"},
+    use_gain={"label": "Use gain reference?"},
+    gain={"label": "Gain reference file (if applicable)",
+          "widget_type": "FileEdit",
+          "mode": "w"},
+    do_positioning={"label": "Positioning: Do positioning?"},
+    unbinned_thickness={"label": "Positioning: Unbinned thickness (in pixels) for samples or whole tomogram",
+                        "min": 0,
+                        "max": 5000,
+                        "step": 100},
+    thickness={"label": "Reconstruction: Thickness (in pixels) for reconstruction",
+               "min": 0,
+               "max": 5000,
+               "step": 100},
+)
+def get_args_imod_route(
+        mc2_path=Path("/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110"),
+        ctffind_path=Path("/opt/lmod/modules/ctffind/4.1.14/bin/ctffind"),
+        image_dims=[1000, 1000],
+        pixel_size=0.000,
+        rot_angle=0.00,
+        super_res=False,
+        use_gain=False,
+        gain="",
+        do_positioning=False,
+        unbinned_thickness=1500,
+        thickness=1500
+):
+    """
+    Function to get essential parameters for processing steps on IMOD route
+
+    ARGS:
+
+
+    OUTPUTs:
+    Namespace
+    """
+
+    return locals()
