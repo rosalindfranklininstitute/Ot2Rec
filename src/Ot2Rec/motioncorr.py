@@ -214,6 +214,7 @@ class Motioncorr:
                '-PixSize', str(self.params['MC2']['pixel_size']),
                '-Throw', str(self.params['MC2']['discard_frames_top']),
                '-Trunc', str(self.params['MC2']['discard_frames_bottom']),
+               '-LogFile', out_path + '.log',
                ]
 
         if extra_info is not None:
