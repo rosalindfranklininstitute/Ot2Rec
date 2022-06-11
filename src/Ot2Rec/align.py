@@ -638,24 +638,28 @@ def imod_align_ext():
         )
 
 
-def get_align_stats():
+def get_align_stats(exclusive=True, args_in=None):
     """
     Method to extract statistics from alignment
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
-    args = parser.parse_args()
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name",
+                            type=str,
+                            help="Name of current project")
+        args = parser.parse_args()
+        project_name = args.project_name
+    else:
+        project_name = args_in.project_name.value
 
     # Check if align metadata file exists
-    align_md_name = args.project_name + '_align_mdout.yaml'
+    align_md_name = project_name + '_align_mdout.yaml'
     if not os.path.isfile(align_md_name):
         raise IOError("Error in Ot2Rec.main.get_align_stats: alignment metadata file not found.")
 
     # Get stacks folder path from config
-    align_yaml = args.project_name + '_align.yaml'
-    align_config = prmMod.read_yaml(project_name=args.project_name,
+    align_yaml = project_name + '_align.yaml'
+    align_config = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml)
 
     folder_path = align_config.params['System']['output_path']

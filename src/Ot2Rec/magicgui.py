@@ -419,7 +419,7 @@ def get_args_align_ext(
         remove_xrays=True,
         coarse_align_bin_factor=4,
         num_patches=[24, 24],
-        patch_overlap=25,
+        patch_overlap=15,
         num_iter=4,
         limits_on_shift=[2, 2],
         adjust_tilt_angles=True,
@@ -502,7 +502,7 @@ def get_args_recon(
         correct_ctf=False,
         erase_gold=False,
         filtering=False,
-        bin_factor=1,
+        bin_factor=4,
         thickness=1500,
         trimvol=True,
         trimvol_reorient="rotate"
@@ -692,6 +692,7 @@ def get_args_savurecon(
                "min": 0,
                "max": 5000,
                "step": 100},
+    show_stats={"label": "Show alignment statistics?"}
 )
 def get_args_imod_route(
         mc2_path=Path("/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110"),
@@ -703,9 +704,10 @@ def get_args_imod_route(
         super_res=False,
         use_gain=False,
         gain="",
+        show_stats=True,
         do_positioning=False,
         unbinned_thickness=1500,
-        thickness=1500
+        thickness=1500,
 ):
     """
     Function to get essential parameters for processing steps on IMOD route

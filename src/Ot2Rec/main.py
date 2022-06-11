@@ -30,6 +30,7 @@ from . import magicgui as mgMod
 from . import motioncorr as mcMod
 from . import ctffind as ctffindMod
 from . import align as alignMod
+from . import recon as reconMod
 
 
 def get_proj_name():
@@ -170,9 +171,23 @@ def run_all_imod():
                  args_in=align_args,
                  newstack=True,
     )
+    if user_args.show_stats.value:
+        alignMod.get_align_stats(exclusive=False,
+                                 args_in=align_args)
 
+    time.sleep(2)
 
-    # # Reconstruction
-    # logger("Reconstruction in progress...")
-    # create_recon_yaml()
-    # run_recon()
+    # Reconstruction
+    recon_args = mgMod.get_args_recon
+    recon_args.project_name.value = proj_arg.project_name.value
+    recon_args.do_positioning.value = user_args.do_positioning.value
+    recon_args.unbinned_thickness.value = user_args.unbinned_thickness.value
+    recon_args.thickness.value = user_args.thickness.value
+
+    prmMod.new_recon_yaml(recon_args)
+    reconMod.update_yaml(recon_args)
+
+    logger("Reconstruction in progress...")
+    reconMod.run(exclusive=False,
+                 args_in=recon_args,
+    )

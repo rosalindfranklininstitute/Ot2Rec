@@ -85,17 +85,17 @@ class Recon:
         # Create the folders and dictionary for future reference
         self._path_dict = {}
         for curr_ts in self.params['System']['process_list']:
-            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
+            subfolder = f"{self.basis_folder}/{self.rootname}_{int(curr_ts):02}{self.suffix}"
             os.makedirs(subfolder, exist_ok=True)
             self._path_dict[curr_ts] = subfolder
 
         self._recon_images = pd.DataFrame(columns=['ts', 'align_output', 'recon_output'])
         for curr_ts in self.params['System']['process_list']:
-            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
+            subfolder = f"{self.basis_folder}/{self.rootname}_{int(curr_ts):02}{self.suffix}"
             _to_append = pd.DataFrame({
                 'ts': [curr_ts],
-                'align_output': [f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_ali.mrc"],
-                'recon_output': [f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_rec.mrc"],
+                'align_output': [f"{subfolder}/{self.rootname}_{int(curr_ts):02}{self.suffix}_ali.mrc"],
+                'recon_output': [f"{subfolder}/{self.rootname}_{int(curr_ts):02}{self.suffix}_rec.mrc"],
             })
             self._recon_images = pd.concat([self._recon_images, _to_append],
                                            ignore_index=True,
@@ -372,25 +372,29 @@ def update_yaml(args):
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
 
 
-def run():
+def run(exclusive=True, args_in=None):
     """
     Method to run IMOD reconstruction
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name",
+                            type=str,
+                            help="Name of current project")
 
-    args = parser.parse_args()
+        args = parser.parse_args()
+        project_name = args.project_name
+    else:
+        project_name = args_in.project_name.value
 
     # Check if prerequisite files exist
-    recon_yaml = args.project_name + '_recon.yaml'
-    align_md_file = args.project_name + '_align_mdout.yaml'
+    recon_yaml = project_name + '_recon.yaml'
+    align_md_file = project_name + '_align_mdout.yaml'
 
     # Read in config and metadata
-    recon_config = prmMod.read_yaml(project_name=args.project_name,
+    recon_config = prmMod.read_yaml(project_name=project_name,
                                     filename=recon_yaml)
-    align_md = mdMod.read_md_yaml(project_name=args.project_name,
+    align_md = mdMod.read_md_yaml(project_name=project_name,
                                   job_type='reconstruct',
                                   filename=align_md_file)
 
@@ -398,7 +402,7 @@ def run():
     logger = logMod.Logger()
 
     # Create Recon object
-    recon_obj = Recon(project_name=args.project_name,
+    recon_obj = Recon(project_name=project_name,
                       md_in=align_md,
                       params_in=recon_config,
                       logger_in=logger,
