@@ -684,6 +684,8 @@ def get_args_savurecon(
           "widget_type": "FileEdit",
           "mode": "w"},
     do_positioning={"label": "Positioning: Do positioning?"},
+    bin_factor={"label": "Binning factor for stack",
+                "min": 1},
     unbinned_thickness={"label": "Positioning: Unbinned thickness (in pixels) for samples or whole tomogram",
                         "min": 0,
                         "max": 5000,
@@ -706,6 +708,7 @@ def get_args_imod_route(
         gain="",
         show_stats=True,
         do_positioning=False,
+        bin_factor=4,
         unbinned_thickness=1500,
         thickness=1500,
 ):

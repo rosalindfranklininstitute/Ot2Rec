@@ -162,6 +162,8 @@ def run_all_imod():
     align_args.project_name.value = proj_arg.project_name.value
     align_args.rot_angle.value = user_args.rot_angle.value
     align_args.image_dims.value = align_args.image_dims.value
+    align_args.stack_bin_factor.value = user_args.bin_factor.value
+    align_args.coarse_align_bin_factor.value = user_args.bin_factor.value
 
     prmMod.new_align_yaml(align_args)
     alignMod.update_yaml(align_args)
@@ -183,6 +185,7 @@ def run_all_imod():
     recon_args.do_positioning.value = user_args.do_positioning.value
     recon_args.unbinned_thickness.value = user_args.unbinned_thickness.value
     recon_args.thickness.value = user_args.thickness.value
+    recon_args.bin_factor.value = user_args.bin_factor.value
 
     prmMod.new_recon_yaml(recon_args)
     reconMod.update_yaml(recon_args)
