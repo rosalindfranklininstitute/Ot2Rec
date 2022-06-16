@@ -277,6 +277,7 @@ setupset.copyarg.userawtlt = <use_rawtlt>
 setupset.copyarg.pixel = <pixel_size>
 setupset.copyarg.rotation = <rot_angle>
 setupset.copyarg.gold = <gold_size>
+setupset.copyarg.skip = <excl_views>
 setupset.systemTemplate = <adoc_template>
 
 runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
@@ -308,6 +309,8 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
             'use_rawtlt': 1 if self.params['BatchRunTomo']['setup']['use_rawtlt'] else 0,
             'pixel_size': self.params['BatchRunTomo']['setup']['pixel_size'],
             'rot_angle': self.params['BatchRunTomo']['setup']['rot_angle'],
+            'excl_views': "" if self.params["BatchRunTomo"]["setup"]["excluded_views"] == [0] \
+            else f'{",".join(map(str, self.params["BatchRunTomo"]["setup"]["excluded_views"]))}',
             'gold_size': self.params['BatchRunTomo']['setup']['gold_size'],
             'adoc_template': self.params['BatchRunTomo']['setup']['adoc_template'],
             'stack_bin_factor': self.params['BatchRunTomo']['setup']['stack_bin_factor'],

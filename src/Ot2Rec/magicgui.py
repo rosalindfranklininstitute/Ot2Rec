@@ -234,6 +234,8 @@ def get_args_ctffind(
                "step": 0.01},
     image_dims={"widget_type": "LiteralEvalLineEdit",
                 "label": "Image dimensions (in pixels) *"},
+    excl_views={"widget_type": "LiteralEvalLineEdit",
+                "label": "Excluded views"},
     output_folder={"label": "IMOD output folder",
                    "mode": "d"},
     file_prefix={"label": "File prefix (if different from project name)"},
@@ -282,6 +284,7 @@ def get_args_align(
         project_name="",
         rot_angle=0.00,
         image_dims=[1000, 1000],
+        excl_views=[0],
         output_folder=Path("./stacks"),
         file_prefix="",
         file_suffix="",
@@ -312,6 +315,7 @@ def get_args_align(
     project_name (str)            :: Name of current project
     rot_angle (float)             :: Rotational angle of electron beam. Can be obtained from MDOC files
     image_dims (int)              :: Image dimensions (in pixels)
+    excl_views (int)              :: Indices of micrographes to be excluded
     output_folder (str)           :: Path to folder for storing IMOD outputs
     file_prefix (str)             :: Common prefix of raw image files (Default: project)
     file_suffix (str)             :: Extra information attached as suffix to output filenames
