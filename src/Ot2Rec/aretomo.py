@@ -153,10 +153,11 @@ class AreTomo:
             cmd = recon_cmd
 
         # Add extra kwargs
-        kwargs = self.params["AreTomo_kwargs"].keys()
-        for kwarg in kwargs:
-            cmd.append(kwarg)
-            cmd.append(self.params["AreTomo_kwargs"][kwarg])
+        if len(self.params["AreTomo_kwargs"]) > 0:
+            kwargs = self.params["AreTomo_kwargs"].keys()
+            for kwarg in kwargs:
+                cmd.append(kwarg)
+                cmd.append(self.params["AreTomo_kwargs"][kwarg])
 
         # Add AreTomo command and out_mrc to md_out
         if "aretomo_cmd" not in list(self.md_out.keys()):
