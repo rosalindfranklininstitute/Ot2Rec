@@ -95,7 +95,7 @@ class Quoll:
             cmd.append(self.tiles_dir)
 
         if self.params['OneImgFRC']['show_overlay'] is True:
-            cmd.append("--show_overlay")
+            cmd.append("--show_plot")
         
         if self.params['OneImgFRC']['results_csv'] is not None:
             cmd.append("--save_csv")
@@ -126,6 +126,7 @@ class Quoll:
         else:
             self.stdout = quoll_run.stdout
         
+        print(cmd)
         print(quoll_run.stdout)
 
 
@@ -154,8 +155,6 @@ def update_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
 
-    # Read in reconstruction yaml file, modify, and update
-    # read in alignment yaml as well (some parameters depend on alignment settings)
     quoll_yaml_name = args.project_name.value + '_quoll.yaml'
     quoll_params = prmMod.read_yaml(project_name=args.project_name.value,
                                     filename=quoll_yaml_name)
