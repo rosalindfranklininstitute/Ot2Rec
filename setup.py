@@ -72,6 +72,9 @@ setup(
 
             "o2r.deconv.run=Ot2Rec.rlf_deconv:run",
 
+            "o2r.quoll.new=Ot2Rec.quoll:create_yaml",
+            "o2r.quoll.run=Ot2Rec.quoll:run",
+
             "o2r.cleanup=Ot2Rec.main:cleanup",
             "o2r.runall=Ot2Rec.main:run_all",
         ]

@@ -339,6 +339,35 @@ def new_aretomo_yaml(args):
         yaml.dump(aretomo_yaml_dict, f, indent=4, sort_keys=False)
 
 
+def new_quoll_yaml(args):
+    """
+    Subroutine to create yaml file for Quoll image quality evaluation
+    ARGS:
+    args (Namespace) :: Namespace containing user parameter inputs
+    """
+
+    quoll_yaml_name = args.project_name.value + '_quoll.yaml'
+
+    quoll_yaml_dict = {
+        "OneImgFRC": {
+            "image_fname": None,
+            "pixel_size": None,
+            "unit": "nm",
+            "tile_size": "0",
+            "tiles_dir": None,
+            "show_overlay": False,
+            "results_csv": None,
+            "overlay_fname": None,
+            "heatmap_fname": None,
+        },
+    }
+    
+    with open(quoll_yaml_name, 'w') as f:
+        yaml.dump(quoll_yaml_dict, f, indent=4, sort_keys=False)
+    
+    print(f"Quoll yaml created: {quoll_yaml_name}")
+
+
 def read_yaml(project_name: str,
               filename: str):
     """

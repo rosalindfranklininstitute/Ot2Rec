@@ -660,3 +660,62 @@ def get_args_savurecon(
     """
 
     return locals()
+
+
+@mg(
+    call_button="Create config file",
+    layout="vertical",
+    result_widget=False,
+
+    project_name={"label": "Project name *"},
+    image_fname={"label": "Image filename to evaluate"},
+    pixel_size={"label": "Pixel size in physical units"},
+    unit={"label": "Units of pixel size, default nm",},
+    tile_size={
+        "label": "Tile size in pixels",
+        "widget_type": "SpinBox",
+    },
+    show_overlay={
+        "label": "Display the resolutions heatmap over the image",
+        "widget_type": "CheckBox",
+    },
+    save_csv={
+        "label": "Save resolution results as .csv",
+        "widget_type": "CheckBox",
+    },
+    save_overlay={
+        "label": "Save plot of resolutions heatmap overlaid on the image",
+        "widget_type": "CheckBox",
+    },
+    save_heatmap={
+        "label": "Save resolutions heatmap as .tif",
+        "widget_type": "CheckBox",
+    },
+)
+def get_args_quoll(
+        # string="Evaluate the one image FRC with Quoll",
+        project_name="",
+        # string="Choose a single image to evaluate, any format accepted by BioFormats",
+        image_fname="*.tif",
+        pixel_size=1.0,
+        unit="nm",
+        # string="Local resolution is evaluated for square tiles of the image.",
+        # string="Choose the length of one side of the tile in pixels",
+        # string="If length=0, the entire image will be evaluated as a single tile",
+        tile_size=256,
+        show_overlay=False,
+        save_csv=False,
+        save_overlay=False,
+        save_heatmap=False,
+):
+    """
+    Function to add arguments to parser for Quoll image resolution estimation
+
+    ARGS:
+    None
+
+    OUTPUTs:
+    Namespace
+    """
+
+    return locals()
