@@ -17,10 +17,12 @@ import argparse
 import os
 import subprocess
 from glob import glob
+
 import yaml
 
 from . import align
 from . import logger as logMod
+from . import magicgui as mgMod
 from . import params as prmMod
 from . import user_args as uaMod
 
@@ -194,7 +196,7 @@ class AreTomo:
 
 # Plugin functions
 
-def update_yaml(args, kwargs):
+def update_yaml(args):
     """
     Method to update yaml file for AreTomo
 
@@ -204,51 +206,51 @@ def update_yaml(args, kwargs):
                      beyond those implemented here
     """
     # Read in YAML, set mundane things
-    rootname = args.project_name if args.rootname is None else args.rootname
-    suffix = args.suffix
+    rootname = args["project_name"] if args["rootname"] is None else args["rootname"]
+    suffix = args["suffix"]
 
-    aretomo_yaml_names = {0: args.project_name + "_aretomo_align.yaml",
-                          1: args.project_name + "_aretomo_recon.yaml",
-                          2: args.project_name + "_aretomo_align-recon.yaml"}
+    aretomo_yaml_names = {0: args["project_name"] + "_aretomo_align.yaml",
+                          1: args["project_name"] + "_aretomo_recon.yaml",
+                          2: args["project_name"] + "_aretomo_align-recon.yaml"}
 
-    aretomo_yaml_name = aretomo_yaml_names[int(args.aretomo_mode)]
+    aretomo_yaml_name = aretomo_yaml_names[int(args["aretomo_mode"])]
     aretomo_params = prmMod.read_yaml(
-        project_name=args.project_name,
+        project_name=args["project_name"],
         filename=aretomo_yaml_name
     )
 
     # Check that AreTomo Mode is 0-3
-    if (args.aretomo_mode < 0) or (args.aretomo_mode > 3):
+    if (args["aretomo_mode"] < 0) or (args["aretomo_mode"] > 3):
         raise ValueError("AreTomo mode must be 0, 1, 2, or 3")
 
-    # Add optional kwargs
-    aretomo_params.params['AreTomo_kwargs'] = kwargs
+    # Add optional kwargs TODO: Implement
+    # aretomo_params.params['AreTomo_kwargs'] = kwargs
 
-    if args.aretomo_mode != 1:  # for workflows with alignment
+    if args["aretomo_mode"] != 1:  # for workflows with alignment
         # Uses align to create the InMrc and AngFile in correct form
         try:
             align.create_yaml([
-                args.project_name,
-                str(args.rot_angle),
+                args["project_name"],
+                str(args["rot_angle"]),
                 '-o',
-                args.output_path])
+                args["output_path"]])
             align.run(
                 newstack=True,
                 do_align=False,
-                args_pass=[args.project_name])
+                args_pass=[args["project_name"]])
             print("Created stacks for input to AreTomo")
         except:
             print("IMOD might not be loaded")
 
         # Set InMrc
-        st_file_list = glob(f'{args.output_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
+        st_file_list = glob(f'{args["output_path"]}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
         aretomo_params.params["AreTomo_setup"]["input_mrc"] = st_file_list
 
         # Set AngFile
-        if args.tilt_angles is None:
-            tlt_file_list = glob(f'{args.output_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
+        if args["tilt_angles"] is None:
+            tlt_file_list = glob(f'{args["output_path"]}/{rootname}_*{suffix}/{rootname}_*{suffix}.rawtlt')
         else:
-            tlt_file_list = args.tilt_angles
+            tlt_file_list = args["tilt_angles"]
         aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
 
         # Set process list
@@ -256,9 +258,9 @@ def update_yaml(args, kwargs):
                    for file in st_file_list]
         aretomo_params.params["System"]["process_list"] = ts_list
 
-    if args.aretomo_mode == 1:
+    if args["aretomo_mode"] == 1:
         # Set InMrc
-        st_file_list = glob(f'{args.input_mrc_folder}/{rootname}_*{suffix}/{rootname}_*{suffix}_ali.mrc')
+        st_file_list = glob(f'{args["input_mrc_folder"]}/{rootname}_*{suffix}/{rootname}_*{suffix}_ali.mrc')
         aretomo_params.params["AreTomo_setup"]["input_mrc"] = st_file_list
 
         # Set process list
@@ -267,54 +269,56 @@ def update_yaml(args, kwargs):
         aretomo_params.params["System"]["process_list"] = ts_list
 
         # Set AngFile
-        if args.tilt_angles is None:
-            tlt_file_list = glob(f'{args.output_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.tlt')
+        if args["tilt_angles"] is None:
+            tlt_file_list = glob(f'{args["output_path"]}/{rootname}_*{suffix}/{rootname}_*{suffix}.tlt')
         else:
-            tlt_file_list = args.tilt_angles
+            tlt_file_list = args["tilt_angles"]
         aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
 
     # Set OutputMrc
-    if args.aretomo_mode == 0:
+    if args["aretomo_mode"] == 0:
         out_file_list = [f"{os.path.splitext(file)[0]}_ali.mrc" for file in st_file_list]
-    elif args.aretomo_mode > 0:
+    elif args["aretomo_mode"] > 0:
         out_file_list = [f"{os.path.splitext(file)[0]}_rec.mrc" for file in st_file_list]
     aretomo_params.params["AreTomo_setup"]["output_mrc"] = out_file_list
 
     # Add the rest of the argparse values to aretomo_params
-    aretomo_params.params["AreTomo_setup"]["aretomo_mode"] = args.aretomo_mode
-    aretomo_params.params["AreTomo_setup"]["output_binning"] = args.output_binning
-    aretomo_params.params["AreTomo_recon"]["volz"] = args.volz
-    aretomo_params.params["AreTomo_recon"]["sample_thickness"] = args.sample_thickness
-    aretomo_params.params["AreTomo_recon"]["pixel_size"] = args.pixel_size
-    aretomo_params.params["AreTomo_recon"]["recon_algo"] = args.recon_algo
+    aretomo_params.params["AreTomo_setup"]["aretomo_mode"] = args["aretomo_mode"]
+    aretomo_params.params["AreTomo_setup"]["output_binning"] = args["output_binning"]
+    aretomo_params.params["AreTomo_recon"]["volz"] = args["volz"]
+    aretomo_params.params["AreTomo_recon"]["sample_thickness"] = args["sample_thickness"]
+    aretomo_params.params["AreTomo_recon"]["pixel_size"] = args["pixel_size"]
+    aretomo_params.params["AreTomo_recon"]["recon_algo"] = args["recon_algo"]
 
     # for workflows with reconstruction, set VolZ unless already overwritten
-    if args.aretomo_mode > 0:
-        if args.volz == -1:
-            if args.sample_thickness < 0:
+    if args["aretomo_mode"] > 0:
+        if args["volz"] == -1:
+            if args["sample_thickness"] < 0:
                 raise ValueError("Please set sample thickness in nm to automatically calculate VolZ")
-            if args.pixel_size < 0:
+            if args["pixel_size"] < 0:
                 raise ValueError("Please set pixel size in nm to automatically calculate VolZ")
             aretomo_params.params["AreTomo_recon"]["volz"] = int(
-                (args.sample_thickness * args.pixel_size) + 200)
+                (args["sample_thickness"] * args["pixel_size"]) + 200)
 
     # update and write yaml file
     with open(aretomo_yaml_name, "w") as f:
         yaml.dump(aretomo_params.params, f, indent=4, sort_keys=False)
 
 
-def create_yaml():
+def create_yaml(input_mgNS=None):
     """
     Subroutine to create new yaml file for AreTomo
     """
 
     # Parse user inputs
-    parser = uaMod.get_args_aretomo()
-    args, kwargs = parser.parse_known_args()
+    if input_mgNS is None:
+        args = mgMod.get_args_aretomo.show(run=True).asdict()
+    else:
+        args = input_mgNS
 
     # Create the yaml file, then automatically update it
     prmMod.new_aretomo_yaml(args)
-    update_yaml(args, kwargs)
+    update_yaml(args)
 
 
 def run():

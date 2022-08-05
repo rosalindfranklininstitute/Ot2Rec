@@ -12,220 +12,197 @@
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-
-# Utility imports
-import unittest
 import os
-import tempfile
-import pathlib
+import unittest
 
-# Import plugin
+from Ot2Rec import magicgui as mgMod
 from Ot2Rec import aretomo
-from Ot2Rec import user_args as uaMod
-from Ot2Rec import params as prmMod
-
 
 class AreTomoTest(unittest.TestCase):
-    """
-    Tests the AreTomo plugin
-    """
 
-    def setUp(self):
+    def _create_aretomo_yaml_from_magicgui(self, kv=None):
+        """ Creates an aretomo yaml from sensible defaults except for
+        those defined in kv = [('key', 'value'), ...] """
+        sensible_defaults = mgMod.get_args_aretomo(
+            project_name="TS",
+            input_mrc_folder="./aretomo",
+            output_path="./aretomo",
+        )
+        if kv is not None:
+            for (key, value) in kv:
+                sensible_defaults.__setitem__(key, value)
+        return sensible_defaults
+
+    def test_magicgui_sets_anyvalue_args(self):
+        """ Tests that arguments are passed to magicgui namespace
+        The values are only sanity-checked in the `aretomo.update_yaml` function
+        so any values are accepted at this stage.
         """
-        Creates prerequisite files
+        test_cases = [
+            ("project_name", "abc"),
+            ("aretomo_mode", 0),
+            ("rot_angle", 90.0),
+            ("pixel_size", 1.5),
+            ("rootname", "abc"),
+            ("suffix", "abc"),
+            ("input_mrc_folder", "./test"),
+            ("output_path", "./test"),
+            ("tilt_angles", ".tlt"),
+            ("volz", 10),
+            ("sample_thickness", 10),
+            ("output_binning", 4),
+            ("recon_algo", "WBP")
+        ]
+        
+        for arg, input in test_cases:
+            with self.subTest(f"{arg}, {input} -> {input}"):
+                ns = mgMod.get_args_aretomo()
+                ns.__setitem__(arg, input)
+                self.assertEqual(input, ns[arg])
+
+    def test_magicgui_namespace_saved_to_yaml(self):
+        """Tests that the magicgui namespace values are saved by
+        `aretomo.create_yaml` if all args are sensible.
         """
-        self._temp_dir = tempfile.TemporaryDirectory()
-        self.temp_path = pathlib.Path(self._temp_dir.name)
-        os.mkdir(self.temp_path / 'aretomo')
-        os.mkdir(self.temp_path / 'aretomo/TS_01')
-        self._create_file(self.temp_path / 'aretomo/TS_01/TS_01.st', '')
-        self._create_file(self.temp_path / 'aretomo/TS_01/TS_01.rawtlt', '')
+        mgNS = self._create_aretomo_yaml_from_magicgui()
+        aretomo.create_yaml(input_mgNS=mgNS)
+        self.assertTrue(os.path.exists("./TS_aretomo_align.yaml"))
+        os.remove("./TS_aretomo_align.yaml")
 
-    def tearDown(self):
-        self._temp_dir.cleanup()
-
-    def _create_file(self, path, data):
-        with open(path, 'w') as f:
-            f.write(data)
-
-    def _generate_yaml(self, working_dir, args, kwargs):
+    @unittest.skip("WIP")
+    def test_aretomo_rootname_set(self):
+        """Tests that rootname is set and read correctly from yaml
         """
-        Generates the AreTomo yaml in working_dir based on args, return params
+    
+    @unittest.skip("WIP")
+    def test_aretomo_suffix_set(self):
+        """Tests that suffix is set and read correctly from yaml
         """
-        # Create the yaml file
-        os.chdir(working_dir)
-        prmMod.new_aretomo_yaml(args)
-        aretomo.update_yaml(args, kwargs)
+    
+    @unittest.skip("WIP")
+    def test_aretomo_yaml_names(self):
+        """Tests that aretomo_yaml names are correctly generated
+        based on aretomo_mode"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_mode_accepts_defaults(self):
+        """ Tests that aretomo mode can be set to 0, 1, 2 """
 
-        # Read in params from yaml file
-        aretomo_params = prmMod.read_yaml(
-            args.project_name,
-            self._get_aretomo_yaml_name(args)
-        )
+    def test_aretomo_mode_raises_error(self):
+        """ Tests that aretomo mode raises error when not 0, 1, 2"""
+        test_cases = [-1, "a", 4]
+        for aretomo_mode in test_cases:
+            with self.subTest(f"{aretomo_mode} -> ValueError"):
+                with self.assertRaises(ValueError):
+                    mgNS = self._create_aretomo_yaml_from_magicgui(
+                        ["aretomo_mode", aretomo_mode]
+                        )
 
-        return aretomo_params
+    @unittest.skip("WIP")
+    def test_aretomo_align_creates_stacks(self):
+        """ Tests that the command to create stacks with IMOD is run by
+        AreTomo align"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_align_st_file_list(self):
+        """ Tests that the input MRC files list is set and read correctly
+        from yaml """
 
-    def _get_aretomo_yaml_name(self, args):
-        aretomo_yaml_names = {
-            0: args.project_name + "_aretomo_align.yaml",
-            1: args.project_name + "_aretomo_recon.yaml",
-            2: args.project_name + "_aretomo_align-recon.yaml"
-        }
+    @unittest.skip("WIP")
+    def test_aretomo_align_tilt_angles_file_set_default(self):
+        """ Tests that the aretomo tilt angles file is set to default value
+        when not specified in magicgui"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_align_tilt_angles_file_set_magicgui(self):
+        """ Tests that the aretomo tilt angles file is set and read correctly
+        from yaml when specified in magicgui"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_align_process_list_set(self):
+        """ Tests that the aretomo align process list is set correctly """
+    
+    @unittest.skip("WIP")
+    def test_aretomo_recon_inputmrc_set(self):
+        """ Tests that aretomo recon sets the input mrc to _ali.mrc by default """
+    
+    @unittest.skip("WIP")
+    def test_aretomo_input_mrc_notfound(self):
+        """ Tests that an error is raised when the input mrc folder does not have
+        the correct filename. e.g., if recon, _ali.mrc files not found. """
+    
+    @unittest.skip("WIP")
+    def test_aretomo_recon_process_list_set(self):
+        """ Tests that the aretomo recon process list is set correctly """
+    
+    @unittest.skip("WIP")
+    def test_aretomo_recon_tilt_angles_set_default(self):
+        """ Tests that the aretomo recon tilt angles list is set correctly
+        by default if not otherwise specified by magicgui """
+    
+    @unittest.skip("WIP")
+    def test_aretomo_recon_tilt_angles_set_magicgui(self):
+        """ Tests that the aretomo recon tilt angles list is set correctly
+        when specified by magicgui"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_output_mrc_set(self):
+        """ Tests that aretomo output_mrc filenames are set correctly,
+        and end in _ali.mrc for align only, and _rec.mrc for others"""
 
-        aretomo_yaml_name = aretomo_yaml_names[int(args.aretomo_mode)]
+    @unittest.skip("WIP")
+    def test_aretomo_args_passed_to_yaml(self):
+        """ Tests that all remaining args are passed to the yaml """
+    
+    @unittest.skip("WIP")
+    def test_aretomo_volz_accepts_defaults(self):
+        """ Tests that aretomo volz accepted values work (-1, >0)"""
 
-        return aretomo_yaml_name
-
-    def test_prereq_files(self):
+    @unittest.skip("WIP")
+    def test_aretomo_volz_raises_error(self):
+        """ Tests that ValueError is raised when volz is not -1 or >0"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_sample_thickness_accepts_defaults(self):
+        """ Tests that samplethickness accepted values work (-1, >0)"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_sample_thickness_raises_error(self):
+        """ Tests that samplethickness does not accept values which are not (-1, >0)"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_pixel_size_accepts_defaults(self):
+        """ Tests that pixel size accepted values work (>0)"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_volz_autoset_or_not(self):
+        """Tests that if either volz or (sample thickness + pixel size) are set, all ok
         """
-        Tests that prerequisite files are created correctly
-        """
-        self.assertEqual(len(os.listdir(self.temp_path / 'aretomo/TS_01')), 2)
+    
+    @unittest.skip("WIP")
+    def test_aretomo_volz_samplethickness_pixelsize_allset(self):
+        """ Tests that error is raised when volz, and either sample_thickness or 
+        pixel_size or both are set"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_cmd_generated_sensible(self):
+        """ Tests that sensible inputs to aretomo will generate the correct cmd"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_cmd_failing(self):
+        """ Tests that cmd cannot be generated from incorrect inputs. previous tests
+        should pick up incorrect inputs raising errors in update_yaml so theoretically
+        these cannot reach _get_aretomo_align_command or _get_aretomo_recon_comand"""
 
-    def test_aretomo_align_defaults(self):
-        """
-        Tests that the aretomo_align.yaml is created correctly with default values
-        """
-        parser = uaMod.get_args_aretomo()
-        args, kwargs = parser.parse_known_args([
-            'TS',
-            '0',
-            '90'
-        ])
+    @unittest.skip("WIP")
+    def test_aretomo_extra_kwargs_passed(self):
+        """ Tests that additional kwargs are added to the cmd"""
+    
+    @unittest.skip("WIP")
+    def test_aretomo_cmds_passed_to_mdout(self):
+        """ Tests that aretomo commands are saved correctly in mdout """
+    
+    @unittest.skip("WIP")
+    def test_aretomo_mdout_yaml(self):
+        """ Tests that the mdout yaml is generated correctly """
 
-        aretomo_params = self._generate_yaml(
-            self.temp_path,
-            args,
-            kwargs
-        )
-
-        self.assertEqual(
-            aretomo_params.params["System"]["process_list"], [1]
-        )
-        self.assertEqual(
-            aretomo_params.params["AreTomo_setup"]["aretomo_mode"], 0
-        )
-        self.assertEqual(
-            aretomo_params.params["AreTomo_setup"]["rot_angle"], 90
-        )
-        self.assertEqual(
-            aretomo_params.params["AreTomo_setup"]["input_mrc"][0],
-            './aretomo/TS_01/TS_01.st'
-        )
-        self.assertTrue(
-            aretomo_params.params["AreTomo_setup"]["output_mrc"][0].endswith("_ali.mrc")
-        )
-        self.assertEqual(
-            aretomo_params.params["AreTomo_setup"]["tilt_angles"][0],
-            './aretomo/TS_01/TS_01.rawtlt'
-        )
-
-    def test_aretomo_extra_kwargs(self):
-        """
-        Tests passing extra kwargs to aretomo parser
-        """
-        parser = uaMod.get_args_aretomo()
-        args, kwargs = parser.parse_known_args([
-            'TS',
-            '0',
-            '90',
-            '--extra',
-            'kwargs'
-        ])
-
-        aretomo_params = self._generate_yaml(
-            self.temp_path,
-            args,
-            kwargs
-        )
-
-        self.assertEqual(aretomo_params.params['AreTomo_kwargs'], ['--extra', 'kwargs'])
-
-    def test_aretomo_recon_defaults(self):
-        """
-        Tests that aretomo_recon.yaml is created correctly
-        """
-        # Add .ali and .tlt files
-        self._create_file(self.temp_path / 'aretomo/TS_01/TS_01_ali.mrc', '')
-        self._create_file(self.temp_path / 'aretomo/TS_01/TS_01_ali.tlt', '')
-
-        parser = uaMod.get_args_aretomo()
-        args, kwargs = parser.parse_known_args([
-            'TS',
-            '1',
-            '90',
-            '--volz',
-            '200'
-        ])
-
-        aretomo_params = self._generate_yaml(
-            self.temp_path,
-            args,
-            kwargs
-        )
-
-        self.assertEqual(
-            aretomo_params.params["System"]["process_list"], [1]
-        )
-        self.assertEqual(
-            aretomo_params.params["AreTomo_setup"]["aretomo_mode"], 1
-        )
-        self.assertEqual(
-            aretomo_params.params["AreTomo_setup"]["input_mrc"][0],
-            "./aretomo/TS_01/TS_01_ali.mrc"
-        )
-        self.assertEqual(
-            aretomo_params.params["AreTomo_setup"]["tilt_angles"][0],
-            "./aretomo/TS_01/TS_01_ali.tlt"
-        )
-        self.assertTrue(
-            aretomo_params.params["AreTomo_setup"]["output_mrc"][0].endswith("_rec.mrc")
-        )
-        self.assertTrue(
-            aretomo_params.params["AreTomo_recon"]["volz"] > 0
-        )
-
-    def test_aretomo_alignrecon_defaults(self):
-        """
-        Tests that aretomo_align-recon.yaml is created correctly
-        """
-
-        parser = uaMod.get_args_aretomo()
-        args, kwargs = parser.parse_known_args([
-            'TS',
-            '2',
-            '90',
-            '--volz',
-            '200'
-        ])
-
-        aretomo_params = self._generate_yaml(
-            self.temp_path,
-            args,
-            kwargs
-        )
-
-        self.assertEqual(
-            aretomo_params.params["System"]["process_list"], [1]
-        )
-        self.assertEqual(
-            aretomo_params.params["AreTomo_setup"]["aretomo_mode"], 2
-        )
-        self.assertEqual(
-            aretomo_params.params["AreTomo_setup"]["input_mrc"][0],
-            "./aretomo/TS_01/TS_01.st"
-        )
-        self.assertEqual(
-            aretomo_params.params["AreTomo_setup"]["tilt_angles"][0],
-            "./aretomo/TS_01/TS_01.rawtlt"
-        )
-        self.assertTrue(
-            aretomo_params.params["AreTomo_setup"]["output_mrc"][0].endswith("_rec.mrc")
-        )
-        self.assertTrue(
-            aretomo_params.params["AreTomo_recon"]["volz"] > 0
-        )
-
-
-if __name__ == "__main__":
-    unittest.main()

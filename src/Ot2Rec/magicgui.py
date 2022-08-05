@@ -660,3 +660,58 @@ def get_args_savurecon(
     """
 
     return locals()
+
+
+@mg(
+    call_button="Create config file",
+    layout="vertical",
+    result_widget=False,
+
+    project_name={"label": "Project name *"},
+    aretomo_mode={
+        "label": "AreTomo Mode*. 0: align, 1: recon, 2: align + recon",
+        "min": 0,
+        "max": 2,
+        "step": 1,
+    },
+    rot_angle={"label": "Rotation angle of electron beam*, can be obtained from mdoc"},
+    pixel_size={"label": "Pixel size in nm"},
+    rootname={"label": "Rootname of current project (required if different from project name"},
+    suffix={"label": "Suffix of project files"},
+    input_mrc_folder={
+        "label": "Folder containing input mrc's",
+        "mode": "d",
+    },
+    output_path={
+        "label": "Path to output folder",
+        "mode": "d",
+    },
+    tilt_angles={"label": "Path to text file containing tilt angles, usually .tlt"},
+    volz={"label": "Z-height of reconstructed volume in unbinned voxels."},
+    sample_thickness={"label": "Sample thickness in nm, used to set volz automatically"},
+    output_binning={
+        "label": "Binning to be applied to saved .mrc",
+        "min": 1,
+        "step": 1
+    },
+    recon_algo={
+        "label": "Reconstruction algorithm",
+        "choices": ["WBP", "SART"]
+    },   
+)
+def get_args_aretomo(
+        project_name="",
+        aretomo_mode=0,
+        rot_angle=90.0,
+        pixel_size=1.0,
+        rootname="",
+        suffix="",
+        input_mrc_folder=Path("./aretomo"),
+        output_path=Path("./aretomo"),
+        tilt_angles="<project_name>_<suffix>.tlt",
+        volz=-1,
+        sample_thickness=-1,
+        output_binning=4,
+        recon_algo="WBP",
+):
+    return locals()
