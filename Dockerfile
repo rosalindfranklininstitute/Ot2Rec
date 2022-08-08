@@ -18,7 +18,7 @@ FROM nvidia/cuda:11.4.0-base-ubuntu20.04
 # Install packages and register python3 as python
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections && \
     apt-get update -y && apt-get install -y dialog apt-utils && \
-    apt-get install -y build-essential git wget python3 python3-pip libgl1 libsm6 libxrender1 libxext6 && \
+    apt-get install -y build-essential git wget python3 python3-pip libglib2.0-0 libsm6 libxrender1 libxext6 && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 10 && \
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10 && \
     apt-get autoremove -y --purge && apt-get clean -y && rm -rf /var/lib/apt/lists/*
