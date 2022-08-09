@@ -13,6 +13,7 @@
 # language governing permissions and limitations under the License.
 
 
+import logging
 import threading
 import datetime as dt
 
@@ -31,32 +32,47 @@ class Logger():
         ARGS:
         log_path :: Path to the log file
         """
-
-        self.lock = threading.Lock()
         self.log_path = log_path
 
+        # Define default logging behaviour
+        logging.basicConfig(
+            filename=self.log_path,
+            level=logging.INFO,
+            format='[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
+            datefmt="%d%b%Y-%H:%M:%S"
+        )
+
+
     def __call__(self,
-                 log: str,
+                 log_path: str,
+                 log_type: str,
+                 message: str,
                  stdout: bool = True,
-                 newline: bool = False):
+    ):
         """
         Send a string to stdout and log file one process at a time.
 
         ARGS:
-        log     :: message to be output to file
-        stdout  :: whether to output to shell
-        newline :: whether to add new line before message
+        log_path :: Path to the log file
+        log_type :: type of log (info / warning / error)
+        message  :: message to be output to file
+        stdout   :: whether to output to shell
         """
 
-        now = dt.datetime.now().strftime("%d%b%Y-%H:%M:%S")
-        with self.lock:
-            if newline:
-                message = f'\n{now} - {log}'
-            else:
-                message = f'{now} - {log}'
+        # Define default logging behaviour
+        # logging.basicConfig(
+        #     filename=self.log_path,
+        #     level=logging.INFO,
+        #     format='[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
+        #     datefmt="%d%b%Y-%H:%M:%S"
+        # )
 
-            if stdout:
-                print(message)
-            if self.log_path is not None:
-                with open(self.log_path, 'a') as f:
-                    f.write(message + '\n')
+        if log_type == "info":
+            logging.info(message)
+        elif log_type == "warning":
+            logging.warning(message)
+        elif log_type == "error":
+            logging.error(message)
+
+        if stdout:
+            print(message)
