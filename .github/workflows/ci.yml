@@ -65,7 +65,7 @@ jobs:
 
       - name: Execute tests within container
         run: |
-          docker run --rm -v $(pwd):/tmp/repo/ -w /tmp/repo/ $DOCKER_REPO_NAME \
+          docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw --rm -v $(pwd):/tmp/repo/ -w /tmp/repo/ $DOCKER_REPO_NAME \
                      python -m pytest --cov=/usr/local/Ot2Rec/src /usr/local/Ot2Rec/tests/ \
                                       --cov-report xml:coverage.xml --cov-report term-missing
 
