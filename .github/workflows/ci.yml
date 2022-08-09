@@ -66,8 +66,7 @@ jobs:
       - name: Execute tests within container
         run: |
           docker run --rm -v $(pwd):/tmp/repo/ -w /tmp/repo/ $DOCKER_REPO_NAME \
-            -it -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY \
-            python -m pytest --cov=/usr/local/Ot2Rec/src /usr/local/Ot2Rec/tests/ \
+            xvfb-run python -m pytest --cov=/usr/local/Ot2Rec/src /usr/local/Ot2Rec/tests/ \
             --cov-report xml:coverage.xml --cov-report term-missing
 
       - name: Submit coverage to Codecov
