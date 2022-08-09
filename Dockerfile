@@ -15,8 +15,6 @@
 
 FROM nvidia/cuda:11.4.0-base-ubuntu20.04
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 # Install packages and register python3 as python
 # RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections && \
 RUN apt-get update -y && apt-get install -y dialog apt-utils && \
