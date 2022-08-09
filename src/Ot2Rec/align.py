@@ -26,6 +26,7 @@ import yaml
 from beautifultable import BeautifulTable as bt
 
 from . import user_args as uaMod
+from . import magicgui as mgMod
 from . import metadata as mdMod
 from . import params as prmMod
 from . import logger as logMod
@@ -457,16 +458,12 @@ PLUGIN METHODS
 """
 
 
-def create_yaml(args_pass=None):
+def create_yaml():
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
     # Parse user inputs
-    parser = uaMod.get_args_align()
-    if args_pass is not None:
-        args = parser.parse_args(args_pass)
-    else:
-        args = parser.parse_args()
+    args = mgMod.get_args_align.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
@@ -481,8 +478,8 @@ def update_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
     # Check if align and motioncorr yaml files exist
-    align_yaml_name = args.project_name + '_align.yaml'
-    mc2_yaml_name = args.project_name + '_mc2.yaml'
+    align_yaml_name = args.project_name.value + '_align.yaml'
+    mc2_yaml_name = args.project_name.value + '_mc2.yaml'
     if not os.path.isfile(align_yaml_name):
         raise IOError("Error in Ot2Rec.align.update_yaml: alignment config file not found.")
     if not os.path.isfile(mc2_yaml_name):
@@ -490,12 +487,12 @@ def update_yaml(args):
 
     # Read in MC2 metadata (as Pandas dataframe)
     # We only need the TS number and the tilt angle for comparisons at this stage
-    mc2_md_name = args.project_name + '_mc2_mdout.yaml'
+    mc2_md_name = args.project_name.value + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
-    align_md_name = args.project_name + '_align_mdout.yaml'
+    align_md_name = args.project_name.value + '_align_mdout.yaml'
     if os.path.isfile(align_md_name):
         is_old_project = True
         with open(align_md_name, 'r') as f:
@@ -516,9 +513,9 @@ def update_yaml(args):
 
     # Read in ctffind yaml file, modify, and update
     # read in MC2 yaml as well (some parameters depend on MC2 settings)
-    align_params = prmMod.read_yaml(project_name=args.project_name,
+    align_params = prmMod.read_yaml(project_name=args.project_name.value,
                                     filename=align_yaml_name)
-    mc2_params = prmMod.read_yaml(project_name=args.project_name,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name.value,
                                   filename=mc2_yaml_name)
 
     align_params.params['System']['process_list'] = unique_ts_numbers
@@ -534,8 +531,7 @@ def create_yaml_stacked():
     prestack (bool) :: if stacks already exist
     """
     # Parse user inputs
-    parser = uaMod.get_args_align_ext()
-    args = parser.parse_args()
+    args = mgMod.get_args_align_ext.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
@@ -549,17 +545,17 @@ def update_yaml_stacked(args):
     ARGS:
     args (Namespace) :: User input parameters
     """
-    project_name = args.project_name
-    parent_path = args.input_folder
+    project_name = args.project_name.value
+    parent_path = str(args.input_folder.value)
     assert (os.path.isdir(parent_path)), \
         "Error in main.update_align_yaml_stacked: IMOD parent folder not found."
     while parent_path.endswith('/'):
         parent_path = parent_path[:-1]
 
-    rootname = args.file_prefix if args.file_prefix is not None else args.project_name
+    rootname = args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value
 
-    pixel_size = args.pixel_size
-    suffix = args.file_suffix if args.file_suffix is not None else ''
+    pixel_size = args.pixel_size.value * 0.1
+    suffix = args.file_suffix.value
 
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
@@ -572,7 +568,7 @@ def update_yaml_stacked(args):
     align_params = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml_name)
 
-    align_params.params['System']['output_path'] = args.output_folder
+    align_params.params['System']['output_path'] = str(args.output_folder.value)
     align_params.params['System']['output_rootname'] = rootname
     align_params.params['System']['output_suffix'] = suffix
     align_params.params['System']['process_list'] = ts_list

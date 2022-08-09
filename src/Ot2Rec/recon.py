@@ -25,6 +25,7 @@ from . import metadata as mdMod
 from . import params as prmMod
 from . import user_args as uaMod
 from . import logger as logMod
+from . import magicgui as mgMod
 
 
 class Recon:
@@ -324,8 +325,7 @@ def create_yaml():
     Subroutine to create new yaml file for IMOD reconstruction
     """
     # Parse user inputs
-    parser = uaMod.get_args_recon()
-    args = parser.parse_args()
+    args = mgMod.get_args_recon.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_recon_yaml(args)
@@ -340,20 +340,20 @@ def update_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
     # Check if recon and align yaml files exist
-    recon_yaml_name = args.project_name + '_recon.yaml'
-    align_yaml_name = args.project_name + '_align.yaml'
+    recon_yaml_name = args.project_name.value + '_recon.yaml'
+    align_yaml_name = args.project_name.value + '_align.yaml'
     if not os.path.isfile(recon_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_recon_yaml: reconstruction config file not found.")
     if not os.path.isfile(align_yaml_name):
         raise IOError("Error in Ot2Rec.main.update_recon_yaml: alignment config file not found.")
 
     # Read in alignment metadata (as Pandas dataframe)
-    align_md_name = args.project_name + '_align_mdout.yaml'
+    align_md_name = args.project_name.value + '_align_mdout.yaml'
     with open(align_md_name, 'r') as f:
         align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
-    recon_md_name = args.project_name + '_recon_mdout.yaml'
+    recon_md_name = args.project_name.value + '_recon_mdout.yaml'
     if os.path.isfile(recon_md_name):
         is_old_project = True
         with open(recon_md_name, 'r') as f:
@@ -373,9 +373,9 @@ def update_yaml(args):
 
     # Read in reconstruction yaml file, modify, and update
     # read in alignment yaml as well (some parameters depend on alignment settings)
-    recon_params = prmMod.read_yaml(project_name=args.project_name,
+    recon_params = prmMod.read_yaml(project_name=args.project_name.value,
                                     filename=recon_yaml_name)
-    align_params = prmMod.read_yaml(project_name=args.project_name,
+    align_params = prmMod.read_yaml(project_name=args.project_name.value,
                                     filename=align_yaml_name)
 
     recon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
