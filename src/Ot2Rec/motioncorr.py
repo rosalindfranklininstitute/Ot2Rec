@@ -313,12 +313,17 @@ def create_yaml():
     """
     Subroutine to create new yaml file for motioncorr
     """
+    logger = logMod.Logger(log_path="motioncor2.log")
+
     # Parse user inputs
     args = mgMod.get_args_mc2.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_mc2_yaml(args)
     update_yaml(args)
+
+    logger(log_type="info",
+           message="MotionCor2 metadata file created.")
 
 
 def update_yaml(args):
