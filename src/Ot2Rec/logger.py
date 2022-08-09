@@ -22,6 +22,11 @@ class Logger():
     """
     Class encapsulating a Logger object
     """
+    LEVELS = {"info": 20,
+              "warning": 30,
+              "error": 40,
+              "critical": 50}
+
 
     def __init__(self,
                  log_path: str = None,
@@ -44,25 +49,21 @@ class Logger():
 
 
     def __call__(self,
-                 log_type: str,
                  message: str,
+                 level: str = "info",
                  stdout: bool = True,
     ):
         """
         Send a string to stdout and log file one process at a time.
 
         ARGS:
-        log_type :: type of log (info / warning / error)
         message  :: message to be output to file
+        level    :: type of log (info / warning / error)
         stdout   :: whether to output to shell
         """
 
-        if log_type == "info":
-            logging.info(message)
-        elif log_type == "warning":
-            logging.warning(message)
-        elif log_type == "error":
-            logging.error(message)
+        logging.log(level=self.LEVELS[level.lower()],
+                    msg=message)
 
         if stdout:
             print(message)
