@@ -165,6 +165,7 @@ def new_align_yaml(args):
 
         'BatchRunTomo': {
             'setup': {
+                'excluded_views': list(args.excl_views.value),
                 'use_rawtlt': not args.no_rawtlt.value,
                 'pixel_size': None,
                 'rot_angle': args.rot_angle.value,

@@ -313,19 +313,23 @@ def update_yaml(args):
         yaml.dump(ctf_params.params, f, indent=4, sort_keys=False)
 
 
-def run():
+def run(exclusive=True, args_in=None):
     """
     Method to run ctffind
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
-    args = parser.parse_args()
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name",
+                            type=str,
+                            help="Name of current project")
+        args = parser.parse_args()
+        project_name = args.project_name
+    else:
+        project_name = args_in.project_name.value
 
     # Check if prerequisite files exist
-    ctffind_yaml = args.project_name + '_ctffind.yaml'
-    mc2_md_file = args.project_name + '_mc2_mdout.yaml'
+    ctffind_yaml = project_name + '_ctffind.yaml'
+    mc2_md_file = project_name + '_mc2_mdout.yaml'
 
     if not os.path.isfile(ctffind_yaml):
         raise IOError("Error in Ot2Rec.main.run_ctffind: ctffind yaml config not found.")
@@ -333,9 +337,9 @@ def run():
         raise IOError("Error in Ot2Rec.main.run_ctffind: MC2 output metadata not found.")
 
     # Read in config and metadata
-    ctffind_config = prmMod.read_yaml(project_name=args.project_name,
+    ctffind_config = prmMod.read_yaml(project_name=project_name,
                                       filename=ctffind_yaml)
-    mc2_md = mdMod.read_md_yaml(project_name=args.project_name,
+    mc2_md = mdMod.read_md_yaml(project_name=project_name,
                                 job_type='ctffind',
                                 filename=mc2_md_file)
 
@@ -348,7 +352,7 @@ def run():
     logger = logMod.Logger(log_path=log_path)
 
     # Create ctffind object
-    ctffind_obj = ctffind(project_name=args.project_name,
+    ctffind_obj = ctffind(project_name=project_name,
                           md_in=mc2_md,
                           params_in=ctffind_config,
                           logger_in=logger,

@@ -291,6 +291,7 @@ setupset.copyarg.userawtlt = <use_rawtlt>
 setupset.copyarg.pixel = <pixel_size>
 setupset.copyarg.rotation = <rot_angle>
 setupset.copyarg.gold = <gold_size>
+setupset.copyarg.skip = <excl_views>
 setupset.systemTemplate = <adoc_template>
 
 runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
@@ -322,6 +323,8 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
             'use_rawtlt': 1 if self.params['BatchRunTomo']['setup']['use_rawtlt'] else 0,
             'pixel_size': self.params['BatchRunTomo']['setup']['pixel_size'],
             'rot_angle': self.params['BatchRunTomo']['setup']['rot_angle'],
+            'excl_views': "" if self.params["BatchRunTomo"]["setup"]["excluded_views"] == [0] \
+            else f'{",".join(map(str, self.params["BatchRunTomo"]["setup"]["excluded_views"]))}',
             'gold_size': self.params['BatchRunTomo']['setup']['gold_size'],
             'adoc_template': self.params['BatchRunTomo']['setup']['adoc_template'],
             'stack_bin_factor': self.params['BatchRunTomo']['setup']['stack_bin_factor'],
@@ -579,7 +582,7 @@ def update_yaml_stacked(args):
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
 
 
-def run(newstack=False, do_align=True, ext=False, args_pass=None):
+def run(newstack=False, do_align=True, ext=False, args_pass=None, exclusive=True, args_in=None):
     """
     Method to run IMOD newstack / alignment
 
@@ -588,25 +591,29 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None):
     do_align (bool) :: whether to perform IMOD alignment
     ext (bool)      :: whether external stack(s) are available and to be used
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
-    if args_pass is not None:
-        args = parser.parse_args(args_pass)
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name",
+                            type=str,
+                            help="Name of current project")
+        if args_pass is not None:
+            args = parser.parse_args(args_pass)
+        else:
+            args = parser.parse_args()
+        project_name = args.project_name
     else:
-        args = parser.parse_args()
+        project_name = args_in.project_name.value
 
     # Check if prerequisite files exist
-    align_yaml = args.project_name + '_align.yaml'
+    align_yaml = project_name + '_align.yaml'
     if not ext:
-        mc2_md_file = args.project_name + '_mc2_mdout.yaml'
+        mc2_md_file = project_name + '_mc2_mdout.yaml'
 
     # Read in config and metadata
-    align_config = prmMod.read_yaml(project_name=args.project_name,
+    align_config = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml)
     if not ext:
-        mc2_md = mdMod.read_md_yaml(project_name=args.project_name,
+        mc2_md = mdMod.read_md_yaml(project_name=project_name,
                                     job_type='align',
                                     filename=mc2_md_file)
 
@@ -619,7 +626,7 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None):
     logger = logMod.Logger(log_path=log_path)
 
     # Create Align object
-    align_obj = Align(project_name=args.project_name,
+    align_obj = Align(project_name=project_name,
                       md_in=mc2_md if not ext else None,
                       params_in=align_config,
                       logger_in=logger,
@@ -668,24 +675,28 @@ def imod_align_ext():
         )
 
 
-def get_align_stats():
+def get_align_stats(exclusive=True, args_in=None):
     """
     Method to extract statistics from alignment
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
-    args = parser.parse_args()
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name",
+                            type=str,
+                            help="Name of current project")
+        args = parser.parse_args()
+        project_name = args.project_name
+    else:
+        project_name = args_in.project_name.value
 
     # Check if align metadata file exists
-    align_md_name = args.project_name + '_align_mdout.yaml'
+    align_md_name = project_name + '_align_mdout.yaml'
     if not os.path.isfile(align_md_name):
         raise IOError("Error in Ot2Rec.main.get_align_stats: alignment metadata file not found.")
 
     # Get stacks folder path from config
-    align_yaml = args.project_name + '_align.yaml'
-    align_config = prmMod.read_yaml(project_name=args.project_name,
+    align_yaml = project_name + '_align.yaml'
+    align_config = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml)
 
     folder_path = align_config.params['System']['output_path']
