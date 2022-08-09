@@ -38,13 +38,12 @@ class Logger():
         logging.basicConfig(
             filename=self.log_path,
             level=logging.INFO,
-            format='[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
+            format='[%(asctime)s] %(levelname)s - %(message)s',
             datefmt="%d%b%Y-%H:%M:%S"
         )
 
 
     def __call__(self,
-                 log_path: str,
                  log_type: str,
                  message: str,
                  stdout: bool = True,
@@ -53,19 +52,10 @@ class Logger():
         Send a string to stdout and log file one process at a time.
 
         ARGS:
-        log_path :: Path to the log file
         log_type :: type of log (info / warning / error)
         message  :: message to be output to file
         stdout   :: whether to output to shell
         """
-
-        # Define default logging behaviour
-        # logging.basicConfig(
-        #     filename=self.log_path,
-        #     level=logging.INFO,
-        #     format='[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
-        #     datefmt="%d%b%Y-%H:%M:%S"
-        # )
 
         if log_type == "info":
             logging.info(message)
