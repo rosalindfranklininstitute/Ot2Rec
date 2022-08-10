@@ -332,6 +332,8 @@ def run(exclusive=True, args_in=None):
     """
     Method to run ctffind
     """
+    logger = logMod.Logger(log_path="o2r_ctffind.log")
+
     if exclusive:
         parser = argparse.ArgumentParser()
         parser.add_argument("project_name",
@@ -347,8 +349,12 @@ def run(exclusive=True, args_in=None):
     mc2_md_file = project_name + '_mc2_mdout.yaml'
 
     if not os.path.isfile(ctffind_yaml):
+        logger(level="error",
+               msg="CTFFind yaml config not found.")
         raise IOError("Error in Ot2Rec.main.run_ctffind: ctffind yaml config not found.")
     if not os.path.isfile(mc2_md_file):
+        logger(level="error",
+               msg="MC2 output metadata not found.")
         raise IOError("Error in Ot2Rec.main.run_ctffind: MC2 output metadata not found.")
 
     # Read in config and metadata
@@ -358,20 +364,12 @@ def run(exclusive=True, args_in=None):
                                 job_type='ctffind',
                                 filename=mc2_md_file)
 
-    # Create Logger object
-    log_path = "./o2r_ctffind.log"
-    try:
-        os.remove(log_path)
-    except:
-        pass
-    logger = logMod.Logger(log_path=log_path)
-
     # Create ctffind object
     ctffind_obj = ctffind(project_name=project_name,
                           md_in=mc2_md,
                           params_in=ctffind_config,
                           logger_in=logger,
-                          )
+    )
 
     if not ctffind_obj.no_processes:
         ctffind_obj.run_ctffind()
