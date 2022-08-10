@@ -320,7 +320,7 @@ def create_yaml():
     """
     Subroutine to create new yaml file for motioncorr
     """
-    logger = logMod.Logger(log_path="motioncor2.log")
+    logger = logMod.Logger(log_path="o2r_motioncor2.log")
 
     # Parse user inputs
     args = mgMod.get_args_mc2.show(run=True)
@@ -339,7 +339,7 @@ def update_yaml(args):
     ARGS:
     args (Namespace) :: Arguments obtained from user
     """
-    logger = logMod.Logger(log_path="motioncor2.log")
+    logger = logMod.Logger(log_path="o2r_motioncor2.log")
 
     # Check if MC2 yaml exists
     mc2_yaml_name = args.project_name.value + '_mc2.yaml'
@@ -400,7 +400,7 @@ def run(exclusive=True, args_in=None):
     """
     Method to run motioncorr
     """
-    logger = logMod.Logger(log_path="motioncor2.log")
+    logger = logMod.Logger(log_path="o2r_motioncor2.log")
 
     if exclusive:
         parser = argparse.ArgumentParser()
