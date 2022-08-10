@@ -250,12 +250,16 @@ def create_yaml():
     """
     Subroutine to create new yaml file for ctffind
     """
+    logger = logMod.Logger(log_path="o2r_ctffind.log")
+
     # Parse user inputs
     args = mgMod.get_args_ctffind.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_ctffind_yaml(args)
     update_yaml(args)
+
+    logger(message="MotionCor2 metadata file created.")
 
 
 def update_yaml(args):
@@ -265,12 +269,18 @@ def update_yaml(args):
     ARGS:
     args (Namespace) :: Arguments obtained from user
     """
+    logger = logMod.Logger(log_path="o2r_ctffind.log")
+
     # Check if ctffind and motioncorr yaml files exist
     ctf_yaml_name = args.project_name.value + '_ctffind.yaml'
     mc2_yaml_name = args.project_name.value + '_mc2.yaml'
     if not os.path.isfile(ctf_yaml_name):
+        logger(level="error",
+               message="CTFFind4 config file not found.")
         raise IOError("Error in Ot2Rec.main.update_ctffind_yaml: ctffind config file not found.")
     if not os.path.isfile(mc2_yaml_name):
+        logger(level="error",
+               message="MotionCor2 config file not found.")
         raise IOError("Error in Ot2Rec.main.update_ctffind_yaml: motioncorr config file not found.")
 
     # Read in MC2 metadata (as Pandas dataframe)
@@ -278,6 +288,7 @@ def update_yaml(args):
     mc2_md_name = args.project_name.value + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+    logger(message="MotionCor2 metadata read successfully.")
 
     # Read in previous ctffind output metadata (as Pandas dataframe) for old projects
     ctf_md_name = args.project_name.value + '_ctffind_mdout.yaml'
@@ -285,8 +296,10 @@ def update_yaml(args):
         is_old_project = True
         with open(ctf_md_name, 'r') as f:
             ctf_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+        logger(message="Previous CTFFind metadata found and read.")
     else:
         is_old_project = False
+        logger(message="Previous MotionCor2 metadata not found.")
 
     # Diff the two dataframes to get numbers of tilt-series with unprocessed data
     if is_old_project:
@@ -311,6 +324,8 @@ def update_yaml(args):
 
     with open(ctf_yaml_name, 'w') as f:
         yaml.dump(ctf_params.params, f, indent=4, sort_keys=False)
+
+    logger(message="CTFFind metadata updated.")
 
 
 def run(exclusive=True, args_in=None):
