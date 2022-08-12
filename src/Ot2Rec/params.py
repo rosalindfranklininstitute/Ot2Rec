@@ -310,7 +310,7 @@ def new_aretomo_yaml(args):
         "System": {
             "process_list": None,
             "output_path": args["output_path"],
-            "output_rootname": args["project_name"] if args["rootname"] is None else args["rootname"],
+            "output_rootname": args["project_name"] if args["rootname"] == "" else args["rootname"],
             "output_suffix": args["suffix"],
         },
 
