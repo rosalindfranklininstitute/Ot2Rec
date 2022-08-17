@@ -24,7 +24,6 @@ from . import logger as logMod
 from . import metadata as mdMod
 from . import params as prmMod
 from . import user_args as uaMod
-from . import magicgui as mgMod
 
 
 def get_proj_name():
@@ -46,14 +45,15 @@ def new_proj():
     Method to create a new project and get master metadata from raw images
     """
     # Parse user inputs
-    args = mgMod.get_args_new_proj.show(run=True)
+    parser = uaMod.get_args_new_proj()
+    args = parser.parse_args()
 
     # Create master yaml config file
     prmMod.new_master_yaml(args)
 
     # Create empty Metadata object
     # Master yaml file will be read automatically
-    meta = mdMod.Metadata(project_name=args.project_name.value,
+    meta = mdMod.Metadata(project_name=args.project_name,
                           job_type='master')
 
     # Create master metadata and serialise it as yaml file
@@ -61,7 +61,7 @@ def new_proj():
     if not args.no_mdoc:
         meta.get_mc2_temp()
 
-    master_md_name = args.project_name.value + '_master_md.yaml'
+    master_md_name = args.project_name + '_master_md.yaml'
     with open(master_md_name, 'w') as f:
         yaml.dump(meta.metadata, f, indent=4)
 
@@ -104,33 +104,33 @@ def cleanup():
                                        stderr=subprocess.STDOUT)
 
 
-def run_all():
-    """
-    Method to run all processes in one go using default settings.
-    """
+# def run_all():
+#     """
+#     Method to run all four processes in one go using default settings.
+#     """
 
-    logger = logMod.Logger()
+#     logger = logMod.Logger()
 
-    # Collect raw images and produce master metadata
-    logger("Collecting raw images...")
-    new_proj()
+#     # Collect raw images and produce master metadata
+#     logger("Collecting raw images...")
+#     get_master_metadata()
 
-    # Motion correction
-    logger("Motion correction in progress...")
-    create_mc2_yaml()
-    run_mc2()
+#     # Motion correction
+#     logger("Motion correction in progress...")
+#     create_mc2_yaml()
+#     run_mc2()
 
-    # CTF estimation
-    logger("CTF estimation in progress...")
-    create_ctffind_yaml()
-    run_ctffind()
+#     # CTF estimation
+#     logger("CTF estimation in progress...")
+#     create_ctffind_yaml()
+#     run_ctffind()
 
-    # Alignment
-    logger("Alignment in progress...")
-    create_align_yaml()
-    run_align()
+#     # Alignment
+#     logger("Alignment in progress...")
+#     create_align_yaml()
+#     run_align()
 
-    # Reconstruction
-    logger("Reconstruction in progress...")
-    create_recon_yaml()
-    run_recon()
+#     # Reconstruction
+#     logger("Reconstruction in progress...")
+#     create_recon_yaml()
+#     run_recon()

@@ -37,8 +37,6 @@ setup(
         'mrcfile',
         'tifffile',
         'redlionfish',
-        'magicgui',
-        'pyqt5',
     ],
     entry_points={
         "console_scripts": [
@@ -49,7 +47,7 @@ setup(
 
             "o2r.ctffind.new=Ot2Rec.ctffind:create_yaml",
             "o2r.ctffind.run=Ot2Rec.ctffind:run",
-
+            
             "o2r.ctfsim.run=Ot2Rec.ctfsim:run",
 
             "o2r.imod.align.new=Ot2Rec.align:create_yaml",
@@ -60,7 +58,7 @@ setup(
             "o2r.imod.align.run_ext=Ot2Rec.align:imod_align_ext",
 
             "o2r.imod.align.stats=Ot2Rec.align:get_align_stats",
-
+            
             "o2r.imod.recon.new=Ot2Rec.recon:create_yaml",
             "o2r.imod.recon.run=Ot2Rec.recon:run",
 

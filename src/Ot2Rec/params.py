@@ -45,16 +45,16 @@ def new_master_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
 
-    master_yaml_name = args.project_name.value + '_proj.yaml'
+    master_yaml_name = args.project_name + '_proj.yaml'
 
     proj_yaml_dict = {
-        'source_folder': str(args.source_folder.value),
-        'TS_folder_prefix': args.folder_prefix.value,
-        'file_prefix': args.project_name.value if args.file_prefix.value=="" else args.file_prefix.value,
-        'image_stack_field': args.stack_field.value,
-        'image_index_field': args.index_field.value,
-        'image_tiltangle_field': args.tiltangle_field.value,
-        'filetype': args.ext.value,
+        'source_folder': args.source_folder,
+        'TS_folder_prefix': args.folder_prefix,
+        'file_prefix': args.project_name if args.file_prefix is None else args.file_prefix,
+        'image_stack_field': args.stack_field,
+        'image_index_field': args.index_field,
+        'image_tiltangle_field': args.tiltangle_field,
+        'filetype': args.ext,
     }
 
     with open(master_yaml_name, 'w') as f:
@@ -69,28 +69,28 @@ def new_mc2_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
 
-    mc2_yaml_name = args.project_name.value + '_mc2.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
 
     mc2_yaml_dict = {
         'System': {
             'process_list': None,
-            'output_path': str(args.output_folder.value),
-            'output_prefix': args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value,
-            'use_gpu': 'auto' if not args.no_gpu.value else False,
-            'jobs_per_gpu': args.jobs_per_gpu.value,
-            'gpu_memory_usage': args.gpu_mem_usage.value,
+            'output_path': args.output_folder,
+            'output_prefix': args.file_prefix if args.file_prefix is not None else args.project_name,
+            'use_gpu': 'auto' if not args.no_gpu else False,
+            'jobs_per_gpu': args.jobs_per_gpu,
+            'gpu_memory_usage': args.gpu_mem_usage,
         },
         'MC2': {
-            'MC2_path': str(args.exec_path.value),
-            'gain_reference': 'nogain' if not args.use_gain.value else str(args.gain.value),
-            'pixel_size': args.pixel_size.value,
-            'desired_pixel_size': args.pixel_size.value * 2 if args.super_res.value else args.pixel_size.value,
-            'discard_frames_top': args.discard_top.value,
-            'discard_frames_bottom': args.discard_bottom.value,
-            'tolerance': args.tolerance.value,
-            'max_iterations': args.max_iter.value,
-            'patch_size': args.patch_size.value,
-            'use_subgroups': args.use_subgroups.value,
+            'MC2_path': args.exec_path,
+            'gain_reference': 'nogain' if args.gain is None else args.gain,
+            'pixel_size': args.pixel_size,
+            'desired_pixel_size': args.pixel_size * 2 if args.super_res else args.pixel_size,
+            'discard_frames_top': args.discard_top,
+            'discard_frames_bottom': args.discard_bottom,
+            'tolerance': args.tolerance,
+            'max_iterations': args.max_iter,
+            'patch_size': args.patch_size,
+            'use_subgroups': not args.no_subgroups,
         },
     }
 
@@ -106,30 +106,30 @@ def new_ctffind_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
 
-    ctf_yaml_name = args.project_name.value + '_ctffind.yaml'
+    ctf_yaml_name = args.project_name + '_ctffind.yaml'
 
     ctf_yaml_dict = {
         'System': {
             'process_list': 'all',
-            'output_path': str(args.output_folder.value),
-            'output_prefix': args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value,
+            'output_path': args.output_folder,
+            'output_prefix': args.file_prefix if args.file_prefix is not None else args.project_name,
         },
         'ctffind': {
-            'ctffind_path': str(args.exec_path.value),
+            'ctffind_path': args.exec_path,
             'pixel_size': None,
-            'voltage': args.voltage.value,
-            'spherical_aberration': args.spherical_aberration.value,
-            'amp_contrast': args.amp_contrast.value,
-            'amp_spec_size': args.spec_size.value,
-            'resolution_min': max(args.res_range.value),
-            'resolution_max': min(args.res_range.value),
-            'defocus_min': args.defocus_range.value[0],
-            'defocus_max': args.defocus_range.value[1],
-            'defocus_step': args.defocus_range.value[2],
-            'astigm_type': args.astigm_type.value,
-            'exhaustive_search': args.exhaustive_search.value,
-            'astigm_restraint': args.astigm_restraint.value if args.astigm_restraint.value > 0 else False,
-            'phase_shift': args.phase_shift.value,
+            'voltage': args.voltage,
+            'spherical_aberration': args.spherical_aberration,
+            'amp_contrast': args.amp_contrast,
+            'amp_spec_size': args.spec_size,
+            'resolution_min': max(args.res_range),
+            'resolution_max': min(args.res_range),
+            'defocus_min': args.defocus_range[0],
+            'defocus_max': args.defocus_range[1],
+            'defocus_step': args.defocus_range[2],
+            'astigm_type': args.astigm_type,
+            'exhaustive_search': args.exhaustive_search,
+            'astigm_restraint': args.astigm_restraint if args.astigm_restraint is not None else False,
+            'phase_shift': args.phase_shift,
         },
     }
 
@@ -145,59 +145,51 @@ def new_align_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
 
-    # Calculate patch sizes
-    import numpy as np
-    image_dims = np.array(args.image_dims.value)
-    n_patches = np.array(args.num_patches.value)
-    overlap = args.patch_overlap.value * 0.01
-    denom = n_patches - n_patches*overlap + overlap
-    patch_dims = (image_dims / denom).astype(int)
-
-    align_yaml_name = args.project_name.value + '_align.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
 
     align_yaml_dict = {
         'System': {
             'process_list': 'all',
-            'output_path': str(args.output_folder.value),
-            'output_rootname': args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value,
-            'output_suffix': args.file_suffix.value,
+            'output_path': args.output_folder,
+            'output_rootname': args.file_prefix if args.file_prefix is not None else args.project_name,
+            'output_suffix': args.file_suffix,
         },
 
         'BatchRunTomo': {
             'setup': {
-                'use_rawtlt': not args.no_rawtlt.value,
+                'use_rawtlt': not args.no_rawtlt,
                 'pixel_size': None,
-                'rot_angle': args.rot_angle.value,
-                'gold_size': args.fiducial_size.value,
-                'adoc_template': str(args.adoc_template.value),
-                'stack_bin_factor': args.stack_bin_factor.value,
+                'rot_angle': args.rot_angle,
+                'gold_size': args.fiducial_size,
+                'adoc_template': args.adoc_template,
+                'stack_bin_factor': args.stack_bin_factor,
             },
 
             'preprocessing': {
-                'delete_old_files': args.delete_old_files.value,
-                'remove_xrays': args.remove_xrays.value,
+                'delete_old_files': args.delete_old_files,
+                'remove_xrays': args.remove_xrays,
             },
 
             'coarse_align': {
-                'bin_factor': args.coarse_align_bin_factor.value,
+                'bin_factor': args.coarse_align_bin_factor,
             },
 
             'patch_track': {
-                'size_of_patches': patch_dims.tolist(),
-                'num_of_patches': list(args.num_patches.value),
-                'num_iterations': args.num_iter.value,
-                'limits_on_shift': list(args.limits_on_shift.value),
-                'adjust_tilt_angles': args.adjust_tilt_angles.value,
+                'size_of_patches': args.patch_sizes,
+                'num_of_patches': args.num_patches,
+                'num_iterations': args.num_iter,
+                'limits_on_shift': args.limits_on_shift,
+                'adjust_tilt_angles': args.adjust_tilt_angles,
             },
 
             'fine_align': {
-                'num_surfaces': args.num_surfaces.value,
-                'mag_option': args.mag_option.value,
-                'tilt_option': args.tilt_option.value,
-                'rot_option': args.rot_option.value,
-                'beam_tilt_option': args.beam_tilt_option.value,
-                'use_robust_fitting': args.robust_fitting.value,
-                'weight_all_contours': args.weight_contours.value,
+                'num_surfaces': args.num_surfaces,
+                'mag_option': args.mag_option,
+                'tilt_option': args.tilt_option,
+                'rot_option': args.rot_option,
+                'beam_tilt_option': args.beam_tilt_option,
+                'use_robust_fitting': not args.no_robust_fitting,
+                'weight_all_contours': not args.no_weight_contours,
             },
         }
     }
@@ -213,7 +205,7 @@ def new_recon_yaml(args):
     ARGS:
     args (Namespace) :: Namespace generated with user inputs
     """
-    recon_yaml_name = args.project_name.value + '_recon.yaml'
+    recon_yaml_name = args.project_name + '_recon.yaml'
 
     recon_yaml_dict = {
         'System': {
@@ -233,24 +225,24 @@ def new_recon_yaml(args):
             },
 
             'positioning': {
-                'do_positioning': args.do_positioning.value,
-                'unbinned_thickness': args.unbinned_thickness.value,
+                'do_positioning': args.do_positioning,
+                'unbinned_thickness': args.unbinned_thickness,
             },
 
             'aligned_stack': {
-                'correct_ctf': args.correct_ctf.value,
-                'erase_gold': args.erase_gold.value,
-                '2d_filtering': args.filtering.value,
-                'bin_factor': args.bin_factor.value,
+                'correct_ctf': args.correct_ctf,
+                'erase_gold': args.erase_gold,
+                '2d_filtering': args.filtering,
+                'bin_factor': args.bin_factor,
             },
 
             'reconstruction': {
-                'thickness': args.thickness.value,
+                'thickness': args.thickness,
             },
 
             'postprocessing': {
-                'run_trimvol': args.trimvol.value,
-                'trimvol_reorient': args.trimvol_reorient.value,
+                'run_trimvol': not args.no_trimvol,
+                'trimvol_reorient': args.trimvol_reorient,
             },
         }
     }
@@ -299,24 +291,24 @@ def new_aretomo_yaml(args):
     args (Namespace) :: Namespace containing user parameter inputs
     """
 
-    aretomo_yaml_names = {0: args["project_name"] + "_aretomo_align.yaml",
-                          1: args["project_name"] + "_aretomo_recon.yaml",
-                          2: args["project_name"] + "_aretomo_align-recon.yaml"}
+    aretomo_yaml_names = {0: args.project_name + "_aretomo_align.yaml",
+                          1: args.project_name + "_aretomo_recon.yaml",
+                          2: args.project_name + "_aretomo_align-recon.yaml"}
 
-    aretomo_yaml_name = aretomo_yaml_names[int(args["aretomo_mode"])]
+    aretomo_yaml_name = aretomo_yaml_names[int(args.aretomo_mode)]
     print(f"{aretomo_yaml_name} created")
 
     aretomo_yaml_dict = {
         "System": {
             "process_list": None,
-            "output_path": args["output_path"],
-            "output_rootname": args["project_name"] if args["rootname"] == "" else args["rootname"],
-            "output_suffix": args["suffix"],
+            "output_path": args.output_path,
+            "output_rootname": args.project_name if args.rootname is None else args.rootname,
+            "output_suffix": args.suffix,
         },
 
         "AreTomo_setup": {
-            "aretomo_mode": args["aretomo_mode"],
-            "rot_angle": args["rot_angle"],
+            "aretomo_mode": args.aretomo_mode,
+            "rot_angle": args.rot_angle,
             "input_mrc": None,
             "output_mrc": None,
             "tilt_angles": None,
@@ -326,7 +318,7 @@ def new_aretomo_yaml(args):
         "AreTomo_recon": {
             "volz": None,
             "sample_thickness": None,
-            "pixel_size": args["pixel_size"],
+            "pixel_size": args.pixel_size,
             "recon_algo": None,
         },
 

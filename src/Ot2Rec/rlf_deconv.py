@@ -20,11 +20,12 @@ import tifffile
 import RedLionfishDeconv as rlf
 
 from . import user_args as uaMod
-from . import magicgui as mgMod
 from . import logger as logMod
 
 
 itick = 0
+
+
 def tickCallBack():
     global itick
     itick += 1
@@ -106,13 +107,12 @@ class RLF_deconv():
         """
         Method to use RLF to deconvolve image
         """
-
         image_deconvolved = rlf.doRLDeconvolutionFromNpArrays(
             self.orig, self.kernel,
             niter=self.params['niter'],
-            method=self.params['method'].lower(),
+            method=self.params['method'],
             useBlockAlgorithm=self.params['useBlockAlgorithm'],
-            callbkTickFunc=tickCallBack(), # if self.params['callbkTickFunc'] else None,
+            callbkTickFunc=tickCallBack if self.params['callbkTickFunc'] else None,
             resAsUint8=self.params['resAsUint8']
         )
 
@@ -129,41 +129,42 @@ def run():
     Method to deconvolve image using a given kernel (point-spread function)
     """
     # Parse user inputs
-    args = mgMod.get_args_rldeconv.show(run=True)
+    parser = uaMod.get_args_rldeconv()
+    args = parser.parse_args()
 
     # Create logger object
     logger = logMod.Logger()
 
     # Check provided files are present
-    # try:
-    #     assert (len(glob(str(args.image_path.value))) > 0)
-    # except:
-    #     logger("Error in rlf_deconv:run: Raw image doesn't exist. Aborting...")
-    #     return
+    try:
+        assert (len(glob(args.image_path)) > 0)
+    except:
+        logger("Error in rlf_deconv:run: Raw image doesn't exist. Aborting...")
+        return
 
-    # try:
-    #     assert (len(glob(args.psf_path)) > 0)
-    # except:
-    #     logger("Error in rlf_deconv:run: PSF image doesn't exist. Aborting...")
-    #     return
+    try:
+        assert (len(glob(args.psf_path)) > 0)
+    except:
+        logger("Error in rlf_deconv:run: PSF image doesn't exist. Aborting...")
+        return
 
     # Define deconvolution parameters and object
     deconv_params = dict({
-        'method': args.device.value,
-        'niter': args.niter.value,
-        'useBlockAlgorithm': args.block.value,
+        'method': args.device,
+        'niter': args.niter,
+        'useBlockAlgorithm': args.block,
         'callbkTickFunc': True,
-        'resAsUint8': args.uint.value,
+        'resAsUint8': args.uint,
     })
 
-    my_deconv = RLF_deconv(orig_path=str(args.image_path.value),
-                           kernel_path=str(args.psf_path.value),
+    my_deconv = RLF_deconv(orig_path=args.image_path,
+                           kernel_path=args.psf_path,
                            params_dict=deconv_params,
-                           orig_mrc=args.image_type.value == 'mrc',
-                           kernel_mrc=args.psf_type.value == 'mrc')
+                           orig_mrc=args.image_type == 'mrc',
+                           kernel_mrc=args.psf_type == 'mrc')
 
     deconvd_image = my_deconv()
 
     # Save results
-    with mrcfile.new(str(args.output_path.value), overwrite=True) as f:
+    with mrcfile.new(args.output_path, overwrite=True) as f:
         f.set_data(deconvd_image)

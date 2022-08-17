@@ -26,7 +26,6 @@ import yaml
 from beautifultable import BeautifulTable as bt
 
 from . import user_args as uaMod
-from . import magicgui as mgMod
 from . import metadata as mdMod
 from . import params as prmMod
 from . import logger as logMod
@@ -271,37 +270,37 @@ class Align:
 
         # Template for directive file
         adoc_temp = """
-setupset.currentStackExt = st
-setupset.copyarg.stackext = st
-setupset.copyarg.userawtlt = <use_rawtlt>
-setupset.copyarg.pixel = <pixel_size>
-setupset.copyarg.rotation = <rot_angle>
-setupset.copyarg.gold = <gold_size>
-setupset.systemTemplate = <adoc_template>
+        setupset.currentStackExt = st
+        setupset.copyarg.stackext = st
+        setupset.copyarg.userawtlt = <use_rawtlt>
+        setupset.copyarg.pixel = <pixel_size>
+        setupset.copyarg.rotation = <rot_angle>
+        setupset.copyarg.gold = <gold_size>
+        setupset.systemTemplate = <adoc_template>
 
-runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
-runtime.Preprocessing.any.removeXrays = <remove_xrays>
+        runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
+        runtime.Preprocessing.any.removeXrays = <remove_xrays>
 
-comparam.prenewst.newstack.BinByFactor = <ca_bin_factor>
+        comparam.prenewst.newstack.BinByFactor = <ca_bin_factor>
 
-runtime.Fiducials.any.trackingMethod = 1
+        runtime.Fiducials.any.trackingMethod = 1
 
-comparam.xcorr_pt.tiltxcorr.SizeOfPatchesXandY = <size_of_patches>
-comparam.xcorr_pt.tiltxcorr.NumberOfPatchesXandY = <num_of_patches>
-comparam.xcorr_pt.tiltxcorr.ShiftLimitsXandY = <limits_on_shift>
-comparam.xcorr_pt.tiltxcorr.IterateCorrelations = <num_iterations>
-runtime.PatchTracking.any.adjustTiltAngles = <adj_tilt_angles>
-comparam.xcorr_pt.imodchopconts.LengthOfPieces = -1
+        comparam.xcorr_pt.tiltxcorr.SizeOfPatchesXandY = <size_of_patches>
+        comparam.xcorr_pt.tiltxcorr.NumberOfPatchesXandY = <num_of_patches>
+        comparam.xcorr_pt.tiltxcorr.ShiftLimitsXandY = <limits_on_shift>
+        comparam.xcorr_pt.tiltxcorr.IterateCorrelations = <num_iterations>
+        runtime.PatchTracking.any.adjustTiltAngles = <adj_tilt_angles>
+        comparam.xcorr_pt.imodchopconts.LengthOfPieces = -1
 
-comparam.align.tiltalign.SurfacesToAnalyze = <num_surfaces>
-comparam.align.tiltalign.MagOption = <mag_option>
-comparam.align.tiltalign.TiltOption = <tilt_option>
-comparam.align.tiltalign.RotOption = <rot_option>
-comparam.align.tiltalign.BeamTiltOption = <beamtilt_option>
-comparam.align.tiltalign.RobustFitting = <use_robust>
-comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
+        comparam.align.tiltalign.SurfacesToAnalyze = <num_surfaces>
+        comparam.align.tiltalign.MagOption = <mag_option>
+        comparam.align.tiltalign.TiltOption = <tilt_option>
+        comparam.align.tiltalign.RotOption = <rot_option>
+        comparam.align.tiltalign.BeamTiltOption = <beamtilt_option>
+        comparam.align.tiltalign.RobustFitting = <use_robust>
+        comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
 
-runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
+        runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
         """
 
         convert_dict = {
@@ -429,12 +428,16 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(args_pass=None):
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
     # Parse user inputs
-    args = mgMod.get_args_align.show(run=True)
+    parser = uaMod.get_args_align()
+    if args_pass is not None:
+        args = parser.parse_args(args_pass)
+    else:
+        args = parser.parse_args()
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
@@ -449,8 +452,8 @@ def update_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
     # Check if align and motioncorr yaml files exist
-    align_yaml_name = args.project_name.value + '_align.yaml'
-    mc2_yaml_name = args.project_name.value + '_mc2.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
     if not os.path.isfile(align_yaml_name):
         raise IOError("Error in Ot2Rec.align.update_yaml: alignment config file not found.")
     if not os.path.isfile(mc2_yaml_name):
@@ -458,12 +461,12 @@ def update_yaml(args):
 
     # Read in MC2 metadata (as Pandas dataframe)
     # We only need the TS number and the tilt angle for comparisons at this stage
-    mc2_md_name = args.project_name.value + '_mc2_mdout.yaml'
+    mc2_md_name = args.project_name + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
-    align_md_name = args.project_name.value + '_align_mdout.yaml'
+    align_md_name = args.project_name + '_align_mdout.yaml'
     if os.path.isfile(align_md_name):
         is_old_project = True
         with open(align_md_name, 'r') as f:
@@ -484,9 +487,9 @@ def update_yaml(args):
 
     # Read in ctffind yaml file, modify, and update
     # read in MC2 yaml as well (some parameters depend on MC2 settings)
-    align_params = prmMod.read_yaml(project_name=args.project_name.value,
+    align_params = prmMod.read_yaml(project_name=args.project_name,
                                     filename=align_yaml_name)
-    mc2_params = prmMod.read_yaml(project_name=args.project_name.value,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
 
     align_params.params['System']['process_list'] = unique_ts_numbers
@@ -502,7 +505,8 @@ def create_yaml_stacked():
     prestack (bool) :: if stacks already exist
     """
     # Parse user inputs
-    args = mgMod.get_args_align_ext.show(run=True)
+    parser = uaMod.get_args_align_ext()
+    args = parser.parse_args()
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
@@ -516,17 +520,17 @@ def update_yaml_stacked(args):
     ARGS:
     args (Namespace) :: User input parameters
     """
-    project_name = args.project_name.value
-    parent_path = str(args.input_folder.value)
+    project_name = args.project_name
+    parent_path = args.input_folder
     assert (os.path.isdir(parent_path)), \
         "Error in main.update_align_yaml_stacked: IMOD parent folder not found."
     while parent_path.endswith('/'):
         parent_path = parent_path[:-1]
 
-    rootname = args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value
+    rootname = args.file_prefix if args.file_prefix is not None else args.project_name
 
-    pixel_size = args.pixel_size.value * 0.1
-    suffix = args.file_suffix.value
+    pixel_size = args.pixel_size
+    suffix = args.file_suffix if args.file_suffix is not None else ''
 
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
@@ -539,7 +543,7 @@ def update_yaml_stacked(args):
     align_params = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml_name)
 
-    align_params.params['System']['output_path'] = str(args.output_folder.value)
+    align_params.params['System']['output_path'] = args.output_folder
     align_params.params['System']['output_rootname'] = rootname
     align_params.params['System']['output_suffix'] = suffix
     align_params.params['System']['process_list'] = ts_list
