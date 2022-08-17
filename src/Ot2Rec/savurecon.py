@@ -23,6 +23,7 @@ import mrcfile
 
 from . import metadata as mdMod
 from . import user_args as uaMod
+from . import magicgui as mgMod
 from . import logger as logMod
 from . import params as prmMod
 
@@ -220,10 +221,9 @@ def create_yaml():
     """
     Subroutine to create new yaml file for Savu reconstruction
     """
-
     # Parse user inputs
-    parser = uaMod.get_args_savurecon()
-    args = parser.parse_args()
+    args = mgMod.get_args_savurecon.show(run=True)
+    print(args); exit()
 
     # Create the yaml file, then automatically update it
     prmMod.new_savurecon_yaml(args)
