@@ -270,8 +270,8 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
                 assert (not batchruntomo.stderr)
             except:
                 error_count += 1
-                self.logObj(f'Batchtomo: An error has occurred ({batchruntomo.returncode}) '
-                            f'on stack{curr_ts}.')
+                self.logObj(level="warning",
+                            message=f"Batchtomo: An error has occurred ({batchruntomo.returncode}) on stack{curr_ts}.")
             else:
                 self.stdout = batchruntomo.stdout
                 self.update_recon_metadata()
@@ -281,8 +281,8 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         if error_count == 0:
             self.logObj("All Ot2Rec-recon (IMOD) jobs successfully finished.")
         else:
-            self.logObj("WARNING: All Ot2Rec-recon (IMOD) jobs finished."
-                        f"{error_count} of {len(tqdm_iter)} jobs failed."
+            self.logObj(level="warning",
+                        message=f"All Ot2Rec-recon (IMOD) jobs finished. {error_count} of {len(tqdm_iter)} jobs failed."
             )
 
 
@@ -324,12 +324,16 @@ def create_yaml():
     """
     Subroutine to create new yaml file for IMOD reconstruction
     """
+    logger = logMod.Logger(log_path="o2r_imod_recon.log")
+
     # Parse user inputs
     args = mgMod.get_args_recon.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_recon_yaml(args)
     update_yaml(args)
+
+    logger(message="IMOD alignment metadata file created.")
 
 
 def update_yaml(args):
@@ -339,18 +343,25 @@ def update_yaml(args):
     ARGS:
     args (Namespace) :: Namespace generated with user inputs
     """
+    logger = logMod.Logger(log_path="o2r_imod_recon.log")
+
     # Check if recon and align yaml files exist
     recon_yaml_name = args.project_name.value + '_recon.yaml'
     align_yaml_name = args.project_name.value + '_align.yaml'
     if not os.path.isfile(recon_yaml_name):
+        logger(level="error",
+               message="IMOD reconstruction config file not found.")
         raise IOError("Error in Ot2Rec.main.update_recon_yaml: reconstruction config file not found.")
     if not os.path.isfile(align_yaml_name):
+        logger(level="error",
+               message="IMOD alignment config file not found.")
         raise IOError("Error in Ot2Rec.main.update_recon_yaml: alignment config file not found.")
 
     # Read in alignment metadata (as Pandas dataframe)
     align_md_name = args.project_name.value + '_align_mdout.yaml'
     with open(align_md_name, 'r') as f:
         align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
+    logger(message="IMOD alignment metadata read successfully.")
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
     recon_md_name = args.project_name.value + '_recon_mdout.yaml'
@@ -358,8 +369,10 @@ def update_yaml(args):
         is_old_project = True
         with open(recon_md_name, 'r') as f:
             recon_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
+        logger(message="Previous IMOD reconstruction metadata found and read.")
     else:
         is_old_project = False
+        logger(message="Previous IMOD reconstruction metadata not found.")
 
     # Diff the two dataframes to get numbers of tilt-series with unprocessed data
     if is_old_project:
@@ -388,11 +401,15 @@ def update_yaml(args):
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
 
+    logger(message="IMOD reconstruction metadata updated.")
+
 
 def run(exclusive=True, args_in=None):
     """
     Method to run IMOD reconstruction
     """
+    logger = logMod.Logger(log_path="o2r_imod_recon.log")
+
     if exclusive:
         parser = argparse.ArgumentParser()
         parser.add_argument("project_name",
