@@ -299,7 +299,7 @@ def update_yaml(args):
         logger(message="Previous CTFFind metadata found and read.")
     else:
         is_old_project = False
-        logger(message="Previous MotionCor2 metadata not found.")
+        logger(message="Previous CTFFind metadata not found.")
 
     # Diff the two dataframes to get numbers of tilt-series with unprocessed data
     if is_old_project:
