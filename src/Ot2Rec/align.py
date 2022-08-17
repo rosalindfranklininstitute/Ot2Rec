@@ -259,8 +259,8 @@ class Align:
                 assert(not run_newstack.stderr)
             except:
                 error_count += 1
-                self.logObj(f'newstack: An error has occurred ({run_newstack.returncode}) '
-                            f'on stack{curr_ts}.')
+                self.logObj(level='error',
+                            message='newstack: An error has occurred ({run_newstack.returncode}) on stack{curr_ts}.')
 
             self.stdout = run_newstack.stdout
             self.update_align_metadata(ext=False)
@@ -269,9 +269,8 @@ class Align:
         if error_count == 0:
             self.logObj("All Ot2Rec-align (IMOD): newstack jobs successfully finished.")
         else:
-            self.logObj("WARNING: All Ot2Rec-align (IMOD): newstack jobs finished."
-                        f"{error_count} of {len(tqdm_iter)} jobs failed."
-            )
+            self.logObj(level='warning',
+                        message="All Ot2Rec-align (IMOD): newstack jobs finished. {error_count} of {len(tqdm_iter)} jobs failed.")
 
 
     """
@@ -465,12 +464,16 @@ def create_yaml():
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
+    logger = logMod.Logger(log_path="o2r_imod_align.log")
+
     # Parse user inputs
     args = mgMod.get_args_align.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
     update_yaml(args)
+
+    logger(message="IMOD alignment metadata file created.")
 
 
 def update_yaml(args):
@@ -480,12 +483,18 @@ def update_yaml(args):
     ARGS:
     args (Namespace) :: Namespace generated with user inputs
     """
+    logger = logMod.Logger(log_path="o2r_imod_align.log")
+
     # Check if align and motioncorr yaml files exist
     align_yaml_name = args.project_name.value + '_align.yaml'
     mc2_yaml_name = args.project_name.value + '_mc2.yaml'
     if not os.path.isfile(align_yaml_name):
+        logger(level="error",
+               message="IMOD alignment config file not found.")
         raise IOError("Error in Ot2Rec.align.update_yaml: alignment config file not found.")
     if not os.path.isfile(mc2_yaml_name):
+        logger(level="error",
+               message="MotionCor2 config file not found.")
         raise IOError("Error in Ot2Rec.align.update__yaml: motioncorr config file not found.")
 
     # Read in MC2 metadata (as Pandas dataframe)
@@ -493,6 +502,7 @@ def update_yaml(args):
     mc2_md_name = args.project_name.value + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
+    logger(message="MotionCor2 metadata read successfully.")
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
     align_md_name = args.project_name.value + '_align_mdout.yaml'
@@ -500,8 +510,10 @@ def update_yaml(args):
         is_old_project = True
         with open(align_md_name, 'r') as f:
             align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
+        logger(message="Previous IMOD alignment metadata found and read.")
     else:
         is_old_project = False
+        logger(message="Previous IMOD alignment metadata not found.")
 
     # Diff the two dataframes to get numbers of tilt-series with unprocessed data
     if is_old_project:
@@ -526,6 +538,8 @@ def update_yaml(args):
 
     with open(align_yaml_name, 'w') as f:
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
+
+    logger(message="IMOD alignment metadata updated.")
 
 
 def create_yaml_stacked():
@@ -591,6 +605,8 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None, exclusive=True
     do_align (bool) :: whether to perform IMOD alignment
     ext (bool)      :: whether external stack(s) are available and to be used
     """
+    logger = logMod.Logger(log_path="o2r_imod_align.log")
+
     if exclusive:
         parser = argparse.ArgumentParser()
         parser.add_argument("project_name",
@@ -616,14 +632,6 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None, exclusive=True
         mc2_md = mdMod.read_md_yaml(project_name=project_name,
                                     job_type='align',
                                     filename=mc2_md_file)
-
-    # Create Logger object
-    log_path = "./o2r_align.log"
-    try:
-        os.remove(log_path)
-    except:
-        pass
-    logger = logMod.Logger(log_path=log_path)
 
     # Create Align object
     align_obj = Align(project_name=project_name,
