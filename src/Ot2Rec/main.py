@@ -72,7 +72,7 @@ def new_proj():
     with open(master_md_name, 'w') as f:
         yaml.dump(meta.metadata, f, indent=4)
 
-    logger(log_type="info",
+    logger(level="info",
            message="Master metadata file created.")
 
     return args
