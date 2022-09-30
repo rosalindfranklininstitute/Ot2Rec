@@ -49,7 +49,7 @@ requirements:
     - tifffile
     - redlionfish
     - magicgui
-    - pyqt5
+    - pyqt
 
 about:
   home: https://github.com/RosalindFranklinInstitute/Ot2Rec
