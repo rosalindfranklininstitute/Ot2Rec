@@ -130,3 +130,5 @@ dmypy.json
 
 *.yaml
 demo/quoll/*
+
+*.idea
