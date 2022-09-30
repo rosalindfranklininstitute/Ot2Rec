@@ -358,6 +358,8 @@ def get_args_align(
                "step": 0.01},
     image_dims={"widget_type": "LiteralEvalLineEdit",
                 "label": "Image dimensions (in pixels) *"},
+    excl_views={"widget_type": "LiteralEvalLineEdit",
+                "label": "Excluded views"},
     pixel_size={"widget_type": "LiteralEvalLineEdit",
                 "label": "Image pixel size (in angstroms) *"},
     input_folder={"label": "Input folder with stacks",
@@ -410,6 +412,7 @@ def get_args_align_ext(
         project_name="",
         rot_angle=0.00,
         image_dims=[1000, 1000],
+        excl_views=[0],
         pixel_size=0.00,
         input_folder=Path("./stacks"),
         output_folder=Path("./stacks"),
@@ -443,6 +446,7 @@ def get_args_align_ext(
     rot_angle (float)             :: Rotational angle of electron beam. Can be obtained from MDOC files
     image_dims (int)              :: Image dimensions (in pixels)
     pixel_size (float)            :: Image pixel size (in angstroms)
+    excl_views (int)              :: Indices of micrographes to be excluded
     input_folder (str)            :: Path to folder with image stacks
     output_folder (str)           :: Path to folder for storing IMOD outputs
     file_prefix (str)             :: Common prefix of raw image files (Default: project)
@@ -483,7 +487,7 @@ def get_args_align_ext(
     do_positioning={"label": "Positioning: Do positioning?"},
     unbinned_thickness={"label": "Positioning: Unbinned thickness (in pixels) for samples or whole tomogram *",
                         "min": 0,
-                        "max": 5000,
+                        "max": 50000,
                         "step": 100},
     correct_ctf={"label": "Aligned stack: Correct CTF for aligned stacks?"},
     erase_gold={"label": "Aligned stack: Erase gold fiducials?"},
@@ -492,7 +496,7 @@ def get_args_align_ext(
                 "min": 1},
     thickness={"label": "Reconstruction: Thickness (in pixels) for reconstruction *",
                "min": 0,
-               "max": 5000,
+               "max": 50000,
                "step": 100},
     trimvol={"label": "Postprocessing: Run Trimvol on reconstruction"},
     trimvol_reorient={"widget_type": "RadioButtons",

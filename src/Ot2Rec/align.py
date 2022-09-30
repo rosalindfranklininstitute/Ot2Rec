@@ -576,6 +576,8 @@ def update_yaml_stacked(args):
 
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
+    print(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
+    print(st_file_list)
 
     # Extract tilt series number
     ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}.st', '')) for i in st_file_list]
@@ -643,8 +645,8 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None, exclusive=True
     # Run IMOD
     # Create the stacks and rawtlt files first
     if not align_obj.no_processes:
+        align_obj.create_stack_folders()
         if newstack:
-            align_obj.create_stack_folders()
             align_obj.create_rawtlt()
             align_obj.create_stack()
         if do_align:
@@ -679,7 +681,7 @@ def imod_align_ext():
     """
     run(newstack=False,
         do_align=True,
-        ext=False,
+        ext=True,
         )
 
 
