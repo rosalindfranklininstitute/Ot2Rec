@@ -300,24 +300,24 @@ def new_aretomo_yaml(args):
     args (Namespace) :: Namespace containing user parameter inputs
     """
 
-    aretomo_yaml_names = {0: args.project_name + "_aretomo_align.yaml",
-                          1: args.project_name + "_aretomo_recon.yaml",
-                          2: args.project_name + "_aretomo_align-recon.yaml"}
+    aretomo_yaml_names = {0: args["project_name"] + "_aretomo_align.yaml",
+                          1: args["project_name"] + "_aretomo_recon.yaml",
+                          2: args["project_name"] + "_aretomo_align-recon.yaml"}
 
-    aretomo_yaml_name = aretomo_yaml_names[int(args.aretomo_mode)]
+    aretomo_yaml_name = aretomo_yaml_names[int(args["aretomo_mode"])]
     print(f"{aretomo_yaml_name} created")
 
     aretomo_yaml_dict = {
         "System": {
             "process_list": None,
-            "output_path": args.output_path,
-            "output_rootname": args.project_name if args.rootname is None else args.rootname,
-            "output_suffix": args.suffix,
+            "output_path": args["output_path"],
+            "output_rootname": args["project_name"] if args["rootname"] == "" else args["rootname"],
+            "output_suffix": args["suffix"],
         },
 
         "AreTomo_setup": {
-            "aretomo_mode": args.aretomo_mode,
-            "rot_angle": args.rot_angle,
+            "aretomo_mode": args["aretomo_mode"],
+            "rot_angle": args["rot_angle"],
             "input_mrc": None,
             "output_mrc": None,
             "tilt_angles": None,
@@ -327,7 +327,7 @@ def new_aretomo_yaml(args):
         "AreTomo_recon": {
             "volz": None,
             "sample_thickness": None,
-            "pixel_size": args.pixel_size,
+            "pixel_size": args["pixel_size"],
             "recon_algo": None,
         },
 
