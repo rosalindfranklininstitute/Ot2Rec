@@ -729,11 +729,11 @@ def get_args_imod_route(
     OUTPUTs:
     Namespace
     """
-    
+
     return locals()
 
-  
-@mg( 
+
+@mg(
     call_button="Create config file",
     layout="vertical",
     result_widget=False,
@@ -758,8 +758,16 @@ def get_args_imod_route(
         "mode": "d",
     },
     tilt_angles={"label": "Path to text file containing tilt angles, usually .tlt"},
-    volz={"label": "Z-height of reconstructed volume in unbinned voxels."},
-    sample_thickness={"label": "Sample thickness in nm, used to set volz automatically"},
+    volz={"label": "Z-height of reconstructed volume in unbinned voxels.",
+          "min": -1,
+          "max": 50000,
+          "step": 1,
+    },
+    sample_thickness={"label": "Sample thickness in nm, used to set volz automatically",
+                      "min": -1,
+                      "max": 50000,
+                      "step": 1
+    },
     output_binning={
         "label": "Binning to be applied to saved .mrc",
         "min": 1,
@@ -768,7 +776,7 @@ def get_args_imod_route(
     recon_algo={
         "label": "Reconstruction algorithm",
         "choices": ["WBP", "SART"]
-    },   
+    },
 )
 def get_args_aretomo(
         project_name="",

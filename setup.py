@@ -17,7 +17,7 @@ from setuptools import setup, find_packages
 
 
 setup(
-    version='0.2.0',
+    version='0.2.1',
     name='Ot2Rec',
     description='Ot2Rec',
     url='https://github.com/rosalindfranklininstitute/Ot2Rec',
@@ -73,7 +73,7 @@ setup(
             "o2r.deconv.run=Ot2Rec.rlf_deconv:run",
 
             "o2r.cleanup=Ot2Rec.main:cleanup",
-            
+
             "o2r.runall.imod=Ot2Rec.main:run_all_imod",
         ]
     }
