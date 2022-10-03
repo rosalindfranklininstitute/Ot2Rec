@@ -219,7 +219,10 @@ class Align:
         """
         Method to create stack file for a given tilt-series.
         """
+        # Add log entry when job starts
+        self.logObj("Ot2Rec-align (IMOD) started: newstack.")
 
+        error_count = 0
         tqdm_iter = tqdm(self._process_list, ncols=100)
         for curr_ts in tqdm_iter:
             tqdm_iter.set_description(f"Creating stack for TS {curr_ts}...")
@@ -252,13 +255,23 @@ class Align:
                                           check=True,
                                           )
 
-            if run_newstack.stderr:
-                raise ValueError(f'newstack: An error has occurred ({run_newstack.returncode}) '
-                                 f'on stack{curr_ts}.')
+            try:
+                assert(not run_newstack.stderr)
+            except:
+                error_count += 1
+                self.logObj(level='error',
+                            message='newstack: An error has occurred ({run_newstack.returncode}) on stack{curr_ts}.')
 
             self.stdout = run_newstack.stdout
             self.update_align_metadata(ext=False)
             self.export_metadata()
+
+        if error_count == 0:
+            self.logObj("All Ot2Rec-align (IMOD): newstack jobs successfully finished.")
+        else:
+            self.logObj(level='warning',
+                        message="All Ot2Rec-align (IMOD): newstack jobs finished. {error_count} of {len(tqdm_iter)} jobs failed.")
+
 
     """
     ALIGNMENT - BATCHTOMO
@@ -277,6 +290,7 @@ setupset.copyarg.userawtlt = <use_rawtlt>
 setupset.copyarg.pixel = <pixel_size>
 setupset.copyarg.rotation = <rot_angle>
 setupset.copyarg.gold = <gold_size>
+setupset.copyarg.skip = <excl_views>
 setupset.systemTemplate = <adoc_template>
 
 runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
@@ -308,6 +322,8 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
             'use_rawtlt': 1 if self.params['BatchRunTomo']['setup']['use_rawtlt'] else 0,
             'pixel_size': self.params['BatchRunTomo']['setup']['pixel_size'],
             'rot_angle': self.params['BatchRunTomo']['setup']['rot_angle'],
+            'excl_views': "" if self.params["BatchRunTomo"]["setup"]["excluded_views"] == [0] \
+            else f'{",".join(map(str, self.params["BatchRunTomo"]["setup"]["excluded_views"]))}',
             'gold_size': self.params['BatchRunTomo']['setup']['gold_size'],
             'adoc_template': self.params['BatchRunTomo']['setup']['adoc_template'],
             'stack_bin_factor': self.params['BatchRunTomo']['setup']['stack_bin_factor'],
@@ -370,10 +386,13 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
         """
         Method to align specified stack(s) using IMOD batchtomo
         """
+        # Add log entry when job starts
+        self.logObj("Ot2Rec-align (IMOD) started: batchruntomo.")
 
         # Create adoc file
         self._get_adoc()
 
+        error_count = 0
         tqdm_iter = tqdm(self._process_list, ncols=100)
         for curr_ts in tqdm_iter:
             tqdm_iter.set_description(f"Aligning TS {curr_ts}...")
@@ -386,12 +405,24 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
                                           check=True,
                                           )
 
-            if batchruntomo.stderr:
-                raise ValueError(f'Batchtomo: An error has occurred ({batchruntomo.returncode}) '
-                                 f'on stack{curr_ts}.')
+            try:
+                assert (not batchruntomo.stderr)
+            except:
+                error_count += 1
+                self.logObj(f'Batchruntomo: An error has occurred ({batchruntomo.returncode}) '
+                            f'on stack{curr_ts}.')
             self.stdout = batchruntomo.stdout
             self.update_align_metadata(ext)
             self.export_metadata()
+
+        # Add log entry when job finishes
+        if error_count == 0:
+            self.logObj("All Ot2Rec-align (IMOD) jobs successfully finished.")
+        else:
+            self.logObj("WARNING: All Ot2Rec-align (IMOD) jobs finished."
+                        f"{error_count} of {len(tqdm_iter)} jobs failed."
+            )
+
 
     def update_align_metadata(self, ext=False):
         """
@@ -433,12 +464,16 @@ def create_yaml():
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
+    logger = logMod.Logger(log_path="o2r_imod_align.log")
+
     # Parse user inputs
     args = mgMod.get_args_align.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
     update_yaml(args)
+
+    logger(message="IMOD alignment metadata file created.")
 
 
 def update_yaml(args):
@@ -448,12 +483,18 @@ def update_yaml(args):
     ARGS:
     args (Namespace) :: Namespace generated with user inputs
     """
+    logger = logMod.Logger(log_path="o2r_imod_align.log")
+
     # Check if align and motioncorr yaml files exist
     align_yaml_name = args.project_name.value + '_align.yaml'
     mc2_yaml_name = args.project_name.value + '_mc2.yaml'
     if not os.path.isfile(align_yaml_name):
+        logger(level="error",
+               message="IMOD alignment config file not found.")
         raise IOError("Error in Ot2Rec.align.update_yaml: alignment config file not found.")
     if not os.path.isfile(mc2_yaml_name):
+        logger(level="error",
+               message="MotionCor2 config file not found.")
         raise IOError("Error in Ot2Rec.align.update__yaml: motioncorr config file not found.")
 
     # Read in MC2 metadata (as Pandas dataframe)
@@ -461,6 +502,7 @@ def update_yaml(args):
     mc2_md_name = args.project_name.value + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
+    logger(message="MotionCor2 metadata read successfully.")
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
     align_md_name = args.project_name.value + '_align_mdout.yaml'
@@ -468,8 +510,10 @@ def update_yaml(args):
         is_old_project = True
         with open(align_md_name, 'r') as f:
             align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
+        logger(message="Previous IMOD alignment metadata found and read.")
     else:
         is_old_project = False
+        logger(message="Previous IMOD alignment metadata not found.")
 
     # Diff the two dataframes to get numbers of tilt-series with unprocessed data
     if is_old_project:
@@ -494,6 +538,8 @@ def update_yaml(args):
 
     with open(align_yaml_name, 'w') as f:
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
+
+    logger(message="IMOD alignment metadata updated.")
 
 
 def create_yaml_stacked():
@@ -530,6 +576,8 @@ def update_yaml_stacked(args):
 
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
+    print(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.st')
+    print(st_file_list)
 
     # Extract tilt series number
     ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'{suffix}.st', '')) for i in st_file_list]
@@ -550,7 +598,7 @@ def update_yaml_stacked(args):
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
 
 
-def run(newstack=False, do_align=True, ext=False, args_pass=None):
+def run(newstack=False, do_align=True, ext=False, args_pass=None, exclusive=True, args_in=None):
     """
     Method to run IMOD newstack / alignment
 
@@ -559,33 +607,36 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None):
     do_align (bool) :: whether to perform IMOD alignment
     ext (bool)      :: whether external stack(s) are available and to be used
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
-    if args_pass is not None:
-        args = parser.parse_args(args_pass)
+    logger = logMod.Logger(log_path="o2r_imod_align.log")
+
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name",
+                            type=str,
+                            help="Name of current project")
+        if args_pass is not None:
+            args = parser.parse_args(args_pass)
+        else:
+            args = parser.parse_args()
+        project_name = args.project_name
     else:
-        args = parser.parse_args()
+        project_name = args_in.project_name.value
 
     # Check if prerequisite files exist
-    align_yaml = args.project_name + '_align.yaml'
+    align_yaml = project_name + '_align.yaml'
     if not ext:
-        mc2_md_file = args.project_name + '_mc2_mdout.yaml'
+        mc2_md_file = project_name + '_mc2_mdout.yaml'
 
     # Read in config and metadata
-    align_config = prmMod.read_yaml(project_name=args.project_name,
+    align_config = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml)
     if not ext:
-        mc2_md = mdMod.read_md_yaml(project_name=args.project_name,
+        mc2_md = mdMod.read_md_yaml(project_name=project_name,
                                     job_type='align',
                                     filename=mc2_md_file)
 
-    # Create Logger object
-    logger = logMod.Logger()
-
     # Create Align object
-    align_obj = Align(project_name=args.project_name,
+    align_obj = Align(project_name=project_name,
                       md_in=mc2_md if not ext else None,
                       params_in=align_config,
                       logger_in=logger,
@@ -594,8 +645,8 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None):
     # Run IMOD
     # Create the stacks and rawtlt files first
     if not align_obj.no_processes:
+        align_obj.create_stack_folders()
         if newstack:
-            align_obj.create_stack_folders()
             align_obj.create_rawtlt()
             align_obj.create_stack()
         if do_align:
@@ -630,28 +681,32 @@ def imod_align_ext():
     """
     run(newstack=False,
         do_align=True,
-        ext=False,
+        ext=True,
         )
 
 
-def get_align_stats():
+def get_align_stats(exclusive=True, args_in=None):
     """
     Method to extract statistics from alignment
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
-    args = parser.parse_args()
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name",
+                            type=str,
+                            help="Name of current project")
+        args = parser.parse_args()
+        project_name = args.project_name
+    else:
+        project_name = args_in.project_name.value
 
     # Check if align metadata file exists
-    align_md_name = args.project_name + '_align_mdout.yaml'
+    align_md_name = project_name + '_align_mdout.yaml'
     if not os.path.isfile(align_md_name):
         raise IOError("Error in Ot2Rec.main.get_align_stats: alignment metadata file not found.")
 
     # Get stacks folder path from config
-    align_yaml = args.project_name + '_align.yaml'
-    align_config = prmMod.read_yaml(project_name=args.project_name,
+    align_yaml = project_name + '_align.yaml'
+    align_config = prmMod.read_yaml(project_name=project_name,
                                     filename=align_yaml)
 
     folder_path = align_config.params['System']['output_path']

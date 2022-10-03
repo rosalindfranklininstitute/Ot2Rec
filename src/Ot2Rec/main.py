@@ -14,6 +14,7 @@
 
 
 import os
+import time
 import subprocess
 import sys
 from glob import glob
@@ -23,8 +24,12 @@ import yaml
 from . import logger as logMod
 from . import metadata as mdMod
 from . import params as prmMod
-from . import user_args as uaMod
 from . import magicgui as mgMod
+
+from . import motioncorr as mcMod
+from . import ctffind as ctffindMod
+from . import align as alignMod
+from . import recon as reconMod
 
 
 def get_proj_name():
@@ -45,6 +50,8 @@ def new_proj():
     """
     Method to create a new project and get master metadata from raw images
     """
+    logger =logMod.Logger(log_path="new_proj.log")
+
     # Parse user inputs
     args = mgMod.get_args_new_proj.show(run=True)
 
@@ -64,6 +71,11 @@ def new_proj():
     master_md_name = args.project_name.value + '_master_md.yaml'
     with open(master_md_name, 'w') as f:
         yaml.dump(meta.metadata, f, indent=4)
+
+    logger(level="info",
+           message="Master metadata file created.")
+
+    return args
 
 
 def cleanup():
@@ -104,33 +116,85 @@ def cleanup():
                                        stderr=subprocess.STDOUT)
 
 
-def run_all():
+def run_all_imod():
     """
     Method to run all processes in one go using default settings.
     """
-
     logger = logMod.Logger()
 
     # Collect raw images and produce master metadata
+    proj_arg = new_proj()
     logger("Collecting raw images...")
-    new_proj()
+
+    # Get essential user inputs for IMOD route
+    user_args = mgMod.get_args_imod_route.show(run=True)
 
     # Motion correction
+    mc2_args = mgMod.get_args_mc2
+    mc2_args.project_name.value = proj_arg.project_name.value
+    mc2_args.exec_path.value = user_args.mc2_path.value
+    mc2_args.pixel_size.value = user_args.pixel_size.value
+    mc2_args.use_gain.value = user_args.use_gain.value
+    mc2_args.gain.value = user_args.gain.value
+
+    prmMod.new_mc2_yaml(mc2_args)
+    mcMod.update_yaml(mc2_args)
+
     logger("Motion correction in progress...")
-    create_mc2_yaml()
-    run_mc2()
+    mcMod.run(exclusive=False,
+              args_in=mc2_args)
+
+    time.sleep(2)
 
     # CTF estimation
-    logger("CTF estimation in progress...")
-    create_ctffind_yaml()
-    run_ctffind()
+    if user_args.do_ctffind.value:
+        ctffind_args = mgMod.get_args_ctffind
+        ctffind_args.project_name.value = proj_arg.project_name.value
+        ctffind_args.exec_path.value = user_args.ctffind_path.value
+
+        prmMod.new_ctffind_yaml(ctffind_args)
+        ctffindMod.update_yaml(ctffind_args)
+
+        logger("CTF estimation in progress...")
+        ctffindMod.run(exclusive=False,
+                       args_in=ctffind_args)
+
+        time.sleep(2)
 
     # Alignment
+    align_args = mgMod.get_args_align
+    align_args.project_name.value = proj_arg.project_name.value
+    align_args.rot_angle.value = user_args.rot_angle.value
+    align_args.image_dims.value = align_args.image_dims.value
+    align_args.stack_bin_factor.value = user_args.bin_factor.value
+    align_args.coarse_align_bin_factor.value = user_args.bin_factor.value
+
+    prmMod.new_align_yaml(align_args)
+    alignMod.update_yaml(align_args)
+
     logger("Alignment in progress...")
-    create_align_yaml()
-    run_align()
+    alignMod.run(exclusive=False,
+                 args_in=align_args,
+                 newstack=True,
+    )
+    if user_args.show_stats.value:
+        alignMod.get_align_stats(exclusive=False,
+                                 args_in=align_args)
+
+    time.sleep(2)
 
     # Reconstruction
+    recon_args = mgMod.get_args_recon
+    recon_args.project_name.value = proj_arg.project_name.value
+    recon_args.do_positioning.value = user_args.do_positioning.value
+    recon_args.unbinned_thickness.value = user_args.unbinned_thickness.value
+    recon_args.thickness.value = user_args.thickness.value
+    recon_args.bin_factor.value = user_args.bin_factor.value
+
+    prmMod.new_recon_yaml(recon_args)
+    reconMod.update_yaml(recon_args)
+
     logger("Reconstruction in progress...")
-    create_recon_yaml()
-    run_recon()
+    reconMod.run(exclusive=False,
+                 args_in=recon_args,
+    )

@@ -65,11 +65,18 @@ def get_psf(ctffile, point_source_recip, k2_grid, alpha_g):
     # Calculate CTF
     ctf = -np.sin(chi, dtype=np.float32)
 
+    # Calculate first-zero of CTF
+    denom0 = wvl * (cs/wvl)**0.25
+    df_min = np.min(df) / np.sqrt(cs*wvl)
+    df_max = np.max(df) / np.sqrt(cs*wvl)
+    q_min = np.sqrt(-df_min + np.sqrt(df_min**2+2)) / denom0
+    q_max = np.sqrt(-df_max + np.sqrt(df_max**2+2)) / denom0
+
     # FT point-source and convolve with CTF
     ps_ctf_k = point_source_recip * ctf
     psf = np.real(np.fft.ifft2(ps_ctf_k)).astype(np.float32)
 
-    return psf
+    return 1/q_min, 1/q_max, psf
 
 
 def calculate_k_grids(image_size, pixel_size):
@@ -149,11 +156,14 @@ def run():
 
         full_psf = np.empty(shape=(len(angle_list), *source_dim[-2:]),
                             dtype=np.float32)
+        mean_res = np.empty(shape=(len(angle_list)),
+                            dtype=np.float32)
         for index in range(len(angle_index)):
-            full_psf[angle_index[index], ...] = get_psf(ctffile='./ctffind/' + glob_list[index],
-                                                        point_source_recip=ps_k,
-                                                        k2_grid=k2_grid,
-                                                        alpha_g=alpha_g_grid)
+            res0, res1, full_psf[angle_index[index], ...] = get_psf(ctffile='./ctffind/' + glob_list[index],
+                                                                    point_source_recip=ps_k,
+                                                                    k2_grid=k2_grid,
+                                                                    alpha_g=alpha_g_grid)
+            mean_res[index] = 0.5*(res0+res1) * 1e10
 
         # Write out psf stack
         with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:02}.mrc', overwrite=True) as f:
@@ -168,3 +178,7 @@ def run():
         with open(subfolder_path + f'/{rootname}_{curr_ts:02}.rawtlt', 'w') as f:
             for angle in sorted(angle_list):
                 f.writelines(str(angle) + '\n')
+
+        # Write out resolution file
+        with open(subfolder_path + f'/{rootname}_{curr_ts:02}.res', 'w') as f:
+            np.savetxt(f, X=mean_res)

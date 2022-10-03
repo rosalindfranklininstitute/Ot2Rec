@@ -234,6 +234,8 @@ def get_args_ctffind(
                "step": 0.01},
     image_dims={"widget_type": "LiteralEvalLineEdit",
                 "label": "Image dimensions (in pixels) *"},
+    excl_views={"widget_type": "LiteralEvalLineEdit",
+                "label": "Excluded views"},
     output_folder={"label": "IMOD output folder",
                    "mode": "d"},
     file_prefix={"label": "File prefix (if different from project name)"},
@@ -282,6 +284,7 @@ def get_args_align(
         project_name="",
         rot_angle=0.00,
         image_dims=[1000, 1000],
+        excl_views=[0],
         output_folder=Path("./stacks"),
         file_prefix="",
         file_suffix="",
@@ -312,6 +315,7 @@ def get_args_align(
     project_name (str)            :: Name of current project
     rot_angle (float)             :: Rotational angle of electron beam. Can be obtained from MDOC files
     image_dims (int)              :: Image dimensions (in pixels)
+    excl_views (int)              :: Indices of micrographes to be excluded
     output_folder (str)           :: Path to folder for storing IMOD outputs
     file_prefix (str)             :: Common prefix of raw image files (Default: project)
     file_suffix (str)             :: Extra information attached as suffix to output filenames
@@ -354,6 +358,8 @@ def get_args_align(
                "step": 0.01},
     image_dims={"widget_type": "LiteralEvalLineEdit",
                 "label": "Image dimensions (in pixels) *"},
+    excl_views={"widget_type": "LiteralEvalLineEdit",
+                "label": "Excluded views"},
     pixel_size={"widget_type": "LiteralEvalLineEdit",
                 "label": "Image pixel size (in angstroms) *"},
     input_folder={"label": "Input folder with stacks",
@@ -406,6 +412,7 @@ def get_args_align_ext(
         project_name="",
         rot_angle=0.00,
         image_dims=[1000, 1000],
+        excl_views=[0],
         pixel_size=0.00,
         input_folder=Path("./stacks"),
         output_folder=Path("./stacks"),
@@ -419,7 +426,7 @@ def get_args_align_ext(
         remove_xrays=True,
         coarse_align_bin_factor=4,
         num_patches=[24, 24],
-        patch_overlap=25,
+        patch_overlap=15,
         num_iter=4,
         limits_on_shift=[2, 2],
         adjust_tilt_angles=True,
@@ -439,6 +446,7 @@ def get_args_align_ext(
     rot_angle (float)             :: Rotational angle of electron beam. Can be obtained from MDOC files
     image_dims (int)              :: Image dimensions (in pixels)
     pixel_size (float)            :: Image pixel size (in angstroms)
+    excl_views (int)              :: Indices of micrographes to be excluded
     input_folder (str)            :: Path to folder with image stacks
     output_folder (str)           :: Path to folder for storing IMOD outputs
     file_prefix (str)             :: Common prefix of raw image files (Default: project)
@@ -479,7 +487,7 @@ def get_args_align_ext(
     do_positioning={"label": "Positioning: Do positioning?"},
     unbinned_thickness={"label": "Positioning: Unbinned thickness (in pixels) for samples or whole tomogram *",
                         "min": 0,
-                        "max": 5000,
+                        "max": 50000,
                         "step": 100},
     correct_ctf={"label": "Aligned stack: Correct CTF for aligned stacks?"},
     erase_gold={"label": "Aligned stack: Erase gold fiducials?"},
@@ -488,7 +496,7 @@ def get_args_align_ext(
                 "min": 1},
     thickness={"label": "Reconstruction: Thickness (in pixels) for reconstruction *",
                "min": 0,
-               "max": 5000,
+               "max": 50000,
                "step": 100},
     trimvol={"label": "Postprocessing: Run Trimvol on reconstruction"},
     trimvol_reorient={"widget_type": "RadioButtons",
@@ -502,7 +510,7 @@ def get_args_recon(
         correct_ctf=False,
         erase_gold=False,
         filtering=False,
-        bin_factor=1,
+        bin_factor=4,
         thickness=1500,
         trimvol=True,
         trimvol_reorient="rotate"
@@ -663,6 +671,69 @@ def get_args_savurecon(
 
 
 @mg(
+    call_button="Get parameters",
+    layout="vertical",
+    result_widget=False,
+
+    mc2_path={"label": "Path to MC2 executable"},
+    do_ctffind={"label": "Estimate CTF?"},
+    ctffind_path={"label": "Path to CTFFind4 executable (if applicable)"},
+    image_dims={"widget_type": "LiteralEvalLineEdit",
+                "label": "Image dimensions (in pixels)"},
+    pixel_size={"label": "Pixel size (A)",
+                "step": 0.001},
+    rot_angle={"label": "Beam rotation angle",
+               "min": -180.00,
+               "max": 180.00,
+               "step": 0.01},
+    super_res={"label": "Super-resolution images?"},
+    use_gain={"label": "Use gain reference?"},
+    gain={"label": "Gain reference file (if applicable)",
+          "widget_type": "FileEdit",
+          "mode": "w"},
+    do_positioning={"label": "Positioning: Do positioning?"},
+    bin_factor={"label": "Binning factor for stack",
+                "min": 1},
+    unbinned_thickness={"label": "Positioning: Unbinned thickness (in pixels) for samples or whole tomogram",
+                        "min": 0,
+                        "max": 50000,
+                        "step": 100},
+    thickness={"label": "Reconstruction: Thickness (in pixels) for reconstruction",
+               "min": 0,
+               "max": 50000,
+               "step": 100},
+    show_stats={"label": "Show alignment statistics?"}
+)
+def get_args_imod_route(
+        mc2_path=Path("/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110"),
+        do_ctffind=False,
+        ctffind_path=Path("/opt/lmod/modules/ctffind/4.1.14/bin/ctffind"),
+        image_dims=[1000, 1000],
+        pixel_size=0.000,
+        rot_angle=0.00,
+        super_res=False,
+        use_gain=False,
+        gain="",
+        show_stats=True,
+        do_positioning=False,
+        bin_factor=4,
+        unbinned_thickness=1500,
+        thickness=1500,
+):
+    """
+    Function to get essential parameters for processing steps on IMOD route
+
+    ARGS:
+
+
+    OUTPUTs:
+    Namespace
+    """
+    
+    return locals()
+
+  
+@mg( 
     call_button="Create config file",
     layout="vertical",
     result_widget=False,

@@ -13,6 +13,7 @@
 # language governing permissions and limitations under the License.
 
 
+import logging
 import threading
 import datetime as dt
 
@@ -21,6 +22,11 @@ class Logger():
     """
     Class encapsulating a Logger object
     """
+    LEVELS = {"info": 20,
+              "warning": 30,
+              "error": 40,
+              "critical": 50}
+
 
     def __init__(self,
                  log_path: str = None,
@@ -31,32 +37,33 @@ class Logger():
         ARGS:
         log_path :: Path to the log file
         """
-
-        self.lock = threading.Lock()
         self.log_path = log_path
 
+        # Define default logging behaviour
+        logging.basicConfig(
+            filename=self.log_path,
+            level=logging.INFO,
+            format='[%(asctime)s] %(levelname)s - %(message)s',
+            datefmt="%d%b%Y-%H:%M:%S"
+        )
+
+
     def __call__(self,
-                 log: str,
+                 message: str,
+                 level: str = "info",
                  stdout: bool = True,
-                 newline: bool = False):
+    ):
         """
         Send a string to stdout and log file one process at a time.
 
         ARGS:
-        log     :: message to be output to file
-        stdout  :: whether to output to shell
-        newline :: whether to add new line before message
+        message  :: message to be output to file
+        level    :: type of log (info / warning / error)
+        stdout   :: whether to output to shell
         """
 
-        now = dt.datetime.now().strftime("%d%b%Y-%H:%M:%S")
-        with self.lock:
-            if newline:
-                message = f'\n{now} - {log}'
-            else:
-                message = f'{now} - {log}'
+        logging.log(level=self.LEVELS[level.lower()],
+                    msg=message)
 
-            if stdout:
-                print(message)
-            if self.log_path is not None:
-                with open(self.log_path, 'a') as f:
-                    f.write(message + '\n')
+        if stdout:
+            print(message)

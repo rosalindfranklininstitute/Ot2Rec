@@ -293,7 +293,12 @@ def run():
                                         filename=savurecon_yaml)
 
     # Create Logger object
-    logger = logMod.Logger()
+    log_path = "./o2r_savurecon.log"
+    try:
+        os.remove(log_path)
+    except:
+        pass
+    logger = logMod.Logger(log_path=log_path)
 
     # Create SavuRecon object
     savurecon_obj = SavuRecon(project_name=args.project_name,
