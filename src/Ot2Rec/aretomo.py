@@ -339,9 +339,17 @@ def update_yaml(args):
 
         # Set output mrc
         output_lookup = {0: "_ali.mrc", 2: "_rec.mrc"}
+        # out_file_list = [
+        #     (f"{os.path.splitext(file)[0]}"
+        #      f"{output_lookup[args['aretomo_mode']]}") for file in st_file_list]
         out_file_list = [
-            (f"{os.path.splitext(file)[0]}"
-             f"{output_lookup[args['aretomo_mode']]}") for file in st_file_list]
+            (f"{aretomo_params.params['System']['output_path']}/"
+             f"{os.path.splitext(os.path.basename(file))[0]}/"
+             f"{os.path.splitext(os.path.basename(file))[0]}"
+             f"{output_lookup[args['aretomo_mode']]}") for file in st_file_list
+        ]
+
+
         aretomo_params.params["AreTomo_setup"]["output_mrc"] = out_file_list
 
     elif args["aretomo_mode"] == 1: # for reconstruction only
