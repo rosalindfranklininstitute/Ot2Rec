@@ -18,6 +18,8 @@ import os
 import subprocess
 from glob import glob
 import warnings
+from icecream import ic
+from pathlib import Path
 
 import yaml
 
@@ -211,7 +213,7 @@ def _update_volz(args, aretomo_params):
             aretomo_params.params["AreTomo_recon"]["volz"] = int(
                 (args["sample_thickness"] * args["pixel_size"]) + 200
             )
-    
+
     # Reject volz and sample thickness values which are not -1 or >0
         elif (args["volz"] == 0) or (args["volz"] < -1):
             raise ValueError(
@@ -291,6 +293,7 @@ def update_yaml(args):
         args["aretomo_mode"],
         args["project_name"]
     )
+    ic(type(aretomo_yaml_name))
 
     aretomo_params = prmMod.read_yaml(
         project_name=args["project_name"],
@@ -298,8 +301,8 @@ def update_yaml(args):
     )
 
     # Check that AreTomo Mode is 0-3
-    if (args["aretomo_mode"] < 0) or (args["aretomo_mode"] > 3):
-        raise ValueError("AreTomo mode must be 0, 1, 2, or 3")
+    if (args["aretomo_mode"] < 0) or (args["aretomo_mode"] > 2):
+        raise ValueError("AreTomo mode must be 0, 1, 2")
 
     # Add optional kwargs TODO: Implement
     # aretomo_params.params['AreTomo_kwargs'] = kwargs
@@ -313,17 +316,17 @@ def update_yaml(args):
             ".st",
             rootname,
             suffix,
-            args["input_mrc_folder"]
+            str(args["input_mrc_folder"])
         )
         aretomo_params.params["AreTomo_setup"]["input_mrc"] = st_file_list
 
         # Set AngFile
-        if args["tilt_angles"] == "<project_name>_<suffix>.tlt":
+        if args["tilt_angles"] == "":
             tlt_file_list = _find_files_with_ext(
                 ".rawtlt",
                 rootname,
                 suffix,
-                args["input_mrc_folder"]
+                str(args["input_mrc_folder"])
             )
             aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
         else:
@@ -347,17 +350,17 @@ def update_yaml(args):
             "_ali.mrc",
             rootname,
             suffix,
-            args["input_mrc_folder"]
+            str(args["input_mrc_folder"])
         )
         aretomo_params.params["AreTomo_setup"]["input_mrc"] = st_file_list
 
         # Set AngFile
-        if args["tilt_angles"] == "<project_name>_<suffix>.tlt":
+        if args["tilt_angles"] == "":
             tlt_file_list = _find_files_with_ext(
                 ".tlt",
                 rootname,
                 suffix,
-                args["input_mrc_folder"]
+                str(args["input_mrc_folder"])
             )
             aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
         else:
@@ -373,7 +376,7 @@ def update_yaml(args):
             f"{os.path.splitext(file)[0]}_rec.mrc" for file in st_file_list
         ]
         aretomo_params.params["AreTomo_setup"]["output_mrc"] = out_file_list
-        
+
     # Add the rest of the argparse values to aretomo_params
     aretomo_params.params["AreTomo_setup"]["aretomo_mode"] = args["aretomo_mode"]
     aretomo_params.params["AreTomo_setup"]["output_binning"] = args["output_binning"]
@@ -385,7 +388,7 @@ def update_yaml(args):
     _update_volz(args, aretomo_params)
 
     # update and write yaml file
-    with open(aretomo_yaml_name, "w") as f:
+    with open(Path(aretomo_yaml_name), "w") as f:
         yaml.dump(aretomo_params.params, f, indent=4, sort_keys=False)
 
 
@@ -400,6 +403,7 @@ def create_yaml(input_mgNS=None):
     else:
         args = input_mgNS
 
+    ic(args)
     # Create the yaml file, then automatically update it
     prmMod.new_aretomo_yaml(args)
     update_yaml(args)

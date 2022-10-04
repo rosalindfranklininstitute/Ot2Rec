@@ -787,7 +787,7 @@ def get_args_aretomo(
         suffix="",
         input_mrc_folder=Path("./aretomo"),
         output_path=Path("./aretomo"),
-        tilt_angles="<project_name>_<suffix>.tlt",
+        tilt_angles="",
         volz=-1,
         sample_thickness=-1,
         output_binning=4,
