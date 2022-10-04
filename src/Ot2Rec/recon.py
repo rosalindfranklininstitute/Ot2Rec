@@ -85,17 +85,17 @@ class Recon:
         # Create the folders and dictionary for future reference
         self._path_dict = {}
         for curr_ts in self.params['System']['process_list']:
-            subfolder = f"{self.basis_folder}/{self.rootname}_{int(curr_ts):02}{self.suffix}"
+            subfolder = f"{self.basis_folder}/{self.rootname}_{int(curr_ts):04}{self.suffix}"
             os.makedirs(subfolder, exist_ok=True)
             self._path_dict[curr_ts] = subfolder
 
         self._recon_images = pd.DataFrame(columns=['ts', 'align_output', 'recon_output'])
         for curr_ts in self.params['System']['process_list']:
-            subfolder = f"{self.basis_folder}/{self.rootname}_{int(curr_ts):02}{self.suffix}"
+            subfolder = f"{self.basis_folder}/{self.rootname}_{int(curr_ts):04}{self.suffix}"
             _to_append = pd.DataFrame({
                 'ts': [curr_ts],
-                'align_output': [f"{subfolder}/{self.rootname}_{int(curr_ts):02}{self.suffix}_ali.mrc"],
-                'recon_output': [f"{subfolder}/{self.rootname}_{int(curr_ts):02}{self.suffix}_rec.mrc"],
+                'align_output': [f"{subfolder}/{self.rootname}_{int(curr_ts):04}{self.suffix}_ali.mrc"],
+                'recon_output': [f"{subfolder}/{self.rootname}_{int(curr_ts):04}{self.suffix}_rec.mrc"],
             })
             self._recon_images = pd.concat([self._recon_images, _to_append],
                                            ignore_index=True,

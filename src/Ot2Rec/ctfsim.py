@@ -149,7 +149,7 @@ def run():
         os.makedirs(subfolder_path, exist_ok=True)
 
         # Find txt files from ctffind
-        glob_list = glob1('./ctffind/', f'{rootname}_{curr_ts:03}_*ctffind.txt')
+        glob_list = glob1('./ctffind/', f'{rootname}_{curr_ts:04}_*ctffind.txt')
 
         angle_list = [float(i.split('/')[-1].split('_')[2]) for i in glob_list]
         angle_index = [sorted(angle_list).index(i) for i in angle_list]

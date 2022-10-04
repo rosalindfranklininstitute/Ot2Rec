@@ -96,7 +96,7 @@ class ctffind():
         # update output column
         self.ctf_images['output'] = self.ctf_images.apply(
             lambda row: f"{self.params['System']['output_path']}/"
-            f"{self.params['System']['output_prefix']}_{row['ts']:03}_{row['angles']}_ctffind.mrc", axis=1)
+            f"{self.params['System']['output_prefix']}_{row['ts']:04}_{row['angles']}_ctffind.mrc", axis=1)
 
     def _check_processed_images(self):
         """
