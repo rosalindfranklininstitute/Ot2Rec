@@ -15,6 +15,8 @@
 
 import os
 import yaml
+from pathlib import Path
+from icecream import ic
 
 
 class Params:
@@ -310,7 +312,7 @@ def new_aretomo_yaml(args):
     aretomo_yaml_dict = {
         "System": {
             "process_list": None,
-            "output_path": args["output_path"],
+            "output_path": str(args["output_path"]),
             "output_rootname": args["project_name"] if args["rootname"] == "" else args["rootname"],
             "output_suffix": args["suffix"],
         },
@@ -358,6 +360,6 @@ def read_yaml(project_name: str,
         raise IOError(f"Error in Ot2Rec.params.read_yaml: {filename}: File not found.")
 
     with open(filename, 'r') as f:
-        params = yaml.load(f, Loader=yaml.FullLoader)
+        params = yaml.load(f.read(), Loader=yaml.FullLoader)
 
     return Params(project_name, params)

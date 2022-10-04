@@ -85,7 +85,7 @@ class Align:
 
         self._align_images = pd.DataFrame(columns=['ts', 'stack_output', 'align_output'])
         for curr_ts in self.params['System']['process_list']:
-            subfolder_name = f'{self.rootname}_{curr_ts:02}{self.suffix}'
+            subfolder_name = f'{self.rootname}_{curr_ts:04}{self.suffix}'
             _to_append = pd.DataFrame(
                 {'ts': [curr_ts],
                  'stack_output': [f'{self.basis_folder}/{subfolder_name}/{subfolder_name}.st'],
@@ -165,7 +165,7 @@ class Align:
         # Create the folders and dictionary for future reference
         self._path_dict = {}
         for curr_ts in self._process_list:
-            subfolder_path = f'{self.basis_folder}/{self.rootname}_{curr_ts:02}{self.suffix}'
+            subfolder_path = f'{self.basis_folder}/{self.rootname}_{curr_ts:04}{self.suffix}'
             os.makedirs(subfolder_path, exist_ok=True)
             self._path_dict[curr_ts] = subfolder_path
 
@@ -203,7 +203,7 @@ class Align:
         for curr_ts in self._process_list:
             # Define path where the new rawtlt file should go
             rawtlt_file = (f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}_"
-                           f"{curr_ts:02}{self.params['System']['output_suffix']}.rawtlt")
+                           f"{curr_ts:04}{self.params['System']['output_suffix']}.rawtlt")
 
             # Sort the filtered metadata
             # Metadata is fetched in the _sort_tilt_angles method
@@ -237,7 +237,7 @@ class Align:
             # Create template for newstack
             self._filename_fileinlist = \
                 (f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}"
-                 f"_{curr_ts:02}{self.params['System']['output_suffix']}_sources.txt")
+                 f"_{curr_ts:04}{self.params['System']['output_suffix']}_sources.txt")
             self._stack_template = f"{len(meta_ts)}\n" + '\n0\n'.join(meta_ts['output']) + '\n0\n'
             with open(self._filename_fileinlist, 'w') as f:
                 f.write(self._stack_template)
@@ -375,8 +375,8 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
                '-CPUMachineList', f"{temp_cpu}",
                '-GPUMachineList', '1',
                '-DirectiveFile', './align.adoc',
-               '-RootName', self.params['System']['output_rootname'] + f'_{curr_ts:02}',
-               '-CurrentLocation', f'{self.basis_folder}/{self.rootname}_{curr_ts:02}{self.suffix}',
+               '-RootName', self.params['System']['output_rootname'] + f'_{curr_ts:04}',
+               '-CurrentLocation', f'{self.basis_folder}/{self.rootname}_{curr_ts:04}{self.suffix}',
                '-StartingStep', '0',
                '-EndingStep', '8',
                ]
@@ -734,7 +734,7 @@ def get_align_stats(exclusive=True, args_in=None):
 
     # Loop through folders, find data and append to dataframe
     for curr_ts in aligned_ts:
-        target_file_path = f"{folder_path}/{rootname}_{curr_ts:02d}{suffix}/align.log"
+        target_file_path = f"{folder_path}/{rootname}_{curr_ts:04d}{suffix}/align.log"
         if not os.path.isfile(target_file_path):
             raise IOError("Error in Ot2Rec.main.get_align_stats: alignment log file not found.")
 

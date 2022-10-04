@@ -76,7 +76,7 @@ class SavuRecon:
         # Create the folders and dictionary for future reference
         self._path_dict = {}
         for curr_ts in self.params['System']['process_list']:
-            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
+            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:04d}{self.suffix}"
             os.makedirs(subfolder, exist_ok=True)
             # self._path_dict[curr_ts] = subfolder
             if "savu_output_dir" not in list(self.md_out.keys()):
