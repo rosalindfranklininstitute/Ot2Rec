@@ -145,7 +145,7 @@ def run():
 
     for curr_ts in tqdm_iter:
         # Create folders and subfolders
-        subfolder_path = f'PSF/{rootname}_{curr_ts:02}'
+        subfolder_path = f'PSF/{rootname}_{curr_ts:04}'
         os.makedirs(subfolder_path, exist_ok=True)
 
         # Find txt files from ctffind
@@ -166,7 +166,7 @@ def run():
             mean_res[index] = 0.5*(res0+res1) * 1e10
 
         # Write out psf stack
-        with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:02}.mrc', overwrite=True) as f:
+        with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:04}.mrc', overwrite=True) as f:
             (xmin, ymin) = (
                 (source_dim[-2] - args.dims.value[0]) // 2,
                 (source_dim[-1] - args.dims.value[1]) // 2)
@@ -175,10 +175,10 @@ def run():
             f.set_data(full_psf[:, xmin:xmax, ymin:ymax])
 
         # Write out rawtlt file
-        with open(subfolder_path + f'/{rootname}_{curr_ts:02}.rawtlt', 'w') as f:
+        with open(subfolder_path + f'/{rootname}_{curr_ts:04}.rawtlt', 'w') as f:
             for angle in sorted(angle_list):
                 f.writelines(str(angle) + '\n')
 
         # Write out resolution file
-        with open(subfolder_path + f'/{rootname}_{curr_ts:02}.res', 'w') as f:
+        with open(subfolder_path + f'/{rootname}_{curr_ts:04}.res', 'w') as f:
             np.savetxt(f, X=mean_res)

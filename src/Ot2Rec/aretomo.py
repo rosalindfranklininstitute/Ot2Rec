@@ -80,7 +80,7 @@ class AreTomo:
         self._path_dict = {}
         for curr_ts in self.params['System']['process_list']:
             subfolder = (f"{self.basis_folder}/"
-                         f"{self.rootname}_{curr_ts:02d}{self.suffix}")
+                         f"{self.rootname}_{curr_ts:04d}{self.suffix}")
             os.makedirs(subfolder, exist_ok=True)
             # self._path_dict[curr_ts] = subfolder
             if "aretomo_output_dir" not in list(self.md_out.keys()):

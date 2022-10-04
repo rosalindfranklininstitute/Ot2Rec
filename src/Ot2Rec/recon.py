@@ -227,7 +227,7 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
                '-CPUMachineList', f"{temp_cpu}",
                '-GPUMachineList', '1',
                '-DirectiveFile', './recon.adoc',
-               '-RootName', f'{self.rootname}_{curr_ts:02d}',
+               '-RootName', f'{self.rootname}_{curr_ts:04d}',
                '-CurrentLocation', self._path_dict[curr_ts],
                '-StartingStep', '8' if not ext else '0',
                '-EndingStep', '20' if not ext else '0',
