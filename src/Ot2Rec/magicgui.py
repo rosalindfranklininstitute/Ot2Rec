@@ -745,7 +745,10 @@ def get_args_imod_route(
         "max": 2,
         "step": 1,
     },
-    rot_angle={"label": "Rotation angle of electron beam*, can be obtained from mdoc"},
+    rot_angle={"label": "Rotation angle of electron beam*, can be obtained from mdoc",
+               "min": -180.0000,
+               "max": 180.0000
+    },
     pixel_size={"label": "Pixel size in nm"},
     rootname={"label": "Rootname of current project (required if different from project name"},
     suffix={"label": "Suffix of project files"},
