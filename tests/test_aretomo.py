@@ -21,6 +21,8 @@ from Ot2Rec import magicgui as mgMod
 from Ot2Rec import aretomo
 from Ot2Rec import params as prmMod
 
+
+@unittest.skip("WIP")
 class AreTomoTest(unittest.TestCase):
 
     def _create_aretomo_yaml_from_magicgui(self, kv=None):
@@ -35,7 +37,7 @@ class AreTomoTest(unittest.TestCase):
             for (key, value) in kv:
                 sensible_defaults.__setitem__(key, value)
         return sensible_defaults
-    
+
     def _create_temp_files(self, ext, aretomo_mode, rootname="", suffix="", kv=[]):
         tmpdir = tempfile.TemporaryDirectory()
         tmpfiles = []
@@ -59,7 +61,7 @@ class AreTomoTest(unittest.TestCase):
             for tmpf in tmpfiles:
                 with open(tmpf, "w") as f:
                     f.write("abc")
-            
+
         kv.append(("input_mrc_folder", f"{tmpdir.name}\\aretomo"))
         kv.append(("aretomo_mode", aretomo_mode))
         kv.append(("volz", 10)) # for the recon workflows, just arbitrary
@@ -73,6 +75,7 @@ class AreTomoTest(unittest.TestCase):
             )
         )
         return aretomo_params, tmpfiles, tmpdir
+
 
     def test_magicgui_sets_anyvalue_args(self):
         """ Tests that arguments are passed to magicgui namespace
@@ -94,12 +97,13 @@ class AreTomoTest(unittest.TestCase):
             ("output_binning", 4),
             ("recon_algo", "WBP")
         ]
-        
+
         for arg, input in test_cases:
             with self.subTest(f"{arg}, {input} -> {input}"):
                 ns = mgMod.get_args_aretomo()
                 ns.__setitem__(arg, input)
                 self.assertEqual(input, ns[arg])
+
 
     def test_magicgui_namespace_saved_to_yaml(self):
         """Tests that the magicgui namespace values are saved by
@@ -109,6 +113,7 @@ class AreTomoTest(unittest.TestCase):
         aretomo.create_yaml(input_mgNS=mgNS)
         self.assertTrue(os.path.exists("./TS_aretomo_align.yaml"))
         os.remove("./TS_aretomo_align.yaml")
+
 
     def test_aretomo_rootname_set(self):
         """Tests that rootname is set and read correctly from yaml
@@ -126,7 +131,8 @@ class AreTomoTest(unittest.TestCase):
             "test_rootname"
         )
         os.remove("./TS_aretomo_align.yaml")
-    
+
+
     def test_aretomo_suffix_set(self):
         """Tests that suffix is set and read correctly from yaml
         """
@@ -143,7 +149,8 @@ class AreTomoTest(unittest.TestCase):
             "test_suffix"
         )
         os.remove("./TS_aretomo_align.yaml")
-    
+
+
     def test_aretomo_yaml_names(self):
         """Tests that aretomo_yaml names are correctly generated
         based on aretomo_mode"""
@@ -159,6 +166,7 @@ class AreTomoTest(unittest.TestCase):
                 self.assertTrue(os.path.exists(expected_filename))
                 os.remove(expected_filename)
 
+
     def test_aretomo_mode_raises_error(self):
         """ Tests that aretomo mode raises error when not 0, 1, 2"""
         test_cases = [-1, "a", 4]
@@ -168,7 +176,8 @@ class AreTomoTest(unittest.TestCase):
                     mgNS = self._create_aretomo_yaml_from_magicgui(
                         ["aretomo_mode", aretomo_mode]
                         )
-    
+
+
     @patch("Ot2Rec.align.create_yaml")
     def test_aretomo_align_creates_stacks(self, imod_st_mock):
         """ Tests that the command to create stacks with IMOD is called by
@@ -188,7 +197,8 @@ class AreTomoTest(unittest.TestCase):
                     logger_in=None,
                 )
                 self.assertTrue(imod_st_mock.called)
-        
+
+
     def test_aretomo_align_st_file_list(self):
         """ Tests that the input MRC files list is set and read correctly
         from yaml """
@@ -226,7 +236,7 @@ class AreTomoTest(unittest.TestCase):
                 "abc_*_def/abc_*_def.st"
             ),
         ]
-        
+
         for rn_sf_dict, expected in test_cases:
             with self.subTest(f"{rn_sf_dict} -> {expected}"):
                 aretomo_params, tmpsts, tmpdir = self._create_temp_files(
@@ -235,7 +245,7 @@ class AreTomoTest(unittest.TestCase):
                     rootname=rn_sf_dict["rootname"],
                     suffix=rn_sf_dict["suffix"],
                     kv=[
-                        ("rootname", rn_sf_dict["rootname"]), 
+                        ("rootname", rn_sf_dict["rootname"]),
                         ("suffix", rn_sf_dict["suffix"]),
                     ]
                 )
@@ -247,6 +257,7 @@ class AreTomoTest(unittest.TestCase):
                     rn_sf_dict["aretomo_mode"], "TS"
                 ))
                 tmpdir.cleanup()
+
 
     def test_aretomo_align_tilt_angles_file_set_default(self):
         """ Tests that the aretomo tilt angles file is set correctly
@@ -285,7 +296,7 @@ class AreTomoTest(unittest.TestCase):
                 "abc_*_def/abc_*_def.rawtlt"
             ),
         ]
-        
+
         for rn_sf_dict, expected in test_cases:
             with self.subTest(f"{rn_sf_dict} -> {expected}"):
                 aretomo_params, tmprawtlt, tmpdir = self._create_temp_files(
@@ -294,7 +305,7 @@ class AreTomoTest(unittest.TestCase):
                     rootname=rn_sf_dict["rootname"],
                     suffix=rn_sf_dict["suffix"],
                     kv=[
-                        ("rootname", rn_sf_dict["rootname"]), 
+                        ("rootname", rn_sf_dict["rootname"]),
                         ("suffix", rn_sf_dict["suffix"]),
                     ]
                 )
@@ -307,6 +318,7 @@ class AreTomoTest(unittest.TestCase):
                 ))
                 tmpdir.cleanup()
 
+
     def test_aretomo_align_process_list_set(self):
         """ Tests that the aretomo align process list is set correctly """
         test_cases = [
@@ -315,7 +327,7 @@ class AreTomoTest(unittest.TestCase):
             {"rootname": "", "suffix": "test"},
             {"rootname": "abc", "suffix": "def"},
         ]
-        
+
         for rn_sf_dict in test_cases:
             with self.subTest(f"{rn_sf_dict} -> [0,1,2]"):
                 aretomo_params, tmpsts, tmpdir = self._create_temp_files(
@@ -324,7 +336,7 @@ class AreTomoTest(unittest.TestCase):
                     rootname=rn_sf_dict["rootname"],
                     suffix=rn_sf_dict["suffix"],
                     kv=[
-                        ("rootname", rn_sf_dict["rootname"]), 
+                        ("rootname", rn_sf_dict["rootname"]),
                         ("suffix", rn_sf_dict["suffix"])
                     ]
                 )
@@ -334,7 +346,8 @@ class AreTomoTest(unittest.TestCase):
                 )
                 os.remove("TS_aretomo_align.yaml")
                 tmpdir.cleanup()
-    
+
+
     def test_aretomo_recon_alimrc_filelist(self):
         """ Tests that aretomo recon sets the input mrcs to _ali.mrc """
         test_cases = [
@@ -343,7 +356,7 @@ class AreTomoTest(unittest.TestCase):
             ({"rootname": "", "suffix": "test"}, "TS_*_test/TS_*_test_ali.mrc"),
             ({"rootname": "abc", "suffix": "def"}, "abc_*_def/abc_*_def_ali.mrc")
         ]
-        
+
         for rn_sf_dict, expected in test_cases:
             with self.subTest(f"{rn_sf_dict} -> {expected}"):
                 aretomo_params, tmpalimrc, tmpdir = self._create_temp_files(
@@ -352,7 +365,7 @@ class AreTomoTest(unittest.TestCase):
                     rootname=rn_sf_dict["rootname"],
                     suffix=rn_sf_dict["suffix"],
                     kv=[
-                        ("rootname", rn_sf_dict["rootname"]), 
+                        ("rootname", rn_sf_dict["rootname"]),
                         ("suffix", rn_sf_dict["suffix"]),
                     ]
                 )
@@ -362,7 +375,8 @@ class AreTomoTest(unittest.TestCase):
                 )
                 os.remove("TS_aretomo_recon.yaml")
                 tmpdir.cleanup()
-    
+
+
     def test_aretomo_input_mrc_notfound(self):
         """ Tests that a warning is made when the input mrc folder does not have
         the correct filename. e.g., if recon, _ali.mrc files not found. """
@@ -377,7 +391,8 @@ class AreTomoTest(unittest.TestCase):
                     )
                     os.remove(aretomo._get_yaml_filename(aretomo_mode, "TS"))
                     tmpdir.cleanup()
-        
+
+
     def test_aretomo_recon_process_list_set(self):
         """ Tests that the aretomo recon process list is set correctly """
         test_cases = [
@@ -386,7 +401,7 @@ class AreTomoTest(unittest.TestCase):
             {"rootname": "", "suffix": "test"},
             {"rootname": "abc", "suffix": "def"},
         ]
-        
+
         for rn_sf_dict in test_cases:
             with self.subTest(f"{rn_sf_dict} -> [0,1,2]"):
                 aretomo_params, tmpalimrc, tmpdir = self._create_temp_files(
@@ -395,7 +410,7 @@ class AreTomoTest(unittest.TestCase):
                     rootname=rn_sf_dict["rootname"],
                     suffix=rn_sf_dict["suffix"],
                     kv=[
-                        ("rootname", rn_sf_dict["rootname"]), 
+                        ("rootname", rn_sf_dict["rootname"]),
                         ("suffix", rn_sf_dict["suffix"])
                     ]
                 )
@@ -406,6 +421,7 @@ class AreTomoTest(unittest.TestCase):
                 os.remove("TS_aretomo_recon.yaml")
                 tmpdir.cleanup()
 
+
     def test_aretomo_alignrecon_process_list_set(self):
         """ Tests that the aretomo align + recon process list is set correctly """
         test_cases = [
@@ -414,7 +430,7 @@ class AreTomoTest(unittest.TestCase):
             {"rootname": "", "suffix": "test"},
             {"rootname": "abc", "suffix": "def"},
         ]
-        
+
         for rn_sf_dict in test_cases:
             with self.subTest(f"{rn_sf_dict} -> [0,1,2]"):
                 aretomo_params, tmpst, tmpdir = self._create_temp_files(
@@ -423,7 +439,7 @@ class AreTomoTest(unittest.TestCase):
                     rootname=rn_sf_dict["rootname"],
                     suffix=rn_sf_dict["suffix"],
                     kv=[
-                        ("rootname", rn_sf_dict["rootname"]), 
+                        ("rootname", rn_sf_dict["rootname"]),
                         ("suffix", rn_sf_dict["suffix"]),
                     ]
                 )
@@ -431,10 +447,11 @@ class AreTomoTest(unittest.TestCase):
                     aretomo_params.params["System"]["process_list"],
                     [0,1,2]
                 )
-                
+
                 os.remove(aretomo._get_yaml_filename(2, "TS"))
                 tmpdir.cleanup()
-    
+
+
     def test_aretomo_recon_tilt_angles_set_default(self):
         """ Tests that the aretomo recon tilt angles list is set correctly
         by default if not otherwise specified by magicgui """
@@ -444,7 +461,7 @@ class AreTomoTest(unittest.TestCase):
             ({"rootname": "", "suffix": "test"}, "TS_*_test/TS_*_test.tlt"),
             ({"rootname": "abc", "suffix": "def"}, "abc_*_def/abc_*_def.tlt"),
         ]
-        
+
         for rn_sf_dict, expected in test_cases:
             with self.subTest(f"{rn_sf_dict} -> {expected}"):
                 aretomo_params, tmptlt, tmpdir = self._create_temp_files(
@@ -453,7 +470,7 @@ class AreTomoTest(unittest.TestCase):
                     rootname=rn_sf_dict["rootname"],
                     suffix=rn_sf_dict["suffix"],
                     kv=[
-                        ("rootname", rn_sf_dict["rootname"]), 
+                        ("rootname", rn_sf_dict["rootname"]),
                         ("suffix", rn_sf_dict["suffix"]),
                     ]
                 )
@@ -463,7 +480,8 @@ class AreTomoTest(unittest.TestCase):
                 )
                 os.remove(aretomo._get_yaml_filename(1, "TS"))
                 tmpdir.cleanup()
-    
+
+
     def test_aretomo_tilt_angles_set_magicgui(self):
         """ Tests that the aretomo tilt angles list is set correctly
         when specified by magicgui"""
@@ -486,7 +504,8 @@ class AreTomoTest(unittest.TestCase):
                     aretomo_params.params["AreTomo_setup"]["tilt_angles"],
                     "test.tlt"
                 )
-    
+
+
     def test_aretomo_output_mrc_set(self):
         """ Tests that aretomo output_mrc filenames are set correctly,
         and end in _ali.mrc for align only, and _rec.mrc for others"""
@@ -504,7 +523,7 @@ class AreTomoTest(unittest.TestCase):
             ({"rootname": "", "suffix": "test", "aretomo_mode":2}, "_rec.mrc"),
             ({"rootname": "abc", "suffix": "def", "aretomo_mode":2}, "_rec.mrc"),
         ]
-        
+
         for rn_sf_dict, search in test_cases:
             with self.subTest(f"{rn_sf_dict} -> {search}"):
                 exts = {
@@ -517,11 +536,11 @@ class AreTomoTest(unittest.TestCase):
                     rootname=rn_sf_dict["rootname"],
                     suffix=rn_sf_dict["suffix"],
                     kv=[
-                        ("rootname", rn_sf_dict["rootname"]), 
+                        ("rootname", rn_sf_dict["rootname"]),
                         ("suffix", rn_sf_dict["suffix"])
                     ]
                 )
-                
+
                 if rn_sf_dict["rootname"] == "":
                     rootname = "TS"
                 else:
@@ -546,7 +565,8 @@ class AreTomoTest(unittest.TestCase):
                     rn_sf_dict["aretomo_mode"], "TS"
                 ))
                 tmpdir.cleanup()
-    
+
+
     def test_aretomo_volz_accepts_defaults(self):
         """ Tests that aretomo volz >0 works"""
         test_cases = [
@@ -555,7 +575,7 @@ class AreTomoTest(unittest.TestCase):
             ("volz", 1e6),
             ("volz", 12.3),
         ]
-        
+
         for arg, input in test_cases:
             with self.subTest(f"{arg}, {input} -> {input}"):
                 mgNS = self._create_aretomo_yaml_from_magicgui(
@@ -570,9 +590,10 @@ class AreTomoTest(unittest.TestCase):
                     aretomo_params.params["AreTomo_recon"]["volz"],
                     input
                 )
-        
+
         os.remove("./TS_aretomo_recon.yaml")
-                
+
+
     def test_aretomo_volz_raises_error(self):
         """ Tests that ValueError is raised when volz is not -1 or >0"""
         test_cases = [
@@ -581,7 +602,7 @@ class AreTomoTest(unittest.TestCase):
             ("volz", -1e6),
             ("volz", 0.1)
         ]
-        
+
         for arg, input in test_cases:
             with self.subTest(f"{arg}, {input} -> ValueError"):
                 with self.assertRaises(ValueError):
@@ -590,6 +611,7 @@ class AreTomoTest(unittest.TestCase):
                     )
                     aretomo.create_yaml(input_mgNS=mgNS)
         os.remove("./TS_aretomo_recon.yaml")
+
 
     def test_aretomo_raises_error_when_volz_is_neg_one_sample_thickness_pixel_size_unset(self):
         """ Tests that ValueError is raised when volz=-1, but samplethickness
@@ -607,6 +629,7 @@ class AreTomoTest(unittest.TestCase):
                     aretomo.create_yaml(input_mgNS=mgNS)
         os.remove("./TS_aretomo_recon.yaml")
 
+
     def test_aretomo_volz_set_if_sample_thickness_and_pixel_size_ok(self):
         """ Tests that samplethickness accepted values work (-1, >0)"""
         test_cases = [
@@ -615,7 +638,7 @@ class AreTomoTest(unittest.TestCase):
             ([("sample_thickness", 1e6), ("pixel_size", 1)], 1000200),
             ([("sample_thickness", 12.3), ("pixel_size", 1)], 212),
         ]
-        
+
         for mgNS_args, expected_volz in test_cases:
             with self.subTest(f"{mgNS_args} -> {expected_volz}"):
                 mgNS_args.append(("aretomo_mode", 1))
@@ -629,18 +652,19 @@ class AreTomoTest(unittest.TestCase):
                     aretomo_params.params["AreTomo_recon"]["volz"],
                     expected_volz
                 )
-        
+
         os.remove("./TS_aretomo_recon.yaml")
-    
+
+
     def test_aretomo_process_list_folders_created(self):
         """ Tests that folders to hold the results for aretomo are created
         accorging to the process list"""
         for aretomo_mode in [0,1,2]:
             with self.subTest(f"Mode {aretomo_mode} creates results folder"):
                 tmpdir = tempfile.TemporaryDirectory()
-                
+
                 mgNS = self._create_aretomo_yaml_from_magicgui([
-                    ("aretomo_mode", aretomo_mode), 
+                    ("aretomo_mode", aretomo_mode),
                     ("volz", 10),
                     ("output_path", tmpdir.name),
                     ])
@@ -661,15 +685,16 @@ class AreTomoTest(unittest.TestCase):
                         (f"{tmpdir.name}/"
                          f"{aretomo_obj.rootname}_0{i}{aretomo_obj.suffix}")
                     ))
-                
+
+
     def test_aretomo_writes_process_list_folders_to_mdout(self):
         """ Test that mdout contains process list folders"""
         for aretomo_mode in [0,1,2]:
             with self.subTest(f"Mode {aretomo_mode} results folder in mdout"):
                 tmpdir = tempfile.TemporaryDirectory()
-                
+
                 mgNS = self._create_aretomo_yaml_from_magicgui([
-                    ("aretomo_mode", aretomo_mode), 
+                    ("aretomo_mode", aretomo_mode),
                     ("volz", 10),
                     ("output_path", tmpdir.name),
                     ])
@@ -692,14 +717,14 @@ class AreTomoTest(unittest.TestCase):
                          aretomo_obj.md_out["aretomo_output_dir"][i]
                     )
 
-    @unittest.skip("WIP")
+
     def test_aretomo_align_cmd(self):
         """ Test that align cmd is reasonable for a default input """
-    
-    @unittest.skip("WIP")
+
+
     def test_aretomo_recon_cmd(self):
         """ Tests that recon cmd is reasonable for a default input """
 
-    @unittest.skip("WIP")
+
     def test_aretomo_extra_kwargs(self):
         """ Tests that extra aretomo kwargs are passed to the cmd"""

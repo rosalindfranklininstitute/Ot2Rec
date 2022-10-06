@@ -1,6 +1,6 @@
 package:
   name: ot2rec
-  version: 0.2.4
+  version: 0.2.6
 
 source:
   path: ..
