@@ -234,8 +234,6 @@ class Metadata:
                 df.loc[(df.ts == curr_ts) & (df.image_idx == curr_idx), 'ds_factor'] = dsf
                 df.loc[(df.ts == curr_ts) & (df.image_idx == curr_idx), 'frame_dose'] = ts_dose_dict[curr_idx] / nf
 
-            ic(df.loc[df.ts == curr_ts])
-
         self.metadata['num_frames'] = df.num_frames.to_list()
         self.metadata['ds_factor'] = df.ds_factor.to_list()
         self.metadata['frame_dose'] = df.frame_dose.to_list()

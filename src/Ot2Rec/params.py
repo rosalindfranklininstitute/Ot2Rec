@@ -78,7 +78,7 @@ def new_mc2_yaml(args):
             'process_list': None,
             'output_path': str(args.output_folder.value),
             'output_prefix': args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value,
-            'use_gpu': 'auto' if not args.no_gpu.value else False,
+            'use_gpu': 'auto', # if not args.no_gpu.value else False,
             'jobs_per_gpu': args.jobs_per_gpu.value,
             'gpu_memory_usage': args.gpu_mem_usage.value,
         },
