@@ -50,6 +50,7 @@ requirements:
     - redlionfish
     - magicgui
     - pyqt
+    - mdocfile
 
 about:
   home: https://github.com/RosalindFranklinInstitute/Ot2Rec

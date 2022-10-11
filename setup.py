@@ -39,6 +39,7 @@ setup(
         'redlionfish',
         'magicgui',
         'pyqt5',
+        'mdocfile',
     ],
     entry_points={
         "console_scripts": [
