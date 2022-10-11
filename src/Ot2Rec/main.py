@@ -50,7 +50,7 @@ def new_proj():
     """
     Method to create a new project and get master metadata from raw images
     """
-    logger =logMod.Logger(log_path="new_proj.log")
+    logger = logMod.Logger(log_path="new_proj.log")
 
     # Parse user inputs
     args = mgMod.get_args_new_proj.show(run=True)
@@ -65,7 +65,8 @@ def new_proj():
 
     # Create master metadata and serialise it as yaml file
     meta.create_master_metadata()
-    if not args.no_mdoc:
+
+    if not args.no_mdoc.value:
         meta.get_mc2_temp()
 
     master_md_name = args.project_name.value + '_master_md.yaml'
@@ -75,7 +76,6 @@ def new_proj():
     logger(level="info",
            message="Master metadata file created.")
 
-    return args
 
 
 def cleanup():
