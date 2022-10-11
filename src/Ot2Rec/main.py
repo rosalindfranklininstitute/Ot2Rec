@@ -50,7 +50,7 @@ def new_proj():
     """
     Method to create a new project and get master metadata from raw images
     """
-    logger =logMod.Logger(log_path="new_proj.log")
+    logger = logMod.Logger(log_path="new_proj.log")
 
     # Parse user inputs
     args = mgMod.get_args_new_proj.show(run=True)
@@ -75,7 +75,6 @@ def new_proj():
     logger(level="info",
            message="Master metadata file created.")
 
-    return args
 
 
 def cleanup():
