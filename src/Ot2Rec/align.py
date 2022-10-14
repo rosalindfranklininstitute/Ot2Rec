@@ -756,7 +756,13 @@ def get_align_stats(exclusive=True, args_in=None):
         get_weighted_crit = re.compile('[0-9]+.[0-9]+')
         weighted_error = float(list(filter(get_weighted_crit.match, filter_split))[0])
 
-        stats_df.loc[len(stats_df.index)] = [curr_ts, mean, sd, weighted_error]
+        stats_df.loc[len(stats_df.index)] = [int(curr_ts), mean, sd, weighted_error]
+
+    # Dump stats as yaml file
+    with open(f"{rootname}_imod_align_stats.yaml", "w") as f:
+        yaml.dump(stats_df.reset_index().to_dict(orient="records"),
+                  f,
+                  sort_keys=False, indent=4)
 
     stats_df.sort_values(by='Error weighted mean (nm)',
                          inplace=True)
