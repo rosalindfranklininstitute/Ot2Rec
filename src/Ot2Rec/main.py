@@ -65,8 +65,9 @@ def new_proj():
 
     # Create master metadata and serialise it as yaml file
     meta.create_master_metadata()
-    if not args.no_mdoc:
+    if not args.no_mdoc.value:
         meta.get_mc2_temp()
+        meta.get_acquisition_settings()
 
     master_md_name = args.project_name.value + '_master_md.yaml'
     with open(master_md_name, 'w') as f:
