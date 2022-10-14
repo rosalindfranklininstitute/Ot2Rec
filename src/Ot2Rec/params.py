@@ -270,14 +270,14 @@ def new_savurecon_yaml(args):
     args (Namespace) :: Namespace containing user parameter inputs
     """
 
-    savurecon_yaml_name = args.project_name + '_savurecon.yaml'
+    savurecon_yaml_name = args.project_name.value + '_savurecon.yaml'
 
     savurecon_yaml_dict = {
         'System': {
             'process_list': None,
-            'output_path': args.output_path,
-            'output_rootname': args.project_name if args.rootname is None else args.rootname,
-            'output_suffix': args.suffix,
+            'output_path': str(args.output_path.value),
+            'output_rootname': args.project_name.value if args.rootname.value is None else args.rootname.value,
+            'output_suffix': args.suffix.value,
         },
 
         'Savu': {
