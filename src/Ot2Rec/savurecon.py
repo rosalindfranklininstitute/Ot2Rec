@@ -82,6 +82,13 @@ class SavuRecon:
             if "savu_output_dir" not in list(self.md_out.keys()):
                 self.md_out["savu_output_dir"] = {}
             self.md_out["savu_output_dir"][curr_ts] = subfolder
+            
+            # Add processed mrc to output dir
+            if "tomogram" not in list(self.md_out.keys()):
+                self.md_out["tomogram"] = {}
+            self.md_out["tomogram"][curr_ts] = glob(
+                f'{subfolder}/*/*.mrc'
+            )[0]
 
     def _get_savuconfig_recon_command(self, i):
         """
@@ -309,7 +316,7 @@ def run():
                                         filename=savurecon_yaml)
 
     # Create Logger object
-    log_path = "./o2r_savurecon.log"
+    log_path = "./o2r_savu.log"
     try:
         os.remove(log_path)
     except:
