@@ -16,6 +16,9 @@
 import re
 import os
 from glob import glob1
+from functools import partial
+import multiprocessing as mp
+
 import pandas as pd
 import numpy as np
 import scipy.constants as spk
@@ -24,6 +27,8 @@ import skimage.transform as skt
 from skimage.transform import iradon, iradon_sart
 from tqdm import tqdm
 import mrcfile
+
+
 from icecream import ic
 
 from . import user_args as uaMod
@@ -79,7 +84,7 @@ def get_psf(ctffile, point_source_recip, k2_grid, alpha_g):
     # FT point-source and convolve with CTF
     ps_ctf_k = point_source_recip * ctf
 
-    return 1/q_min, 1/q_max, np.absolute(np.fft.ifft2(ps_ctf_k))**2
+    return 1/q_min, 1/q_max, np.absolute(np.fft.ifft2(ps_ctf_k))
 
 
 def calculate_k_grids(image_size, pixel_size):
@@ -101,17 +106,22 @@ def calculate_k_grids(image_size, pixel_size):
     kxv, kyv = np.meshgrid(kx_gridpts, ky_gridpts, indexing='ij', sparse=True)
     k2_grid = kxv**2 + kyv**2
 
-    # alpha_g = np.arctan2(kxv, kyv, dtype=np.float32)
     alpha_g = np.angle(kxv + 1j*kyv)
 
     return k2_grid, alpha_g
 
 
-def reconstruct_fbp(stack, angle_list):
-    tomo = np.zeros((stack.shape[1], stack.shape[1], stack.shape[2]), dtype=np.float32)
-    for curr_slice in range(stack.shape[2]):
-        sinogram = stack[..., curr_slice]
-        tomo[..., curr_slice] = iradon(sinogram.T, angle_list)
+def reconstruct_slice(args, slice_idx):
+    stack, angle_list = args
+    sino_slice = stack[..., slice_idx]
+    return iradon(sino_slice.T, angle_list)
+
+
+def reconstruct_full_stack(stack, angle_list):
+    pool = mp.Pool(mp.cpu_count())
+    p = partial(reconstruct_slice, (stack, angle_list))
+    tomo_map = pool.map(p, range(stack.shape[2]))
+    tomo = np.array(tomo_map, dtype=np.float32)
 
     return tomo
 
@@ -180,7 +190,7 @@ def run():
             mean_res[index] = 0.5*(res0+res1) * 1e10
 
         # calculate PSF
-        full_psf = reconstruct_fbp(full_ctf, sorted(angle_list))
+        full_psf = reconstruct_full_stack(full_ctf, sorted(angle_list))
 
         # Write out psf stack
         with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:04}_PSF.mrc', overwrite=True) as f:
