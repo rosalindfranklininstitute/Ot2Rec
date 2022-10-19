@@ -19,9 +19,12 @@ from glob import glob1
 import pandas as pd
 import numpy as np
 import scipy.constants as spk
+from scipy.signal import convolve2d as c2d
 import skimage.transform as skt
+from skimage.transform import iradon, iradon_sart
 from tqdm import tqdm
 import mrcfile
+from icecream import ic
 
 from . import user_args as uaMod
 from . import magicgui as mgMod
@@ -63,7 +66,8 @@ def get_psf(ctffile, point_source_recip, k2_grid, alpha_g):
         (dphi + np.arctan2(w2, np.sqrt(1 - w2**2)))
 
     # Calculate CTF
-    ctf = -np.sin(chi, dtype=np.float32)
+    # ctf = -np.sin(chi, dtype=np.float32)
+    ctf = np.exp(-1j*chi)
 
     # Calculate first-zero of CTF
     denom0 = wvl * (cs/wvl)**0.25
@@ -74,9 +78,8 @@ def get_psf(ctffile, point_source_recip, k2_grid, alpha_g):
 
     # FT point-source and convolve with CTF
     ps_ctf_k = point_source_recip * ctf
-    psf = np.real(np.fft.ifft2(ps_ctf_k)).astype(np.float32)
 
-    return 1/q_min, 1/q_max, psf
+    return 1/q_min, 1/q_max, np.absolute(np.fft.ifft2(ps_ctf_k))**2
 
 
 def calculate_k_grids(image_size, pixel_size):
@@ -95,12 +98,22 @@ def calculate_k_grids(image_size, pixel_size):
     kx_gridpts = np.fft.fftfreq(image_size[0], d=pixel_size)
     ky_gridpts = np.fft.fftfreq(image_size[1], d=pixel_size)
 
-    kxv, kyv = np.meshgrid(kx_gridpts, ky_gridpts, indexing='ij')
+    kxv, kyv = np.meshgrid(kx_gridpts, ky_gridpts, indexing='ij', sparse=True)
     k2_grid = kxv**2 + kyv**2
 
-    alpha_g = np.arctan2(kxv, kyv, dtype=np.float32)
+    # alpha_g = np.arctan2(kxv, kyv, dtype=np.float32)
+    alpha_g = np.angle(kxv + 1j*kyv)
 
     return k2_grid, alpha_g
+
+
+def reconstruct_fbp(stack, angle_list):
+    tomo = np.zeros((stack.shape[1], stack.shape[1], stack.shape[2]), dtype=np.float32)
+    for curr_slice in range(stack.shape[2]):
+        sinogram = stack[..., curr_slice]
+        tomo[..., curr_slice] = iradon(sinogram.T, angle_list)
+
+    return tomo
 
 
 def run():
@@ -154,28 +167,34 @@ def run():
         angle_list = [float(i.split('/')[-1].split('_')[2]) for i in glob_list]
         angle_index = [sorted(angle_list).index(i) for i in angle_list]
 
-        full_psf = np.empty(shape=(len(angle_list), *source_dim[-2:]),
+        full_ctf = np.empty(shape=(len(angle_list), *source_dim[-2:]),
                             dtype=np.float32)
         mean_res = np.empty(shape=(len(angle_list)),
                             dtype=np.float32)
+
         for index in range(len(angle_index)):
-            res0, res1, full_psf[angle_index[index], ...] = get_psf(ctffile='./ctffind/' + glob_list[index],
+            res0, res1, full_ctf[angle_index[index], ...] = get_psf(ctffile='./ctffind/' + glob_list[index],
                                                                     point_source_recip=ps_k,
                                                                     k2_grid=k2_grid,
                                                                     alpha_g=alpha_g_grid)
             mean_res[index] = 0.5*(res0+res1) * 1e10
 
-        # Write out psf stack
-        with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:04}.mrc', overwrite=True) as f:
-            (xmin, ymin) = (
-                (source_dim[-2] - args.dims.value[0]) // 2,
-                (source_dim[-1] - args.dims.value[1]) // 2)
-            (xmax, ymax) = (xmin + args.dims.value[0], ymin + args.dims.value[1])
+        # calculate PSF
+        full_psf = reconstruct_fbp(full_ctf, sorted(angle_list))
 
-            f.set_data(full_psf[:, xmin:xmax, ymin:ymax])
+        # Write out psf stack
+        with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:04}_PSF.mrc', overwrite=True) as f:
+            (xmin, ymin, zmin) = (
+                (source_dim[0] - args.dims.value[0]) // 2,
+                (source_dim[0] - args.dims.value[1]) // 2,
+                (source_dim[1] - args.dims.value[2]) // 2,
+            )
+            (xmax, ymax, zmax) = (xmin + args.dims.value[0], ymin + args.dims.value[1], zmin + args.dims.value[2])
+
+            f.set_data(np.asarray(full_psf[xmin:xmax, ymin:ymax, zmin:zmax], dtype=np.float32))
 
         # Write out rawtlt file
-        with open(subfolder_path + f'/{rootname}_{curr_ts:04}.rawtlt', 'w') as f:
+        with open(subfolder_path + f'/{rootname}_{curr_ts:04}.tlt', 'w') as f:
             for angle in sorted(angle_list):
                 f.writelines(str(angle) + '\n')
 
