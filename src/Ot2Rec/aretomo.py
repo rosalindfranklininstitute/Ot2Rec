@@ -449,8 +449,13 @@ def run():
         filename=aretomo_yaml_name
     )
 
-    # Create logger object
-    logger = logMod.Logger()
+    # Create Logger object
+    log_path = "./o2r_aretomo.log"
+    try:
+        os.remove(log_path)
+    except:
+        pass
+    logger = logMod.Logger(log_path=log_path)
 
     # Create AreTomo object
     aretomo_obj = AreTomo(

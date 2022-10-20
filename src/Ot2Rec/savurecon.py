@@ -316,7 +316,7 @@ def run():
                                         filename=savurecon_yaml)
 
     # Create Logger object
-    log_path = "./o2r_savu.log"
+    log_path = "./o2r_savurecon.log"
     try:
         os.remove(log_path)
     except:
