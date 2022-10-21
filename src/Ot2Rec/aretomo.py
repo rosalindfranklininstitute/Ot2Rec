@@ -133,11 +133,11 @@ class AreTomo:
             '0'
         ]
 
-        if self.params['AreTomo_recon']['recon_algo'] == 0:
+        if self.params['AreTomo_recon']['recon_algo'] == "WBP":
             # WBP
             cmd.append('-Wbp')
             cmd.append('1')
-        elif self.params['AreTomo_recon']['recon_algo'] == 1:
+        elif self.params['AreTomo_recon']['recon_algo'] == "SART":
             # SART
             cmd.append('-Wbp')
             cmd.append('0')
