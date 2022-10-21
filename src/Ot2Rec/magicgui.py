@@ -554,7 +554,7 @@ def get_args_ctfsim(
         pixel_res=0.000,
         ds_factor=4,
         rootname="",
-        dims=[100, 100, 100],
+        dims=[50, 50, 50],
 ):
     """
     Function to add arguments to parser for O2R-CTFsim
