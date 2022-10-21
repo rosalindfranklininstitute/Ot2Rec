@@ -747,7 +747,9 @@ def get_args_imod_route(
                "min": -180.0000,
                "max": 180.0000
     },
-    pixel_size={"label": "Pixel size in nm"},
+    pixel_size={"label": "Pixel size in nm",
+                "min": 0.0001,
+    },
     rootname={"label": "Rootname of current project (required if different from project name"},
     suffix={"label": "Suffix of project files"},
     input_mrc_folder={
@@ -782,8 +784,8 @@ def get_args_imod_route(
 def get_args_aretomo(
         project_name="",
         aretomo_mode=0,
-        rot_angle=90.0,
-        pixel_size=1.0,
+        rot_angle=0.001,
+        pixel_size=0.001,
         rootname="",
         suffix="",
         input_mrc_folder=Path("./aretomo"),
