@@ -644,7 +644,10 @@ def get_args_rldeconv(
     rootname={"label": "Rootname of current project (if different from project name)"},
     suffix={"label": "Suffix of project files"},
     extension={"label": "File extension of stacks *"},
-    imod_suffix={"label": "IMOD file suffix"}
+    imod_suffix={"label": "IMOD file suffix"},
+    algorithm={"widget_type": "RadioButtons",
+         "label": "Reconstruction algorithm",
+         "choices": ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA", "BP_CUDA"]},
 )
 def get_args_savurecon(
         project_name="",
@@ -653,7 +656,8 @@ def get_args_savurecon(
         rootname="",
         suffix="",
         extension="mrc",
-        imod_suffix="ali"
+        imod_suffix="ali",
+        algorithm="BP_CUDA"
 ):
     """
     Function to add arguments to parser for Savu reconstruction

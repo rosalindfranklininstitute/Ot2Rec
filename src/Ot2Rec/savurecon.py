@@ -82,6 +82,13 @@ class SavuRecon:
             if "savu_output_dir" not in list(self.md_out.keys()):
                 self.md_out["savu_output_dir"] = {}
             self.md_out["savu_output_dir"][curr_ts] = subfolder
+            
+            # Add processed mrc to output dir
+            if "tomogram" not in list(self.md_out.keys()):
+                self.md_out["tomogram"] = {}
+            self.md_out["tomogram"][curr_ts] = glob(
+                f'{subfolder}/*/*.mrc'
+            )[0]
 
     def _get_savuconfig_recon_command(self, i):
         """
@@ -221,13 +228,16 @@ def create_yaml():
     """
     Subroutine to create new yaml file for Savu reconstruction
     """
+    logger = logMod.Logger(log_path="o2r_savu.log")
+
     # Parse user inputs
     args = mgMod.get_args_savurecon.show(run=True)
-    print(args); exit()
 
     # Create the yaml file, then automatically update it
     prmMod.new_savurecon_yaml(args)
     update_yaml(args)
+
+    logger(message="Savu metadata file created.")
 
 
 def update_yaml(args):
@@ -236,12 +246,20 @@ def update_yaml(args):
     Args:
     args (Namespace) :: Namespace containing user inputs
     """
+    logger = logMod.Logger(log_path="o2r_savu.log")
 
-    parent_path = args.stacks_folder
-    rootname = args.project_name if args.rootname is None else args.rootname
-    suffix = args.suffix
-    ext = args.extension
-    imod_suffix = args.imod_suffix
+    # Check if SavuRecon yaml exists
+    savu_yaml_name = args.project_name.value + '_savurecon.yaml'
+    if not os.path.isfile(savu_yaml_name):
+        logger(level="error",
+               message="Savu metadata file not found.")
+        raise IOError("Error in Ot2Rec.main.update_savu_yaml: File not found.")    
+
+    parent_path = args.stacks_folder.value
+    rootname = args.project_name.value if args.rootname.value is "" else args.rootname.value
+    suffix = args.suffix.value
+    ext = args.extension.value
+    imod_suffix = args.imod_suffix.value
 
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}')
@@ -255,13 +273,14 @@ def update_yaml(args):
                for i in st_file_list]
 
     # Read in and update YAML parameters
-    recon_yaml_name = args.project_name + '_savurecon.yaml'
-    recon_params = prmMod.read_yaml(project_name=args.project_name,
-                                    filename=recon_yaml_name)
+    savu_yaml_name = args.project_name.value + '_savurecon.yaml'
+    recon_params = prmMod.read_yaml(project_name=args.project_name.value,
+                                    filename=savu_yaml_name)
 
     recon_params.params['System']['process_list'] = ts_list
     recon_params.params['Savu']['setup']['tilt_angles'] = tlt_file_list
     recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
+    logger(message=f"Search term is {parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}")
 
     # Change centre of rotation to centre of image by default
     centre_of_rotation = []
@@ -270,9 +289,13 @@ def update_yaml(args):
         centre_of_rotation.append(float(mrc.header["nx"] / 2))  # xdim/2
     recon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
 
+    # Set algorithm
+    recon_params.params['Savu']['setup']['algorithm'] = args.algorithm.value
+
     # Write out YAML file
-    with open(recon_yaml_name, 'w') as f:
+    with open(savu_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
+    logger(message="Savu metadata updated.")
 
 
 def run():
