@@ -71,7 +71,6 @@ def get_psf(ctffile, point_source_recip, k2_grid, alpha_g):
         (dphi + np.arctan2(w2, np.sqrt(1 - w2**2)))
 
     # Calculate CTF
-    # ctf = -np.sin(chi, dtype=np.float32)
     ctf = np.exp(-1j*chi)
 
     # Calculate first-zero of CTF
@@ -124,6 +123,27 @@ def reconstruct_full_stack(stack, angle_list):
     tomo = np.array(tomo_map, dtype=np.float32)
 
     return tomo
+
+
+def normalise_stack(tomo, pixel_size):
+    image_size = tomo.shape
+
+    # Create k-space coordinate grid
+    kx_gridpts = np.fft.fftfreq(image_size[0], d=pixel_size)
+    ky_gridpts = np.fft.fftfreq(image_size[1], d=pixel_size)
+    kz_gridpts = np.fft.fftfreq(image_size[2], d=pixel_size)
+
+    # Fourier transform PSF stack
+    ctf_stack = np.fft.fftn(tomo)
+
+    # Normalise CTF stack and back FFT
+    zero_freq = np.array([np.argmin(np.abs(kx_gridpts)),
+                          np.argmin(np.abs(ky_gridpts)),
+                          np.argmin(np.abs(kz_gridpts))])
+    ctf_stack_norm = ctf_stack / ctf_stack[zero_freq[0], zero_freq[1], zero_freq[2]]
+    psf_out = np.absolute(np.fft.ifftn(ctf_stack_norm))
+
+    return psf_out
 
 
 def run():
@@ -190,7 +210,8 @@ def run():
             mean_res[index] = 0.5*(res0+res1) * 1e10
 
         # calculate PSF
-        full_psf = reconstruct_full_stack(full_ctf, sorted(angle_list))
+        psf_unnorm = reconstruct_full_stack(full_ctf, sorted(angle_list))
+        full_psf = normalise_stack(psf_unnorm, pixel_size*ds_factor)
 
         # Write out psf stack
         with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:04}_PSF.mrc', overwrite=True) as f:
