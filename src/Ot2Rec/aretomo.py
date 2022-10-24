@@ -211,7 +211,7 @@ def _update_volz(args, aretomo_params):
                     in nm to automatically calculate VolZ. Currently sample_thickness \
                     = {args['sample_thickness']} and pixel_size = {args['pixel_size']}")
             aretomo_params.params["AreTomo_recon"]["volz"] = int(
-                (args["sample_thickness"] * args["pixel_size"]) + 200
+                (args["sample_thickness"] * args["pixel_size"] * 0.1) + 200   # factor of 0.1 because pixel_size in A
             )
 
     # Reject volz and sample thickness values which are not -1 or >0
