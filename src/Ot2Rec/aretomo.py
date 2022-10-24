@@ -293,7 +293,6 @@ def update_yaml(args):
         args["aretomo_mode"],
         args["project_name"]
     )
-    ic(type(aretomo_yaml_name))
 
     aretomo_params = prmMod.read_yaml(
         project_name=args["project_name"],
@@ -411,7 +410,6 @@ def create_yaml(input_mgNS=None):
     else:
         args = input_mgNS
 
-    ic(args)
     # Create the yaml file, then automatically update it
     prmMod.new_aretomo_yaml(args)
     update_yaml(args)
