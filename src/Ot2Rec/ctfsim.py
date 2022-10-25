@@ -142,6 +142,7 @@ def normalise_stack(tomo, pixel_size):
                           np.argmin(np.abs(kz_gridpts))])
     ctf_stack_norm = ctf_stack / ctf_stack[zero_freq[0], zero_freq[1], zero_freq[2]]
     psf_out = np.absolute(np.fft.ifftn(ctf_stack_norm))
+    psf_out /= np.max(psf_out)
 
     return psf_out
 
@@ -210,19 +211,19 @@ def run():
             mean_res[index] = 0.5*(res0+res1) * 1e10
 
         # calculate PSF
-        psf_unnorm = reconstruct_full_stack(full_ctf, sorted(angle_list))
+        (xmin, ymin, zmin) = (
+            (source_dim[0] - args.dims.value[0]) // 2,
+            (source_dim[0] - args.dims.value[1]) // 2,
+            (source_dim[1] - args.dims.value[2]) // 2,
+        )
+        (xmax, ymax, zmax) = (xmin + args.dims.value[0], ymin + args.dims.value[1], zmin + args.dims.value[2])
+        psf_unnorm = reconstruct_full_stack(full_ctf, sorted(angle_list))[xmin:xmax, ymin:ymax, zmin:zmax]
+
         full_psf = normalise_stack(psf_unnorm, pixel_size*ds_factor)
 
         # Write out psf stack
         with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:04}_PSF.mrc', overwrite=True) as f:
-            (xmin, ymin, zmin) = (
-                (source_dim[0] - args.dims.value[0]) // 2,
-                (source_dim[0] - args.dims.value[1]) // 2,
-                (source_dim[1] - args.dims.value[2]) // 2,
-            )
-            (xmax, ymax, zmax) = (xmin + args.dims.value[0], ymin + args.dims.value[1], zmin + args.dims.value[2])
-
-            f.set_data(np.asarray(full_psf[xmin:xmax, ymin:ymax, zmin:zmax], dtype=np.float32))
+            f.set_data(np.asarray(full_psf, dtype=np.float32))
 
         # Write out rawtlt file
         with open(subfolder_path + f'/{rootname}_{curr_ts:04}.tlt', 'w') as f:
