@@ -177,22 +177,6 @@ def run():
     # Parse user inputs
     args = mgMod.get_args_rldeconv.show(run=True)
 
-    # Create logger object
-    logger = logMod.Logger()
-
-    # Check provided files are present
-    # try:
-    #     assert (len(glob(str(args.image_path.value))) > 0)
-    # except:
-    #     logger("Error in rlf_deconv:run: Raw image doesn't exist. Aborting...")
-    #     return
-
-    # try:
-    #     assert (len(glob(args.psf_path)) > 0)
-    # except:
-    #     logger("Error in rlf_deconv:run: PSF image doesn't exist. Aborting...")
-    #     return
-
     # Define deconvolution parameters and object
     deconv_params = dict({
         'method': args.device.value,
