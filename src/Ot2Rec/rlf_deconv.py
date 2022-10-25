@@ -15,6 +15,7 @@
 
 from glob import glob
 import os
+import numpy as np
 from icecream import ic
 from tqdm import tqdm
 
@@ -109,7 +110,7 @@ class RLF_deconv():
         with mrcfile.open(path) as image:
             data = image.data
 
-        return data
+        return 256 * (data-np.min(data)) / np.ptp(data)
 
 
     @staticmethod
