@@ -14,6 +14,9 @@
 
 
 from glob import glob
+import os
+from icecream import ic
+
 import mrcfile
 import tifffile
 
@@ -34,21 +37,24 @@ class RLF_deconv():
     """
     Class encapsulating an RLF_deconv object
     """
-
-    def __init__(self, orig_path, kernel_path, params_dict, orig_mrc, kernel_mrc):
+    def __init__(self, rootname, suffix, raw_folder, kernel_folder, out_folder, params_dict, orig_mrc, kernel_mrc):
         """
         Initialise the RLF_deconv object
 
         ARGS:
-        orig_path (ndarray)   :: path to original image to be deconvolved
-        kernel_path (ndarray) :: path to kernel with which the image is to be deconvolved
-        params_dict (dict)    :: dictionary containing all parameters used in RLF
-        orig_mrc (bool)       :: whether the original image is in MRC format (TIFF if false)
-        kernel_mrc (bool)     :: whether the kernel is in MRC format (TIFF if false)
+        rootname (str)          :: rootname of project
+        orig_folder (ndarray)   :: parent folder containing original images to be deconvolved
+        kernel_folder (ndarray) :: parent folder containing kernel with which the image is to be deconvolved
+        out_folder (ndarray)    :: output parent folder for deconvolved tomograms
+        params_dict (dict)      :: dictionary containing all parameters used in RLF
+        orig_mrc (bool)         :: whether the original image is in MRC format (TIFF if false)
+        kernel_mrc (bool)       :: whether the kernel is in MRC format (TIFF if false)
         """
-
-        self.orig_path = orig_path
-        self.kernel_path = kernel_path
+        self.rootname = rootname
+        self.suffix = suffix
+        self.raw_folder = raw_folder
+        self.kernel_folder = kernel_folder
+        self.out_folder = out_folder
         self.params = params_dict
         self.orig_mrc = orig_mrc
         self.kernel_mrc = kernel_mrc
@@ -57,25 +63,37 @@ class RLF_deconv():
         self.orig = None
         self.kernel = None
 
+        self._get_internal_metadata()
+
+
     def __call__(self):
         """
         Method to start deconvolution
         """
-        # Read in raw image and kernel files
-        if self.orig_mrc:
-            self.orig = self.read_mrc(self.orig_path)
-        else:
-            self.orig = self.read_tiff(self.orig_path)
+        for idx, _ in enumerate(self.plist):
+            self.orig_path = self.raw_files[idx]
+            self.kernel_path = self.psf_files[idx]
+            self.out_path = f"{self.out_folder}/{self.plist[idx]}/{self.plist[idx]}_deconv.mrc"
 
-        if self.kernel_mrc:
-            self.kernel = self.read_mrc(self.kernel_path)
-        else:
-            self.kernel = self.read_tiff(self.kernel_path)
+            # Read in raw image and kernel files
+            if self.orig_mrc:
+                self.orig = self.read_mrc(self.orig_path)
+            else:
+                self.orig = self.read_tiff(self.orig_path)
 
-        # Deconvolve image
-        out = self._deconv_array()
+            if self.kernel_mrc:
+                self.kernel = self.read_mrc(self.kernel_path)
+            else:
+                self.kernel = self.read_tiff(self.kernel_path)
 
-        return out
+            # Deconvolve image
+            out = self._deconv_array()
+
+            # Save results
+            with mrcfile.new(self.out_path, overwrite=True) as f:
+                f.set_data(out)
+
+
 
     @staticmethod
     def read_mrc(path):
@@ -90,6 +108,7 @@ class RLF_deconv():
 
         return data
 
+
     @staticmethod
     def read_tiff(path):
         """
@@ -101,6 +120,7 @@ class RLF_deconv():
         data = tifffile.imread(path)
 
         return data
+
 
     def _deconv_array(self):
         """
@@ -119,11 +139,37 @@ class RLF_deconv():
         return image_deconvolved
 
 
+    def _get_internal_metadata(self):
+        """
+        Method to prepare internal metadata for processing and checking
+        """
+        # Get process list
+        raw_subfolders = (f"{self.raw_folder}/"
+                          f"{self.rootname}_*{self.suffix}")
+        psf_subfolders = (f"{self.kernel_folder}/"
+                          f"{self.rootname}_*{self.suffix}")
+        raw_set = set([i.split("/")[-1] for i in glob(raw_subfolders)])
+        psf_set = set([i.split("/")[-1] for i in glob(psf_subfolders)])
+        self.plist = sorted(list(raw_set & psf_set))
+
+        self.raw_files = []
+        self.psf_files = []
+        for proc in self.plist:
+            # Create the folders and dictionary for future reference
+            out_subfolders = f"{self.out_folder}/{proc}"
+            os.makedirs(out_subfolders, exist_ok=True)
+
+            # Find relevant files
+            self.raw_files.append(glob(f"{self.raw_folder}/{proc}/*_ali_rec.mrc")[0])
+            self.psf_files.append(glob(f"{self.kernel_folder}/{proc}/*_PSF.mrc")[0])
+
+        assert(len(self.raw_files)==len(self.psf_files)), \
+            "ERROR: lengths of raw and PSF file list not equal. File missing?"
+
+
 """
 PLUGIN METHODS
 """
-
-
 def run():
     """
     Method to deconvolve image using a given kernel (point-spread function)
@@ -156,14 +202,15 @@ def run():
         'resAsUint8': args.uint.value,
     })
 
-    my_deconv = RLF_deconv(orig_path=str(args.image_path.value),
-                           kernel_path=str(args.psf_path.value),
-                           params_dict=deconv_params,
-                           orig_mrc=args.image_type.value == 'mrc',
-                           kernel_mrc=args.psf_type.value == 'mrc')
+    my_deconv = RLF_deconv(
+        rootname = args.project_name.value,
+        suffix = args.file_suffix.value,
+        raw_folder=str(args.raw_folder.value),
+        kernel_folder=str(args.psf_folder.value),
+        out_folder=str(args.output_folder.value),
+        params_dict=deconv_params,
+        orig_mrc=args.image_type.value == 'mrc',
+        kernel_mrc=args.psf_type.value == 'mrc'
+    )
 
     deconvd_image = my_deconv()
-
-    # Save results
-    with mrcfile.new(str(args.output_path.value), overwrite=True) as f:
-        f.set_data(deconvd_image)
