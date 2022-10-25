@@ -16,6 +16,7 @@
 from glob import glob
 import os
 from icecream import ic
+from tqdm import tqdm
 
 import mrcfile
 import tifffile
@@ -70,7 +71,9 @@ class RLF_deconv():
         """
         Method to start deconvolution
         """
-        for idx, _ in enumerate(self.plist):
+        tqdm_iter = tqdm(range(len(self.plist)), ncols=100)
+
+        for idx in tqdm_iter:
             self.orig_path = self.raw_files[idx]
             self.kernel_path = self.psf_files[idx]
             self.out_path = f"{self.out_folder}/{self.plist[idx]}/{self.plist[idx]}_deconv.mrc"
