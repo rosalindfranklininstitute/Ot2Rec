@@ -85,10 +85,12 @@ class RLF_deconv():
             else:
                 self.orig = self.read_tiff(self.orig_path)
 
+            self.orig = 256 * (self.orig-np.min(self.orig)) / np.ptp(self.orig)
+
             if self.kernel_mrc:
-                self.kernel = self.read_mrc(self.kernel_path)
+                self.kernel = np.flip(self.read_mrc(self.kernel_path))
             else:
-                self.kernel = self.read_tiff(self.kernel_path)
+                self.kernel = np.flip(self.read_tiff(self.kernel_path))
 
             # Deconvolve image
             out = self._deconv_array()
@@ -110,7 +112,7 @@ class RLF_deconv():
         with mrcfile.open(path) as image:
             data = image.data
 
-        return 256 * (data-np.min(data)) / np.ptp(data)
+        return data
 
 
     @staticmethod
