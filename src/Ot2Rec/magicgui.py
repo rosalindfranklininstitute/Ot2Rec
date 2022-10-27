@@ -614,7 +614,7 @@ def get_args_rldeconv(
         device="GPU",
         niter=10,
         block=False,
-        uint=True,
+        uint=False,
 ):
     """
     Function to add arguments to parser for RedLionfish deconvolution
