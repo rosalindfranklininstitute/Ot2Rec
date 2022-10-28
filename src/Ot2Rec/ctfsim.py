@@ -189,7 +189,7 @@ def run():
 
     for curr_ts in tqdm_iter:
         # Create folders and subfolders
-        subfolder_path = f'PSF/{rootname}_{curr_ts:04}'
+        subfolder_path = f'{args.output_folder.value}/{rootname}_{curr_ts:04}'
         os.makedirs(subfolder_path, exist_ok=True)
 
         # Find txt files from ctffind

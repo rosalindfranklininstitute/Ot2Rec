@@ -540,6 +540,9 @@ def get_args_recon(
     result_widget=False,
 
     project_name={"label": "Project name *"},
+    output_folder={"widget_type": "FileEdit",
+                   "label": "Folder for simulated PSF tomograms",
+                   "mode":"w"},
     pixel_res={"label": "Pixel resolution (in angstroms) *",
                "min": 0.0,
                "step": 0.001},
@@ -551,9 +554,10 @@ def get_args_recon(
 )
 def get_args_ctfsim(
         project_name="",
+        output_folder=Path("./PSF"),
+        rootname="",
         pixel_res=0.000,
         ds_factor=4,
-        rootname="",
         dims=[30, 30, 30],
 ):
     """
