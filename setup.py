@@ -39,6 +39,8 @@ setup(
         'redlionfish',
         'magicgui',
         'pyqt5',
+        'mdocfile',
+        'joblib'
     ],
     entry_points={
         "console_scripts": [

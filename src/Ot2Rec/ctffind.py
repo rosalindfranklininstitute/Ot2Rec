@@ -16,15 +16,38 @@
 import os
 import argparse
 import subprocess
+import contextlib
+import multiprocessing as mp
+import joblib
 import yaml
 from tqdm import tqdm
 import pandas as pd
+from icecream import ic
 
 from . import user_args as uaMod
 from . import magicgui as mgMod
 from . import metadata as mdMod
 from . import logger as logMod
 from . import params as prmMod
+
+
+@contextlib.contextmanager
+def tqdm_joblib(tqdm_object):
+    """
+    Context manager to patch joblib to report into tqdm progress bar given as argument
+    """
+    class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
+        def __call__(self, *args, **kwargs):
+            tqdm_object.update(n=self.batch_size)
+            return super().__call__(*args, **kwargs)
+
+    old_batch_callback = joblib.parallel.BatchCompletionCallBack
+    joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
+    try:
+        yield tqdm_object
+    finally:
+        joblib.parallel.BatchCompletionCallBack = old_batch_callback
+        tqdm_object.close()
 
 
 class ctffind():
@@ -172,6 +195,29 @@ class ctffind():
                       'no']
         self.input_string = '\n'.join(input_dict)
 
+
+    def _ctffind_single(self, idx):
+        self._get_ctffind_command(self.ctf_images.iloc[idx])
+        ctffind_run = subprocess.run(self.cmd,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT,
+                                     input=self.input_string,
+                                     encoding='ascii',
+                                     check=True,
+        )
+
+        try:
+            assert(not ctffind_run.stderr)
+        except:
+            error_count += 1
+            self.logObj(f"CTFFind4: An error has occurred ({ctffind_run.returncode}) "
+                        f"on stack{index}.")
+
+        self.stdout = ctffind_run.stdout
+        self.update_ctffind_metadata()
+        self.export_metadata()
+
+
     def run_ctffind(self):
         """
         Method to run ctffind on tilt-series sequentially
@@ -182,27 +228,12 @@ class ctffind():
         error_count = 0
         ts_list = list(self.ctf_images.iterrows())
         tqdm_iter = tqdm(ts_list, ncols=100)
-        for index, curr_image in tqdm_iter:
-            # Get the command and inputs for current tilt-series
-            self._get_ctffind_command(curr_image)
-            ctffind_run = subprocess.run(self.cmd,
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.STDOUT,
-                                         input=self.input_string,
-                                         encoding='ascii',
-                                         check=True,
-                                         )
 
-            try:
-                assert(not ctffind_run.stderr)
-            except:
-                error_count += 1
-                self.logObj(f"CTFFind4: An error has occurred ({ctffind_run.returncode}) "
-                            f"on stack{index}.")
+        with tqdm_joblib(tqdm_iter) as progress_bar:
+            joblib.Parallel(n_jobs=mp.cpu_count())(
+                joblib.delayed(self._ctffind_single)(idx) for idx in range(len(ts_list))
+            )
 
-            self.stdout = ctffind_run.stdout
-            self.update_ctffind_metadata()
-            self.export_metadata()
 
         # Log progress when all jobs have successfully terminated
         if error_count == 0:
