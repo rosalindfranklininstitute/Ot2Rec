@@ -15,7 +15,8 @@
 
 FROM nvidia/cuda:10.1-devel-ubuntu18.04
 
-WORKDIR /home
+WORKDIR /usr/local/Ot2Rec
+COPY . .
 
 # Install packages and register python3 (version 3.8) as python
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections && \
@@ -47,28 +48,28 @@ RUN apt-key adv --fetch-keys http://repos.codelite.org/CodeLite.asc && \
                  zlib1g-dev \
                  libjpeg-dev \
                  libtiff5-dev
-
 # Install ctffind
-RUN wget -c "https://grigoriefflab.umassmed.edu/system/tdf?path=ctffind-4.1.14.tar.gz&file=1&type=node&id=26" && \
+RUN cd /home && wget -c "https://grigoriefflab.umassmed.edu/system/tdf?path=ctffind-4.1.14.tar.gz&file=1&type=node&id=26" && \
     mv 'tdf?path=ctffind-4.1.14.tar.gz&file=1&type=node&id=26' ctffind-4.1.14.tar.gz && \
-    tar xvf ctffind-4.1.14.tar.gz && cd ctffind-4.1.14 && ./configure && make && make install && cd ..
+    tar xvf ctffind-4.1.14.tar.gz && rm ctffind-4.1.14.tar.gz && cd ctffind-4.1.14 && \
+    ./configure && make && make install && cd .. && rm -r ctffind-4.1.14 && cd /usr/local/Ot2Rec
 
+# Install IMOD dependencies
+RUN apt-get install -y default-jre tcsh
 # Install IMOD
-RUN wget https://bio3d.colorado.edu/imod/AMD64-RHEL5/imod_4.11.20_RHEL7-64_CUDA10.1.sh && \
-    apt-get install -y default-jre tcsh && \
-    sh imod_4.11.20_RHEL7-64_CUDA10.1.sh -yes
+RUN cd /home && mkdir IMOD-4.11.20 && cd IMOD-4.11.20 && \
+    wget https://bio3d.colorado.edu/imod/AMD64-RHEL5/imod_4.11.20_RHEL7-64_CUDA10.1.sh && \
+    sh imod_4.11.20_RHEL7-64_CUDA10.1.sh -yes && cd .. && rm -r IMOD-4.11.20 && cd /usr/local/Ot2Rec
 
 # Install Ot2Rec
-ADD . /usr/local/Ot2Rec
-WORKDIR /usr/local/Ot2Rec
 
 # Install python packages
 RUN pip3 install --no-cache-dir --upgrade \
-        mock pytest pytest-cov PyYAML coverage  && \
+        mock pytest pytest-cov PyYAML coverage && \
     rm -rf /tmp/* && \
     find /usr/lib/python3.*/ -name 'tests' -exec rm -rf '{}' +
 
 # Install Ot2Rec from the current commit
-RUN pip3 install -e . && \
+RUN pip3 install -e . && pip3 install . && \
     rm -rf /tmp/* && \
     find /usr/lib/python3.*/ -name 'tests' -exec rm -rf '{}' +
