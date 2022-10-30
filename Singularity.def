@@ -75,6 +75,7 @@ mock pytest pytest-cov PyYAML coverage
 
 # Install Ot2Rec from the current commit
 pip3 install -e .
+pip3 install .
 
 %runscript
 exec /bin/bash "$@"
