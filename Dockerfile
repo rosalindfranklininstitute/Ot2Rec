@@ -89,6 +89,6 @@ RUN pip install --no-cache-dir --ignore-installed \
     find /usr/lib/python3.*/ -name 'tests' -exec rm -rf '{}' +
 
 # Install Ot2Rec from the current commit
-RUN pip install -e . && pip3 install . && \
+RUN pip install -e . && pip install . && \
     rm -rf /tmp/* && \
     find /usr/lib/python3.*/ -name 'tests' -exec rm -rf '{}' +
