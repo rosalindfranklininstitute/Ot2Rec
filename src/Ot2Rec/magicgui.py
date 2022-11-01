@@ -540,6 +540,9 @@ def get_args_recon(
     result_widget=False,
 
     project_name={"label": "Project name *"},
+    output_folder={"widget_type": "FileEdit",
+                   "label": "Folder for simulated PSF tomograms",
+                   "mode":"w"},
     pixel_res={"label": "Pixel resolution (in angstroms) *",
                "min": 0.0,
                "step": 0.001},
@@ -551,10 +554,11 @@ def get_args_recon(
 )
 def get_args_ctfsim(
         project_name="",
+        output_folder=Path("./PSF"),
+        rootname="",
         pixel_res=0.000,
         ds_factor=4,
-        rootname="",
-        dims=[50, 50, 50],
+        dims=[30, 30, 30],
 ):
     """
     Function to add arguments to parser for O2R-CTFsim
@@ -578,19 +582,23 @@ def get_args_ctfsim(
     layout="vertical",
     result_widget=False,
 
-    image_path={"widget_type": "FileEdit",
-                "label": "Path to raw image"},
-    psf_path={"widget_type": "FileEdit",
-              "label": "Path to PSF for deconvolution"},
+    project_name={"label": "Project name *"},
+    file_suffix={"label": "IMOD file suffix (if applicable)"},
+    raw_folder={"widget_type": "FileEdit",
+                "label": "Folder containing raw stacks",
+                "mode": "d"},
+    psf_folder={"widget_type": "FileEdit",
+                "label": "Folder containing PSF stacks",
+                "mode": "d"},
     image_type={"widget_type": "ComboBox",
                 "label": "File type of raw image",
                 "choices": ["mrc", "tiff"]},
     psf_type={"widget_type": "ComboBox",
               "label": "File type of PSF stack",
               "choices": ["mrc", "tiff"]},
-    output_path={"widget_type": "FileEdit",
-                 "label": "Path to deconvolved image",
-                 "mode":"w"},
+    output_folder={"widget_type": "FileEdit",
+                   "label": "Folder for deconvolved image stacks",
+                   "mode":"w"},
     device={"widget_type": "ComboBox",
             "label": "Device to be used for deconvolution",
             "choices": ["GPU", "CPU"]},
@@ -600,15 +608,17 @@ def get_args_ctfsim(
     uint={"label": "Store results as UInt8?"}
 )
 def get_args_rldeconv(
-        image_path=Path("./stacks/"),
+        project_name="",
+        file_suffix="",
+        raw_folder=Path("./stacks/"),
         image_type="mrc",
-        psf_path=Path("./PSF/"),
+        psf_folder=Path("./PSF/"),
         psf_type="mrc",
-        output_path=Path("."),
+        output_folder=Path("./deconv/"),
         device="GPU",
         niter=10,
         block=False,
-        uint=True,
+        uint=False,
 ):
     """
     Function to add arguments to parser for RedLionfish deconvolution
