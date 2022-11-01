@@ -647,17 +647,23 @@ def get_args_rldeconv(
     result_widget=False,
 
     project_name={"label": "Project name *"},
-    stacks_folder={"label": "Path to parent folder with stacks",
-                   "mode": "d"},
-    output_path={"label": "Path to output folder",
-                 "mode": "d"},
+    stacks_folder={
+        "label": "Path to parent folder with stacks",
+        "mode": "d"},
+    output_path={
+        "label": "Path to output folder",
+        "mode": "d"},
     rootname={"label": "Rootname of current project (if different from project name)"},
     suffix={"label": "Suffix of project files"},
     extension={"label": "File extension of stacks *"},
     imod_suffix={"label": "IMOD file suffix"},
-    algorithm={"widget_type": "RadioButtons",
-         "label": "Reconstruction algorithm",
-         "choices": ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA", "BP_CUDA"]},
+    algorithm={
+        "widget_type": "RadioButtons",
+        "label": "Reconstruction algorithm",
+        "choices": ["FBP_CUDA", "SIRT_CUDA", "SART_CUDA", "CGLS_CUDA", "BP_CUDA"]},
+    n_iters={
+        "label": "Number of iterations (ignored if iterative reconstruction not used)",
+        "min":1,}
 )
 def get_args_savurecon(
         project_name="",
@@ -667,7 +673,8 @@ def get_args_savurecon(
         suffix="",
         extension="mrc",
         imod_suffix="ali",
-        algorithm="BP_CUDA"
+        algorithm="CGLS_CUDA",
+        n_iters=100
 ):
     """
     Function to add arguments to parser for Savu reconstruction
