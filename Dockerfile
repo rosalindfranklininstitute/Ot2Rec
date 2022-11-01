@@ -76,8 +76,8 @@ RUN apt-get install -y default-jre tcsh
 RUN cd /tmp && mkdir IMOD-4.11.20 && cd IMOD-4.11.20 && \
     wget https://bio3d.colorado.edu/imod/AMD64-RHEL5/imod_4.11.20_RHEL7-64_CUDA10.1.sh && \
     sh imod_4.11.20_RHEL7-64_CUDA10.1.sh -yes && cd .. && rm -r IMOD-4.11.20 && cd /usr/local/Ot2Rec
-ENV PATH="${PATH}:/usr/local/IMOD/bin"
-ARG PATH="${PATH}:/usr/local/IMOD/bin"
+ENV PATH="/usr/local/IMOD/bin:${PATH}:"
+ARG PATH="/usr/local/IMOD/bin:${PATH}:"
 ENV IMOD_DIR="/usr/local/IMOD"
 ARG IMOD_DIR="/usr/local/IMOD"
 # Install Ot2Rec
