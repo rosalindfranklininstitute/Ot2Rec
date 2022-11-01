@@ -180,6 +180,8 @@ def run():
     """
     Method to deconvolve image using a given kernel (point-spread function)
     """
+    logger = logMod.Logger(log_path="o2r_rlfdeconv.log")
+
     # Parse user inputs
     args = mgMod.get_args_rldeconv.show(run=True)
 
@@ -191,6 +193,9 @@ def run():
         'callbkTickFunc': True,
         'resAsUint8': args.uint.value,
     })
+
+    logger(level="info",
+           msg="Starting deconvolution using RedLionfish.")
 
     my_deconv = RLF_deconv(
         rootname = args.project_name.value,
