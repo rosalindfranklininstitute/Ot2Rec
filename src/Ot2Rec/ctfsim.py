@@ -195,6 +195,9 @@ def run():
     ts_list = sorted(pd.Series(ctffind_md['ts']).unique())
     tqdm_iter = tqdm(ts_list, ncols=100)
 
+    logger(level="info",
+           msg="CTF simulation started.")
+
     for curr_ts in tqdm_iter:
         # Create folders and subfolders
         subfolder_path = f'{args.output_folder.value}/{rootname}_{curr_ts:04}'
