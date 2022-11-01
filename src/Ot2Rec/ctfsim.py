@@ -34,6 +34,7 @@ from icecream import ic
 from . import user_args as uaMod
 from . import magicgui as mgMod
 from . import metadata as mdMod
+from . import logger as logMod
 
 
 def get_psf(ctffile, point_source_recip, k2_grid, alpha_g):
@@ -151,6 +152,8 @@ def run():
     """
     Method to run simulator for CTF from CTFFIND4 outputs
     """
+    logger = logMod.Logger(log_path="o2r_ctffind.log")
+
     # Parse user inputs
     args = mgMod.get_args_ctfsim.show(run=True)
 
@@ -165,6 +168,11 @@ def run():
 
     # Read in metadata from ctffind
     ctffind_md_file = project_name + '_ctffind_mdout.yaml'
+    if not os.path.isfile(ctffind_md_file):
+        logger(level="error",
+               msg="CTFFind metadata not found.")
+        raise IOError("Error in Ot2Rec.ctfsim.run: ctffind metadata not found.")
+
     ctffind_obj = mdMod.read_md_yaml(project_name=project_name,
                                      job_type='ctfsim',
                                      filename=ctffind_md_file)
