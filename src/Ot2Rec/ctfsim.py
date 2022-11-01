@@ -152,7 +152,7 @@ def run():
     """
     Method to run simulator for CTF from CTFFIND4 outputs
     """
-    logger = logMod.Logger(log_path="o2r_ctffind.log")
+    logger = logMod.Logger(log_path="o2r_ctfsim.log")
 
     # Parse user inputs
     args = mgMod.get_args_ctfsim.show(run=True)
