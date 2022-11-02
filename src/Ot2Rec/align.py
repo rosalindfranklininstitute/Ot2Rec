@@ -19,8 +19,10 @@ import argparse
 import subprocess
 from glob import glob
 import multiprocess as mp
+from icecream import ic
 
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 import yaml
 from beautifultable import BeautifulTable as bt
@@ -728,15 +730,14 @@ def get_align_stats(exclusive=True, args_in=None):
         {'Tilt series': [],
          'Error mean (nm)': [],
          'Error SD (nm)': [],
-         'Error weighted mean (nm)': [],
          }
     )
 
     # Loop through folders, find data and append to dataframe
     for curr_ts in aligned_ts:
-        target_file_path = f"{folder_path}/{rootname}_{curr_ts:04d}{suffix}/align.log"
+        target_file_path = f"{folder_path}/{rootname}_{curr_ts:04d}{suffix}/taLocals.log"
         if not os.path.isfile(target_file_path):
-            raise IOError("Error in Ot2Rec.main.get_align_stats: alignment log file not found.")
+            raise IOError("Error in Ot2Rec.main.get_align_stats: alignment log file (taLocals) not found.")
 
         with open(target_file_path, 'r') as f:
             lines = f.readlines()
@@ -744,19 +745,9 @@ def get_align_stats(exclusive=True, args_in=None):
         mean_sd_criterion = re.compile(r'^\s*Residual error mean')
         filtered = list(filter(mean_sd_criterion.match, lines))
         filter_split = re.split(r'\s+', filtered[0])
+        mean, sd = list(float(i) for i in filter_split[6:8])
 
-        get_mean_sd = re.compile('[0-9]+.[0-9]+')
-        mean = float(list(filter(get_mean_sd.match, filter_split))[0])
-        sd = float(list(filter(get_mean_sd.match, filter_split))[1])
-
-        weighted_mean_criterion = re.compile(r'^\s*Residual error weighted mean')
-        filtered = list(filter(weighted_mean_criterion.match, lines))
-        filter_split = re.split(r'\s+', filtered[0])
-
-        get_weighted_crit = re.compile('[0-9]+.[0-9]+')
-        weighted_error = float(list(filter(get_weighted_crit.match, filter_split))[0])
-
-        stats_df.loc[len(stats_df.index)] = [int(curr_ts), mean, sd, weighted_error]
+        stats_df.loc[len(stats_df.index)] = [int(curr_ts), mean, sd]
 
     # Dump stats as yaml file
     with open(f"{rootname}_imod_align_stats.yaml", "w") as f:
@@ -764,12 +755,12 @@ def get_align_stats(exclusive=True, args_in=None):
                   f,
                   sort_keys=False, indent=4)
 
-    stats_df.sort_values(by='Error weighted mean (nm)',
+    stats_df.sort_values(by='Error mean (nm)',
                          inplace=True)
 
     # Create table object and append data from dataframe
     stats = bt()
-    stats.columns.headers = ['Tilt series', 'Error mean (nm)', 'Error SD (nm)', 'Error weighted mean (nm)']
+    stats.columns.headers = ['Tilt series', 'Error mean (nm)', 'Error SD (nm)']
     stats.rows.append(stats.columns.headers)
     for i in stats_df.values.tolist():
         stats.rows.append([int(i[0]), *i[1:]])
