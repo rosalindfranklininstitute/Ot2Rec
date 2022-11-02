@@ -24,24 +24,23 @@ RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selectio
     apt-get install -y build-essential git wget curl software-properties-common && \
     apt-get update && rm -rf /var/lib/apt/lists/*
 
-# Install miniconda
-ENV PATH="/root/miniconda3/bin:${PATH}"
-ARG PATH="/root/miniconda3/bin:${PATH}"
-RUN wget \
-    https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh \
-    && mkdir /root/.conda \
-    && bash Miniconda3-py38_4.12.0-Linux-x86_64.sh -b \
-    && rm -f Miniconda3-py38_4.12.0-Linux-x86_64.sh
-
 # Install plugin dependencies
 
-#Install Savu
-RUN cd /tmp && git clone https://github.com/DiamondLightSource/Savu.git && cd Savu && \
-    conda install --yes --file install/savu_lite37/spec-savu_lite_latest.txt
-
+# Install miniconda
+ENV PATH="/usr/local/miniconda3/bin:${PATH}"
+ARG PATH="/usr/local/miniconda3/bin:${PATH}"
+RUN wget \
+    https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh \
+    && bash Miniconda3-py38_4.12.0-Linux-x86_64.sh -b -p /usr/local/miniconda3 \
+    && rm -f Miniconda3-py38_4.12.0-Linux-x86_64.sh
 SHELL ["conda", "run", "-n", "base", "/bin/bash", "-c"]
 
-RUN cd /tmp/Savu && python setup.py install && cd .. && rm -r Savu && cd /usr/local/Ot2Rec
+# Install Savu
+RUN cd /tmp && git clone https://github.com/DiamondLightSource/Savu.git && cd Savu && \
+    conda install --yes --file install/savu_lite37/spec-savu_lite_latest.txt && \
+    cd /tmp/Savu && python setup.py install && cd .. && rm -r Savu && cd /usr/local/Ot2Rec
+
+# Install RedlionFishDeconv
 RUN conda install -y redlionfish -c conda-forge
 
 # Install ctffind-dependencies
@@ -72,6 +71,7 @@ RUN cd /tmp && \
 
 # Install IMOD dependencies
 RUN apt-get install -y default-jre tcsh
+
 # Install IMOD
 RUN cd /tmp && mkdir IMOD-4.11.20 && cd IMOD-4.11.20 && \
     wget https://bio3d.colorado.edu/imod/AMD64-RHEL5/imod_4.11.20_RHEL7-64_CUDA10.1.sh && \
