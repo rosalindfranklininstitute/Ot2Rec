@@ -170,7 +170,7 @@ def run():
     ctffind_md_file = project_name + '_ctffind_mdout.yaml'
     if not os.path.isfile(ctffind_md_file):
         logger(level="error",
-               msg="CTFFind metadata not found.")
+               message="CTFFind metadata not found.")
         raise IOError("Error in Ot2Rec.ctfsim.run: ctffind metadata not found.")
 
     ctffind_obj = mdMod.read_md_yaml(project_name=project_name,
@@ -193,11 +193,11 @@ def run():
 
     # Grab tilt series numbers and tilt angles from metadata
     ts_list = sorted(pd.Series(ctffind_md['ts']).unique())
-    tqdm_iter = tqdm(ts_list, ncols=100)
 
     logger(level="info",
-           msg="CTF simulation started.")
+           message="Ot2Rec-CTFSim started.")
 
+    tqdm_iter = tqdm(ts_list, ncols=100)
     for curr_ts in tqdm_iter:
         # Create folders and subfolders
         subfolder_path = f'{args.output_folder.value}/{rootname}_{curr_ts:04}'

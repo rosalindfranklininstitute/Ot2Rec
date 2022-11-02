@@ -166,7 +166,11 @@ class RLF_deconv():
             os.makedirs(out_subfolders, exist_ok=True)
 
             # Find relevant files
-            self.raw_files.append(glob(f"{self.raw_folder}/{proc}/*_ali_rec.mrc")[0])
+            search = f"{self.raw_folder}/{proc}/*_rec.mrc"
+            exclude = f"{self.raw_folder}/{proc}/*_full_rec.mrc"
+            file_clean = list(set(glob(search))-set(glob(exclude)))[0]
+
+            self.raw_files.append(file_clean)
             self.psf_files.append(glob(f"{self.kernel_folder}/{proc}/*_PSF.mrc")[0])
 
         assert(len(self.raw_files)==len(self.psf_files)), \
@@ -195,7 +199,7 @@ def run():
     })
 
     logger(level="info",
-           msg="Starting deconvolution using RedLionfish.")
+           message="Ot2Rec-RLFDeconv started.")
 
     my_deconv = RLF_deconv(
         rootname = args.project_name.value,
