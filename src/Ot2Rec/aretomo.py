@@ -448,7 +448,10 @@ def run():
     )
 
     # Create Logger object
-    log_path = "./o2r_aretomo.log"
+    aretomo_log_names = {0: "o2r_aretomo_align.log",
+                         1: "o2r_aretomo_recon.log",
+                         2: "o2r_aretomo_align-recon.log"}
+    log_path = aretomo_log_names[int(args.aretomo_mode)]
     try:
         os.remove(log_path)
     except:
