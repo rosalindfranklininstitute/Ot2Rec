@@ -466,8 +466,6 @@ def create_yaml():
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
-    logger = logMod.Logger(log_path="o2r_imod_align.log")
-
     # Parse user inputs
     args = mgMod.get_args_align.show(run=True)
 
@@ -485,8 +483,6 @@ def update_yaml(args):
     ARGS:
     args (Namespace) :: Namespace generated with user inputs
     """
-    logger = logMod.Logger(log_path="o2r_imod_align.log")
-
     # Check if align and motioncorr yaml files exist
     align_yaml_name = args.project_name.value + '_align.yaml'
     mc2_yaml_name = args.project_name.value + '_mc2.yaml'
