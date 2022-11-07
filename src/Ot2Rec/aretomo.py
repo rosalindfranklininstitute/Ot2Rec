@@ -78,7 +78,8 @@ class AreTomo:
 
         # Create the folders and dictionary for future reference
         self._path_dict = {}
-        self.md_out["process_list"] = self.params['System']['process_list']
+        self.md_out["process_list"] = dict(zip(range(1, len(self.params['System']['process_list'])+1),
+                                               self.params['System']['process_list']))
         for curr_ts in self.params['System']['process_list']:
             subfolder = (f"{self.basis_folder}/"
                          f"{self.rootname}_{curr_ts:04d}{self.suffix}")
