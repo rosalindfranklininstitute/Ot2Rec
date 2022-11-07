@@ -316,9 +316,6 @@ def update_yaml(args):
     # aretomo_params.params['AreTomo_kwargs'] = kwargs
 
     if args["aretomo_mode"] != 1:  # for workflows with alignment
-        # Create input stacks from motioncor images
-        _create_stacks_with_imod(args)
-
         # Set InMrc
         st_file_list = _find_files_with_ext(
             ".st",
@@ -326,6 +323,17 @@ def update_yaml(args):
             suffix,
             str(args["input_mrc_folder"])
         )
+
+        if len(st_file_list) == 0:  # assume that input_mrc_folder is from motioncor
+            # Create input stacks from motioncor images
+            _create_stacks_with_imod(args)
+            st_file_list = _find_files_with_ext(
+                ".st",
+                rootname,
+                suffix,
+                str(args["output_path"])
+            )
+
         aretomo_params.params["AreTomo_setup"]["input_mrc"] = st_file_list
 
         # Set AngFile
@@ -336,10 +344,17 @@ def update_yaml(args):
                 suffix,
                 str(args["input_mrc_folder"])
             )
-            aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
+            if len(tlt_file_list) == 0: # assume that input_mrc_folder is from motioncor
+                tlt_file_list = _find_files_with_ext(
+                    ".rawtlt",
+                    rootname,
+                    suffix,
+                    str(args["output_path"])
+                )
         else:
             tlt_file_list = args["tilt_angles"]
-            aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
+
+        aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
 
         # Set process list
         ts_list = _get_process_list(st_file_list, rootname, suffix, ".st")
