@@ -609,11 +609,7 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None, exclusive=True
     do_align (bool) :: whether to perform IMOD alignment
     ext (bool)      :: whether external stack(s) are available and to be used
     """
-    # logger = logMod.Logger(log_path="o2r_imod_align.log")
-
-    logger = logMod.Logger()
-    if do_align:
-        logger.log_path="o2r_imod_align.log"
+    logger = logMod.Logger(log_path="o2r_imod_align.log")
 
     if exclusive:
         parser = argparse.ArgumentParser()

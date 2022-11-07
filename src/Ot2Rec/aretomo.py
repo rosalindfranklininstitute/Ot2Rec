@@ -78,7 +78,6 @@ class AreTomo:
 
         # Create the folders and dictionary for future reference
         self._path_dict = {}
-        self.md_out["process_list"] = self.params['System']['process_list']
         for curr_ts in self.params['System']['process_list']:
             subfolder = (f"{self.basis_folder}/"
                          f"{self.rootname}_{curr_ts:04d}{self.suffix}")
@@ -86,9 +85,7 @@ class AreTomo:
             # self._path_dict[curr_ts] = subfolder
             if "aretomo_output_dir" not in list(self.md_out.keys()):
                 self.md_out["aretomo_output_dir"] = {}
-                self.md_out["aretomo_align_stats"] = {}
             self.md_out["aretomo_output_dir"][curr_ts] = subfolder
-            self.md_out["aretomo_align_stats"][curr_ts] = subfolder + f"/{self.rootname}_{curr_ts:04d}{self.suffix}.st.aln"
 
     def _get_aretomo_align_command(self, i):
         """
@@ -451,10 +448,7 @@ def run():
     )
 
     # Create Logger object
-    aretomo_log_names = {0: "o2r_aretomo_align.log",
-                         1: "o2r_aretomo_recon.log",
-                         2: "o2r_aretomo_align-recon.log"}
-    log_path = aretomo_log_names[int(args.aretomo_mode)]
+    log_path = "./o2r_aretomo.log"
     try:
         os.remove(log_path)
     except:
