@@ -82,13 +82,6 @@ class SavuRecon:
             if "savu_output_dir" not in list(self.md_out.keys()):
                 self.md_out["savu_output_dir"] = {}
             self.md_out["savu_output_dir"][curr_ts] = subfolder
-            
-            # Add processed mrc to output dir
-            if "tomogram" not in list(self.md_out.keys()):
-                self.md_out["tomogram"] = {}
-            self.md_out["tomogram"][curr_ts] = glob(
-                f'{subfolder}/*/*.mrc'
-            )[0]
 
     def _get_savuconfig_recon_command(self, i):
         """
@@ -131,13 +124,14 @@ class SavuRecon:
             'mod 2.2 {}\n'.format(algo),
             'add MrcSaver\n',
             'mod 3.1 VOLUME_YZ\n',
+            'mod 3.2 float32\n',
             'save {}/{}_{}.nxs\n'.format(subfolder, ts_name, algo),
             'y\n',
             'exit\n',
             'y\n'
         ]
         if algo in ("SIRT_CUDA", "SART_CUDA", "CGLS_CUDA"):
-            cmd.insert(4, "mod 2.2 5\n")
+            cmd.insert(4, f"mod 2.2 {self.params['Savu']['setup']['n_iters']}\n")
 
         # Add location of .nxs file to metadata
         if "savu_process_lists" not in list(self.md_out.keys()):
@@ -206,6 +200,14 @@ class SavuRecon:
             self._create_savurecon_process_list(i)
             self._run_savurecon(i)
             # self._dummy_runner(i)
+
+            # Add processed mrc to output dir
+            if "tomogram" not in list(self.md_out.keys()):
+                self.md_out["tomogram"] = {}
+            self.md_out["tomogram"][curr_ts] = glob(
+                f'{self.md_out["savu_output_dir"][curr_ts]}/*/*.mrc'
+            )[0]
+
             print(f"Savu reconstruction complete for {self.proj_name}_{curr_ts}")
         self.export_metadata()
 
@@ -228,7 +230,7 @@ def create_yaml():
     """
     Subroutine to create new yaml file for Savu reconstruction
     """
-    logger = logMod.Logger(log_path="o2r_savu.log")
+    logger = logMod.Logger(log_path="o2r_savu_recon.log")
 
     # Parse user inputs
     args = mgMod.get_args_savurecon.show(run=True)
@@ -246,7 +248,7 @@ def update_yaml(args):
     Args:
     args (Namespace) :: Namespace containing user inputs
     """
-    logger = logMod.Logger(log_path="o2r_savu.log")
+    logger = logMod.Logger(log_path="o2r_savu_recon.log")
 
     # Check if SavuRecon yaml exists
     savu_yaml_name = args.project_name.value + '_savurecon.yaml'
@@ -278,6 +280,7 @@ def update_yaml(args):
                                     filename=savu_yaml_name)
 
     recon_params.params['System']['process_list'] = ts_list
+    recon_params.params['System']['output_rootname'] = rootname
     recon_params.params['Savu']['setup']['tilt_angles'] = tlt_file_list
     recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
     logger(message=f"Search term is {parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}")
@@ -291,6 +294,7 @@ def update_yaml(args):
 
     # Set algorithm
     recon_params.params['Savu']['setup']['algorithm'] = args.algorithm.value
+    recon_params.params['Savu']['setup']['n_iters'] = args.n_iters.value
 
     # Write out YAML file
     with open(savu_yaml_name, 'w') as f:
@@ -316,7 +320,7 @@ def run():
                                         filename=savurecon_yaml)
 
     # Create Logger object
-    log_path = "./o2r_savurecon.log"
+    log_path = "./o2r_savu_recon.log"
     try:
         os.remove(log_path)
     except:
