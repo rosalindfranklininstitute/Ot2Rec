@@ -18,14 +18,15 @@ import os
 import subprocess
 from glob import glob
 
-import yaml
 import mrcfile
+import yaml
+from tqdm import tqdm
 
-from . import metadata as mdMod
-from . import user_args as uaMod
-from . import magicgui as mgMod
 from . import logger as logMod
+from . import magicgui as mgMod
+from . import metadata as mdMod
 from . import params as prmMod
+from . import user_args as uaMod
 
 
 class SavuRecon:
@@ -177,7 +178,7 @@ class SavuRecon:
                                   encoding='ascii',
                                   check=True,
                                   )
-        print(savu_run.stdout)
+        self.logObj(savu_run.stdout)
 
     def _dummy_runner(self, i):
         """
@@ -196,7 +197,10 @@ class SavuRecon:
         """
         Method to run savurecon_stack for all ts in process list
         """
-        for i, curr_ts in enumerate(self.params['System']['process_list']):
+        ts_list = self.params['System']['process_list']
+        tqdm_iter = tqdm(ts_list, ncols=100)
+        for i, curr_ts in enumerate(tqdm_iter):
+            tqdm_iter.set_description(f"Processing TS {curr_ts}...")
             self._create_savurecon_process_list(i)
             self._run_savurecon(i)
             # self._dummy_runner(i)
@@ -208,7 +212,7 @@ class SavuRecon:
                 f'{self.md_out["savu_output_dir"][curr_ts]}/*/*.mrc'
             )[0]
 
-            print(f"Savu reconstruction complete for {self.proj_name}_{curr_ts}")
+            print(f"Savu reconstruction complete for {self.proj_name}_{curr_ts}\n")
         self.export_metadata()
 
     def export_metadata(self):
