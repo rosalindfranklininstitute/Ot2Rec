@@ -16,13 +16,13 @@
 import argparse
 import os
 import subprocess
-from glob import glob
 import warnings
-from icecream import ic
+from glob import glob
 from pathlib import Path
-from tqdm import tqdm
 
 import yaml
+from icecream import ic
+from tqdm import tqdm
 
 from . import align
 from . import logger as logMod
