@@ -269,14 +269,27 @@ def update_yaml(args):
 
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}')
+    st_file_list.sort()
 
     # Find tlt files
-    # tlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.tlt')
-    tlt_file_list = [st_file.replace(f'_{imod_suffix}.{ext}', '.tlt') for st_file in st_file_list]
+    tlt_file_list_raw = glob(f'{parent_path}/{rootname}_*{suffix}/*.tlt')
+    tlt_file_list = []
+    for tltfile in tlt_file_list_raw:
+        if tltfile.endswith("fid.tlt") is False:  # remove fid.tlt files
+            tlt_file_list.append(tltfile)
+    tlt_file_list.sort()
+    # tlt_file_list = [st_file.replace(f'_{imod_suffix}.{ext}', '.tlt') for st_file in st_file_list]
 
     # Extract tilt series number
     ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'_{suffix}{imod_suffix}.{ext}', ''))
                for i in st_file_list]
+
+    # Ensure number of st == tlt files
+    if len(st_file_list) != len(tlt_file_list):
+        raise ValueError(
+            f"Inconsistent number of aligned TS ({len(st_file_list)}) and "
+            f"tlt ({len(tlt_file_list)}) files."
+        )
 
     # Read in and update YAML parameters
     savu_yaml_name = args.project_name.value + '_savurecon.yaml'
