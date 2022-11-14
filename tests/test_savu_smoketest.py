@@ -14,12 +14,14 @@
 
 import os
 import unittest
+from unittest.mock import patch
 import tempfile
 from Ot2Rec import magicgui as mgMod
 from Ot2Rec import savurecon
 from Ot2Rec import params as prmMod
 import magicgui
 import mrcfile
+from Ot2Rec import logger as logMod
 
 class SavuSmokeTest(unittest.TestCase):
 
@@ -35,17 +37,16 @@ class SavuSmokeTest(unittest.TestCase):
     def _create_expected_folder_structure(self):
         """Create expected folder structure """
         tmpdir = tempfile.TemporaryDirectory()
-        tmpfiles = []
         os.mkdir(f"{tmpdir.name}/stacks")
-        os.mkdir(f"{tmpdir.name}/stacks/TS_01")
+        os.mkdir(f"{tmpdir.name}/stacks/TS_0001")
         
         # aligned stack files
-        ali_mrc = f"{tmpdir.name}/stacks/TS_01/TS_01_ali.mrc"
+        ali_mrc = f"{tmpdir.name}/stacks/TS_0001/TS_0001_ali.mrc"
         with mrcfile.new(ali_mrc) as mrc:
             mrc.header.nx = 100
 
         # tilt angle files
-        tltfile = f"{tmpdir.name}/stacks/TS_01/TS_01.tlt"
+        tltfile = f"{tmpdir.name}/stacks/TS_0001/TS_0001.tlt"
         with open(tltfile, "w") as f:
             f.write("abc")
 
@@ -56,7 +57,6 @@ class SavuSmokeTest(unittest.TestCase):
         # Create expected input
         tmpdir = self._create_expected_folder_structure()
         os.chdir(tmpdir.name)
-        print(os.listdir(os.getcwd()))
         args = self._create_expected_input_args()
 
         # Create yaml
@@ -70,3 +70,43 @@ class SavuSmokeTest(unittest.TestCase):
 
         # Ensure process list is not empty
         self.assertNotEqual(len(params.params["System"]["process_list"]), 0)
+
+    @patch("subprocess.Popen")
+    @patch("subprocess.run")
+    def test_savu_called(self, savu_config_mock, savu_mock):
+        """Test Savu is called with correct input"""
+        # Create expected input
+        tmpdir = self._create_expected_folder_structure()
+        os.chdir(tmpdir.name)
+        args = self._create_expected_input_args()
+
+        # Spoof results
+        os.mkdir(f"{tmpdir.name}/savurecon")
+        os.mkdir(f"{tmpdir.name}/savurecon/TS_0001")
+        os.mkdir(f"{tmpdir.name}/savurecon/TS_0001/r")
+        tomofile = f"{tmpdir.name}/savurecon/TS_0001/r/TS_0001_processed.mrc"
+        with open(tomofile, "w") as f:
+            f.write("abc")
+
+        # Create yaml
+        savurecon.create_yaml(args)
+
+        # Read params
+        params = prmMod.read_yaml(
+            project_name="TS",
+            filename="./TS_savurecon.yaml"
+        )
+
+        # Run
+        logger = logMod.Logger("./o2r_savu_recon.log")
+        savurecon_obj = savurecon.SavuRecon(
+            project_name="TS",
+            params_in=params,
+            logger_in=logger
+        )
+        print(savurecon_obj.md_out)
+        savurecon_obj.run_savu_all()
+
+        # Check that savu_config and savu are called
+        self.assertTrue(savu_config_mock.called)
+        self.assertTrue(savu_mock.called)
