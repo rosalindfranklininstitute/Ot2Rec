@@ -462,21 +462,26 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(args_in=None):
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
     # Parse user inputs
-    args = mgMod.get_args_align.show(run=True)
+    if args_in is None:  # default case, o2r.imod.new
+        logger = logMod.Logger(log_path="o2r_imod_align.log")
+        args = mgMod.get_args_align.show(run=True)
+    else:  # to create stacks for aretomo
+        args = args_in
+        logger = logMod.Logger(log_path="o2r_imod_stack_creation.log")
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
-    update_yaml(args)
+    update_yaml(args, logger)
 
     logger(message="IMOD alignment metadata file created.")
 
 
-def update_yaml(args):
+def update_yaml(args, logger):
     """
     Subroutine to update yaml file for IMOD newstack / alignment
 

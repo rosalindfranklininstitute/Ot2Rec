@@ -18,14 +18,15 @@ import os
 import subprocess
 from glob import glob
 
-import yaml
 import mrcfile
+import yaml
+from tqdm import tqdm
 
-from . import metadata as mdMod
-from . import user_args as uaMod
-from . import magicgui as mgMod
 from . import logger as logMod
+from . import magicgui as mgMod
+from . import metadata as mdMod
 from . import params as prmMod
+from . import user_args as uaMod
 
 
 class SavuRecon:
@@ -177,7 +178,7 @@ class SavuRecon:
                                   encoding='ascii',
                                   check=True,
                                   )
-        print(savu_run.stdout)
+        self.logObj(savu_run.stdout)
 
     def _dummy_runner(self, i):
         """
@@ -196,7 +197,10 @@ class SavuRecon:
         """
         Method to run savurecon_stack for all ts in process list
         """
-        for i, curr_ts in enumerate(self.params['System']['process_list']):
+        ts_list = self.params['System']['process_list']
+        tqdm_iter = tqdm(ts_list, ncols=100)
+        for i, curr_ts in enumerate(tqdm_iter):
+            tqdm_iter.set_description(f"Processing TS {curr_ts}...")
             self._create_savurecon_process_list(i)
             self._run_savurecon(i)
             # self._dummy_runner(i)
@@ -208,7 +212,7 @@ class SavuRecon:
                 f'{self.md_out["savu_output_dir"][curr_ts]}/*/*.mrc'
             )[0]
 
-            print(f"Savu reconstruction complete for {self.proj_name}_{curr_ts}")
+            print(f"Savu reconstruction complete for {self.proj_name}_{curr_ts}\n")
         self.export_metadata()
 
     def export_metadata(self):
@@ -265,14 +269,27 @@ def update_yaml(args):
 
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}')
+    st_file_list.sort()
 
     # Find tlt files
-    # tlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.tlt')
-    tlt_file_list = [st_file.replace(f'_{imod_suffix}.{ext}', '.tlt') for st_file in st_file_list]
+    tlt_file_list_raw = glob(f'{parent_path}/{rootname}_*{suffix}/*.tlt')
+    tlt_file_list = []
+    for tltfile in tlt_file_list_raw:
+        if tltfile.endswith("fid.tlt") is False:  # remove fid.tlt files
+            tlt_file_list.append(tltfile)
+    tlt_file_list.sort()
+    # tlt_file_list = [st_file.replace(f'_{imod_suffix}.{ext}', '.tlt') for st_file in st_file_list]
 
     # Extract tilt series number
     ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'_{suffix}{imod_suffix}.{ext}', ''))
                for i in st_file_list]
+
+    # Ensure number of st == tlt files
+    if len(st_file_list) != len(tlt_file_list):
+        raise ValueError(
+            f"Inconsistent number of aligned TS ({len(st_file_list)}) and "
+            f"tlt ({len(tlt_file_list)}) files."
+        )
 
     # Read in and update YAML parameters
     savu_yaml_name = args.project_name.value + '_savurecon.yaml'
