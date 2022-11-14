@@ -230,14 +230,15 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(args=None):
     """
     Subroutine to create new yaml file for Savu reconstruction
     """
     logger = logMod.Logger(log_path="o2r_savu_recon.log")
 
     # Parse user inputs
-    args = mgMod.get_args_savurecon.show(run=True)
+    if args is None:
+        args = mgMod.get_args_savurecon.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_savurecon_yaml(args)

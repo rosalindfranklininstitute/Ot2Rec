@@ -1,0 +1,72 @@
+# Copyright 2022 Rosalind Franklin Institute
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+import os
+import unittest
+import tempfile
+from Ot2Rec import magicgui as mgMod
+from Ot2Rec import savurecon
+from Ot2Rec import params as prmMod
+import magicgui
+import mrcfile
+
+class SavuSmokeTest(unittest.TestCase):
+
+    def _create_expected_input_args(self):
+        """Create expected input magicGUI args"""
+        default_args = magicgui.widgets.FunctionGui(mgMod.get_args_savurecon)
+        default_args.project_name.value = "TS"
+        default_args.stacks_folder.value = "./stacks"
+        default_args.output_path.value = "./savurecon"
+        
+        return default_args
+    
+    def _create_expected_folder_structure(self):
+        """Create expected folder structure """
+        tmpdir = tempfile.TemporaryDirectory()
+        tmpfiles = []
+        os.mkdir(f"{tmpdir.name}/stacks")
+        os.mkdir(f"{tmpdir.name}/stacks/TS_01")
+        
+        # aligned stack files
+        ali_mrc = f"{tmpdir.name}/stacks/TS_01/TS_01_ali.mrc"
+        with mrcfile.new(ali_mrc) as mrc:
+            mrc.header.nx = 100
+
+        # tilt angle files
+        tltfile = f"{tmpdir.name}/stacks/TS_01/TS_01.tlt"
+        with open(tltfile, "w") as f:
+            f.write("abc")
+
+        return tmpdir
+    
+    def test_yaml_creation(self):
+        """Test yaml is created with expected input"""
+        # Create expected input
+        tmpdir = self._create_expected_folder_structure()
+        os.chdir(tmpdir.name)
+        print(os.listdir(os.getcwd()))
+        args = self._create_expected_input_args()
+
+        # Create yaml
+        savurecon.create_yaml(args)
+
+        # Read params
+        params = prmMod.read_yaml(
+            project_name="TS",
+            filename="./TS_savurecon.yaml"
+        )
+
+        # Ensure process list is not empty
+        self.assertNotEqual(len(params.params["System"]["process_list"]), 0)
