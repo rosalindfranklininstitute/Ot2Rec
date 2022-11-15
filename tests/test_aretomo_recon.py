@@ -56,9 +56,9 @@ class AreTomoReconSmokeTest(unittest.TestCase):
         with mrcfile.new(st_file) as mrc:
             mrc.set_data(np.arange(18, dtype=np.int8).reshape(2,3,3))
 
-        # create rawtlt files
-        rawtlt_file = f"{tmpdir.name}/aretomo_aligned/TS_0001/TS_0001.tlt"
-        with open(rawtlt_file, "w") as f:
+        # create tlt files
+        tlt_file = f"{tmpdir.name}/aretomo_aligned/TS_0001/TS_0001.tlt"
+        with open(tlt_file, "w") as f:
             f.write("-30.0\n")
             f.write("0.0\n")
             f.write("30.0\n")
