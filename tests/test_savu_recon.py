@@ -73,6 +73,8 @@ class SavuSmokeTest(unittest.TestCase):
         # Ensure process list is not empty
         self.assertNotEqual(len(params.params["System"]["process_list"]), 0)
 
+        tmpdir.cleanup()
+
     @patch("subprocess.Popen")
     @patch("subprocess.run")
     def test_savu_called(self, savu_config_mock, savu_mock):
@@ -111,3 +113,5 @@ class SavuSmokeTest(unittest.TestCase):
         # Check that savu_config and savu are called
         self.assertTrue(savu_config_mock.called)
         self.assertTrue(savu_mock.called)
+
+        tmpdir.cleanup()

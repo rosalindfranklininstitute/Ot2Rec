@@ -130,6 +130,8 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
         # Ensure process list is not empty
         self.assertNotEqual(len(params.params["System"]["process_list"]), 0)
 
+        tmpdir.cleanup()
+
     @patch("subprocess.run")
     def test_aretomo_called(self, aretomo_mock):
         # Create expected input
@@ -158,3 +160,5 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
 
         # Check that aretomo is called
         self.assertTrue(aretomo_mock.called)
+
+        tmpdir.cleanup()
