@@ -39,7 +39,7 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
             aretomo_mode=0,
             pixel_size=1.0,
             input_mrc_folder="./motioncor",
-            output_path="./aretomo_aligned",
+            output_path="./aligned",
         )
 
         return args
@@ -83,14 +83,14 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
         )
 
         # create st files
-        os.mkdir(f"{tmpdir.name}/aretomo_aligned")
-        os.mkdir(f"{tmpdir.name}/aretomo_aligned/TS_0001")
-        st_file = f"{tmpdir.name}/aretomo_aligned/TS_0001/TS_0001.st"
+        os.mkdir(f"{tmpdir.name}/aligned")
+        os.mkdir(f"{tmpdir.name}/aligned/TS_0001")
+        st_file = f"{tmpdir.name}/aligned/TS_0001/TS_0001.st"
         with mrcfile.new(st_file) as mrc:
             mrc.set_data(np.arange(18, dtype=np.int8).reshape(2,3,3))
 
         # create rawtlt files
-        rawtlt_file = f"{tmpdir.name}/aretomo_aligned/TS_0001/TS_0001.rawtlt"
+        rawtlt_file = f"{tmpdir.name}/aligned/TS_0001/TS_0001.rawtlt"
         with open(rawtlt_file, "w") as f:
             f.write("-30.0\n")
             f.write("0.0\n")
