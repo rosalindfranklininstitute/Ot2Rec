@@ -281,7 +281,7 @@ def get_args_ctffind(
 def get_args_align(
         project_name="",
         rot_angle=0.00,
-        image_dims=[1000, 1000],
+        image_dims=[100, 100],
         excl_views=[0],
         output_folder=Path("./stacks"),
         file_prefix="",
