@@ -13,15 +13,17 @@
 # language governing permissions and limitations under the License.
 
 import os
+import tempfile
 import unittest
 from unittest.mock import patch
-import tempfile
-from Ot2Rec import magicgui as mgMod
-from Ot2Rec import savurecon
-from Ot2Rec import params as prmMod
+
 import magicgui
 import mrcfile
 from Ot2Rec import logger as logMod
+from Ot2Rec import magicgui as mgMod
+from Ot2Rec import params as prmMod
+from Ot2Rec import savurecon
+
 
 class SavuSmokeTest(unittest.TestCase):
 
