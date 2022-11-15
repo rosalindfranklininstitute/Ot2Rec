@@ -106,7 +106,6 @@ class SavuSmokeTest(unittest.TestCase):
             params_in=params,
             logger_in=logger
         )
-        print(savurecon_obj.md_out)
         savurecon_obj.run_savu_all()
 
         # Check that savu_config and savu are called
