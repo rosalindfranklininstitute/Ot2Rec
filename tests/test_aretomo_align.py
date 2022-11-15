@@ -77,7 +77,10 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
 
         # create align_mdout.yaml file
         align_md_yaml = f"{tmpdir.name}/TS_align_mdout.yaml"
-        shutil.copyfile(f"{template_folder}/TS_align_mdout.yaml", align_md_yaml)
+        shutil.copyfile(
+            f"{template_folder}/TS_align_mdout.yaml",
+            align_md_yaml
+        )
 
         # create st files
         os.mkdir(f"{tmpdir.name}/aretomo_aligned")
