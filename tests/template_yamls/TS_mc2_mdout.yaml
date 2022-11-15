@@ -1,0 +1,24 @@
+angles:
+    0: -30.0
+    1: 0.0
+    2: 30.0
+file_paths:
+    0: ./raw/TS_0001_000[-30.00]_Fractions.mrc
+    1: ./raw/TS_0001_001[0.00]_Fractions.mrc
+    2: ./raw/TS_0001_002[30.00]_Fractions.mrc
+image_idx:
+    0: 0
+    1: 1
+    2: 2
+ts:
+    0: 1
+    1: 1
+    2: 1
+output:
+    0: ./motioncor/TS_0001_-30.0.mrc
+    1: ./motioncor/TS_0001_0.0.mrc
+    2: ./motioncor/TS_0001_30.0.mrc
+gpu:
+    0: '0'
+    1: '0'
+    2: '0'
