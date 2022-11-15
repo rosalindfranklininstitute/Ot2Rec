@@ -29,12 +29,12 @@ class SavuSmokeTest(unittest.TestCase):
 
     def _create_expected_input_args(self):
         """Create expected input magicGUI args"""
-        default_args = magicgui.widgets.FunctionGui(mgMod.get_args_savurecon)
-        default_args.project_name.value = "TS"
-        default_args.stacks_folder.value = "./stacks"
-        default_args.output_path.value = "./savurecon"
+        args = magicgui.widgets.FunctionGui(mgMod.get_args_savurecon)
+        args.project_name.value = "TS"
+        args.stacks_folder.value = "./stacks"
+        args.output_path.value = "./savurecon"
         
-        return default_args
+        return args
     
     def _create_expected_folder_structure(self):
         """Create expected folder structure """
