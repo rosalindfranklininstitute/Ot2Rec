@@ -33,15 +33,15 @@ class SavuSmokeTest(unittest.TestCase):
         args.project_name.value = "TS"
         args.stacks_folder.value = "./stacks"
         args.output_path.value = "./savurecon"
-        
+
         return args
-    
+
     def _create_expected_folder_structure(self):
         """Create expected folder structure """
         tmpdir = tempfile.TemporaryDirectory()
         os.mkdir(f"{tmpdir.name}/stacks")
         os.mkdir(f"{tmpdir.name}/stacks/TS_0001")
-        
+
         # aligned stack files
         ali_mrc = f"{tmpdir.name}/stacks/TS_0001/TS_0001_ali.mrc"
         with mrcfile.new(ali_mrc) as mrc:
@@ -53,7 +53,7 @@ class SavuSmokeTest(unittest.TestCase):
             f.write("abc")
 
         return tmpdir
-    
+
     def test_yaml_creation(self):
         """Test yaml is created with expected input"""
         # Create expected input
