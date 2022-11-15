@@ -126,3 +126,32 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
 
         # Ensure process list is not empty
         self.assertNotEqual(len(params.params["System"]["process_list"]), 0)
+
+    @patch("subprocess.run")
+    def test_aretomo_called(self, aretomo_mock):
+        # Create expected input
+        tmpdir = self._create_expected_folder_structure()
+        os.chdir(tmpdir.name)
+        args = self._create_expected_input_args()
+        self._create_expected_st_folder_structure(tmpdir)
+
+        # Create yaml
+        aretomo.create_yaml(args)
+
+        # Read params
+        params = prmMod.read_yaml(
+            project_name="TS",
+            filename="./TS_aretomo_align.yaml",
+        )
+
+        # Run
+        logger = logMod.Logger("./o2r_aretomo_align.log")
+        aretomo_obj = aretomo.AreTomo(
+            project_name="TS",
+            params_in=params,
+            logger_in=logger
+        )
+        aretomo_obj.run_aretomo_all()
+
+        # Check that aretomo is called
+        self.assertTrue(aretomo_mock.called)
