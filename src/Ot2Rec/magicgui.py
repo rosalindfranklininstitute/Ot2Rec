@@ -86,7 +86,7 @@ def get_args_new_proj(
     jobs_per_gpu={"label": "Jobs per GPU",
                   "min": 1},
     gpu_mem_usage={"label": "GPU memory usage (if applicable)",
-                   "widget_type": "FloatSlider",
+                #    "widget_type": "FloatSlider",
                    "min": 0.1,
                    "max": 2.0},
     use_gain={"label": "Use gain reference?"},
