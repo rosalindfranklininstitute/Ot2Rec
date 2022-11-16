@@ -69,12 +69,13 @@ class Motioncorr:
 
         # Check if output folder exists, create if not
         if not os.path.isdir(self.params['System']['output_path']):
-            subprocess.run(['mkdir', self.params['System']['output_path']],
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE,
-                           encoding='ascii',
-                           check=True,
-                           )
+            # subprocess.run(['mkdir', self.params['System']['output_path']],
+            #                stdout=subprocess.PIPE,
+            #                stderr=subprocess.PIPE,
+            #                encoding='ascii',
+            #                check=True,
+            #                )
+            os.mkdir(self.params['System']['output_path'])
 
     def _check_processed_images(self):
         """
@@ -316,14 +317,15 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(args=None):
     """
     Subroutine to create new yaml file for motioncorr
     """
     logger = logMod.Logger(log_path="o2r_motioncor2.log")
 
     # Parse user inputs
-    args = mgMod.get_args_mc2.show(run=True)
+    if args is None:
+        args = mgMod.get_args_mc2.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_mc2_yaml(args)
