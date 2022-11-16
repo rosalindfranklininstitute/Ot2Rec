@@ -3,9 +3,9 @@ angles:
     1: 0.0
     2: 30.0
 file_paths:
-    0: ./raw/TS_0001_000[-30.00]_Fractions.mrc
-    1: ./raw/TS_0001_001[0.00]_Fractions.mrc
-    2: ./raw/TS_0001_002[30.00]_Fractions.mrc
+    0: ./raw/TS_0001_001_-30.00.mrc
+    1: ./raw/TS_0001_002_0.00.mrc
+    2: ./raw/TS_0001_003_30.00.mrc
 image_idx:
     0: 0
     1: 1
