@@ -473,7 +473,7 @@ def create_yaml():
     prmMod.new_align_yaml(args)
     update_yaml(args)
 
-    logger(message="IMOD alignment metadata file created.")
+    # logger(message="IMOD alignment metadata file created.")
 
 
 def update_yaml(args):
@@ -500,7 +500,7 @@ def update_yaml(args):
     mc2_md_name = args.project_name.value + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
-    logger(message="MotionCor2 metadata read successfully.")
+    # logger(message="MotionCor2 metadata read successfully.")
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
     align_md_name = args.project_name.value + '_align_mdout.yaml'
@@ -508,10 +508,10 @@ def update_yaml(args):
         is_old_project = True
         with open(align_md_name, 'r') as f:
             align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
-        logger(message="Previous IMOD alignment metadata found and read.")
+        # logger(message="Previous IMOD alignment metadata found and read.")
     else:
         is_old_project = False
-        logger(message="Previous IMOD alignment metadata not found.")
+        # logger(message="Previous IMOD alignment metadata not found.")
 
     # Diff the two dataframes to get numbers of tilt-series with unprocessed data
     if is_old_project:
@@ -537,7 +537,7 @@ def update_yaml(args):
     with open(align_yaml_name, 'w') as f:
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
 
-    logger(message="IMOD alignment metadata updated.")
+    # logger(message="IMOD alignment metadata updated.")
 
 
 def create_yaml_stacked():
