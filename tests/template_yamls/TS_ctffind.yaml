@@ -1,0 +1,21 @@
+System:
+    process_list:
+    - 1
+    output_path: /ceph/groups/els/win_data/processing_1/ctffind
+    output_prefix: Position
+ctffind:
+    ctffind_path: /opt/lmod/modules/ctffind/4.1.14/bin/ctffind
+    pixel_size: 1.87
+    voltage: 300.0
+    spherical_aberration: 2.7
+    amp_contrast: 0.8
+    amp_spec_size: 512
+    resolution_min: 30
+    resolution_max: 5
+    defocus_min: 5000
+    defocus_max: 50000
+    defocus_step: 500
+    astigm_type: ''
+    exhaustive_search: false
+    astigm_restraint: false
+    phase_shift: false
