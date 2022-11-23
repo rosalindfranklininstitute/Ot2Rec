@@ -90,12 +90,13 @@ class ctffind():
 
         # Check if output folder exists, create if not
         if not os.path.isdir(self.params['System']['output_path']):
-            subprocess.run(['mkdir', self.params['System']['output_path']],
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE,
-                           encoding='ascii',
-                           check=True,
-                           )
+            # subprocess.run(['mkdir', self.params['System']['output_path']],
+            #                stdout=subprocess.PIPE,
+            #                stderr=subprocess.PIPE,
+            #                encoding='ascii',
+            #                check=True,
+            #                )
+            os.mkdir(self.params['System']['output_path'])
 
     def _get_images(self):
         """
@@ -203,7 +204,7 @@ class ctffind():
                                      stderr=subprocess.STDOUT,
                                      input=self.input_string,
                                      encoding='ascii',
-                                     check=True,
+                                     # check=True,
         )
 
         try:
@@ -225,18 +226,18 @@ class ctffind():
         # Add log entry when job starts
         self.logObj("Ot2Rec-CTFFind4 started.")
 
-        error_count = 0
+        self.error_count = 0
         ts_list = list(self.ctf_images.iterrows())
         tqdm_iter = tqdm(ts_list, ncols=100)
 
         with tqdm_joblib(tqdm_iter) as progress_bar:
-            joblib.Parallel(n_jobs=mp.cpu_count())(
+            joblib.Parallel(n_jobs=min(len(ts_list), mp.cpu_count()))(
                 joblib.delayed(self._ctffind_single)(idx) for idx in range(len(ts_list))
             )
 
 
         # Log progress when all jobs have successfully terminated
-        if error_count == 0:
+        if self.error_count == 0:
             self.logObj("All Ot2Rec-CTFFind4 jobs successfully finished.")
         else:
             self.logObj("WARNING: All Ot2Rec-CTTFFind4 jobs finished."
@@ -277,14 +278,15 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(args=None):
     """
     Subroutine to create new yaml file for ctffind
     """
     logger = logMod.Logger(log_path="o2r_ctffind.log")
 
     # Parse user inputs
-    args = mgMod.get_args_ctffind.show(run=True)
+    if args is None:
+        args = mgMod.get_args_ctffind.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_ctffind_yaml(args)
