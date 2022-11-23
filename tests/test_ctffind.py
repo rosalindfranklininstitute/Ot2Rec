@@ -90,12 +90,11 @@ class CTFFindSmokeTest(unittest.TestCase):
 
 
     def test_ctffind_called(self):
-        currdir = os.getcwd()
-
         # Create expected input
         tmpdir = self._create_expected_folder_structure()
         os.chdir(tmpdir.name)
         args = self._create_expected_input_args()
+        args.output_folder.value = Path(tmpdir.name + "/ctffind")
 
         # Create yaml
         ctffind.create_yaml(args)
@@ -125,4 +124,4 @@ class CTFFindSmokeTest(unittest.TestCase):
             ctffind_obj.run_ctffind()
             self.assertEqual(ctffind_obj.error_count, 0)
         finally:
-            shutil.rmtree(currdir + "/ctffind")
+            tmpdir.cleanup()
