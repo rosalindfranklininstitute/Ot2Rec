@@ -16,25 +16,25 @@ import os
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch, Mock, MagicMock
 
 import magicgui
 import mrcfile
 import numpy as np
-from Ot2Rec import motioncorr
+from Ot2Rec import ctffind
 from Ot2Rec import logger as logMod
 from Ot2Rec import magicgui as mgMod
 from Ot2Rec import metadata as mdMod
 from Ot2Rec import params as prmMod
 
 
-class MotioncorrSmokeTest(unittest.TestCase):
+class CTFFindSmokeTest(unittest.TestCase):
 
     def _create_expected_input_args(self):
         """Create expected input magicgui args"""
-        args = magicgui.widgets.FunctionGui(mgMod.get_args_mc2)
+        args = magicgui.widgets.FunctionGui(mgMod.get_args_ctffind)
         args.project_name.value = "TS"
-        args.pixel_size.value = 1.0
 
         return args
 
@@ -46,16 +46,20 @@ class MotioncorrSmokeTest(unittest.TestCase):
         proj_yaml = f"{tmpdir.name}/TS_proj.yaml"
         shutil.copyfile(f"{template_folder}/TS_proj.yaml", proj_yaml)
 
-        # Create master_md.yaml
-        master_md_yaml = f"{tmpdir.name}/TS_master_md.yaml"
-        shutil.copyfile(f"{template_folder}/TS_master_md.yaml", master_md_yaml)
+        # Create mc2.yaml
+        mc2_yaml = f"{tmpdir.name}/TS_mc2.yaml"
+        shutil.copyfile(f"{template_folder}/TS_mc2.yaml", mc2_yaml)
+
+        # Create mc2_mdout.yaml
+        mc2_md_yaml = f"{tmpdir.name}/TS_mc2_mdout.yaml"
+        shutil.copyfile(f"{template_folder}/TS_mc2_mdout.yaml", mc2_md_yaml)
 
         # Create raw files
-        os.mkdir(f"{tmpdir.name}/raw")
+        os.mkdir(f"{tmpdir.name}/motioncor")
         tas = [-30.0, 0.0, 30.0]
         raw_mrcs = [
-            f"{tmpdir.name}/raw/"
-            f"TS_0001_{i:04}_{ang}.mrc" for i, ang in enumerate(tas)
+            f"{tmpdir.name}/motioncor/"
+            f"TS_0001_{ang}.mrc" for i, ang in enumerate(tas)
         ]
         for raw_mrc in raw_mrcs:
             with mrcfile.new(raw_mrc) as mrc:
@@ -71,12 +75,12 @@ class MotioncorrSmokeTest(unittest.TestCase):
         args = self._create_expected_input_args()
 
         # Create yaml
-        motioncorr.create_yaml(args)
+        ctffind.create_yaml(args)
 
         # Read params
         params = prmMod.read_yaml(
             project_name="TS",
-            filename="./TS_mc2.yaml"
+            filename="./TS_ctffind.yaml"
         )
 
         # Ensure process list is not empty
@@ -85,9 +89,8 @@ class MotioncorrSmokeTest(unittest.TestCase):
         tmpdir.cleanup()
 
 
-    @unittest.skip("Cannot figure out how to exit the while loop in run_mc2")
-    @patch("subprocess.Popen")
-    def test_mc2_called(self, mc2_mock):
+    def test_ctffind_called(self):
+        currdir = os.getcwd()
 
         # Create expected input
         tmpdir = self._create_expected_folder_structure()
@@ -95,37 +98,31 @@ class MotioncorrSmokeTest(unittest.TestCase):
         args = self._create_expected_input_args()
 
         # Create yaml
-        motioncorr.create_yaml(args)
+        ctffind.create_yaml(args)
 
         # Read params
         params = prmMod.read_yaml(
             project_name="TS",
-            filename="./TS_mc2.yaml"
+            filename="./TS_ctffind.yaml"
         )
 
         # Get mc2_md
-        master_md = mdMod.read_md_yaml(
+        mc2_md = mdMod.read_md_yaml(
             project_name="TS",
-            job_type="motioncorr",
-            filename="./TS_master_md.yaml")
+            job_type="ctffind",
+            filename="./TS_mc2_mdout.yaml")
 
         # Run
-        logger = logMod.Logger("./o2r_mc2.log")
-
-        # Create MagicMock to spoof _get_gpu_nvidia_smi
-        motioncorr.Motioncorr._get_gpu_nvidia_smi = MagicMock(
-            return_value=['0']
-        )
-
-        mc2_obj = motioncorr.Motioncorr(
+        logger = logMod.Logger("./o2r_ctffind.log")
+        ctffind_obj = ctffind.ctffind(
             project_name="TS",
-            mc2_params=params,
-            md_in=master_md,
-            logger=logger
+            md_in=mc2_md,
+            params_in=params,
+            logger_in=logger
         )
-        mc2_obj.use_gpu = ['0']
-        mc2_mock.return_value.returncode = None
-        mc2_obj._curr_meta = []
-        mc2_obj.run_mc2()
 
-        self.assertTrue(mc2_mock.called)
+        try:
+            ctffind_obj.run_ctffind()
+            self.assertEqual(ctffind_obj.error_count, 0)
+        finally:
+            shutil.rmtree(currdir + "/ctffind")
