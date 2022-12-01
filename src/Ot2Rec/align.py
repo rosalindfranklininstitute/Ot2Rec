@@ -462,31 +462,32 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(args_in=None):
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
-    logger = logMod.Logger(log_path="o2r_imod_align.log")
-
     # Parse user inputs
-    args = mgMod.get_args_align.show(run=True)
+    if args_in is None:  # default case, o2r.imod.new
+        logger = logMod.Logger(log_path="o2r_imod_align.log")
+        args = mgMod.get_args_align.show(run=True)
+    else:  # to create stacks for aretomo
+        args = args_in
+        logger = logMod.Logger(log_path="o2r_imod_stack_creation.log")
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
-    update_yaml(args)
+    update_yaml(args, logger)
 
-    logger(message="IMOD alignment metadata file created.")
+    # logger(message="IMOD alignment metadata file created.")
 
 
-def update_yaml(args):
+def update_yaml(args, logger):
     """
     Subroutine to update yaml file for IMOD newstack / alignment
 
     ARGS:
     args (Namespace) :: Namespace generated with user inputs
     """
-    logger = logMod.Logger(log_path="o2r_imod_align.log")
-
     # Check if align and motioncorr yaml files exist
     align_yaml_name = args.project_name.value + '_align.yaml'
     mc2_yaml_name = args.project_name.value + '_mc2.yaml'
@@ -504,7 +505,7 @@ def update_yaml(args):
     mc2_md_name = args.project_name.value + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
-    logger(message="MotionCor2 metadata read successfully.")
+    # logger(message="MotionCor2 metadata read successfully.")
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
     align_md_name = args.project_name.value + '_align_mdout.yaml'
@@ -512,10 +513,10 @@ def update_yaml(args):
         is_old_project = True
         with open(align_md_name, 'r') as f:
             align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
-        logger(message="Previous IMOD alignment metadata found and read.")
+        # logger(message="Previous IMOD alignment metadata found and read.")
     else:
         is_old_project = False
-        logger(message="Previous IMOD alignment metadata not found.")
+        # logger(message="Previous IMOD alignment metadata not found.")
 
     # Diff the two dataframes to get numbers of tilt-series with unprocessed data
     if is_old_project:
@@ -541,7 +542,7 @@ def update_yaml(args):
     with open(align_yaml_name, 'w') as f:
         yaml.dump(align_params.params, f, indent=4, sort_keys=False)
 
-    logger(message="IMOD alignment metadata updated.")
+    # logger(message="IMOD alignment metadata updated.")
 
 
 def create_yaml_stacked():
@@ -609,7 +610,11 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None, exclusive=True
     do_align (bool) :: whether to perform IMOD alignment
     ext (bool)      :: whether external stack(s) are available and to be used
     """
-    logger = logMod.Logger(log_path="o2r_imod_align.log")
+    # logger = logMod.Logger(log_path="o2r_imod_align.log")
+
+    logger = logMod.Logger()
+    if do_align:
+        logger.log_path="o2r_imod_align.log"
 
     if exclusive:
         parser = argparse.ArgumentParser()

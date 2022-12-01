@@ -16,12 +16,13 @@
 import argparse
 import os
 import subprocess
-from glob import glob
 import warnings
-from icecream import ic
+from glob import glob
 from pathlib import Path
 
 import yaml
+from icecream import ic
+from tqdm import tqdm
 
 from . import align
 from . import logger as logMod
@@ -78,6 +79,8 @@ class AreTomo:
 
         # Create the folders and dictionary for future reference
         self._path_dict = {}
+        self.md_out["process_list"] = dict(zip(range(1, len(self.params['System']['process_list'])+1),
+                                               self.params['System']['process_list']))
         for curr_ts in self.params['System']['process_list']:
             subfolder = (f"{self.basis_folder}/"
                          f"{self.rootname}_{curr_ts:04d}{self.suffix}")
@@ -85,7 +88,9 @@ class AreTomo:
             # self._path_dict[curr_ts] = subfolder
             if "aretomo_output_dir" not in list(self.md_out.keys()):
                 self.md_out["aretomo_output_dir"] = {}
+                self.md_out["aretomo_align_stats"] = {}
             self.md_out["aretomo_output_dir"][curr_ts] = subfolder
+            self.md_out["aretomo_align_stats"][curr_ts] = subfolder + f"/{self.rootname}_{curr_ts:04d}{self.suffix}.st.aln"
 
     def _get_aretomo_align_command(self, i):
         """
@@ -176,15 +181,18 @@ class AreTomo:
                                      encoding='ascii',
                                      check=True,
                                      )
-        print(aretomo_run.stdout)
+        self.logObj(f"\nStdOut:{aretomo_run.stdout}\n")
+        self.logObj(f"\nStdErr:{aretomo_run.stderr}\n")
 
     def run_aretomo_all(self):
         """
         Method to run AreTomo for all ts in process list
         """
-        for i, curr_ts in enumerate(self.params['System']['process_list']):
+        ts_list = self.params['System']['process_list']
+        tqdm_iter = tqdm(ts_list, ncols=100)
+        for i, curr_ts in enumerate(tqdm_iter):
+            tqdm_iter.set_description(f"Processing TS {curr_ts}...")
             self._run_aretomo(i)
-            print(f"Ran AreTomo on {self.proj_name}_{curr_ts}")
         self.export_metadata()
 
     def export_metadata(self):
@@ -224,24 +232,25 @@ def _update_volz(args, aretomo_params):
 def _create_stacks_with_imod(args):
     # Uses align to create the InMrc and AngFile in correct form
         try:
-            align.create_yaml([
-                args["project_name"],
-                str(args["rot_angle"]),
-                '-o',
-                args["output_path"]])
+            args_in_align = mgMod.get_args_align
+            args_in_align.project_name.value = args["project_name"]
+            args_in_align.rot_angle.value = args["rot_angle"]
+            args_in_align.output_folder.value = args["output_path"]
+            align.create_yaml(args_in=args_in_align)
             align.run(
                 newstack=True,
                 do_align=False,
                 args_pass=[args["project_name"]])
             print("Created stacks for input to AreTomo")
         except:
-            print("IMOD might not be loaded")
+            warnings.warn("Stacks could not be created, IMOD might not be loaded")
 
 
 def _find_files_with_ext(ext, rootname, suffix, directory):
     search_term = (f"{directory}/{rootname}_*{suffix}/"
                    f"{rootname}_*{suffix}{ext}")
     file_list = glob(search_term)
+    file_list.sort()
 
     if len(file_list) == 0:
         warnings.warn(
@@ -307,9 +316,6 @@ def update_yaml(args):
     # aretomo_params.params['AreTomo_kwargs'] = kwargs
 
     if args["aretomo_mode"] != 1:  # for workflows with alignment
-        # Create input stacks from motioncor images
-        _create_stacks_with_imod(args)
-
         # Set InMrc
         st_file_list = _find_files_with_ext(
             ".st",
@@ -317,6 +323,17 @@ def update_yaml(args):
             suffix,
             str(args["input_mrc_folder"])
         )
+
+        if len(st_file_list) == 0:  # assume that input_mrc_folder is from motioncor
+            # Create input stacks from motioncor images
+            _create_stacks_with_imod(args)
+            st_file_list = _find_files_with_ext(
+                ".st",
+                rootname,
+                suffix,
+                str(args["output_path"])
+            )
+
         aretomo_params.params["AreTomo_setup"]["input_mrc"] = st_file_list
 
         # Set AngFile
@@ -327,10 +344,17 @@ def update_yaml(args):
                 suffix,
                 str(args["input_mrc_folder"])
             )
-            aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
+            if len(tlt_file_list) == 0: # assume that input_mrc_folder is from motioncor
+                tlt_file_list = _find_files_with_ext(
+                    ".rawtlt",
+                    rootname,
+                    suffix,
+                    str(args["output_path"])
+                )
         else:
             tlt_file_list = args["tilt_angles"]
-            aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
+
+        aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
 
         # Set process list
         ts_list = _get_process_list(st_file_list, rootname, suffix, ".st")
@@ -338,9 +362,6 @@ def update_yaml(args):
 
         # Set output mrc
         output_lookup = {0: "_ali.mrc", 2: "_rec.mrc"}
-        # out_file_list = [
-        #     (f"{os.path.splitext(file)[0]}"
-        #      f"{output_lookup[args['aretomo_mode']]}") for file in st_file_list]
         out_file_list = [
             (f"{aretomo_params.params['System']['output_path']}/"
              f"{os.path.splitext(os.path.basename(file))[0]}/"
@@ -363,12 +384,16 @@ def update_yaml(args):
 
         # Set AngFile
         if args["tilt_angles"] == "":
-            tlt_file_list = _find_files_with_ext(
-                ".tlt",
-                rootname,
-                suffix,
-                str(args["input_mrc_folder"])
-            )
+            # NOTE: sometimes if .fid.tlt files are present these are accidentally found too.
+            # Temp fix
+            # tlt_file_list = _find_files_with_ext(
+            #     ".tlt",
+            #     rootname,
+            #     suffix,
+            #     str(args["input_mrc_folder"])
+            # )
+            tlt_file_list = [f"{f.strip('_ali.mrc')}.tlt" for f in st_file_list]
+
             aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
         else:
             tlt_file_list = args["tilt_angles"]
@@ -380,7 +405,10 @@ def update_yaml(args):
 
         # Set output mrc
         out_file_list = [
-            f"{os.path.splitext(file)[0]}_rec.mrc" for file in st_file_list
+            (f"{aretomo_params.params['System']['output_path']}/"
+             f"{os.path.splitext(os.path.basename(file))[0].strip('_ali')}/"
+             f"{os.path.splitext(os.path.basename(file))[0]}"
+             f"_rec.mrc") for file in st_file_list
         ]
         aretomo_params.params["AreTomo_setup"]["output_mrc"] = out_file_list
 
@@ -448,7 +476,10 @@ def run():
     )
 
     # Create Logger object
-    log_path = "./o2r_aretomo.log"
+    aretomo_log_names = {0: "o2r_aretomo_align.log",
+                         1: "o2r_aretomo_recon.log",
+                         2: "o2r_aretomo_align-recon.log"}
+    log_path = aretomo_log_names[int(args.aretomo_mode)]
     try:
         os.remove(log_path)
     except:
