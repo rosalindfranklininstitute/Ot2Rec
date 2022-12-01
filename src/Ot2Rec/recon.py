@@ -172,6 +172,9 @@ runtime.AlignedStack.any.eraseGold = <erase_gold>
 runtime.AlignedStack.any.filterStack = <filter_stack>
 runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
 
+runtime.Reconstruction.any.useSirt = <use_sirt>
+comparam.sirtsetup.sirtsetup.LeaveIterations = <sirt_iter>
+
 comparam.tilt.tilt.THICKNESS = <recon_thickness>
 
 runtime.Postprocess.any.doTrimvol = <run_trimvol>
@@ -194,6 +197,8 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
             'stack_bin_factor': self.params['BatchRunTomo']['aligned_stack']['bin_factor'],
 
             'recon_thickness': self.params['BatchRunTomo']['reconstruction']['thickness'],
+            'use_sirt': 1 if self.params['BatchRunTomo']['reconstruction']['use_sirt'] else 0,
+            'sirt_iter': self.params['BatchRunTomo']['reconstruction']['sirt_iter'],
 
             'run_trimvol': 1 if self.params['BatchRunTomo']['postprocessing']['run_trimvol'] else 0,
             'trimvol_reorient': {'none': 0, 'flip': 1, 'rotate': 2}[

@@ -249,6 +249,8 @@ def new_recon_yaml(args):
 
             'reconstruction': {
                 'thickness': args.thickness.value,
+                'use_sirt': args.use_sirt.value,
+                'sirt_iter': args.sirt_iter.value,
             },
 
             'postprocessing': {
