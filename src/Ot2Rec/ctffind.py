@@ -204,7 +204,7 @@ class ctffind():
                                      stderr=subprocess.STDOUT,
                                      input=self.input_string,
                                      encoding='ascii',
-                                     # check=True,
+                                     check=True,
         )
 
         try:
