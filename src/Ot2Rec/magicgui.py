@@ -496,6 +496,8 @@ def get_args_align_ext(
                "min": 0,
                "max": 50000,
                "step": 100},
+    use_sirt={"label": "Use SIRT?"},
+    sirt_iter={"label": "# of SIRT iterations (if applicable)"},
     trimvol={"label": "Postprocessing: Run Trimvol on reconstruction"},
     trimvol_reorient={"widget_type": "RadioButtons",
                       "label": "Postprocessing: Reorientation in Trimvol (if applicable)",
@@ -510,6 +512,8 @@ def get_args_recon(
         filtering=False,
         bin_factor=4,
         thickness=1500,
+        use_sirt=False,
+        sirt_iter=10,
         trimvol=True,
         trimvol_reorient="rotate"
 ):
