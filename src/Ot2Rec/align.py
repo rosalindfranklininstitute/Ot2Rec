@@ -248,6 +248,7 @@ class Align:
             cmd = ['newstack',
                    '-fileinlist', self._filename_fileinlist,
                    '-output', stack_file,
+                   '-bin', str(self.params['BatchRunTomo']['setup']['stack_bin_factor']),
                    ]
 
             # Run newstack to create stack
@@ -298,7 +299,7 @@ setupset.systemTemplate = <adoc_template>
 runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
 runtime.Preprocessing.any.removeXrays = <remove_xrays>
 
-comparam.prenewst.newstack.BinByFactor = <ca_bin_factor>
+comparam.prenewst.newstack.BinByFactor = 1
 
 runtime.Fiducials.any.trackingMethod = 1
 
@@ -317,7 +318,7 @@ comparam.align.tiltalign.BeamTiltOption = <beamtilt_option>
 comparam.align.tiltalign.RobustFitting = <use_robust>
 comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
 
-runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
+runtime.AlignedStack.any.binByFactor = 1
         """
 
         convert_dict = {

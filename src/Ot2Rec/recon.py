@@ -402,6 +402,9 @@ def update_yaml(args):
 
     recon_params.params['BatchRunTomo']['setup'] = {key: value for key, value in align_params.params['BatchRunTomo']['setup'].items() \
                                                     if key != 'stack_bin_factor'}
+    recon_params.params['BatchRunTomo']['setup']['pixel_size'] = \
+        align_params.params['BatchRunTomo']['setup']['pixel_size'] * \
+        align_params.params['BatchRunTomo']['setup']['stack_bin_factor']
 
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)

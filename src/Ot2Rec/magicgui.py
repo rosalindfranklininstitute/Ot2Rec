@@ -510,7 +510,7 @@ def get_args_recon(
         correct_ctf=False,
         erase_gold=False,
         filtering=False,
-        bin_factor=4,
+        bin_factor=1,
         thickness=1500,
         use_sirt=False,
         sirt_iter=10,
