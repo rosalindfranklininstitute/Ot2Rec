@@ -289,6 +289,7 @@ class Align:
         adoc_temp = """
 setupset.currentStackExt = st
 setupset.copyarg.stackext = st
+setupset.copyarg.dual = 0
 setupset.copyarg.userawtlt = <use_rawtlt>
 setupset.copyarg.pixel = <pixel_size>
 setupset.copyarg.rotation = <rot_angle>
@@ -301,6 +302,40 @@ runtime.Preprocessing.any.removeXrays = <remove_xrays>
 
 comparam.prenewst.newstack.BinByFactor = 1
 
+runtime.AlignedStack.any.binByFactor = 1
+"""
+
+        fiducial_temp = """
+runtime.Positioning.any.wholeTomogram = 1
+runtime.Fiducials.any.trackingMethod = 2
+
+runtime.RAPTOR.any.useAlignedStack = 1
+runtime.RAPTOR.any.numberOfMarkers = <num_beads>
+
+comparam.track.beadtrack.SobelFilterCentering = 1
+comparam.track.beadtrack.ScalableSigmaForSobel = 0.12
+
+comparam.newst.newstack.TaperAtFill = 1,1
+comparam.newst.newstack.AntialiasFilter = -1
+comparam.golderaser.ccderaser.ExpandCircleIterations = 3
+comparam.eraser.ccderaser.PeakCriterion = 8.0
+comparam.eraser.ccderaser.DiffCriterion = 6.0
+
+runtime.Fiducials.any.seedingMethod = 3
+comparam.track.beadtrack.LightBeads = 0
+comparam.track.beadtrack.LocalAreaTracking = 1
+comparam.track.beadtrack.LocalAreaTargetSize = <size_of_patches>
+comparam.autofidseed.autofidseed.TwoSurfaces = 0
+comparam.autofidseed.autofidseed.TargetNumberOfBeads = <num_beads>
+
+comparam.align.tiltalign.SurfacesToAnalyze = 1
+comparam.align.tiltalign.MagOption = 0
+comparam.align.tiltalign.TiltOption = 0
+comparam.align.tiltalign.RotOption = -1
+comparam.align.tiltalign.BeamTiltOption = 2
+"""
+
+        patchtrack_temp = """
 runtime.Fiducials.any.trackingMethod = 1
 
 comparam.xcorr_pt.tiltxcorr.SizeOfPatchesXandY = <size_of_patches>
@@ -317,9 +352,14 @@ comparam.align.tiltalign.RotOption = <rot_option>
 comparam.align.tiltalign.BeamTiltOption = <beamtilt_option>
 comparam.align.tiltalign.RobustFitting = <use_robust>
 comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
-
-runtime.AlignedStack.any.binByFactor = 1
         """
+
+        fiducial = self.params['BatchRunTomo']['setup']['gold_size'] > 0
+
+        if fiducial:
+            adoc_temp = adoc_temp + fiducial_temp
+        else:
+            adoc_temp = adoc_temp + patchtrack_temp
 
         convert_dict = {
             'use_rawtlt': 1 if self.params['BatchRunTomo']['setup']['use_rawtlt'] else 0,
@@ -327,7 +367,7 @@ runtime.AlignedStack.any.binByFactor = 1
             'rot_angle': self.params['BatchRunTomo']['setup']['rot_angle'],
             'excl_views': "" if self.params["BatchRunTomo"]["setup"]["excluded_views"] == [0] \
             else f'{",".join(map(str, self.params["BatchRunTomo"]["setup"]["excluded_views"]))}',
-            'gold_size': self.params['BatchRunTomo']['setup']['gold_size'],
+            'gold_size': self.params['BatchRunTomo']['setup']['gold_size'] if fiducial else 0,
             'adoc_template': self.params['BatchRunTomo']['setup']['adoc_template'],
             'stack_bin_factor': self.params['BatchRunTomo']['setup']['stack_bin_factor'],
 
@@ -335,6 +375,7 @@ runtime.AlignedStack.any.binByFactor = 1
             'remove_xrays': 1 if self.params['BatchRunTomo']['preprocessing']['remove_xrays'] else 0,
 
             'ca_bin_factor': self.params['BatchRunTomo']['coarse_align']['bin_factor'],
+            'num_beads': self.params['BatchRunTomo']['setup']['num_beads'],
 
             'size_of_patches': f'{",".join(map(str, self.params["BatchRunTomo"]["patch_track"]["size_of_patches"]))}',
             'num_of_patches': f'{",".join(map(str, self.params["BatchRunTomo"]["patch_track"]["num_of_patches"]))}',

@@ -172,6 +172,7 @@ def new_align_yaml(args):
                 'pixel_size': None,
                 'rot_angle': args.rot_angle.value,
                 'gold_size': args.fiducial_size.value,
+                'num_beads': args.num_beads.value,
                 'adoc_template': str(args.adoc_template.value),
                 'stack_bin_factor': args.stack_bin_factor.value,
             },
