@@ -17,7 +17,7 @@ from setuptools import setup, find_packages
 
 
 setup(
-    version='1.0a',
+    version='0.3.0',
     name='Ot2Rec',
     description='Ot2Rec',
     url='https://github.com/rosalindfranklininstitute/Ot2Rec',
@@ -33,29 +33,50 @@ setup(
         'multiprocess',
         'icecream',
         'beautifultable',
+        'scikit-image',
+        'mrcfile',
+        'tifffile',
+        'redlionfish',
+        'magicgui',
+        'pyqt5',
+        'mdocfile',
+        'joblib'
     ],
     entry_points={
         "console_scripts": [
             "o2r.new=Ot2Rec.main:new_proj",
-            "o2r.get_master=Ot2Rec.main:get_master_metadata",
 
-            "o2r.mc.new=Ot2Rec.main:create_mc2_yaml",
-            "o2r.mc.run=Ot2Rec.main:run_mc2",
+            "o2r.mc.new=Ot2Rec.motioncorr:create_yaml",
+            "o2r.mc.run=Ot2Rec.motioncorr:run",
 
-            "o2r.ctffind.new=Ot2Rec.main:create_ctffind_yaml",
-            "o2r.ctffind.run=Ot2Rec.main:run_ctffind",
+            "o2r.ctffind.new=Ot2Rec.ctffind:create_yaml",
+            "o2r.ctffind.run=Ot2Rec.ctffind:run",
 
-            "o2r.align.new=Ot2Rec.main:create_align_yaml",
-            "o2r.align.new_ext=Ot2Rec.main:create_align_yaml_stacked",
-            "o2r.align.run=Ot2Rec.main:run_align",
-            "o2r.align.run_ext=Ot2Rec.main:run_align_ext",
-            "o2r.align.stats=Ot2Rec.main:get_align_stats",
+            "o2r.ctfsim.run=Ot2Rec.ctfsim:run",
 
-            "o2r.recon.new=Ot2Rec.main:create_recon_yaml",
-            "o2r.recon.run=Ot2Rec.main:run_recon",
+            "o2r.imod.align.new=Ot2Rec.align:create_yaml",
+            "o2r.imod.align.stacks=Ot2Rec.align:imod_create_stacks",
+            "o2r.imod.align.run=Ot2Rec.align:imod_standard_align",
+
+            "o2r.imod.align.new_ext=Ot2Rec.align:create_yaml_stacked",
+            "o2r.imod.align.run_ext=Ot2Rec.align:imod_align_ext",
+
+            "o2r.imod.align.stats=Ot2Rec.align:get_align_stats",
+
+            "o2r.imod.recon.new=Ot2Rec.recon:create_yaml",
+            "o2r.imod.recon.run=Ot2Rec.recon:run",
+
+            "o2r.savu.recon.new=Ot2Rec.savurecon:create_yaml",
+            "o2r.savu.recon.run=Ot2Rec.savurecon:run",
+
+            "o2r.aretomo.new=Ot2Rec.aretomo:create_yaml",
+            "o2r.aretomo.run=Ot2Rec.aretomo:run",
+
+            "o2r.deconv.run=Ot2Rec.rlf_deconv:run",
 
             "o2r.cleanup=Ot2Rec.main:cleanup",
-            "o2r.runall=Ot2Rec.main:run_all",
+
+            "o2r.runall.imod=Ot2Rec.main:run_all_imod",
         ]
     }
 )
