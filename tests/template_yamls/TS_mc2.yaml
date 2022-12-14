@@ -1,0 +1,23 @@
+System:
+    process_list:
+    - 1
+    output_path: ./motioncor
+    output_prefix: TS
+    use_gpu: auto
+    jobs_per_gpu: 2
+    gpu_memory_usage: 1.0
+    filetype: mrc
+MC2:
+    MC2_path: /opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110
+    gain_reference: nogain
+    pixel_size: 1.0
+    desired_pixel_size: 1.0
+    discard_frames_top: 0
+    discard_frames_bottom: 0
+    tolerance: 0.5
+    max_iterations: 10
+    patch_size:
+    - 5
+    - 5
+    - 20
+    use_subgroups: true

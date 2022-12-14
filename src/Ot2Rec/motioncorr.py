@@ -23,6 +23,7 @@ from tqdm import tqdm
 
 from . import metadata as mdMod
 from . import user_args as uaMod
+from . import magicgui as mgMod
 from . import logger as logMod
 from . import params as prmMod
 
@@ -68,12 +69,13 @@ class Motioncorr:
 
         # Check if output folder exists, create if not
         if not os.path.isdir(self.params['System']['output_path']):
-            subprocess.run(['mkdir', self.params['System']['output_path']],
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE,
-                           encoding='ascii',
-                           check=True,
-                           )
+            # subprocess.run(['mkdir', self.params['System']['output_path']],
+            #                stdout=subprocess.PIPE,
+            #                stderr=subprocess.PIPE,
+            #                encoding='ascii',
+            #                check=True,
+            #                )
+            os.mkdir(self.params['System']['output_path'])
 
     def _check_processed_images(self):
         """
@@ -105,21 +107,21 @@ class Motioncorr:
             self.meta_out = self.meta_out[self._merged['_merge'] == 'left_only']
 
             if len(self._missing_specified) > 0:
-                self.logObj(f"Info: {len(self._missing_specified)} images in record missing in folder. "
+                self.logObj(f"{len(self._missing_specified)} images in record missing in folder. "
                             "Will be added back for processing.")
 
         # Drop the items in input metadata if they are in the output record
         _ignored = self.meta[self.meta.output.isin(self.meta_out.output)]
         if len(_ignored) > 0 and len(_ignored) < len(self.meta):
-            self.logObj(f"Info: {len(_ignored)} images had been processed and will be omitted.")
+            self.logObj(f"{len(_ignored)} images had been processed and will be omitted.")
         elif len(_ignored) == len(self.meta):
-            self.logObj("Info: All specified images had been processed. Nothing will be done.")
+            self.logObj("All specified images had been processed. Nothing will be done.")
             self.no_processes = True
 
         self.meta = self.meta[~self.meta.output.isin(self.meta_out.output)]
 
-    @staticmethod
-    def _get_gpu_nvidia_smi():
+
+    def _get_gpu_nvidia_smi(self):
         """
         Subroutine to get visible GPU ID(s) from nvidia-smi
         """
@@ -139,6 +141,9 @@ class Motioncorr:
 
         # catch the visible GPUs
         if nv_uuid.returncode != 0 or nv_processes.returncode != 0:
+            self.logObj(msg=f"nvidia-smi returned an error: {nv_uuid.stderr}",
+                        level='critical',
+            )
             raise AssertionError(f"Error in Ot2Rec.Motioncorr._get_gpu_from_nvidia_smi: "
                                  f"nvidia-smi returned an error: {nv_uuid.stderr}")
 
@@ -162,6 +167,9 @@ class Motioncorr:
                 visible_gpu.append(gpu_id)
 
         if not visible_gpu:
+            self.logObj(f"{len(nv_uuid)} GPU detected, but none of them is free.",
+                        level='critical',
+            )
             raise ValueError(f"Error in metadata._get_gpu_from_nvidia_smi: {len(nv_uuid)} GPU detected, "
                              "but none of them is free.")
         return visible_gpu
@@ -171,8 +179,8 @@ class Motioncorr:
         Subroutine to set output path for motioncorr'd images
         """
         self.meta['output'] = self.meta.apply(
-            lambda row: f"{self.params['System']['output_path']}"
-            f"{self.params['System']['output_prefix']}_{row['ts']:03}_{row['angles']}.mrc", axis=1)
+            lambda row: f"{self.params['System']['output_path']}/"
+            f"{self.params['System']['output_prefix']}_{row['ts']:04}_{row['angles']}.mrc", axis=1)
 
     def _get_command(self, image, extra_info=None):
         """
@@ -213,6 +221,7 @@ class Motioncorr:
                '-PixSize', str(self.params['MC2']['pixel_size']),
                '-Throw', str(self.params['MC2']['discard_frames_top']),
                '-Trunc', str(self.params['MC2']['discard_frames_bottom']),
+               '-LogFile', out_path + '.log',
                ]
 
         if extra_info is not None:
@@ -233,6 +242,9 @@ class Motioncorr:
         """
         Subroutine to run MotionCor2
         """
+
+        # Add log entry when job starts
+        self.logObj("Ot2Rec-MotionCor2 started.")
 
         # Process tilt-series one at a time
         ts_list = self.params['System']['process_list']
@@ -261,10 +273,18 @@ class Motioncorr:
                 for job in chunks:
                     # from the moment the next line is read, every process in job are spawned
                     for process in list(job):
-                        self.log.append(process.communicate()[0].decode('UTF-8'))
+                        try:
+                            assert(process.returncode is None)
+                        except:
+                            self.logObj("Ot2Rec-MotionCor2 job failed.",
+                                        level="warning")
 
+                        self.log.append(process.communicate()[0].decode('UTF-8'))
                         self.update_mc2_metadata()
                         self.export_metadata()
+
+        self.logObj("Ot2Rec-MotionCor2 jobs finished.")
+
 
     def update_mc2_metadata(self):
         """
@@ -297,17 +317,21 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(args=None):
     """
     Subroutine to create new yaml file for motioncorr
     """
+    logger = logMod.Logger(log_path="o2r_motioncor2.log")
+
     # Parse user inputs
-    parser = uaMod.get_args_mc2()
-    args = parser.parse_args()
+    if args is None:
+        args = mgMod.get_args_mc2.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_mc2_yaml(args)
     update_yaml(args)
+
+    logger(message="MotionCor2 metadata file created.")
 
 
 def update_yaml(args):
@@ -317,30 +341,39 @@ def update_yaml(args):
     ARGS:
     args (Namespace) :: Arguments obtained from user
     """
+    logger = logMod.Logger(log_path="o2r_motioncor2.log")
 
     # Check if MC2 yaml exists
-    mc2_yaml_name = args.project_name + '_mc2.yaml'
+    mc2_yaml_name = args.project_name.value + '_mc2.yaml'
     if not os.path.isfile(mc2_yaml_name):
+        logger(level="error",
+               message="MotionCor2 metadata file not found.")
         raise IOError("Error in Ot2Rec.main.update_mc2_yaml: File not found.")
 
     # Read in master yaml
-    master_yaml = args.project_name + '_proj.yaml'
+    master_yaml = args.project_name.value + '_proj.yaml'
     with open(master_yaml, 'r') as f:
         master_config = yaml.load(f, Loader=yaml.FullLoader)
+    logger(message="Master config read successfully.")
+
 
     # Read in master metadata (as Pandas dataframe)
-    master_md_name = args.project_name + '_master_md.yaml'
+    master_md_name = args.project_name.value + '_master_md.yaml'
     with open(master_md_name, 'r') as f:
         master_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+    logger(message="Master metadata read successfully.")
 
     # Read in previous MC2 output metadata (as Pandas dataframe) for old projects
-    mc2_md_name = args.project_name + '_mc2_md.yaml'
+    mc2_md_name = args.project_name.value + '_mc2_md.yaml'
     if os.path.isfile(mc2_md_name):
         is_old_project = True
         with open(mc2_md_name, 'r') as f:
             mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+        logger(log_type="info",
+               message="Previous MotionCor2 metadata found and read.")
     else:
         is_old_project = False
+        logger(message="Previous MotionCor2 metadata not found.")
 
     # Diff the two dataframes to get numbers of tilt-series with unprocessed data
     if is_old_project:
@@ -354,7 +387,7 @@ def update_yaml(args):
     unique_ts_numbers = unprocessed_images['ts'].sort_values(ascending=True).unique().tolist()
 
     # Read in MC2 yaml file, modify, and update
-    mc2_params = prmMod.read_yaml(project_name=args.project_name,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name.value,
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
     mc2_params.params['System']['filetype'] = master_config['filetype']
@@ -362,38 +395,48 @@ def update_yaml(args):
     with open(mc2_yaml_name, 'w') as f:
         yaml.dump(mc2_params.params, f, indent=4, sort_keys=False)
 
+    logger(message="MotionCor2 metadata updated.")
 
-def run():
+
+def run(exclusive=True, args_in=None):
     """
     Method to run motioncorr
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
-    args = parser.parse_args()
+    logger = logMod.Logger(log_path="o2r_motioncor2.log")
+
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name",
+                            type=str,
+                            help="Name of current project")
+        args = parser.parse_args()
+        project_name = args.project_name
+    else:
+        project_name = args_in.project_name.value
 
     # Check if prerequisite files exist
-    mc2_yaml = args.project_name + '_mc2.yaml'
-    master_md_file = args.project_name + '_master_md.yaml'
+    mc2_yaml = project_name + '_mc2.yaml'
+    master_md_file = project_name + '_master_md.yaml'
 
     if not os.path.isfile(mc2_yaml):
+        logger(level="error",
+               msg="MC2 yaml config not found.")
         raise IOError("Error in Ot2Rec.main.run_mc2: MC2 yaml config not found.")
+
     if not os.path.isfile(master_md_file):
+        logger(level="error",
+               msg="Master metadata not found.")
         raise IOError("Error in Ot2Rec.main.run_mc2: Master metadata not found.")
 
     # Read in config and metadata
-    mc2_config = prmMod.read_yaml(project_name=args.project_name,
+    mc2_config = prmMod.read_yaml(project_name=project_name,
                                   filename=mc2_yaml)
-    master_md = mdMod.read_md_yaml(project_name=args.project_name,
+    master_md = mdMod.read_md_yaml(project_name=project_name,
                                    job_type='motioncorr',
                                    filename=master_md_file)
 
-    # Create Logger object
-    logger = logMod.Logger()
-
     # Create Motioncorr object
-    mc2_obj = Motioncorr(project_name=args.project_name,
+    mc2_obj = Motioncorr(project_name=project_name,
                          mc2_params=mc2_config,
                          md_in=master_md,
                          logger=logger

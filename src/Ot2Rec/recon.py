@@ -25,6 +25,7 @@ from . import metadata as mdMod
 from . import params as prmMod
 from . import user_args as uaMod
 from . import logger as logMod
+from . import magicgui as mgMod
 
 
 class Recon:
@@ -84,17 +85,17 @@ class Recon:
         # Create the folders and dictionary for future reference
         self._path_dict = {}
         for curr_ts in self.params['System']['process_list']:
-            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
+            subfolder = f"{self.basis_folder}/{self.rootname}_{int(curr_ts):04}{self.suffix}"
             os.makedirs(subfolder, exist_ok=True)
             self._path_dict[curr_ts] = subfolder
 
         self._recon_images = pd.DataFrame(columns=['ts', 'align_output', 'recon_output'])
         for curr_ts in self.params['System']['process_list']:
-            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
+            subfolder = f"{self.basis_folder}/{self.rootname}_{int(curr_ts):04}{self.suffix}"
             _to_append = pd.DataFrame({
                 'ts': [curr_ts],
-                'align_output': [f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_ali.mrc"],
-                'recon_output': [f"{subfolder}/{self.rootname}_{curr_ts:02d}{self.suffix}_rec.mrc"],
+                'align_output': [f"{subfolder}/{self.rootname}_{int(curr_ts):04}{self.suffix}_ali.mrc"],
+                'recon_output': [f"{subfolder}/{self.rootname}_{int(curr_ts):04}{self.suffix}_rec.mrc"],
             })
             self._recon_images = pd.concat([self._recon_images, _to_append],
                                            ignore_index=True,
@@ -171,6 +172,9 @@ runtime.AlignedStack.any.eraseGold = <erase_gold>
 runtime.AlignedStack.any.filterStack = <filter_stack>
 runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
 
+runtime.Reconstruction.any.useSirt = <use_sirt>
+comparam.sirtsetup.sirtsetup.LeaveIterations = <sirt_iter>
+
 comparam.tilt.tilt.THICKNESS = <recon_thickness>
 
 runtime.Postprocess.any.doTrimvol = <run_trimvol>
@@ -193,6 +197,8 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
             'stack_bin_factor': self.params['BatchRunTomo']['aligned_stack']['bin_factor'],
 
             'recon_thickness': self.params['BatchRunTomo']['reconstruction']['thickness'],
+            'use_sirt': 1 if self.params['BatchRunTomo']['reconstruction']['use_sirt'] else 0,
+            'sirt_iter': self.params['BatchRunTomo']['reconstruction']['sirt_iter'],
 
             'run_trimvol': 1 if self.params['BatchRunTomo']['postprocessing']['run_trimvol'] else 0,
             'trimvol_reorient': {'none': 0, 'flip': 1, 'rotate': 2}[
@@ -226,7 +232,7 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
                '-CPUMachineList', f"{temp_cpu}",
                '-GPUMachineList', '1',
                '-DirectiveFile', './recon.adoc',
-               '-RootName', f'{self.rootname}_{curr_ts:02d}',
+               '-RootName', f'{self.rootname}_{curr_ts:04d}',
                '-CurrentLocation', self._path_dict[curr_ts],
                '-StartingStep', '8' if not ext else '0',
                '-EndingStep', '20' if not ext else '0',
@@ -238,35 +244,52 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         """
         Method to reconstruct specified stack(s) using IMOD batchtomo
         """
+        # Add log entry when job starts
+        self.logObj("Ot2Rec-reconstruction (IMOD) started.")
 
         # Create adoc file
         self._get_adoc()
 
+        error_count = 0
         tqdm_iter = tqdm(self._process_list, ncols=100)
         for curr_ts in tqdm_iter:
             tqdm_iter.set_description(f"Reconstructing TS {curr_ts}...")
 
             # Get command for current tilt-series
-            cmd_ts = self._get_brt_recon_command(curr_ts)
-
             if ext:
                 batchruntomo = subprocess.run(self._get_brt_recon_command(curr_ts, ext=True),
                                               stdout=subprocess.PIPE,
                                               stderr=subprocess.STDOUT,
-                                              encoding='ascii')
+                                              encoding='ascii',
+                                              check=True
+                )
 
             batchruntomo = subprocess.run(self._get_brt_recon_command(curr_ts, ext=False),
                                           stdout=subprocess.PIPE,
                                           stderr=subprocess.STDOUT,
-                                          encoding='ascii')
+                                          encoding='ascii',
+                                          check=True
+            )
 
-            if batchruntomo.stderr:
-                raise ValueError(f'Batchtomo: An error has occurred ({batchruntomo.returncode}) '
-                                 f'on stack{curr_ts}.')
+            try:
+                assert (not batchruntomo.stderr)
+            except:
+                error_count += 1
+                self.logObj(level="warning",
+                            message=f"Batchtomo: An error has occurred ({batchruntomo.returncode}) on stack{curr_ts}.")
             else:
                 self.stdout = batchruntomo.stdout
                 self.update_recon_metadata()
                 self.export_metadata()
+
+        # Add log entry when job finishes
+        if error_count == 0:
+            self.logObj("All Ot2Rec-recon (IMOD) jobs successfully finished.")
+        else:
+            self.logObj(level="warning",
+                        message=f"All Ot2Rec-recon (IMOD) jobs finished. {error_count} of {len(tqdm_iter)} jobs failed."
+            )
+
 
     def update_recon_metadata(self):
         """
@@ -292,6 +315,8 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         """
 
         yaml_file = self.proj_name + '_recon_mdout.yaml'
+        meta_dict = self.meta_out.to_dict()
+        meta_dict['recon_algor'] = "SIRT" if self.params["Batchruntomo"]["reconstruction"]["use_sirt"] else "WBP"
 
         with open(yaml_file, 'w') as f:
             yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False)
@@ -302,17 +327,21 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(args=None):
     """
     Subroutine to create new yaml file for IMOD reconstruction
     """
+    logger = logMod.Logger(log_path="o2r_imod_recon.log")
+
     # Parse user inputs
-    parser = uaMod.get_args_recon()
-    args = parser.parse_args()
+    if args is None:
+        args = mgMod.get_args_recon.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_recon_yaml(args)
     update_yaml(args)
+
+    logger(message="IMOD alignment metadata file created.")
 
 
 def update_yaml(args):
@@ -322,27 +351,36 @@ def update_yaml(args):
     ARGS:
     args (Namespace) :: Namespace generated with user inputs
     """
+    logger = logMod.Logger(log_path="o2r_imod_recon.log")
+
     # Check if recon and align yaml files exist
-    recon_yaml_name = args.project_name + '_recon.yaml'
-    align_yaml_name = args.project_name + '_align.yaml'
+    recon_yaml_name = args.project_name.value + '_recon.yaml'
+    align_yaml_name = args.project_name.value + '_align.yaml'
     if not os.path.isfile(recon_yaml_name):
+        logger(level="error",
+               message="IMOD reconstruction config file not found.")
         raise IOError("Error in Ot2Rec.main.update_recon_yaml: reconstruction config file not found.")
     if not os.path.isfile(align_yaml_name):
+        logger(level="error",
+               message="IMOD alignment config file not found.")
         raise IOError("Error in Ot2Rec.main.update_recon_yaml: alignment config file not found.")
 
     # Read in alignment metadata (as Pandas dataframe)
-    align_md_name = args.project_name + '_align_mdout.yaml'
+    align_md_name = args.project_name.value + '_align_mdout.yaml'
     with open(align_md_name, 'r') as f:
         align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
+    logger(message="IMOD alignment metadata read successfully.")
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
-    recon_md_name = args.project_name + '_recon_mdout.yaml'
+    recon_md_name = args.project_name.value + '_recon_mdout.yaml'
     if os.path.isfile(recon_md_name):
         is_old_project = True
         with open(recon_md_name, 'r') as f:
             recon_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
+        logger(message="Previous IMOD reconstruction metadata found and read.")
     else:
         is_old_project = False
+        logger(message="Previous IMOD reconstruction metadata not found.")
 
     # Diff the two dataframes to get numbers of tilt-series with unprocessed data
     if is_old_project:
@@ -356,9 +394,9 @@ def update_yaml(args):
 
     # Read in reconstruction yaml file, modify, and update
     # read in alignment yaml as well (some parameters depend on alignment settings)
-    recon_params = prmMod.read_yaml(project_name=args.project_name,
+    recon_params = prmMod.read_yaml(project_name=args.project_name.value,
                                     filename=recon_yaml_name)
-    align_params = prmMod.read_yaml(project_name=args.project_name,
+    align_params = prmMod.read_yaml(project_name=args.project_name.value,
                                     filename=align_yaml_name)
 
     recon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
@@ -367,38 +405,54 @@ def update_yaml(args):
 
     recon_params.params['BatchRunTomo']['setup'] = {key: value for key, value in align_params.params['BatchRunTomo']['setup'].items() \
                                                     if key != 'stack_bin_factor'}
+    recon_params.params['BatchRunTomo']['setup']['pixel_size'] = \
+        align_params.params['BatchRunTomo']['setup']['pixel_size'] * \
+        align_params.params['BatchRunTomo']['setup']['stack_bin_factor']
 
     with open(recon_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
 
+    logger(message="IMOD reconstruction metadata updated.")
 
-def run():
+
+def run(exclusive=True, args_in=None):
     """
     Method to run IMOD reconstruction
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
+    logger = logMod.Logger(log_path="o2r_imod_recon.log")
 
-    args = parser.parse_args()
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name",
+                            type=str,
+                            help="Name of current project")
+
+        args = parser.parse_args()
+        project_name = args.project_name
+    else:
+        project_name = args_in.project_name.value
 
     # Check if prerequisite files exist
-    recon_yaml = args.project_name + '_recon.yaml'
-    align_md_file = args.project_name + '_align_mdout.yaml'
+    recon_yaml = project_name + '_recon.yaml'
+    align_md_file = project_name + '_align_mdout.yaml'
 
     # Read in config and metadata
-    recon_config = prmMod.read_yaml(project_name=args.project_name,
+    recon_config = prmMod.read_yaml(project_name=project_name,
                                     filename=recon_yaml)
-    align_md = mdMod.read_md_yaml(project_name=args.project_name,
+    align_md = mdMod.read_md_yaml(project_name=project_name,
                                   job_type='reconstruct',
                                   filename=align_md_file)
 
     # Create Logger object
-    logger = logMod.Logger()
+    log_path = "./o2r_recon.log"
+    try:
+        os.remove(log_path)
+    except:
+        pass
+    logger = logMod.Logger(log_path=log_path)
 
     # Create Recon object
-    recon_obj = Recon(project_name=args.project_name,
+    recon_obj = Recon(project_name=project_name,
                       md_in=align_md,
                       params_in=recon_config,
                       logger_in=logger,

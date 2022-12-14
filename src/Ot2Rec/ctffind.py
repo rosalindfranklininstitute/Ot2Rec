@@ -16,14 +16,38 @@
 import os
 import argparse
 import subprocess
+import contextlib
+import multiprocessing as mp
+import joblib
 import yaml
 from tqdm import tqdm
 import pandas as pd
+from icecream import ic
 
 from . import user_args as uaMod
+from . import magicgui as mgMod
 from . import metadata as mdMod
 from . import logger as logMod
 from . import params as prmMod
+
+
+@contextlib.contextmanager
+def tqdm_joblib(tqdm_object):
+    """
+    Context manager to patch joblib to report into tqdm progress bar given as argument
+    """
+    class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
+        def __call__(self, *args, **kwargs):
+            tqdm_object.update(n=self.batch_size)
+            return super().__call__(*args, **kwargs)
+
+    old_batch_callback = joblib.parallel.BatchCompletionCallBack
+    joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
+    try:
+        yield tqdm_object
+    finally:
+        joblib.parallel.BatchCompletionCallBack = old_batch_callback
+        tqdm_object.close()
 
 
 class ctffind():
@@ -94,8 +118,8 @@ class ctffind():
 
         # update output column
         self.ctf_images['output'] = self.ctf_images.apply(
-            lambda row: f"{self.params['System']['output_path']}"
-            f"{self.params['System']['output_prefix']}_{row['ts']:03}_{row['angles']}_ctffind.mrc", axis=1)
+            lambda row: f"{self.params['System']['output_path']}/"
+            f"{self.params['System']['output_prefix']}_{row['ts']:04}_{row['angles']}_ctffind.mrc", axis=1)
 
     def _check_processed_images(self):
         """
@@ -171,31 +195,54 @@ class ctffind():
                       'no']
         self.input_string = '\n'.join(input_dict)
 
+
+    def _ctffind_single(self, idx):
+        self._get_ctffind_command(self.ctf_images.iloc[idx])
+        ctffind_run = subprocess.run(self.cmd,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT,
+                                     input=self.input_string,
+                                     encoding='ascii',
+                                     check=True,
+        )
+
+        try:
+            assert(not ctffind_run.stderr)
+        except:
+            error_count += 1
+            self.logObj(f"CTFFind4: An error has occurred ({ctffind_run.returncode}) "
+                        f"on stack{index}.")
+
+        self.stdout = ctffind_run.stdout
+        self.update_ctffind_metadata()
+        self.export_metadata()
+
+
     def run_ctffind(self):
         """
         Method to run ctffind on tilt-series sequentially
         """
+        # Add log entry when job starts
+        self.logObj("Ot2Rec-CTFFind4 started.")
 
+        error_count = 0
         ts_list = list(self.ctf_images.iterrows())
         tqdm_iter = tqdm(ts_list, ncols=100)
-        for index, curr_image in tqdm_iter:
-            # Get the command and inputs for current tilt-series
-            self._get_ctffind_command(curr_image)
-            ctffind_run = subprocess.run(self.cmd,
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.STDOUT,
-                                         input=self.input_string,
-                                         encoding='ascii',
-                                         check=True,
-                                         )
 
-            if ctffind_run.stderr:
-                raise ValueError(f'Ctffind: An error has occurred ({ctffind_run.returncode}) '
-                                 f'on stack{index}.')
+        with tqdm_joblib(tqdm_iter) as progress_bar:
+            joblib.Parallel(n_jobs=mp.cpu_count())(
+                joblib.delayed(self._ctffind_single)(idx) for idx in range(len(ts_list))
+            )
 
-            self.stdout = ctffind_run.stdout
-            self.update_ctffind_metadata()
-            self.export_metadata()
+
+        # Log progress when all jobs have successfully terminated
+        if error_count == 0:
+            self.logObj("All Ot2Rec-CTFFind4 jobs successfully finished.")
+        else:
+            self.logObj("WARNING: All Ot2Rec-CTTFFind4 jobs finished."
+                        f"{error_count} of {len(tqdm_iter)} jobs failed."
+            )
+
 
     def update_ctffind_metadata(self):
         """
@@ -234,13 +281,16 @@ def create_yaml():
     """
     Subroutine to create new yaml file for ctffind
     """
+    logger = logMod.Logger(log_path="o2r_ctffind.log")
+
     # Parse user inputs
-    parser = uaMod.get_args_ctffind()
-    args = parser.parse_args()
+    args = mgMod.get_args_ctffind.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_ctffind_yaml(args)
     update_yaml(args)
+
+    logger(message="MotionCor2 metadata file created.")
 
 
 def update_yaml(args):
@@ -250,28 +300,37 @@ def update_yaml(args):
     ARGS:
     args (Namespace) :: Arguments obtained from user
     """
+    logger = logMod.Logger(log_path="o2r_ctffind.log")
+
     # Check if ctffind and motioncorr yaml files exist
-    ctf_yaml_name = args.project_name + '_ctffind.yaml'
-    mc2_yaml_name = args.project_name + '_mc2.yaml'
+    ctf_yaml_name = args.project_name.value + '_ctffind.yaml'
+    mc2_yaml_name = args.project_name.value + '_mc2.yaml'
     if not os.path.isfile(ctf_yaml_name):
+        logger(level="error",
+               message="CTFFind4 config file not found.")
         raise IOError("Error in Ot2Rec.main.update_ctffind_yaml: ctffind config file not found.")
     if not os.path.isfile(mc2_yaml_name):
+        logger(level="error",
+               message="MotionCor2 config file not found.")
         raise IOError("Error in Ot2Rec.main.update_ctffind_yaml: motioncorr config file not found.")
 
     # Read in MC2 metadata (as Pandas dataframe)
     # We only need the TS number and the tilt angle for comparisons at this stage
-    mc2_md_name = args.project_name + '_mc2_mdout.yaml'
+    mc2_md_name = args.project_name.value + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+    logger(message="MotionCor2 metadata read successfully.")
 
     # Read in previous ctffind output metadata (as Pandas dataframe) for old projects
-    ctf_md_name = args.project_name + '_ctffind_mdout.yaml'
+    ctf_md_name = args.project_name.value + '_ctffind_mdout.yaml'
     if os.path.isfile(ctf_md_name):
         is_old_project = True
         with open(ctf_md_name, 'r') as f:
             ctf_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+        logger(message="Previous CTFFind metadata found and read.")
     else:
         is_old_project = False
+        logger(message="Previous CTFFind metadata not found.")
 
     # Diff the two dataframes to get numbers of tilt-series with unprocessed data
     if is_old_project:
@@ -286,9 +345,9 @@ def update_yaml(args):
 
     # Read in ctffind yaml file, modify, and update
     # read in MC2 yaml as well (some parameters depend on MC2 settings)
-    ctf_params = prmMod.read_yaml(project_name=args.project_name,
+    ctf_params = prmMod.read_yaml(project_name=args.project_name.value,
                                   filename=ctf_yaml_name)
-    mc2_params = prmMod.read_yaml(project_name=args.project_name,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name.value,
                                   filename=mc2_yaml_name)
 
     ctf_params.params['System']['process_list'] = unique_ts_numbers
@@ -297,42 +356,51 @@ def update_yaml(args):
     with open(ctf_yaml_name, 'w') as f:
         yaml.dump(ctf_params.params, f, indent=4, sort_keys=False)
 
+    logger(message="CTFFind metadata updated.")
 
-def run():
+
+def run(exclusive=True, args_in=None):
     """
     Method to run ctffind
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name",
-                        type=str,
-                        help="Name of current project")
-    args = parser.parse_args()
+    logger = logMod.Logger(log_path="o2r_ctffind.log")
+
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("project_name",
+                            type=str,
+                            help="Name of current project")
+        args = parser.parse_args()
+        project_name = args.project_name
+    else:
+        project_name = args_in.project_name.value
 
     # Check if prerequisite files exist
-    ctffind_yaml = args.project_name + '_ctffind.yaml'
-    mc2_md_file = args.project_name + '_mc2_mdout.yaml'
+    ctffind_yaml = project_name + '_ctffind.yaml'
+    mc2_md_file = project_name + '_mc2_mdout.yaml'
 
     if not os.path.isfile(ctffind_yaml):
+        logger(level="error",
+               msg="CTFFind yaml config not found.")
         raise IOError("Error in Ot2Rec.main.run_ctffind: ctffind yaml config not found.")
     if not os.path.isfile(mc2_md_file):
+        logger(level="error",
+               msg="MC2 output metadata not found.")
         raise IOError("Error in Ot2Rec.main.run_ctffind: MC2 output metadata not found.")
 
     # Read in config and metadata
-    ctffind_config = prmMod.read_yaml(project_name=args.project_name,
+    ctffind_config = prmMod.read_yaml(project_name=project_name,
                                       filename=ctffind_yaml)
-    mc2_md = mdMod.read_md_yaml(project_name=args.project_name,
+    mc2_md = mdMod.read_md_yaml(project_name=project_name,
                                 job_type='ctffind',
                                 filename=mc2_md_file)
 
-    # Create Logger object
-    logger = logMod.Logger()
-
     # Create ctffind object
-    ctffind_obj = ctffind(project_name=args.project_name,
+    ctffind_obj = ctffind(project_name=project_name,
                           md_in=mc2_md,
                           params_in=ctffind_config,
                           logger_in=logger,
-                          )
+    )
 
     if not ctffind_obj.no_processes:
         ctffind_obj.run_ctffind()

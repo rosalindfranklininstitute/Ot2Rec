@@ -22,6 +22,7 @@ import subprocess
 from glob import glob
 
 import yaml
+import mdocfile as mdf
 import pandas as pd
 from icecream import ic
 
@@ -155,7 +156,8 @@ class Metadata:
         self.metadata = dict(file_paths=self.image_paths,
                              ts=[int(i) for i in self.tilt_series],
                              image_idx=[int(i) for i in self.image_idx],
-                             angles=self.tilt_angles)
+                             angles=self.tilt_angles,
+        )
 
     @staticmethod
     def get_num_frames(curr_file, target_frames):
@@ -211,6 +213,7 @@ class Metadata:
 
         return ts_dose_dict
 
+
     def get_mc2_temp(self):
         df = pd.DataFrame(self.metadata)
         base_folder = '/'.join(df.file_paths.values[0].split('/')[:-1])
@@ -220,6 +223,7 @@ class Metadata:
         df['frame_dose'] = None
         for curr_ts in list(set(df.ts)):
             mdoc_path = f"{base_folder}/{self.params['file_prefix']}_" + str(curr_ts) + ".mdoc"
+            mdoc = mdf.read(mdoc_path)
             ts_dose_dict = self.get_ts_dose(mdoc_path, 1)
 
             ts_image_list = df[df['ts'] == curr_ts]['file_paths'].to_list()
@@ -234,11 +238,25 @@ class Metadata:
                 df.loc[(df.ts == curr_ts) & (df.image_idx == curr_idx), 'ds_factor'] = dsf
                 df.loc[(df.ts == curr_ts) & (df.image_idx == curr_idx), 'frame_dose'] = ts_dose_dict[curr_idx] / nf
 
-            ic(df.loc[df.ts == curr_ts])
-
         self.metadata['num_frames'] = df.num_frames.to_list()
         self.metadata['ds_factor'] = df.ds_factor.to_list()
         self.metadata['frame_dose'] = df.frame_dose.to_list()
+
+
+    def get_acquisition_settings(self):
+        df = pd.DataFrame(self.metadata)
+        base_folder = '/'.join(df.file_paths.values[0].split('/')[:-1])
+
+        ts = list(set(df.ts))[0] # Assuming settings same across one data set
+        mdoc_path = f"{base_folder}/{self.params['file_prefix']}_" + str(ts) + ".mdoc"
+        mdoc = mdf.read(mdoc_path)
+
+        self.metadata['magnification'] = int(mdoc.magnification.unique()[0])
+        self.metadata['pixel_spacing'] = float(mdoc.pixel_spacing.unique()[0])
+        self.metadata['spot_size'] = float(mdoc.spot_size.unique()[0])
+        self.metadata['rotation_angle'] = float(mdoc.rotation_angle.unique()[0])
+        self.metadata['voltage'] = float(mdoc.voltage.unique()[0])
+        self.metadata['image_size'] = list(mdoc.image_size.unique()[0])
 
 
 def read_md_yaml(project_name: str,

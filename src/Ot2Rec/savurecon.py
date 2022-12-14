@@ -18,13 +18,15 @@ import os
 import subprocess
 from glob import glob
 
-import yaml
 import mrcfile
+import yaml
+from tqdm import tqdm
 
-from . import metadata as mdMod
-from . import user_args as uaMod
 from . import logger as logMod
+from . import magicgui as mgMod
+from . import metadata as mdMod
 from . import params as prmMod
+from . import user_args as uaMod
 
 
 class SavuRecon:
@@ -75,7 +77,7 @@ class SavuRecon:
         # Create the folders and dictionary for future reference
         self._path_dict = {}
         for curr_ts in self.params['System']['process_list']:
-            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:02d}{self.suffix}"
+            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts:04d}{self.suffix}"
             os.makedirs(subfolder, exist_ok=True)
             # self._path_dict[curr_ts] = subfolder
             if "savu_output_dir" not in list(self.md_out.keys()):
@@ -123,13 +125,14 @@ class SavuRecon:
             'mod 2.2 {}\n'.format(algo),
             'add MrcSaver\n',
             'mod 3.1 VOLUME_YZ\n',
+            'mod 3.2 float32\n',
             'save {}/{}_{}.nxs\n'.format(subfolder, ts_name, algo),
             'y\n',
             'exit\n',
             'y\n'
         ]
         if algo in ("SIRT_CUDA", "SART_CUDA", "CGLS_CUDA"):
-            cmd.insert(4, "mod 2.2 5\n")
+            cmd.insert(4, f"mod 2.2 {self.params['Savu']['setup']['n_iters']}\n")
 
         # Add location of .nxs file to metadata
         if "savu_process_lists" not in list(self.md_out.keys()):
@@ -175,7 +178,7 @@ class SavuRecon:
                                   encoding='ascii',
                                   check=True,
                                   )
-        print(savu_run.stdout)
+        self.logObj(savu_run.stdout)
 
     def _dummy_runner(self, i):
         """
@@ -194,11 +197,22 @@ class SavuRecon:
         """
         Method to run savurecon_stack for all ts in process list
         """
-        for i, curr_ts in enumerate(self.params['System']['process_list']):
+        ts_list = self.params['System']['process_list']
+        tqdm_iter = tqdm(ts_list, ncols=100)
+        for i, curr_ts in enumerate(tqdm_iter):
+            tqdm_iter.set_description(f"Processing TS {curr_ts}...")
             self._create_savurecon_process_list(i)
             self._run_savurecon(i)
             # self._dummy_runner(i)
-            print(f"Savu reconstruction complete for {self.proj_name}_{curr_ts}")
+
+            # Add processed mrc to output dir
+            if "tomogram" not in list(self.md_out.keys()):
+                self.md_out["tomogram"] = {}
+            self.md_out["tomogram"][curr_ts] = glob(
+                f'{self.md_out["savu_output_dir"][curr_ts]}/*/*.mrc'
+            )[0]
+
+            print(f"Savu reconstruction complete for {self.proj_name}_{curr_ts}\n")
         self.export_metadata()
 
     def export_metadata(self):
@@ -216,18 +230,21 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(args=None):
     """
     Subroutine to create new yaml file for Savu reconstruction
     """
+    logger = logMod.Logger(log_path="o2r_savu_recon.log")
 
     # Parse user inputs
-    parser = uaMod.get_args_savurecon()
-    args = parser.parse_args()
+    if args is None:
+        args = mgMod.get_args_savurecon.show(run=True)
 
     # Create the yaml file, then automatically update it
     prmMod.new_savurecon_yaml(args)
     update_yaml(args)
+
+    logger(message="Savu metadata file created.")
 
 
 def update_yaml(args):
@@ -236,32 +253,55 @@ def update_yaml(args):
     Args:
     args (Namespace) :: Namespace containing user inputs
     """
+    logger = logMod.Logger(log_path="o2r_savu_recon.log")
 
-    parent_path = args.stacks_folder
-    rootname = args.project_name if args.rootname is None else args.rootname
-    suffix = args.suffix
-    ext = args.extension
-    imod_suffix = args.imod_suffix
+    # Check if SavuRecon yaml exists
+    savu_yaml_name = args.project_name.value + '_savurecon.yaml'
+    if not os.path.isfile(savu_yaml_name):
+        logger(level="error",
+               message="Savu metadata file not found.")
+        raise IOError("Error in Ot2Rec.main.update_savu_yaml: File not found.")    
+
+    parent_path = args.stacks_folder.value
+    rootname = args.project_name.value if args.rootname.value is "" else args.rootname.value
+    suffix = args.suffix.value
+    ext = args.extension.value
+    imod_suffix = args.imod_suffix.value
 
     # Find stack files
     st_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}')
+    st_file_list.sort()
 
     # Find tlt files
-    # tlt_file_list = glob(f'{parent_path}/{rootname}_*{suffix}/{rootname}_*{suffix}.tlt')
-    tlt_file_list = [st_file.replace(f'_{imod_suffix}.{ext}', '.tlt') for st_file in st_file_list]
+    tlt_file_list_raw = glob(f'{parent_path}/{rootname}_*{suffix}/*.tlt')
+    tlt_file_list = []
+    for tltfile in tlt_file_list_raw:
+        if tltfile.endswith("fid.tlt") is False:  # remove fid.tlt files
+            tlt_file_list.append(tltfile)
+    tlt_file_list.sort()
+    # tlt_file_list = [st_file.replace(f'_{imod_suffix}.{ext}', '.tlt') for st_file in st_file_list]
 
     # Extract tilt series number
     ts_list = [int(i.split('/')[-1].replace(f'{rootname}_', '').replace(f'_{suffix}{imod_suffix}.{ext}', ''))
                for i in st_file_list]
 
+    # Ensure number of st == tlt files
+    if len(st_file_list) != len(tlt_file_list):
+        raise ValueError(
+            f"Inconsistent number of aligned TS ({len(st_file_list)}) and "
+            f"tlt ({len(tlt_file_list)}) files."
+        )
+
     # Read in and update YAML parameters
-    recon_yaml_name = args.project_name + '_savurecon.yaml'
-    recon_params = prmMod.read_yaml(project_name=args.project_name,
-                                    filename=recon_yaml_name)
+    savu_yaml_name = args.project_name.value + '_savurecon.yaml'
+    recon_params = prmMod.read_yaml(project_name=args.project_name.value,
+                                    filename=savu_yaml_name)
 
     recon_params.params['System']['process_list'] = ts_list
+    recon_params.params['System']['output_rootname'] = rootname
     recon_params.params['Savu']['setup']['tilt_angles'] = tlt_file_list
     recon_params.params['Savu']['setup']['aligned_projections'] = st_file_list
+    logger(message=f"Search term is {parent_path}/{rootname}_*{suffix}/{rootname}*_{suffix}{imod_suffix}.{ext}")
 
     # Change centre of rotation to centre of image by default
     centre_of_rotation = []
@@ -270,9 +310,14 @@ def update_yaml(args):
         centre_of_rotation.append(float(mrc.header["nx"] / 2))  # xdim/2
     recon_params.params['Savu']['setup']['centre_of_rotation'] = centre_of_rotation
 
+    # Set algorithm
+    recon_params.params['Savu']['setup']['algorithm'] = args.algorithm.value
+    recon_params.params['Savu']['setup']['n_iters'] = args.n_iters.value
+
     # Write out YAML file
-    with open(recon_yaml_name, 'w') as f:
+    with open(savu_yaml_name, 'w') as f:
         yaml.dump(recon_params.params, f, indent=4, sort_keys=False)
+    logger(message="Savu metadata updated.")
 
 
 def run():
@@ -293,7 +338,12 @@ def run():
                                         filename=savurecon_yaml)
 
     # Create Logger object
-    logger = logMod.Logger()
+    log_path = "./o2r_savu_recon.log"
+    try:
+        os.remove(log_path)
+    except:
+        pass
+    logger = logMod.Logger(log_path=log_path)
 
     # Create SavuRecon object
     savurecon_obj = SavuRecon(project_name=args.project_name,
