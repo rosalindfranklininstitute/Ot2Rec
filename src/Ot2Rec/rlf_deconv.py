@@ -18,6 +18,8 @@ import os
 import numpy as np
 from icecream import ic
 from tqdm import tqdm
+import pandas as pd
+import yaml
 
 import mrcfile
 import tifffile
@@ -72,6 +74,7 @@ class RLF_deconv():
         """
         Method to start deconvolution
         """
+        self.out_files = []
         tqdm_iter = tqdm(range(len(self.plist)), ncols=100)
 
         for idx in tqdm_iter:
@@ -98,6 +101,16 @@ class RLF_deconv():
             # Save results
             with mrcfile.new(self.out_path, overwrite=True) as f:
                 f.set_data(out)
+
+            # Update output list
+            self.out_files.append(self.out_path)
+
+        # Update and export output metadata
+        self.meta_out.outputs = self.out_files
+
+        yaml_file = self.rootname + '_rlf_deconv_mdout.yaml'
+        with open(yaml_file, 'w') as f:
+            yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False)
 
 
 
@@ -176,6 +189,10 @@ class RLF_deconv():
         assert(len(self.raw_files)==len(self.psf_files)), \
             "ERROR: lengths of raw and PSF file list not equal. File missing?"
 
+        self.meta_out = pd.DataFrame(columns=['raw_files', 'psf_files', 'outputs'])
+        self.meta_out.raw_files = self.raw_files
+        self.meta_out.psf_files = self.psf_files
+
 
 """
 PLUGIN METHODS
@@ -184,7 +201,7 @@ def run():
     """
     Method to deconvolve image using a given kernel (point-spread function)
     """
-    logger = logMod.Logger(log_path="o2r_rlfdeconv.log")
+    logger = logMod.Logger(log_path="o2r_rlf_deconv.log")
 
     # Parse user inputs
     args = mgMod.get_args_rldeconv.show(run=True)
