@@ -826,3 +826,35 @@ def get_args_aretomo(
         recon_algo="WBP",
 ):
     return locals()
+
+
+@mg(
+    call_button="Create config file",
+    layout="vertical",
+    result_widget=False,
+
+    project_name={"label": "Project name *"},
+    input_mrc_folder={
+        "label": "Folder containing input mrc's",
+        "mode": "d",
+    },
+    create_st_files={
+        "label": "Create Stack Files with IMOD?"
+    },
+    tilt_angles={
+        "label": "Path to text file containing tilt angles, usually .tlt"
+    },
+    exclude_factor={
+        "label": "Multiplier of stack std dev to include (higher=include more tilts)",
+        "min": 1e-6,
+        "max": 3,
+    },
+)
+def get_args_exclude_bad_tilts(
+        project_name="",
+        input_mrc_folder=Path("./stacks"),
+        create_st_files=False,
+        tilt_angles="",
+        exclude_factor=0.5,
+):
+    return locals()
