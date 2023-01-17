@@ -112,7 +112,7 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
 
         ebt_obj._exclude_tilt_one_ts(0)
 
-        with mrcfile.mmap("./stacks/TS_0001/TS_0001_excl.st") as mrc:
+        with mrcfile.mmap("./stacks/TS_0001/TS_0001.excl") as mrc:
             excluded_mrc = mrc.data
         
         with mrcfile.mmap("./stacks/TS_0001/TS_0001.st") as mrc:
@@ -215,7 +215,7 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
         
         exclude_bad_tilts._recombine_tilt_one_ts(
             0,
-            params.params,
+            params,
             md
         )
 

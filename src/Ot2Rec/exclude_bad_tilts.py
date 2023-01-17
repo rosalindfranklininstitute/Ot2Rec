@@ -148,13 +148,8 @@ class ExcludeBadTilts:
                 f".rawtlt file has {len(all_tilt_angles)} lines, should have "
                 f"{img.shape[0]} lines instead.")
 
-        # Write dict of index:excluded tilt angles to separate file
-        excluded_ta_file = rawtlt_file.replace(".rawtlt", "_excl.rawtlt")
-        with open(excluded_ta_file, "w") as f:
-            yaml.dump(tilt_angles_to_exclude, f, indent=4, sort_keys=False)
-
         # Create stack of excluded tilts
-        exclude_filename = st_file.replace(".st", "_excl.st")
+        exclude_filename = st_file.replace(".st", ".excl")
         with mrcfile.new_mmap(
             exclude_filename,
             shape=(len(tilts_to_exclude), img.shape[1], img.shape[2]),
@@ -417,4 +412,4 @@ def recombine_bad_tilts():
     tqdm_iter = tqdm(ts_list, ncols=100)
     for i, curr_ts in enumerate(tqdm_iter):
         tqdm_iter.set_description(f"Recombining bad tilts from TS {curr_ts}")
-        _recombine_tilt_one_ts(i, ebt_config, ebt_mdout)
+        _recombine_tilt_one_ts(i, ebt_config.params, ebt_mdout)
