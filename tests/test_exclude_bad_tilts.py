@@ -181,7 +181,7 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
 
         self.assertEqual(
             md["Excluded_St_Files"][0],
-            "stacks/TS_0001/TS_0001_excl.st"
+            "stacks/TS_0001/TS_0001.excl"
         )
 
         self.assertEqual(
@@ -215,7 +215,7 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
         
         exclude_bad_tilts._recombine_tilt_one_ts(
             0,
-            params,
+            params.params,
             md
         )
 
