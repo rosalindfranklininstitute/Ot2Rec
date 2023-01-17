@@ -51,6 +51,7 @@ setup(
 
             "o2r.excludebadtilts.new=Ot2Rec.exclude_bad_tilts:create_yaml",
             "o2r.excludebadtilts.run=Ot2Rec.exclude_bad_tilts:run",
+            "o2r.recombinebadtilts=Ot2Rec.exclude_bad_tilts:recombine_bad_tilts",
 
             "o2r.ctffind.new=Ot2Rec.ctffind:create_yaml",
             "o2r.ctffind.run=Ot2Rec.ctffind:run",

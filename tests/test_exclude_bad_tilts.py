@@ -43,23 +43,20 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
 
         # .st files
         st_mrc = f"{tmpdir.name}/stacks/TS_0001/TS_0001.st"
+        bad = np.full(
+            shape=(2,2),
+            fill_value=1,
+        )
+        good = np.full(
+            shape=(2,2),
+            fill_value=200,
+        )
+        st = np.stack(
+            [bad, good, good, good, good, good, good, good, good, bad],
+            axis=0,
+        ).astype("uint8")
         with mrcfile.new(st_mrc) as mrc:
-            bad = np.full(
-                shape=(2,2),
-                fill_value=1,
-                dtype="uint8",
-            )
-            good = np.full(
-                shape=(2,2),
-                fill_value=200,
-                dtype="uint8",
-            )
-            mrc.set_data(
-                np.stack(
-                    [bad, good, good, good, good, good, good, good, good, bad],
-                    axis=0,
-                )
-            )
+            mrc.set_data(st)
         
         # create .rawtlt files
         rawtlt_file = f"{tmpdir.name}/stacks/TS_0001/TS_0001.rawtlt"
@@ -67,12 +64,12 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
         with open(rawtlt_file, "w") as f:
             f.writelines(f"{str(ta)}\n" for ta in tas)
         
-        return tmpdir
+        return tmpdir, st
     
     def test_yaml_creation(self):
         """ Test yaml is created with expected input """
         args = self._create_expected_input_args()
-        tmpdir = self._create_expected_folder_structure()
+        tmpdir, st = self._create_expected_folder_structure()
         os.chdir(tmpdir.name)
 
         exclude_bad_tilts.create_yaml(args)
@@ -97,7 +94,7 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
     def test_tilts_exclusion(self):
         """ Test that the correct tilts are excluded """
         args = self._create_expected_input_args()
-        tmpdir = self._create_expected_folder_structure()
+        tmpdir, st = self._create_expected_folder_structure()
         os.chdir(tmpdir.name)
 
         exclude_bad_tilts.create_yaml(args)
@@ -118,13 +115,17 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
         with mrcfile.mmap("./stacks/TS_0001/TS_0001_excl.st") as mrc:
             excluded_mrc = mrc.data
         
+        with mrcfile.mmap("./stacks/TS_0001/TS_0001.st") as mrc:
+            cropped_ts = mrc.data
+        
         self.assertEqual(excluded_mrc.shape[0], 2)
+        self.assertEqual(cropped_ts.shape[0], 8)
     
     def test_tilt_angles_exclusion(self):
         """ Test that the correct tilt angles are removed from the rawtlt """
 
         args = self._create_expected_input_args()
-        tmpdir = self._create_expected_folder_structure()
+        tmpdir, st = self._create_expected_folder_structure()
         os.chdir(tmpdir.name)
 
         exclude_bad_tilts.create_yaml(args)
@@ -151,7 +152,7 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
         """ Test that excluded tilt indices, tilt angles, filenames saved """
 
         args = self._create_expected_input_args()
-        tmpdir = self._create_expected_folder_structure()
+        tmpdir, st = self._create_expected_folder_structure()
         os.chdir(tmpdir.name)
 
         exclude_bad_tilts.create_yaml(args)
@@ -186,4 +187,48 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
         self.assertEqual(
             list(md["Excluded_Tilt_Angles"][0].keys()),
             [0,9]
+        )
+    
+    def test_EBT_recombine(self):
+        """ Test that excluded tilts are recombined correctly """
+        args = self._create_expected_input_args()
+        tmpdir, st = self._create_expected_folder_structure()
+        os.chdir(tmpdir.name)
+
+        exclude_bad_tilts.create_yaml(args)
+
+        params = prmMod.read_yaml(
+            project_name="TS",
+            filename="./TS_exclude_bad_tilts.yaml",
+        )
+
+        ebt_obj = exclude_bad_tilts.ExcludeBadTilts(
+            project_name="TS",
+            params_in=params,
+            logger_in=logMod.Logger("o2r_exclude_bad_tilts.log")
+        )
+
+        ebt_obj.run_exclude_bad_tilts()
+
+        with open("TS_exclude_bad_tilts_mdout.yaml", "r") as f:
+            md = yaml.load(f, Loader=yaml.FullLoader)
+        
+        exclude_bad_tilts._recombine_tilt_one_ts(
+            0,
+            md
+        )
+
+        # Check that images are recombined correctly
+        with mrcfile.mmap("./stacks/TS_0001/TS_0001.st") as mrc:
+            recombined_st = mrc.data
+        np.testing.assert_allclose(recombined_st, st)
+
+        # Check that rawtlt files are recombined correctly
+        ta = np.loadtxt(
+            fname="stacks/TS_0001/TS_0001.rawtlt",
+            delimiter="\n",
+        )
+        np.testing.assert_allclose(
+            ta,
+            np.linspace(-60, 60, 10)
         )
