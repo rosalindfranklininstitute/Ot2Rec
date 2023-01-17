@@ -227,7 +227,6 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
         # Check that rawtlt files are recombined correctly
         ta = np.loadtxt(
             fname="stacks/TS_0001/TS_0001.rawtlt",
-            delimiter="\n",
         )
         np.testing.assert_allclose(
             ta,
