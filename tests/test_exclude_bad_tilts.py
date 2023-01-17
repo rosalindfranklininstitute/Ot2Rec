@@ -215,6 +215,7 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
         
         exclude_bad_tilts._recombine_tilt_one_ts(
             0,
+            params.params,
             md
         )
 
