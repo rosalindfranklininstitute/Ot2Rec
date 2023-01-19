@@ -32,7 +32,8 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
     def _create_expected_input_args(self):
         args = magicgui.widgets.FunctionGui(mgMod.get_args_exclude_bad_tilts)
         args.project_name.value = "TS"
-        args.exclude_factor.value = 0.5
+        args.min_percentile.value = 20
+        args.max_percentile.value = 80
         
         return args
     

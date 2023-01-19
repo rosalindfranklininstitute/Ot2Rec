@@ -363,9 +363,8 @@ def new_exclude_bad_tilts_yaml(args):
 
         "EBT_setup": {
             "input_mrc": None,
-            "tilt_angles": None,
-            "create_st_files" : None,
-            "exclude_factor": None,
+            "min_percentile": None,
+            "max_percentile": None,
         },
     }
 

@@ -838,23 +838,21 @@ def get_args_aretomo(
         "label": "Folder containing input mrc's",
         "mode": "d",
     },
-    create_st_files={
-        "label": "Create Stack Files with IMOD?"
+    min_percentile={
+        "label": "Min percentile of stack grey value distribution to include",
+        "min": 0,
+        "max": 100,
     },
-    tilt_angles={
-        "label": "Path to text file containing tilt angles, usually .tlt"
-    },
-    exclude_factor={
-        "label": "Multiplier of stack std dev to include (higher=include more tilts)",
-        "min": 1e-6,
-        "max": 3,
-    },
+    max_percentile={
+        "label": "Max percentile of stack grey value distribution to include",
+        "min": 0,
+        "max": 100,
+    }
 )
 def get_args_exclude_bad_tilts(
         project_name="",
         input_mrc_folder=Path("./stacks"),
-        create_st_files=False,
-        tilt_angles="",
-        exclude_factor=0.5,
+        min_percentile=5,
+        max_percentile=95,
 ):
     return locals()

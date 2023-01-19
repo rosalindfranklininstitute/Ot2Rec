@@ -94,11 +94,19 @@ class ExcludeBadTilts:
         Returns:
             list: list of index of tilts to exclude (starts at 0)
         """
-        stack_mean = np.mean(img)
-        stack_stdev = np.std(img)
-        exclude_factor = float(self.params["EBT_setup"]["exclude_factor"])
-        min_accept = stack_mean - (exclude_factor * stack_stdev)
-        max_accept = stack_mean + (exclude_factor * stack_stdev)
+        # This approach was skewed when the difference between very bright/dark
+        # and normal images was too much and skewed the mean.
+        # stack_mean = np.mean(img)
+        # stack_stdev = np.std(img)
+        # exclude_factor = float(self.params["EBT_setup"]["exclude_factor"])
+        # min_accept = stack_mean - (exclude_factor * stack_stdev)
+        # max_accept = stack_mean + (exclude_factor * stack_stdev)
+
+        # Percentile approach
+        low_pct = self.params["EBT_setup"]["min_percentile"]
+        high_pct = self.params["EBT_setup"]["max_percentile"]
+        min_accept = np.percentile(img.flatten(), low_pct)
+        max_accept = np.percentile(img.flatten(), high_pct)
 
         tilts_to_exclude = []
         for proj in range(img.shape[0]):
@@ -176,9 +184,9 @@ class ExcludeBadTilts:
             tqdm_iter.set_description(f"Removing bad tilts from TS {curr_ts}")
             self._exclude_tilt_one_ts(i)
         self.export_metadata()
-    
+
     def dry_run(self):
-        """Method to output tilts to exclude for all in process list without 
+        """Method to output tilts to exclude for all in process list without
         actually removing the tilts. Allows users to experiment with params.
         """
         ts_list = self.params["System"]["process_list"]
@@ -193,7 +201,7 @@ class ExcludeBadTilts:
             with mrcfile.mmap(st_file) as mrc:
                 img = mrc.data
             tilts_to_exclude[curr_ts] = self._determine_tilts_to_exclude(img)
-        
+
         with open(f"{self.proj_name}_EBTdryrun.yaml", "w") as f:
             yaml.dump(tilts_to_exclude, f, indent=4, sort_keys=False)
 
@@ -260,8 +268,8 @@ def update_yaml(args: dict):
     ebt_params.params["System"]["process_list"] = ts_list
 
     # Add remaining magicgui values to ebt_params
-    ebt_params.params["EBT_setup"]["create_st_files"] = args.create_st_files.value
-    ebt_params.params["EBT_setup"]["exclude_factor"] = args.exclude_factor.value
+    ebt_params.params["EBT_setup"]["min_percentile"] = args.min_percentile.value
+    ebt_params.params["EBT_setup"]["max_percentile"] = args.max_percentile.value
 
     # update and write yaml file
     with open(ebt_yaml_name, "w") as f:
