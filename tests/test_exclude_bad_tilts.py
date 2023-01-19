@@ -232,3 +232,32 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
             ta,
             np.linspace(-60, 60, 10)
         )
+    
+    def test_EBT_dryrun(self):
+        """Tests that dry run outputs tilts to exclude to yaml
+        """
+        args = self._create_expected_input_args()
+        tmpdir, st = self._create_expected_folder_structure()
+        os.chdir(tmpdir.name)
+
+        exclude_bad_tilts.create_yaml(args)
+
+        params = prmMod.read_yaml(
+            project_name="TS",
+            filename="./TS_exclude_bad_tilts.yaml",
+        )
+
+        ebt_obj = exclude_bad_tilts.ExcludeBadTilts(
+            project_name="TS",
+            params_in=params,
+            logger_in=logMod.Logger("o2r_exclude_bad_tilts.log")
+        )
+
+        ebt_obj.dry_run()
+
+        self.assertTrue(os.path.isfile("TS_EBTdryrun.yaml"))
+        
+        with open("TS_EBTdryrun.yaml", "r") as f:
+            dryrun = yaml.load(f, Loader=yaml.FullLoader)
+        
+        self.assertNotEqual(len(dryrun), 0)

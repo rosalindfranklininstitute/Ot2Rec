@@ -176,6 +176,28 @@ class ExcludeBadTilts:
             tqdm_iter.set_description(f"Removing bad tilts from TS {curr_ts}")
             self._exclude_tilt_one_ts(i)
         self.export_metadata()
+    
+    def dry_run(self):
+        """Method to output tilts to exclude for all in process list without 
+        actually removing the tilts. Allows users to experiment with params.
+        """
+        ts_list = self.params["System"]["process_list"]
+        tqdm_iter = tqdm(ts_list, ncols=100)
+        tilts_to_exclude = {}
+        for i, curr_ts in enumerate(tqdm_iter):
+            tqdm_iter.set_description(
+                f"Determining bad tilts from ts {curr_ts}"
+            )
+            # Read image and determine tilts to exclude
+            st_file = self.params["EBT_setup"]["input_mrc"][i]
+            with mrcfile.mmap(st_file) as mrc:
+                img = mrc.data
+            tilts_to_exclude[curr_ts] = self._determine_tilts_to_exclude(img)
+        
+        with open(f"{self.proj_name}_EBTdryrun.yaml", "w") as f:
+            yaml.dump(tilts_to_exclude, f, indent=4, sort_keys=False)
+
+        self.logObj(f"Dry run file written to {self.proj_name}_EBTdryrun.yaml")
 
     def export_metadata(self):
         """Method to export metadata as
@@ -271,6 +293,10 @@ def run():
         type=str,
         help="Name of current project",
     )
+    parser.add_argument(
+        "--dryrun",
+        action="store_true"
+    )
     run_args = parser.parse_args()
 
     # check that ebt yaml file exists
@@ -302,7 +328,10 @@ def run():
     )
 
     # Run exclude bad tilts commands
-    ebt_obj.run_exclude_bad_tilts()
+    if run_args.dryrun is True:
+        ebt_obj.dry_run()
+    else:
+        ebt_obj.run_exclude_bad_tilts()
 
 def _recombine_tilt_one_ts(
         i: int,
