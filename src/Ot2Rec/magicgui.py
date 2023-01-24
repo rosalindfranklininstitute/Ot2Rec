@@ -183,7 +183,14 @@ def get_args_mc2(
     OUTPUTs:
     Namespace
     """
-    return locals()
+    logger = logMod.Logger(log_path="o2r_motioncor2.log")
+    args = asObject(locals())
+
+    # Create the yaml file, then automatically update it
+    prmMod.new_mc2_yaml(args)
+
+    logger(message="MotionCor2 metadata file created.")
+    return args
 
 
 @mg(
