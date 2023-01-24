@@ -217,7 +217,7 @@ def new_recon_yaml(args):
     ARGS:
     args (Namespace) :: Namespace generated with user inputs
     """
-    recon_yaml_name = args.project_name.value + '_recon.yaml'
+    recon_yaml_name = args.project_name + '_recon.yaml'
 
     recon_yaml_dict = {
         'System': {
@@ -237,26 +237,26 @@ def new_recon_yaml(args):
             },
 
             'positioning': {
-                'do_positioning': args.do_positioning.value,
-                'unbinned_thickness': args.unbinned_thickness.value,
+                'do_positioning': args.do_positioning,
+                'unbinned_thickness': args.unbinned_thickness,
             },
 
             'aligned_stack': {
-                'correct_ctf': args.correct_ctf.value,
-                'erase_gold': args.erase_gold.value,
-                '2d_filtering': args.filtering.value,
-                'bin_factor': args.bin_factor.value,
+                'correct_ctf': args.correct_ctf,
+                'erase_gold': args.erase_gold,
+                '2d_filtering': args.filtering,
+                'bin_factor': args.bin_factor,
             },
 
             'reconstruction': {
-                'thickness': args.thickness.value,
-                'use_sirt': args.use_sirt.value,
-                'sirt_iter': args.sirt_iter.value,
+                'thickness': args.thickness,
+                'use_sirt': args.use_sirt,
+                'sirt_iter': args.sirt_iter,
             },
 
             'postprocessing': {
-                'run_trimvol': args.trimvol.value,
-                'trimvol_reorient': args.trimvol_reorient.value,
+                'run_trimvol': args.trimvol,
+                'trimvol_reorient': args.trimvol_reorient,
             },
         }
     }

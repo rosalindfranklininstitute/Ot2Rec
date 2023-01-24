@@ -327,20 +327,16 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(runall=False):
     """
     Subroutine to create new yaml file for IMOD reconstruction
     """
-    logger = logMod.Logger(log_path="o2r_imod_recon.log")
-
-    # Parse user inputs
     args = mgMod.get_args_recon.show(run=True)
 
-    # Create the yaml file, then automatically update it
-    prmMod.new_recon_yaml(args)
-    update_yaml(args)
-
-    logger(message="IMOD alignment metadata file created.")
+    if not runall:
+        update_yaml(args)
+    else:
+        return args
 
 
 def update_yaml(args):

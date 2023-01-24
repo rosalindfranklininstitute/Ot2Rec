@@ -595,7 +595,15 @@ def get_args_recon(
     OUTPUTs:
     Namespace
     """
-    return locals()
+    logger = logMod.Logger(log_path="o2r_imod_recon.log")
+    args = asObject(locals())
+
+    # Create the yaml file, then automatically update it
+    prmMod.new_recon_yaml(args)
+
+    logger(message="IMOD alignment metadata file created.")
+
+    return args
 
 
 @mg(
