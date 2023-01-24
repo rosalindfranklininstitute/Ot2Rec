@@ -108,30 +108,30 @@ def new_ctffind_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
 
-    ctf_yaml_name = args.project_name.value + '_ctffind.yaml'
+    ctf_yaml_name = args.project_name + '_ctffind.yaml'
 
     ctf_yaml_dict = {
         'System': {
             'process_list': 'all',
-            'output_path': str(args.output_folder.value),
-            'output_prefix': args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value,
+            'output_path': str(args.output_folder),
+            'output_prefix': args.file_prefix if args.file_prefix != "" else args.project_name,
         },
         'ctffind': {
-            'ctffind_path': str(args.exec_path.value),
+            'ctffind_path': str(args.exec_path),
             'pixel_size': None,
-            'voltage': args.voltage.value,
-            'spherical_aberration': args.spherical_aberration.value,
-            'amp_contrast': args.amp_contrast.value,
-            'amp_spec_size': args.spec_size.value,
-            'resolution_min': max(args.res_range.value),
-            'resolution_max': min(args.res_range.value),
-            'defocus_min': args.defocus_range.value[0],
-            'defocus_max': args.defocus_range.value[1],
-            'defocus_step': args.defocus_range.value[2],
-            'astigm_type': args.astigm_type.value,
-            'exhaustive_search': args.exhaustive_search.value,
-            'astigm_restraint': args.astigm_restraint.value if args.astigm_restraint.value > 0 else False,
-            'phase_shift': args.phase_shift.value,
+            'voltage': args.voltage,
+            'spherical_aberration': args.spherical_aberration,
+            'amp_contrast': args.amp_contrast,
+            'amp_spec_size': args.spec_size,
+            'resolution_min': max(args.res_range),
+            'resolution_max': min(args.res_range),
+            'defocus_min': args.defocus_range[0],
+            'defocus_max': args.defocus_range[1],
+            'defocus_step': args.defocus_range[2],
+            'astigm_type': args.astigm_type,
+            'exhaustive_search': args.exhaustive_search,
+            'astigm_restraint': args.astigm_restraint if args.astigm_restraint > 0 else False,
+            'phase_shift': args.phase_shift,
         },
     }
 
@@ -149,59 +149,59 @@ def new_align_yaml(args):
 
     # Calculate patch sizes
     import numpy as np
-    image_dims = np.array(args.image_dims.value)
-    n_patches = np.array(args.num_patches.value)
-    overlap = args.patch_overlap.value * 0.01
+    image_dims = np.array(args.image_dims)
+    n_patches = np.array(args.num_patches)
+    overlap = args.patch_overlap * 0.01
     denom = n_patches - n_patches*overlap + overlap
     patch_dims = (image_dims / denom).astype(int)
 
-    align_yaml_name = args.project_name.value + '_align.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
 
     align_yaml_dict = {
         'System': {
             'process_list': 'all',
-            'output_path': str(args.output_folder.value),
-            'output_rootname': args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value,
-            'output_suffix': args.file_suffix.value,
+            'output_path': str(args.output_folder),
+            'output_rootname': args.file_prefix if args.file_prefix != "" else args.project_name,
+            'output_suffix': args.file_suffix,
         },
 
         'BatchRunTomo': {
             'setup': {
-                'excluded_views': list(args.excl_views.value),
-                'use_rawtlt': not args.no_rawtlt.value,
+                'excluded_views': list(args.excl_views),
+                'use_rawtlt': not args.no_rawtlt,
                 'pixel_size': None,
-                'rot_angle': args.rot_angle.value,
-                'gold_size': args.fiducial_size.value,
-                'num_beads': args.num_beads.value,
-                'adoc_template': str(args.adoc_template.value),
-                'stack_bin_factor': args.stack_bin_factor.value,
+                'rot_angle': args.rot_angle,
+                'gold_size': args.fiducial_size,
+                'num_beads': args.num_beads,
+                'adoc_template': str(args.adoc_template),
+                'stack_bin_factor': args.stack_bin_factor,
             },
 
             'preprocessing': {
-                'delete_old_files': args.delete_old_files.value,
-                'remove_xrays': args.remove_xrays.value,
+                'delete_old_files': args.delete_old_files,
+                'remove_xrays': args.remove_xrays,
             },
 
             'coarse_align': {
-                'bin_factor': args.coarse_align_bin_factor.value,
+                'bin_factor': args.coarse_align_bin_factor,
             },
 
             'patch_track': {
                 'size_of_patches': patch_dims.tolist(),
-                'num_of_patches': list(args.num_patches.value),
-                'num_iterations': args.num_iter.value,
-                'limits_on_shift': list(args.limits_on_shift.value),
-                'adjust_tilt_angles': args.adjust_tilt_angles.value,
+                'num_of_patches': list(args.num_patches),
+                'num_iterations': args.num_iter,
+                'limits_on_shift': list(args.limits_on_shift),
+                'adjust_tilt_angles': args.adjust_tilt_angles,
             },
 
             'fine_align': {
-                'num_surfaces': args.num_surfaces.value,
-                'mag_option': args.mag_option.value,
-                'tilt_option': args.tilt_option.value,
-                'rot_option': args.rot_option.value,
-                'beam_tilt_option': args.beam_tilt_option.value,
-                'use_robust_fitting': args.robust_fitting.value,
-                'weight_all_contours': args.weight_contours.value,
+                'num_surfaces': args.num_surfaces,
+                'mag_option': args.mag_option,
+                'tilt_option': args.tilt_option,
+                'rot_option': args.rot_option,
+                'beam_tilt_option': args.beam_tilt_option,
+                'use_robust_fitting': args.robust_fitting,
+                'weight_all_contours': args.weight_contours,
             },
         }
     }

@@ -325,8 +325,8 @@ def create_yaml(runall=False):
     # Create the yaml file, then automatically update it
     if not runall:
         update_yaml(args)
-
-    return args
+    else:
+        return args
 
 
 def update_yaml(args):

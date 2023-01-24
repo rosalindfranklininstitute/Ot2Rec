@@ -230,7 +230,7 @@ def get_args_ctffind(
         amp_contrast=0.8,
         spec_size=512,
         res_range=[30, 5],
-        defocus_range=[5000, 50000, 500],
+        defocus_range=[0, 50000, 500],
         astigm_type="",
         exhaustive_search=False,
         astigm_restraint=0,
@@ -257,8 +257,15 @@ def get_args_ctffind(
     OUTPUTs:
     Namespace
     """
+    logger = logMod.Logger(log_path="o2r_ctffind.log")
+    args = asObject(locals())
 
-    return locals()
+    # Create the yaml file, then automatically update it
+    prmMod.new_ctffind_yaml(args)
+
+    logger(message="CTFFind4 metadata file created.")
+
+    return args
 
 
 @mg(
@@ -383,6 +390,14 @@ def get_args_align(
     OUTPUTs:
     Namespace
     """
+    logger = logMod.Logger(log_path="o2r_imod_align.log")
+    args = asObject(locals())
+
+    # Create the yaml file, then automatically update it
+    prmMod.new_align_yaml(args)
+
+    logger(message="IMOD alignment metadata file created.")
+
 
     return locals()
 

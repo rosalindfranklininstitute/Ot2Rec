@@ -504,20 +504,18 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(runall=False):
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
-    logger = logMod.Logger(log_path="o2r_imod_align.log")
-
-    # Parse user inputs
+    # Create the yaml file, then automatically update it
     args = mgMod.get_args_align.show(run=True)
 
-    # Create the yaml file, then automatically update it
-    prmMod.new_align_yaml(args)
-    update_yaml(args)
+    if not runall:
+        update_yaml(args)
+    else:
+        return args
 
-    logger(message="IMOD alignment metadata file created.")
 
 
 def update_yaml(args):
