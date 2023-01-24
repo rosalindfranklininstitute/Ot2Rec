@@ -15,7 +15,17 @@
 
 from pathlib import Path
 
+import yaml
 from magicgui import magicgui as mg
+
+from . import logger as logMod
+from . import params as prmMod
+from . import metadata as mdMod
+
+
+class asObject(object):
+    def __init__(self, d):
+        self.__dict__ = d
 
 
 @mg(
@@ -69,7 +79,31 @@ def get_args_new_proj(
     Namespace
     """
 
-    return locals()
+    logger = logMod.Logger(log_path="new_proj.log")
+    args = asObject(locals())
+
+    # Create master yaml config file
+    prmMod.new_master_yaml(args)
+
+    # Create empty Metadata object
+    # Master yaml file will be read automatically
+    meta = mdMod.Metadata(project_name=args.project_name,
+                          job_type='master')
+
+    # Create master metadata and serialise it as yaml file
+    meta.create_master_metadata()
+    if not args.no_mdoc:
+        meta.get_mc2_temp()
+        meta.get_acquisition_settings()
+
+    master_md_name = args.project_name + '_master_md.yaml'
+    with open(master_md_name, 'w') as f:
+        yaml.dump(meta.metadata, f, indent=4)
+
+    logger(level="info",
+           message="Master metadata file created.")
+
+    return
 
 
 @mg(
