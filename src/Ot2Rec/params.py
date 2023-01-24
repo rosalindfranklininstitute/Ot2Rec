@@ -167,6 +167,7 @@ def new_align_yaml(args):
 
         'BatchRunTomo': {
             'setup': {
+                'stack_ext': args.stack_ext,
                 'excluded_views': list(args.excl_views),
                 'use_rawtlt': not args.no_rawtlt,
                 'pixel_size': None,
@@ -231,6 +232,7 @@ def new_recon_yaml(args):
             'setup': {
                 'use_rawtlt': True,
                 'pixel_size': 'default',
+                'stack_ext': args.stack_ext,
                 'rot_angle': 86.,
                 'gold_size': 0.,
                 'adoc_template': '/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc',

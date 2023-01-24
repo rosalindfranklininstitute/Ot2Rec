@@ -154,8 +154,8 @@ class Recon:
 
         # Template for directive file
         adoc_temp = f"""
-setupset.currentStackExt = st
-setupset.copyarg.stackext = st
+setupset.currentStackExt = <stack_ext>
+setupset.copyarg.stackext = <stack_ext>
 setupset.copyarg.userawtlt = <use_rawtlt>
 setupset.copyarg.pixel = <pixel_size>
 setupset.copyarg.rotation = <rot_angle>
@@ -182,6 +182,7 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         """
 
         convert_dict = {
+            'stack_ext': self.params['BatchRunTomo']['setup']['stack_ext'],
             'use_rawtlt': 1 if self.params['BatchRunTomo']['setup']['use_rawtlt'] else 0,
             'pixel_size': self.params['BatchRunTomo']['setup']['pixel_size'],
             'rot_angle': self.params['BatchRunTomo']['setup']['rot_angle'],

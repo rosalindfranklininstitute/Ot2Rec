@@ -274,6 +274,7 @@ def get_args_ctffind(
     result_widget=False,
 
     project_name={"label": "Project name *"},
+    stack_ext={"label": "Raw stack extension *"},
     rot_angle={"label": "Beam rotation angle *",
                "min": -180.00,
                "max": 180.00,
@@ -329,6 +330,7 @@ def get_args_ctffind(
 )
 def get_args_align(
         project_name="",
+        stack_ext="st",
         rot_angle=0.00,
         image_dims=[1000, 1000],
         excl_views=[0],
@@ -542,6 +544,7 @@ def get_args_align_ext(
     result_widget=False,
 
     project_name={"label": "Project name *"},
+    stack_ext={"label": "Stack extension *"},
     do_positioning={"label": "Positioning: Do positioning?"},
     unbinned_thickness={"label": "Positioning: Unbinned thickness (in pixels) for samples or whole tomogram *",
                         "min": 0,
@@ -565,6 +568,7 @@ def get_args_align_ext(
 )
 def get_args_recon(
         project_name="",
+        stack_ext="st",
         do_positioning=False,
         unbinned_thickness=1500,
         correct_ctf=False,
@@ -582,6 +586,7 @@ def get_args_recon(
 
     ARGS:
     project_name (str)       :: Name of current project
+    stack_ext (str)          :: Extension of raw stack
     do_positioning (bool)    :: Whether to perform positioning
     unbinned_thickness (int) :: Unbinned thickness (in pixels) for samples or whole tomogram for positioning
     correct_ctf (bool)       :: Whether to correct CTF for aligned stacks
