@@ -277,20 +277,16 @@ PLUGIN METHODS
 """
 
 
-def create_yaml():
+def create_yaml(runall=False):
     """
     Subroutine to create new yaml file for ctffind
     """
-    logger = logMod.Logger(log_path="o2r_ctffind.log")
-
-    # Parse user inputs
     args = mgMod.get_args_ctffind.show(run=True)
 
-    # Create the yaml file, then automatically update it
-    prmMod.new_ctffind_yaml(args)
-    update_yaml(args)
-
-    logger(message="MotionCor2 metadata file created.")
+    if not runall:
+        update_yaml(args)
+    else:
+        return args
 
 
 def update_yaml(args):
