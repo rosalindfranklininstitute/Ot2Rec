@@ -345,6 +345,33 @@ def new_aretomo_yaml(args):
         yaml.dump(aretomo_yaml_dict, f, indent=4, sort_keys=False)
 
 
+def new_exclude_bad_tilts_yaml(args):
+    """
+    Subroutine to create yaml file for excluding bad tilts
+
+    ARGS:
+    args (Namespace) :: Namespace containing user parameter inputs
+    """
+
+    ebt_yaml_name = f"{args.project_name.value}_exclude_bad_tilts.yaml"
+    print(f"{ebt_yaml_name} created")
+
+    ebt_yaml_dict = {
+        "System": {
+            "process_list": None,
+        },
+
+        "EBT_setup": {
+            "input_mrc": None,
+            "min_percentile": None,
+            "max_percentile": None,
+        },
+    }
+
+    with open(ebt_yaml_name, "w") as f:
+        yaml.dump(ebt_yaml_dict, f, indent=4, sort_keys=False)
+
+
 def read_yaml(project_name: str,
               filename: str):
     """

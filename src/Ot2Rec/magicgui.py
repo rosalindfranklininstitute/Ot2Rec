@@ -826,3 +826,33 @@ def get_args_aretomo(
         recon_algo="WBP",
 ):
     return locals()
+
+
+@mg(
+    call_button="Create config file",
+    layout="vertical",
+    result_widget=False,
+
+    project_name={"label": "Project name *"},
+    input_mrc_folder={
+        "label": "Folder containing input mrc's",
+        "mode": "d",
+    },
+    min_percentile={
+        "label": "Min percentile of stack grey value distribution to include",
+        "min": 0,
+        "max": 100,
+    },
+    max_percentile={
+        "label": "Max percentile of stack grey value distribution to include",
+        "min": 0,
+        "max": 100,
+    }
+)
+def get_args_exclude_bad_tilts(
+        project_name="",
+        input_mrc_folder=Path("./stacks"),
+        min_percentile=5,
+        max_percentile=95,
+):
+    return locals()

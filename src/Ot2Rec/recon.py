@@ -316,7 +316,7 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
 
         yaml_file = self.proj_name + '_recon_mdout.yaml'
         meta_dict = self.meta_out.to_dict()
-        meta_dict['recon_algor'] = "SIRT" if self.params["Batchruntomo"]["reconstruction"]["use_sirt"] else "WBP"
+        meta_dict['recon_algor'] = "SIRT" if self.params["BatchRunTomo"]["reconstruction"]["use_sirt"] else "WBP"
 
         with open(yaml_file, 'w') as f:
             yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False)

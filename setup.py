@@ -17,7 +17,7 @@ from setuptools import setup, find_packages
 
 
 setup(
-    version='0.3.0',
+    version='0.3.1',
     name='Ot2Rec',
     description='Ot2Rec',
     url='https://github.com/rosalindfranklininstitute/Ot2Rec',
@@ -48,6 +48,10 @@ setup(
 
             "o2r.mc.new=Ot2Rec.motioncorr:create_yaml",
             "o2r.mc.run=Ot2Rec.motioncorr:run",
+
+            "o2r.excludebadtilts.new=Ot2Rec.exclude_bad_tilts:create_yaml",
+            "o2r.excludebadtilts.run=Ot2Rec.exclude_bad_tilts:run",
+            "o2r.recombinebadtilts=Ot2Rec.exclude_bad_tilts:recombine_bad_tilts",
 
             "o2r.ctffind.new=Ot2Rec.ctffind:create_yaml",
             "o2r.ctffind.run=Ot2Rec.ctffind:run",
