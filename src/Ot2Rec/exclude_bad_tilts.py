@@ -118,7 +118,8 @@ class ExcludeBadTilts:
 
     def _exclude_tilt_one_ts(
         self,
-        i: int
+        i: int,
+        existing_file: bool = False
     ):
         """Excludes tilts from one tilt series, saves excluded tilts as a
         separate .mrc file and edits .tlt accordingly. Old .tlt file is
@@ -127,13 +128,24 @@ class ExcludeBadTilts:
 
         Args:
             i (int): Index of tilt series on the process list
+            existing_file (bool): If True, use existing 
+            <proj_name>_EBTdryrun.yaml to find tilt angles to exclude.
         """
         # Read image and determine tilts to exclude
         st_file = self.params["EBT_setup"]["input_mrc"][i]
         with mrcfile.mmap(st_file) as mrc:
             img = mrc.data
 
-        tilts_to_exclude = self._determine_tilts_to_exclude(img)
+        if existing_file is True:
+            if os.path.isfile(f"{self.proj_name}_EBTdryrun.yaml") is False:
+                raise IOError("EBTdryrun.yaml file not found")
+            else:
+                with open(f"{self.proj_name}_EBTdryrun.yaml", "r") as f:
+                    contents = yaml.load(f, Loader=yaml.FullLoader)
+                    tilts_to_exclude = contents[i]
+        
+        else:
+            tilts_to_exclude = self._determine_tilts_to_exclude(img)
         self.md_out["Excluded_Tilt_Index"][i] = tilts_to_exclude
 
 
@@ -175,14 +187,17 @@ class ExcludeBadTilts:
         with mrcfile.mmap(st_file, mode="r+") as mrc:
             mrc.set_data(cropped_ts)
 
-    def run_exclude_bad_tilts(self):
+    def run_exclude_bad_tilts(
+        self,
+        existing_file: bool = False
+    ):
         """Method to exclude bad tilts for all tilt series
         """
         ts_list = self.params["System"]["process_list"]
         tqdm_iter = tqdm(ts_list, ncols=100)
         for i, curr_ts in enumerate(tqdm_iter):
             tqdm_iter.set_description(f"Removing bad tilts from TS {curr_ts}")
-            self._exclude_tilt_one_ts(i)
+            self._exclude_tilt_one_ts(i, existing_file=existing_file)
         self.export_metadata()
 
     def dry_run(self):
@@ -305,6 +320,10 @@ def run():
         "--dryrun",
         action="store_true"
     )
+    parser.add_argument(
+        "--existing_file",
+        action="store_true"
+    )
     run_args = parser.parse_args()
 
     # check that ebt yaml file exists
@@ -339,7 +358,7 @@ def run():
     if run_args.dryrun is True:
         ebt_obj.dry_run()
     else:
-        ebt_obj.run_exclude_bad_tilts()
+        ebt_obj.run_exclude_bad_tilts(existing_file=run_args.existing_file)
 
 def _recombine_tilt_one_ts(
         i: int,

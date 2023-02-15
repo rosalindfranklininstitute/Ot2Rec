@@ -262,3 +262,42 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
             dryrun = yaml.load(f, Loader=yaml.FullLoader)
         
         self.assertNotEqual(len(dryrun), 0)
+    
+    def test_EBT_with_existing_dryrun_file(self):
+        """Tests that tilts can be excluded from an existing dry run file
+        """
+        args = self._create_expected_input_args()
+        tmpdir, st = self._create_expected_folder_structure()
+        os.chdir(tmpdir.name)
+
+        exclude_bad_tilts.create_yaml(args)
+
+        params = prmMod.read_yaml(
+            project_name="TS",
+            filename="./TS_exclude_bad_tilts.yaml",
+        )
+
+        ebt_obj = exclude_bad_tilts.ExcludeBadTilts(
+            project_name="TS",
+            params_in=params,
+            logger_in=logMod.Logger("o2r_exclude_bad_tilts.log")
+        )
+
+        self.assertRaises(
+            IOError,
+            ebt_obj.run_exclude_bad_tilts,
+            True
+        )
+
+        tilts_to_exclude = {
+            0: [1,2,3,9]
+        }
+
+        with open("TS_EBTdryrun.yaml", "w") as f:
+            yaml.dump(tilts_to_exclude, f, indent=4, sort_keys=False)
+
+        ebt_obj.run_exclude_bad_tilts(existing_file=True)
+
+        with mrcfile.mmap("./stacks/TS_0001/TS_0001.st") as mrc:
+            cropped_ts = mrc.data
+        self.assertEqual(cropped_ts.shape[0], 6)
