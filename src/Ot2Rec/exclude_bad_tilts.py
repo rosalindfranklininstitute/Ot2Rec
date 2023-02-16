@@ -132,6 +132,7 @@ class ExcludeBadTilts:
             <proj_name>_EBTdryrun.yaml to find tilt angles to exclude.
         """
         # Read image and determine tilts to exclude
+        ts_list = self.params["System"]["process_list"]
         st_file = self.params["EBT_setup"]["input_mrc"][i]
         with mrcfile.mmap(st_file) as mrc:
             img = mrc.data
@@ -142,11 +143,12 @@ class ExcludeBadTilts:
             else:
                 with open(f"{self.proj_name}_EBTdryrun.yaml", "r") as f:
                     contents = yaml.load(f, Loader=yaml.FullLoader)
-                    tilts_to_exclude = contents[i]
+                    tilts_to_exclude = contents[ts_list[i]]
+                    print(tilts_to_exclude)
         
         else:
             tilts_to_exclude = self._determine_tilts_to_exclude(img)
-        self.md_out["Excluded_Tilt_Index"][i] = tilts_to_exclude
+        self.md_out["Excluded_Tilt_Index"][i+1] = tilts_to_exclude
 
 
         # Take excluded tilt angles out of rawtlt file
@@ -161,7 +163,9 @@ class ExcludeBadTilts:
                 del all_tilt_angles[tilt]
             with open(rawtlt_file, "w+") as f:
                 f.writelines(all_tilt_angles)
-            self.md_out["Excluded_Tilt_Angles"][i] = tilt_angles_to_exclude
+            self.md_out["Excluded_Tilt_Angles"][i+1] = [
+                float(t) for t in list(tilt_angles_to_exclude.values())
+            ]
 
         else:
             raise ValueError(
@@ -176,7 +180,7 @@ class ExcludeBadTilts:
         ) as mrc:
             excluded_stack = img[tilts_to_exclude, :, :]
             mrc.set_data(excluded_stack)
-        self.md_out["Excluded_St_Files"][i] = exclude_filename
+        self.md_out["Excluded_St_Files"][i+1] = exclude_filename
 
         # Remove excluded tilts from original data
         cropped_ts = np.delete(
@@ -373,7 +377,7 @@ def _recombine_tilt_one_ts(
         md_in (dict): Metadata read from exclude_bad_tilts_mdout.yaml
     """
     # Check that we have the metadata we need, i.e. tilts have been removed
-    tilts_to_exclude = md_in["Excluded_Tilt_Index"][i]
+    tilts_to_exclude = md_in["Excluded_Tilt_Index"][i+1]
     if len(tilts_to_exclude) == 0:
         print("Skipping this TS as no excluded tilts")
         pass
@@ -385,7 +389,7 @@ def _recombine_tilt_one_ts(
             img = mrc.data
             dtype = mrcfile.utils.data_dtype_from_header(mrc.header)
 
-        exclude_filename = md_in["Excluded_St_Files"][i]
+        exclude_filename = md_in["Excluded_St_Files"][i+1]
         with mrcfile.mmap(exclude_filename) as mrc:
             excl_st = mrc.data
 
@@ -416,19 +420,24 @@ def _recombine_tilt_one_ts(
         with open(rawtlt_file, "r") as f:
             cropped_ta = f.readlines()
         cropped_ta = [float(ta.strip("\n")) for ta in cropped_ta]
-        excl_ta = md_in["Excluded_Tilt_Angles"][i]
+        excl_ta = md_in["Excluded_Tilt_Angles"][i+1]
 
         number_of_cropped_st_added = 0
+        number_of_excl_st_added = 0
 
         full_ta = []
         for tilt in range(full_ts.shape[0]):
             if tilt in tilts_to_exclude:
-                full_ta.append(excl_ta[tilt])
+                full_ta.append(excl_ta[number_of_excl_st_added])
+                number_of_excl_st_added += 1
             else:
                 full_ta.append(cropped_ta[number_of_cropped_st_added])
                 number_of_cropped_st_added += 1
         with open(rawtlt_file, "w+") as f:
             f.writelines(f"{ta}\n" for ta in full_ta)
+        
+        # Delete excl files
+        os.remove(exclude_filename)
 
 
 def recombine_bad_tilts():
@@ -464,7 +473,7 @@ def recombine_bad_tilts():
     with open(ebt_mdout_yaml, "r") as f:
         ebt_mdout = yaml.load(f, Loader=yaml.FullLoader)
 
-    ts_list = ebt_config["System"]["process_list"]
+    ts_list = ebt_config.params["System"]["process_list"]
     tqdm_iter = tqdm(ts_list, ncols=100)
     for i, curr_ts in enumerate(tqdm_iter):
         tqdm_iter.set_description(f"Recombining bad tilts from TS {curr_ts}")

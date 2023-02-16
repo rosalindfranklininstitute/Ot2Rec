@@ -177,17 +177,17 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
             md = yaml.load(f, Loader=yaml.FullLoader)
         
         self.assertEqual(
-            len(md["Excluded_Tilt_Index"][0]), 2
+            len(md["Excluded_Tilt_Index"][1]), 2
         )
 
         self.assertEqual(
-            md["Excluded_St_Files"][0],
+            md["Excluded_St_Files"][1],
             "stacks/TS_0001/TS_0001.excl"
         )
 
         self.assertEqual(
-            list(md["Excluded_Tilt_Angles"][0].keys()),
-            [0,9]
+            list(md["Excluded_Tilt_Angles"][1]),
+            [-60.0, 60.0]
         )
     
     def test_EBT_recombine(self):
@@ -290,7 +290,7 @@ class ExcludeBadTiltsSmokeTest(unittest.TestCase):
         )
 
         tilts_to_exclude = {
-            0: [1,2,3,9]
+            1: [1,2,3,9]
         }
 
         with open("TS_EBTdryrun.yaml", "w") as f:
