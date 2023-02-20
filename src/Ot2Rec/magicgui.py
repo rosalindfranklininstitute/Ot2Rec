@@ -809,6 +809,14 @@ def get_args_imod_route(
         "label": "Reconstruction algorithm",
         "choices": ["WBP", "SART"]
     },
+    out_imod={
+        "label": "Produce STA output for",
+        "choices": ["N/A", "RELION4", "Warp", "Local alignment"]
+    },
+    dark_tol={
+        "label": "Tolerance to remove dark images",
+        "tooltip": "Default 0.7, low number = fewer images removed",
+    }
 )
 def get_args_aretomo(
         project_name="",
@@ -823,7 +831,9 @@ def get_args_aretomo(
         volz=-1,
         sample_thickness=-1,
         output_binning=4,
-        recon_algo="WBP",
+        recon_algo="SART",
+        out_imod="N/A",
+        dark_tol=0.7,
 ):
     return locals()
 
