@@ -15,6 +15,7 @@
 
 import argparse
 import os
+import shutil
 import subprocess
 import warnings
 from glob import glob
@@ -59,6 +60,8 @@ class AreTomo:
 
         self.md_out = {}
 
+        self.sta = {}
+
         self._get_internal_metadata()
 
     def _get_internal_metadata(self):
@@ -90,7 +93,15 @@ class AreTomo:
                 self.md_out["aretomo_output_dir"] = {}
                 self.md_out["aretomo_align_stats"] = {}
             self.md_out["aretomo_output_dir"][curr_ts] = subfolder
-            self.md_out["aretomo_align_stats"][curr_ts] = subfolder + f"/{self.rootname}_{curr_ts:04d}{self.suffix}.st.aln"
+            self.md_out["aretomo_align_stats"][curr_ts] = (
+                f"{subfolder}/"
+                f"{self.rootname}_{curr_ts:04d}{self.suffix}.st.aln"
+            )
+
+        if self.params["AreTomo_setup"]["out_imod"] != "N/A":
+            self.sta_folder = f"{self.basis_folder}/STA"
+            self.md_out["aretomo_STA_dir"] = self.sta_folder
+            os.makedirs(self.sta_folder, exist_ok=True)
 
     def _get_aretomo_align_command(self, i):
         """
@@ -111,6 +122,8 @@ class AreTomo:
             '0',
             '-OutBin',
             str(self.params['AreTomo_setup']['output_binning']),
+            '-DarkTol',
+            str(self.params['AreTomo_setup']['dark_tol']),
         ]
 
         return cmd
@@ -134,18 +147,26 @@ class AreTomo:
             str(self.params['AreTomo_recon']['volz']),
             '-OutBin',
             str(self.params['AreTomo_setup']['output_binning']),
-            '-Align',
-            '0'
         ]
 
+        if self.params['AreTomo_setup']['aretomo_mode'] == 1:
+            cmd.append('-Align')
+            cmd.append('0')
+        
         if self.params['AreTomo_recon']['recon_algo'] == "WBP":
             # WBP
             cmd.append('-Wbp')
             cmd.append('1')
-        elif self.params['AreTomo_recon']['recon_algo'] == "SART":
-            # SART
-            cmd.append('-Wbp')
-            cmd.append('0')
+        
+        out_imod = self.params['AreTomo_setup']['out_imod']
+        if out_imod != "N/A":
+            outimod_lookup = {
+                "RELION4": "1",
+                "Warp": "2",
+                "Local alignment": "3",
+            }
+            cmd.append('-OutImod')
+            cmd.append(outimod_lookup[out_imod])
 
         return cmd
 
@@ -175,12 +196,19 @@ class AreTomo:
         self.md_out["aretomo_cmd"][curr_ts] = " ".join(cmd)
 
         # Run aretomo
-        aretomo_run = subprocess.run(cmd,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.STDOUT,
-                                     encoding='ascii',
-                                     check=True,
-                                     )
+        aretomo_run = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='ascii',
+            check=True,
+        )
+
+        # If STA files are generated save folder names to move to common folder
+        if self.params["AreTomo_setup"]["out_imod"] != "N/A":
+            input_mrc = self.params["AreTomo_setup"]["input_mrc"][i]
+            self.sta[curr_ts] = f'{os.path.splitext(input_mrc)[0]}_rec_Imod/'
+
         self.logObj(f"\nStdOut:{aretomo_run.stdout}\n")
         self.logObj(f"\nStdErr:{aretomo_run.stderr}\n")
 
@@ -199,6 +227,13 @@ class AreTomo:
         """
         Method to export metadata as yaml
         """
+        # If STA files created, move to common folder
+        if self.params["AreTomo_setup"]["out_imod"] != "N/A":
+            for ts in list(self.sta.keys()):
+                shutil.move(
+                    src=self.sta[ts],
+                    dst=self.sta_folder
+                )
 
         yaml_file = self.proj_name + "_aretomo_mdout.yaml"
 
@@ -281,6 +316,7 @@ def _get_process_list(file_list, rootname, suffix, ext):
                 int(st_bn.split(f"{rootname}_")[1].split(ext)[0])
             )
     return ts_list
+
 
 def update_yaml(args):
     """
