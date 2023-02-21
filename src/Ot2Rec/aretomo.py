@@ -228,11 +228,19 @@ class AreTomo:
         Method to export metadata as yaml
         """
         # If STA files created, move to common folder
-        if self.params["AreTomo_setup"]["out_imod"] != "N/A":
+        if self.params["AreTomo_setup"]["out_imod"] != "N/A": 
             for ts in list(self.sta.keys()):
+                sta_ts_folder = (
+                    f"{self.sta_folder}/{self.sta[ts].split(os.sep)[-2]}"
+                )
+                if os.path.exists(sta_ts_folder):
+                    self.logObj(
+                        f"STA folder {sta_ts_folder} not empty, overwriting."
+                    )
+                    shutil.rmtree(sta_ts_folder)
                 shutil.move(
                     src=self.sta[ts],
-                    dst=self.sta_folder
+                    dst=self.sta_folder,
                 )
 
         yaml_file = self.proj_name + "_aretomo_mdout.yaml"
