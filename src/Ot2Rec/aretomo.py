@@ -157,16 +157,6 @@ class AreTomo:
             # WBP
             cmd.append('-Wbp')
             cmd.append('1')
-        
-        out_imod = self.params['AreTomo_setup']['out_imod']
-        if out_imod != "N/A":
-            outimod_lookup = {
-                "RELION4": "1",
-                "Warp": "2",
-                "Local alignment": "3",
-            }
-            cmd.append('-OutImod')
-            cmd.append(outimod_lookup[out_imod])
 
         return cmd
 
@@ -183,6 +173,16 @@ class AreTomo:
         else:
             recon_cmd = self._get_aretomo_recon_command(i)
             cmd = recon_cmd
+
+        out_imod = self.params['AreTomo_setup']['out_imod']
+        if out_imod != "N/A":
+            outimod_lookup = {
+                "RELION4": "1",
+                "Warp": "2",
+                "Local alignment": "3",
+            }
+            cmd.append('-OutImod')
+            cmd.append(outimod_lookup[out_imod])
 
         # Add extra kwargs
         kwargs = self.params["AreTomo_kwargs"].keys()
@@ -206,11 +206,11 @@ class AreTomo:
 
         # If STA files are generated save folder names to move to common folder
         if self.params["AreTomo_setup"]["out_imod"] != "N/A":
-            input_mrc = self.params["AreTomo_setup"]["input_mrc"][i]
+            output_mrc = self.params["AreTomo_setup"]["output_mrc"][i]
             self.sta[curr_ts] = (
                 f'{self.basis_folder}/'
                 f'{self.rootname}_{curr_ts:04d}{self.suffix}/'
-                f'{os.path.splitext(os.path.basename(input_mrc))[0]}_rec_Imod/'
+                f'{os.path.splitext(os.path.basename(output_mrc))[0]}_Imod/'
             )
 
         self.logObj(f"\nStdOut:{aretomo_run.stdout}\n")
