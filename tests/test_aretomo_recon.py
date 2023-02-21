@@ -114,3 +114,39 @@ class AreTomoReconSmokeTest(unittest.TestCase):
         self.assertTrue(aretomo_mock.called)
 
         tmpdir.cleanup()
+    
+    @patch("subprocess.run")
+    def test_aretomo_STA_output_folders_created(self, aretomo_mock):
+        # Create expected input
+        tmpdir = self._create_expected_folder_structure()
+        os.chdir(tmpdir.name)
+        args = self._create_expected_input_args()
+        args["out_imod"] = "Warp"   
+
+        # Create yaml
+        aretomo.create_yaml(args)
+
+        # Read params
+        params = prmMod.read_yaml(
+            project_name="TS",
+            filename="./TS_aretomo_recon.yaml",
+        )
+
+        # Run
+        logger = logMod.Logger("./o2r_aretomo_recon.log")
+        aretomo_obj = aretomo.AreTomo(
+            project_name="TS",
+            params_in=params,
+            logger_in=logger
+        )
+        sta_folder = "./aretomo_recon/STA"
+        aretomo_obj._run_aretomo(0)
+        os.mkdir(f"{tmpdir.name}/aretomo_recon/TS_0001/TS_0001_ali_rec_Imod")
+
+        aretomo_obj.export_metadata()
+
+        self.assertTrue(
+            os.path.isdir(f"{sta_folder}/TS_0001_ali_rec_Imod")
+        )
+
+        tmpdir.cleanup()

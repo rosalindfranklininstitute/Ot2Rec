@@ -207,7 +207,11 @@ class AreTomo:
         # If STA files are generated save folder names to move to common folder
         if self.params["AreTomo_setup"]["out_imod"] != "N/A":
             input_mrc = self.params["AreTomo_setup"]["input_mrc"][i]
-            self.sta[curr_ts] = f'{os.path.splitext(input_mrc)[0]}_rec_Imod/'
+            self.sta[curr_ts] = (
+                f'{self.basis_folder}/'
+                f'{self.rootname}_{curr_ts:04d}{self.suffix}/'
+                f'{os.path.splitext(os.path.basename(input_mrc))[0]}_rec_Imod/'
+            )
 
         self.logObj(f"\nStdOut:{aretomo_run.stdout}\n")
         self.logObj(f"\nStdErr:{aretomo_run.stderr}\n")
