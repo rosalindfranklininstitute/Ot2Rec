@@ -366,7 +366,7 @@ def update_yaml(args):
     if args["aretomo_mode"] != 1:  # for workflows with alignment
         # Set InMrc
         st_file_list = _find_files_with_ext(
-            ".st",
+            args["input_ext"],
             rootname,
             suffix,
             str(args["input_mrc_folder"])
@@ -405,7 +405,12 @@ def update_yaml(args):
         aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
 
         # Set process list
-        ts_list = _get_process_list(st_file_list, rootname, suffix, ".st")
+        ts_list = _get_process_list(
+            st_file_list,
+            rootname,
+            suffix,
+            args["input_ext"]
+        )
         aretomo_params.params["System"]["process_list"] = ts_list
 
         # Set output mrc

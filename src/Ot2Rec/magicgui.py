@@ -772,7 +772,7 @@ def get_args_imod_route(
         "max": 2,
         "step": 1,
     },
-    rot_angle={"label": "Rotation angle of electron beam*, can be obtained from mdoc",
+    rot_angle={"label": "Rotation angle of electron beam, can be obtained from mdoc",
                "min": -180.0000,
                "max": 180.0000
     },
@@ -784,6 +784,10 @@ def get_args_imod_route(
     input_mrc_folder={
         "label": "Folder containing input mrc's",
         "mode": "d",
+    },
+    input_ext={
+        "label": "Extension of input mrc files",
+        "tooltip": ".st or .mrc usually"
     },
     output_path={
         "label": "Path to output folder",
@@ -826,6 +830,7 @@ def get_args_aretomo(
         rootname="",
         suffix="",
         input_mrc_folder=Path("./aretomo"),
+        input_ext=".st",
         output_path=Path("./aretomo"),
         tilt_angles="",
         volz=-1,
