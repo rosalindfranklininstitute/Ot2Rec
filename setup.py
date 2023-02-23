@@ -39,7 +39,7 @@ setup(
         'redlionfish',
         'magicgui',
         'pyqt5',
-        'mdocfile',
+        # 'mdocfile',
         'joblib'
     ],
     entry_points={
