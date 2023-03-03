@@ -15,6 +15,7 @@
 
 import argparse
 import os
+import shutil
 import subprocess
 import warnings
 from glob import glob
@@ -59,6 +60,8 @@ class AreTomo:
 
         self.md_out = {}
 
+        self.sta = {}
+
         self._get_internal_metadata()
 
     def _get_internal_metadata(self):
@@ -90,7 +93,15 @@ class AreTomo:
                 self.md_out["aretomo_output_dir"] = {}
                 self.md_out["aretomo_align_stats"] = {}
             self.md_out["aretomo_output_dir"][curr_ts] = subfolder
-            self.md_out["aretomo_align_stats"][curr_ts] = subfolder + f"/{self.rootname}_{curr_ts:04d}{self.suffix}.st.aln"
+            self.md_out["aretomo_align_stats"][curr_ts] = (
+                f"{subfolder}/"
+                f"{self.rootname}_{curr_ts:04d}{self.suffix}.st.aln"
+            )
+
+        if self.params["AreTomo_setup"]["out_imod"] != "N/A":
+            self.sta_folder = f"{self.basis_folder}/STA"
+            self.md_out["aretomo_STA_dir"] = self.sta_folder
+            os.makedirs(self.sta_folder, exist_ok=True)
 
     def _get_aretomo_align_command(self, i):
         """
@@ -111,6 +122,8 @@ class AreTomo:
             '0',
             '-OutBin',
             str(self.params['AreTomo_setup']['output_binning']),
+            '-DarkTol',
+            str(self.params['AreTomo_setup']['dark_tol']),
         ]
 
         return cmd
@@ -134,18 +147,16 @@ class AreTomo:
             str(self.params['AreTomo_recon']['volz']),
             '-OutBin',
             str(self.params['AreTomo_setup']['output_binning']),
-            '-Align',
-            '0'
         ]
 
+        if self.params['AreTomo_setup']['aretomo_mode'] == 1:
+            cmd.append('-Align')
+            cmd.append('0')
+        
         if self.params['AreTomo_recon']['recon_algo'] == "WBP":
             # WBP
             cmd.append('-Wbp')
             cmd.append('1')
-        elif self.params['AreTomo_recon']['recon_algo'] == "SART":
-            # SART
-            cmd.append('-Wbp')
-            cmd.append('0')
 
         return cmd
 
@@ -163,6 +174,16 @@ class AreTomo:
             recon_cmd = self._get_aretomo_recon_command(i)
             cmd = recon_cmd
 
+        out_imod = self.params['AreTomo_setup']['out_imod']
+        if out_imod != "N/A":
+            outimod_lookup = {
+                "RELION4": "1",
+                "Warp": "2",
+                "Local alignment": "3",
+            }
+            cmd.append('-OutImod')
+            cmd.append(outimod_lookup[out_imod])
+
         # Add extra kwargs
         kwargs = self.params["AreTomo_kwargs"].keys()
         for kwarg in kwargs:
@@ -175,12 +196,23 @@ class AreTomo:
         self.md_out["aretomo_cmd"][curr_ts] = " ".join(cmd)
 
         # Run aretomo
-        aretomo_run = subprocess.run(cmd,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.STDOUT,
-                                     encoding='ascii',
-                                     check=True,
-                                     )
+        aretomo_run = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='ascii',
+            check=True,
+        )
+
+        # If STA files are generated save folder names to move to common folder
+        if self.params["AreTomo_setup"]["out_imod"] != "N/A":
+            output_mrc = self.params["AreTomo_setup"]["output_mrc"][i]
+            self.sta[curr_ts] = (
+                f'{self.basis_folder}/'
+                f'{self.rootname}_{curr_ts:04d}{self.suffix}/'
+                f'{os.path.splitext(os.path.basename(output_mrc))[0]}_Imod/'
+            )
+
         self.logObj(f"\nStdOut:{aretomo_run.stdout}\n")
         self.logObj(f"\nStdErr:{aretomo_run.stderr}\n")
 
@@ -199,6 +231,21 @@ class AreTomo:
         """
         Method to export metadata as yaml
         """
+        # If STA files created, move to common folder
+        if self.params["AreTomo_setup"]["out_imod"] != "N/A": 
+            for ts in list(self.sta.keys()):
+                sta_ts_folder = (
+                    f"{self.sta_folder}/{self.sta[ts].split(os.sep)[-2]}"
+                )
+                if os.path.exists(sta_ts_folder):
+                    self.logObj(
+                        f"STA folder {sta_ts_folder} not empty, overwriting."
+                    )
+                    shutil.rmtree(sta_ts_folder)
+                shutil.move(
+                    src=self.sta[ts],
+                    dst=self.sta_folder,
+                )
 
         yaml_file = self.proj_name + "_aretomo_mdout.yaml"
 
@@ -282,6 +329,7 @@ def _get_process_list(file_list, rootname, suffix, ext):
             )
     return ts_list
 
+
 def update_yaml(args):
     """
     Method to update yaml file for AreTomo
@@ -318,7 +366,7 @@ def update_yaml(args):
     if args["aretomo_mode"] != 1:  # for workflows with alignment
         # Set InMrc
         st_file_list = _find_files_with_ext(
-            ".st",
+            args["input_ext"],
             rootname,
             suffix,
             str(args["input_mrc_folder"])
@@ -357,7 +405,12 @@ def update_yaml(args):
         aretomo_params.params["AreTomo_setup"]["tilt_angles"] = tlt_file_list
 
         # Set process list
-        ts_list = _get_process_list(st_file_list, rootname, suffix, ".st")
+        ts_list = _get_process_list(
+            st_file_list,
+            rootname,
+            suffix,
+            args["input_ext"]
+        )
         aretomo_params.params["System"]["process_list"] = ts_list
 
         # Set output mrc

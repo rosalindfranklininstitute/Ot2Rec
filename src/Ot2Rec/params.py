@@ -326,14 +326,16 @@ def new_aretomo_yaml(args):
             "input_mrc": None,
             "output_mrc": None,
             "tilt_angles": None,
-            "output_binning": None
+            "output_binning": None,
+            "out_imod": args["out_imod"],
+            "dark_tol": args["dark_tol"]
         },
 
         "AreTomo_recon": {
             "volz": None,
             "sample_thickness": None,
             "pixel_size": args["pixel_size"],
-            "recon_algo": None,
+            "recon_algo": args["recon_algo"],
         },
 
         "AreTomo_kwargs": {

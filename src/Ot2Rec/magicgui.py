@@ -772,7 +772,7 @@ def get_args_imod_route(
         "max": 2,
         "step": 1,
     },
-    rot_angle={"label": "Rotation angle of electron beam*, can be obtained from mdoc",
+    rot_angle={"label": "Rotation angle of electron beam, can be obtained from mdoc",
                "min": -180.0000,
                "max": 180.0000
     },
@@ -784,6 +784,10 @@ def get_args_imod_route(
     input_mrc_folder={
         "label": "Folder containing input mrc's",
         "mode": "d",
+    },
+    input_ext={
+        "label": "Extension of input mrc files",
+        "tooltip": ".st or .mrc usually"
     },
     output_path={
         "label": "Path to output folder",
@@ -809,6 +813,14 @@ def get_args_imod_route(
         "label": "Reconstruction algorithm",
         "choices": ["WBP", "SART"]
     },
+    out_imod={
+        "label": "Produce STA output for",
+        "choices": ["N/A", "RELION4", "Warp", "Local alignment"]
+    },
+    dark_tol={
+        "label": "Tolerance to remove dark images",
+        "tooltip": "Default 0.7, low number = fewer images removed",
+    }
 )
 def get_args_aretomo(
         project_name="",
@@ -818,12 +830,15 @@ def get_args_aretomo(
         rootname="",
         suffix="",
         input_mrc_folder=Path("./aretomo"),
+        input_ext=".st",
         output_path=Path("./aretomo"),
         tilt_angles="",
         volz=-1,
         sample_thickness=-1,
         output_binning=4,
-        recon_algo="WBP",
+        recon_algo="SART",
+        out_imod="N/A",
+        dark_tol=0.7,
 ):
     return locals()
 
