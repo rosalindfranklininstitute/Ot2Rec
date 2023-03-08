@@ -250,40 +250,38 @@ class Motioncorr:
 
         # Process tilt-series one at a time
         ts_list = self.params['System']['process_list']
-        tqdm_iter = tqdm(ts_list, ncols=100)
-        for curr_ts in tqdm_iter:
+        tqdm_iter = tqdm(self.meta.iterrows(), total=self.meta.shape[0], ncols=100)
+        for idx, curr_image in tqdm_iter:
+            curr_ts = self.meta.ts[idx]
             tqdm_iter.set_description(f"Processing TS {curr_ts}...")
-            self._curr_meta = self.meta.loc[self.meta.ts == curr_ts]
+            self._curr_meta = curr_image
 
-            while len(self._curr_meta) > 0:
-                # Get commands to run MC2
-                if self._dose_data_present:
-                    mc_commands = [self._get_command((_in, _out, _gpu), (_frame, _ds, _dose))
-                                   for _in, _out, _gpu, _frame, _ds, _dose in zip(
-                                       self._curr_meta.file_paths, self._curr_meta.output, self._curr_meta.gpu,
-                                       self._curr_meta.num_frames, self._curr_meta.ds_factor,
-                                       self._curr_meta.frame_dose)]
-                else:
-                    mc_commands = [self._get_command((_in, _out, _gpu))
-                                   for _in, _out, _gpu in zip(
-                                       self._curr_meta.file_paths, self._curr_meta.output, self._curr_meta.gpu)]
+            file_in = self._curr_meta.file_paths
+            file_out = self._curr_meta.output
+            gpu = self._curr_meta.gpu
 
-                jobs = (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) for cmd in mc_commands)
+            # Get commands to run MC2
+            if self._dose_data_present:
+                frame = self._curr_meta.num_frames
+                ds = self._curr_meta.ds_factor
+                dose = self._curr_meta.frame_dose
 
-                # run subprocess by chunks of GPU
-                chunks = self._yield_chunks(jobs, len(self.use_gpu) * self.params['System']['jobs_per_gpu'])
-                for job in chunks:
-                    # from the moment the next line is read, every process in job are spawned
-                    for process in list(job):
-                        try:
-                            assert(process.returncode is None)
-                        except:
-                            self.logObj("Ot2Rec-MotionCor2 job failed.",
-                                        level="warning")
+                cmd = self._get_command((file_in, file_out, gpu), (frame, ds, dose))
 
-                        self.log.append(process.communicate()[0].decode('UTF-8'))
-                        self.update_mc2_metadata()
-                        self.export_metadata()
+            else:
+                cmd = self._get_command((file_in, file_out, gpu), (frame, ds, dose))
+
+            job = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            try:
+                assert(job.returncode is None)
+            except:
+                self.logObj("Ot2Rec-MotionCor2 job failed.",
+                            level="warning")
+
+            self.log.append(job.communicate()[0].decode('UTF-8'))
+            self.update_mc2_metadata()
+            self.export_metadata()
+
 
         self.logObj("Ot2Rec-MotionCor2 jobs finished.")
 
@@ -301,7 +299,6 @@ class Motioncorr:
         self.meta_out = pd.concat([self.meta_out, _to_append],
                                   ignore_index=True)
         self.meta = self.meta.loc[~self.meta['output'].apply(lambda x: os.path.isfile(x))]
-        self._curr_meta = self._curr_meta.loc[~self._curr_meta['output'].apply(lambda x: os.path.isfile(x))]
 
 
     def export_metadata(self):
