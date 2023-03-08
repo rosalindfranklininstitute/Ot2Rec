@@ -127,12 +127,12 @@ class Metadata:
             # Extract tilt series number
             split_path_name = curr_image.split('/')[-1].replace('[', '_').split('_')
             try:
-                ts_index = int(''.join(i for i in split_path_name[
-                    self.params['image_stack_field'] + prefix_length] if i.isdigit()))
+                ts_index = ''.join(i for i in split_path_name[
+                    self.params['image_stack_field'] + prefix_length])
             except (IndexError, ValueError):
                 raise IndexError(f"Error in Ot2Rec.metadata.Metadata.create_master_metadata. "
                                  f"Failed to get tilt series number from file path {curr_image}.")
-            self.tilt_series.append(ts_index)
+            self.tilt_series.append(str(ts_index))
 
             # Extract image index number
             try:
@@ -154,7 +154,7 @@ class Metadata:
 
         # Save metadata as a dictionary --- easier to dump as yaml
         self.metadata = dict(file_paths=self.image_paths,
-                             ts=[int(i) for i in self.tilt_series],
+                             ts=self.tilt_series,
                              image_idx=[int(i) for i in self.image_idx],
                              angles=self.tilt_angles,
         )
