@@ -24,7 +24,7 @@ import yaml
 from . import logger as logMod
 from . import metadata as mdMod
 from . import params as prmMod
-from . import magicgui as mgMod
+from . import mgui_import as mgMod
 
 from . import motioncorr as mcMod
 from . import ctffind as ctffindMod
@@ -50,32 +50,7 @@ def new_proj():
     """
     Method to create a new project and get master metadata from raw images
     """
-    logger = logMod.Logger(log_path="new_proj.log")
-
-    # Parse user inputs
-    args = mgMod.get_args_new_proj.show(run=True)
-
-    # Create master yaml config file
-    prmMod.new_master_yaml(args)
-
-    # Create empty Metadata object
-    # Master yaml file will be read automatically
-    meta = mdMod.Metadata(project_name=args.project_name.value,
-                          job_type='master')
-
-    # Create master metadata and serialise it as yaml file
-    meta.create_master_metadata()
-    if not args.no_mdoc.value:
-        meta.get_mc2_temp()
-        meta.get_acquisition_settings()
-
-    master_md_name = args.project_name.value + '_master_md.yaml'
-    with open(master_md_name, 'w') as f:
-        yaml.dump(meta.metadata, f, indent=4)
-
-    logger(level="info",
-           message="Master metadata file created.")
-
+    mgMod.get_args_new_proj.show(run=True)
 
 
 def cleanup():
