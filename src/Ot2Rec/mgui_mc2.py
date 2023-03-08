@@ -39,12 +39,11 @@ class asObject(object):
     output_folder={"label": "MC2 output folder"},
     file_prefix={"label": "File prefix (if different from project name)"},
     exec_path={"label": "Path to MC2 executable"},
-    jobs_per_gpu={"label": "Jobs per GPU",
-                  "min": 1},
     gpu_mem_usage={"label": "GPU memory usage (if applicable)",
-                #    "widget_type": "FloatSlider",
-                   "min": 0.1,
-                   "max": 2.0},
+                   "min": 0.0,
+                   "max": 1.0,
+                   "step": 0.05,
+    },
     use_gain={"label": "Use gain reference?"},
     gain={"label": "Gain reference file (if applicable)",
           "widget_type": "FileEdit",
@@ -68,7 +67,6 @@ def get_args_mc2(
         output_folder=Path(Path.cwd() / "motioncor"),
         file_prefix="",
         exec_path=Path("/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110"),
-        jobs_per_gpu=1,
         gpu_mem_usage=1.0,
         use_gain=False,
         gain="",
@@ -89,7 +87,6 @@ def get_args_mc2(
     output_folder (str)   :: Path to folder for storing motion-corrected images (Default: ./motioncor/)
     file_prefix (str)     :: Common prefix of raw image files (Default: project)
     no_gpu (bool)         :: Use CPU only for motion-correction
-    jobs_per_gpu (int)    :: Number of job instance(s) per GPU
     gpu_mem_usage (float) :: MotionCor2 GPU memory usage
     exec_path (str)       :: Path to MotionCor2 executable
     use_gain (bool)       :: Whether to use gain reference file
