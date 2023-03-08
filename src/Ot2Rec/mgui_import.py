@@ -94,8 +94,11 @@ def get_args_new_proj(
         meta.get_acquisition_settings()
 
     master_md_name = args.project_name + '_master_md.yaml'
+    acqui_md_name =  args.project_name + '_acquisition_md.yaml'
     with open(master_md_name, 'w') as f:
         yaml.dump(meta.metadata, f, indent=4)
+    with open(acqui_md_name, 'w') as g:
+        yaml.dump(meta.acquisition, g, indent=4)
 
     logger(level="info",
            message="Master metadata file created.")

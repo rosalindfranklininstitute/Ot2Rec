@@ -60,6 +60,7 @@ class Metadata:
         self.project_name = project_name
         self.job_type = job_type
         self.metadata = md_in
+        self.acquisition = dict()
 
         # Obtain parameters first
         if self.job_type in ['master', 'motioncorr', 'ctffind', 'align', 'reconstruct']:
@@ -251,12 +252,12 @@ class Metadata:
         mdoc_path = f"{base_folder}/{self.params['file_prefix']}_" + str(ts) + ".mdoc"
         mdoc = mdf.read(mdoc_path)
 
-        self.metadata['magnification'] = int(mdoc.magnification.unique()[0])
-        self.metadata['pixel_spacing'] = float(mdoc.pixel_spacing.unique()[0])
-        self.metadata['spot_size'] = float(mdoc.spot_size.unique()[0])
-        self.metadata['rotation_angle'] = float(mdoc.rotation_angle.unique()[0])
-        self.metadata['voltage'] = float(mdoc.voltage.unique()[0])
-        self.metadata['image_size'] = list(mdoc.image_size.unique()[0])
+        self.acquisition['magnification'] = int(mdoc.magnification.unique()[0])
+        self.acquisition['pixel_spacing'] = float(mdoc.pixel_spacing.unique()[0])
+        self.acquisition['spot_size'] = float(mdoc.spot_size.unique()[0])
+        self.acquisition['rotation_angle'] = float(mdoc.rotation_angle.unique()[0])
+        self.acquisition['voltage'] = float(mdoc.voltage.unique()[0])
+        self.acquisition['image_size'] = list(mdoc.image_size.unique()[0])
 
 
 def read_md_yaml(project_name: str,
