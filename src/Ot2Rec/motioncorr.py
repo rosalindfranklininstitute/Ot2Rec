@@ -23,7 +23,7 @@ from tqdm import tqdm
 
 from . import metadata as mdMod
 from . import user_args as uaMod
-from . import magicgui as mgMod
+from . import mgui_mc2 as mgMod
 from . import logger as logMod
 from . import params as prmMod
 
@@ -321,17 +321,7 @@ def create_yaml(args=None):
     """
     Subroutine to create new yaml file for motioncorr
     """
-    logger = logMod.Logger(log_path="o2r_motioncor2.log")
-
-    # Parse user inputs
-    if args is None:
-        args = mgMod.get_args_mc2.show(run=True)
-
-    # Create the yaml file, then automatically update it
-    prmMod.new_mc2_yaml(args)
-    update_yaml(args)
-
-    logger(message="MotionCor2 metadata file created.")
+    mgMod.get_args_mc2.show(run=True)
 
 
 def update_yaml(args):
@@ -344,27 +334,28 @@ def update_yaml(args):
     logger = logMod.Logger(log_path="o2r_motioncor2.log")
 
     # Check if MC2 yaml exists
-    mc2_yaml_name = args.project_name.value + '_mc2.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
     if not os.path.isfile(mc2_yaml_name):
         logger(level="error",
                message="MotionCor2 metadata file not found.")
         raise IOError("Error in Ot2Rec.main.update_mc2_yaml: File not found.")
 
     # Read in master yaml
-    master_yaml = args.project_name.value + '_proj.yaml'
+    master_yaml = args.project_name + '_proj.yaml'
     with open(master_yaml, 'r') as f:
         master_config = yaml.load(f, Loader=yaml.FullLoader)
     logger(message="Master config read successfully.")
 
 
     # Read in master metadata (as Pandas dataframe)
-    master_md_name = args.project_name.value + '_master_md.yaml'
+    master_md_name = args.project_name + '_master_md.yaml'
     with open(master_md_name, 'r') as f:
         master_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
+
     logger(message="Master metadata read successfully.")
 
     # Read in previous MC2 output metadata (as Pandas dataframe) for old projects
-    mc2_md_name = args.project_name.value + '_mc2_md.yaml'
+    mc2_md_name = args.project_name + '_mc2_md.yaml'
     if os.path.isfile(mc2_md_name):
         is_old_project = True
         with open(mc2_md_name, 'r') as f:
@@ -387,7 +378,7 @@ def update_yaml(args):
     unique_ts_numbers = unprocessed_images['ts'].sort_values(ascending=True).unique().tolist()
 
     # Read in MC2 yaml file, modify, and update
-    mc2_params = prmMod.read_yaml(project_name=args.project_name.value,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
     mc2_params.params['System']['process_list'] = unique_ts_numbers
     mc2_params.params['System']['filetype'] = master_config['filetype']
