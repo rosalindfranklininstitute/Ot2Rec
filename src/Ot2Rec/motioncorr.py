@@ -180,7 +180,7 @@ class Motioncorr:
         """
         self.meta['output'] = self.meta.apply(
             lambda row: f"{self.params['System']['output_path']}/"
-            f"{self.params['System']['output_prefix']}_{row['ts']:04}_{row['angles']}.mrc", axis=1)
+            f"{self.params['System']['output_prefix']}_{row['ts']}_{row['angles']}.mrc", axis=1)
 
     def _get_command(self, image, extra_info=None):
         """
@@ -229,6 +229,7 @@ class Motioncorr:
 
         return cmd
 
+
     @staticmethod
     def _yield_chunks(iterable, size):
         """
@@ -237,6 +238,7 @@ class Motioncorr:
         iterator = iter(iterable)
         for first in iterator:
             yield itertools.chain([first], itertools.islice(iterator, size - 1))
+
 
     def run_mc2(self):
         """
@@ -300,6 +302,7 @@ class Motioncorr:
                                   ignore_index=True)
         self.meta = self.meta.loc[~self.meta['output'].apply(lambda x: os.path.isfile(x))]
         self._curr_meta = self._curr_meta.loc[~self._curr_meta['output'].apply(lambda x: os.path.isfile(x))]
+
 
     def export_metadata(self):
         """
