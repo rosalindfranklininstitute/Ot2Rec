@@ -25,7 +25,7 @@ import pandas as pd
 from icecream import ic
 
 from . import user_args as uaMod
-from . import magicgui as mgMod
+from . import mgui_ctffind as mgMod
 from . import metadata as mdMod
 from . import logger as logMod
 from . import params as prmMod
@@ -119,7 +119,7 @@ class ctffind():
         # update output column
         self.ctf_images['output'] = self.ctf_images.apply(
             lambda row: f"{self.params['System']['output_path']}/"
-            f"{self.params['System']['output_prefix']}_{row['ts']:04}_{row['angles']}_ctffind.mrc", axis=1)
+            f"{self.params['System']['output_prefix']}_{row['ts']}_{row['angles']}_ctffind.mrc", axis=1)
 
     def _check_processed_images(self):
         """
@@ -281,16 +281,7 @@ def create_yaml():
     """
     Subroutine to create new yaml file for ctffind
     """
-    logger = logMod.Logger(log_path="o2r_ctffind.log")
-
-    # Parse user inputs
-    args = mgMod.get_args_ctffind.show(run=True)
-
-    # Create the yaml file, then automatically update it
-    prmMod.new_ctffind_yaml(args)
-    update_yaml(args)
-
-    logger(message="MotionCor2 metadata file created.")
+    mgMod.get_args_ctffind.show(run=True)
 
 
 def update_yaml(args):
@@ -303,8 +294,8 @@ def update_yaml(args):
     logger = logMod.Logger(log_path="o2r_ctffind.log")
 
     # Check if ctffind and motioncorr yaml files exist
-    ctf_yaml_name = args.project_name.value + '_ctffind.yaml'
-    mc2_yaml_name = args.project_name.value + '_mc2.yaml'
+    ctf_yaml_name = args.project_name + '_ctffind.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
     if not os.path.isfile(ctf_yaml_name):
         logger(level="error",
                message="CTFFind4 config file not found.")
@@ -316,13 +307,13 @@ def update_yaml(args):
 
     # Read in MC2 metadata (as Pandas dataframe)
     # We only need the TS number and the tilt angle for comparisons at this stage
-    mc2_md_name = args.project_name.value + '_mc2_mdout.yaml'
+    mc2_md_name = args.project_name + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts', 'angles']]
     logger(message="MotionCor2 metadata read successfully.")
 
     # Read in previous ctffind output metadata (as Pandas dataframe) for old projects
-    ctf_md_name = args.project_name.value + '_ctffind_mdout.yaml'
+    ctf_md_name = args.project_name + '_ctffind_mdout.yaml'
     if os.path.isfile(ctf_md_name):
         is_old_project = True
         with open(ctf_md_name, 'r') as f:
@@ -345,9 +336,9 @@ def update_yaml(args):
 
     # Read in ctffind yaml file, modify, and update
     # read in MC2 yaml as well (some parameters depend on MC2 settings)
-    ctf_params = prmMod.read_yaml(project_name=args.project_name.value,
+    ctf_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=ctf_yaml_name)
-    mc2_params = prmMod.read_yaml(project_name=args.project_name.value,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
 
     ctf_params.params['System']['process_list'] = unique_ts_numbers

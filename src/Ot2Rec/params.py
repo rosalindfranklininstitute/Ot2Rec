@@ -107,30 +107,30 @@ def new_ctffind_yaml(args):
     args (Namespace) :: Namespace generated with user inputs
     """
 
-    ctf_yaml_name = args.project_name.value + '_ctffind.yaml'
+    ctf_yaml_name = args.project_name + '_ctffind.yaml'
 
     ctf_yaml_dict = {
         'System': {
             'process_list': 'all',
-            'output_path': str(args.output_folder.value),
-            'output_prefix': args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value,
+            'output_path': str(args.output_folder),
+            'output_prefix': args.file_prefix if args.file_prefix != "" else args.project_name,
         },
         'ctffind': {
-            'ctffind_path': str(args.exec_path.value),
+            'ctffind_path': str(args.exec_path),
             'pixel_size': None,
-            'voltage': args.voltage.value,
-            'spherical_aberration': args.spherical_aberration.value,
-            'amp_contrast': args.amp_contrast.value,
-            'amp_spec_size': args.spec_size.value,
-            'resolution_min': max(args.res_range.value),
-            'resolution_max': min(args.res_range.value),
-            'defocus_min': args.defocus_range.value[0],
-            'defocus_max': args.defocus_range.value[1],
-            'defocus_step': args.defocus_range.value[2],
-            'astigm_type': args.astigm_type.value,
-            'exhaustive_search': args.exhaustive_search.value,
-            'astigm_restraint': args.astigm_restraint.value if args.astigm_restraint.value > 0 else False,
-            'phase_shift': args.phase_shift.value,
+            'voltage': args.voltage,
+            'spherical_aberration': args.spherical_aberration,
+            'amp_contrast': args.amp_contrast,
+            'amp_spec_size': args.spec_size,
+            'resolution_min': max(args.res_range),
+            'resolution_max': min(args.res_range),
+            'defocus_min': args.defocus_range[0],
+            'defocus_max': args.defocus_range[1],
+            'defocus_step': args.defocus_range[2],
+            'astigm_type': args.astigm_type,
+            'exhaustive_search': args.exhaustive_search,
+            'astigm_restraint': args.astigm_restraint if args.astigm_restraint > 0 else False,
+            'phase_shift': args.phase_shift,
         },
     }
 
