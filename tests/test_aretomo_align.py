@@ -162,3 +162,39 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
         self.assertTrue(aretomo_mock.called)
 
         tmpdir.cleanup()
+    
+    def test_aretomo_path_specified(self):
+        """ Tests that AreTomo path can be specified correctly in command """
+        # Create expected input
+        tmpdir = self._create_expected_folder_structure()
+        os.chdir(tmpdir.name)
+        args = self._create_expected_input_args()
+        self._create_expected_st_folder_structure(tmpdir)
+        args["aretomo_path"] = "/home/AreTomo_1.2.5_Cuda113_08-01-2022"
+
+        # Create yaml
+        aretomo.create_yaml(args)
+
+        # Read params
+        params = prmMod.read_yaml(
+            project_name="TS",
+            filename="./TS_aretomo_align.yaml",
+        )
+
+        # Run
+        logger = logMod.Logger("./o2r_aretomo_align.log")
+        aretomo_obj = aretomo.AreTomo(
+            project_name="TS",
+            params_in=params,
+            logger_in=logger
+        )        
+
+        cmd = aretomo_obj._get_aretomo_align_command(0)
+
+        self.assertEqual(
+            cmd[0],
+            "/home/AreTomo_1.2.5_Cuda113_08-01-2022"
+        )
+        
+        tmpdir.cleanup()
+

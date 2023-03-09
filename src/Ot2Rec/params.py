@@ -318,6 +318,7 @@ def new_aretomo_yaml(args):
             "output_path": str(args["output_path"]),
             "output_rootname": args["project_name"] if args["rootname"] == "" else args["rootname"],
             "output_suffix": args["suffix"],
+            "aretomo_path": args["aretomo_path"]
         },
 
         "AreTomo_setup": {
