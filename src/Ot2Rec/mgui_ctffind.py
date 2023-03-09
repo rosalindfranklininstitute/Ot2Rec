@@ -37,7 +37,9 @@ class asObject(object):
     output_folder={"label": "CTFFind4 output folder",
                    "mode": "d"},
     file_prefix={"label": "File prefix (if different from project name)"},
-    exec_path={"label": "Path to CTFFind4 executable"},
+    exec_path={"widget_type": "FileEdit",
+               "mode": "w",
+               "label": "Path to CTFFind4 executable (Default: ctffind)"},
     voltage={"label": "Electron beam voltage (in keV)"},
     spherical_aberration={"label": "Objective lens spherical aberration (in mrad)",
                           "step": 0.1},
@@ -59,7 +61,7 @@ def get_args_ctffind(
         project_name="",
         output_folder=Path(Path.cwd() / "ctffind"),
         file_prefix="",
-        exec_path=Path("/opt/lmod/modules/ctffind/4.1.14/bin/ctffind"),
+        exec_path="",
         voltage=300.0,
         spherical_aberration=2.7,
         amp_contrast=0.8,
@@ -94,6 +96,9 @@ def get_args_ctffind(
     """
     logger = logMod.Logger(log_path="o2r_ctffind.log")
     args = asObject(locals())
+
+    if locals()['exec_path'] == Path("."):
+        args.exec_path = "ctffind"
 
     # Create the yaml file, then automatically update it
     prmMod.new_ctffind_yaml(args)
