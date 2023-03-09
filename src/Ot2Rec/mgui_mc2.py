@@ -38,7 +38,10 @@ class asObject(object):
                 "step": 0.001},
     output_folder={"label": "MC2 output folder"},
     file_prefix={"label": "File prefix (if different from project name)"},
-    exec_path={"label": "Path to MC2 executable"},
+    exec_path={"label": "Path to MC2 executable (Default: MotionCor2_1.4.0_Cuda110)",
+               "widget_type": "FileEdit",
+               "mode": "w",
+    },
     gpu_mem_usage={"label": "GPU memory usage (if applicable)",
                    "min": 0.0,
                    "max": 1.0,
@@ -66,7 +69,7 @@ def get_args_mc2(
         pixel_size=0.0,
         output_folder=Path(Path.cwd() / "motioncor"),
         file_prefix="",
-        exec_path=Path("/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110"),
+        exec_path="",
         gpu_mem_usage=1.0,
         use_gain=False,
         gain="",
@@ -103,7 +106,10 @@ def get_args_mc2(
     Namespace
     """
     logger = logMod.Logger(log_path="o2r_motioncor2.log")
+
     args = asObject(locals())
+    if locals()['exec_path'] == Path("."):
+        args.exec_path = 'MotionCor2_1.4.0_Cuda110'
 
     prmMod.new_mc2_yaml(args)
     mcMod.update_yaml(args)
