@@ -28,7 +28,7 @@ import yaml
 from beautifultable import BeautifulTable as bt
 
 from . import user_args as uaMod
-from . import magicgui as mgMod
+from . import mgui_imod_align as mgMod
 from . import metadata as mdMod
 from . import params as prmMod
 from . import logger as logMod
@@ -84,13 +84,14 @@ class Align:
         while self.rootname.endswith('_'):
             self.rootname = self.rootname[:-1]
         self.suffix = self.params['System']['output_suffix']
+        self.output_ext = self.params['System']['output_ext']
 
         self._align_images = pd.DataFrame(columns=['ts', 'stack_output', 'align_output'])
         for curr_ts in self.params['System']['process_list']:
-            subfolder_name = f'{self.rootname}_{curr_ts:04}{self.suffix}'
+            subfolder_name = f'{self.rootname}_{curr_ts}{self.suffix}'
             _to_append = pd.DataFrame(
                 {'ts': [curr_ts],
-                 'stack_output': [f'{self.basis_folder}/{subfolder_name}/{subfolder_name}.st'],
+                 'stack_output': [f'{self.basis_folder}/{subfolder_name}/{subfolder_name}.{self.output_ext}'],
                  'align_output': [f'{self.basis_folder}/{subfolder_name}/{subfolder_name}_ali.mrc']
                  },
             )
@@ -148,7 +149,7 @@ class Align:
     STACK CREATION
     """
 
-    def create_stack_folders(self):
+    def create_stack_folders(self, single_folder=False):
         """
         Method to create folders for storing stacked images.
         These folders will be used for alignment and reconstruction as well.
@@ -166,10 +167,17 @@ class Align:
 
         # Create the folders and dictionary for future reference
         self._path_dict = {}
-        for curr_ts in self._process_list:
-            subfolder_path = f'{self.basis_folder}/{self.rootname}_{curr_ts:04}{self.suffix}'
+        if single_folder:
+            subfolder_path = f'{self.basis_folder}'
             os.makedirs(subfolder_path, exist_ok=True)
-            self._path_dict[curr_ts] = subfolder_path
+            for curr_ts in self._process_list:
+                self._path_dict[curr_ts] = subfolder_path
+        else:
+            for curr_ts in self._process_list:
+                subfolder_path = f'{self.basis_folder}/{self.rootname}_{curr_ts}{self.suffix}'
+                os.makedirs(subfolder_path, exist_ok=True)
+                self._path_dict[curr_ts] = subfolder_path
+
 
     def _sort_tilt_angles(self,
                           curr_ts: int
@@ -201,11 +209,10 @@ class Align:
         (Note: Rather than grabbing info from file names as done in OTTERec,
                we use information directly from input metadata
         """
-
         for curr_ts in self._process_list:
             # Define path where the new rawtlt file should go
             rawtlt_file = (f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}_"
-                           f"{curr_ts:04}{self.params['System']['output_suffix']}.rawtlt")
+                           f"{curr_ts}{self.params['System']['output_suffix']}.rawtlt")
 
             # Sort the filtered metadata
             # Metadata is fetched in the _sort_tilt_angles method
@@ -239,7 +246,7 @@ class Align:
             # Create template for newstack
             self._filename_fileinlist = \
                 (f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}"
-                 f"_{curr_ts:04}{self.params['System']['output_suffix']}_sources.txt")
+                 f"_{curr_ts}{self.params['System']['output_suffix']}_sources.txt")
             self._stack_template = f"{len(meta_ts)}\n" + '\n0\n'.join(meta_ts['output']) + '\n0\n'
             with open(self._filename_fileinlist, 'w') as f:
                 f.write(self._stack_template)
@@ -287,8 +294,8 @@ class Align:
 
         # Template for directive file
         adoc_temp = """
-setupset.currentStackExt = st
-setupset.copyarg.stackext = st
+setupset.currentStackExt = <ext>
+setupset.copyarg.stackext = <ext>
 setupset.copyarg.dual = 0
 setupset.copyarg.userawtlt = <use_rawtlt>
 setupset.copyarg.pixel = <pixel_size>
@@ -362,6 +369,7 @@ comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
             adoc_temp = adoc_temp + patchtrack_temp
 
         convert_dict = {
+            'ext': self.params['System']['output_ext'],
             'use_rawtlt': 1 if self.params['BatchRunTomo']['setup']['use_rawtlt'] else 0,
             'pixel_size': self.params['BatchRunTomo']['setup']['pixel_size'],
             'rot_angle': self.params['BatchRunTomo']['setup']['rot_angle'],
@@ -419,8 +427,8 @@ comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
                '-CPUMachineList', f"{temp_cpu}",
                '-GPUMachineList', '1',
                '-DirectiveFile', './align.adoc',
-               '-RootName', self.params['System']['output_rootname'] + f'_{curr_ts:04}',
-               '-CurrentLocation', f'{self.basis_folder}/{self.rootname}_{curr_ts:04}{self.suffix}',
+               '-RootName', self.params['System']['output_rootname'] + f'_{curr_ts}',
+               '-CurrentLocation', f'{self.basis_folder}/{self.rootname}_{curr_ts}{self.suffix}',
                '-StartingStep', '0',
                '-EndingStep', '8',
                ]
@@ -508,19 +516,7 @@ def create_yaml(args_in=None):
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
     """
-    # Parse user inputs
-    if args_in is None:  # default case, o2r.imod.new
-        logger = logMod.Logger(log_path="o2r_imod_align.log")
-        args = mgMod.get_args_align.show(run=True)
-    else:  # to create stacks for aretomo
-        args = args_in
-        logger = logMod.Logger(log_path="o2r_imod_stack_creation.log")
-
-    # Create the yaml file, then automatically update it
-    prmMod.new_align_yaml(args)
-    update_yaml(args, logger)
-
-    # logger(message="IMOD alignment metadata file created.")
+    mgMod.get_args_align.show(run=True)
 
 
 def update_yaml(args, logger):
@@ -531,8 +527,8 @@ def update_yaml(args, logger):
     args (Namespace) :: Namespace generated with user inputs
     """
     # Check if align and motioncorr yaml files exist
-    align_yaml_name = args.project_name.value + '_align.yaml'
-    mc2_yaml_name = args.project_name.value + '_mc2.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
+    mc2_yaml_name = args.project_name + '_mc2.yaml'
     if not os.path.isfile(align_yaml_name):
         logger(level="error",
                message="IMOD alignment config file not found.")
@@ -544,13 +540,13 @@ def update_yaml(args, logger):
 
     # Read in MC2 metadata (as Pandas dataframe)
     # We only need the TS number and the tilt angle for comparisons at this stage
-    mc2_md_name = args.project_name.value + '_mc2_mdout.yaml'
+    mc2_md_name = args.project_name + '_mc2_mdout.yaml'
     with open(mc2_md_name, 'r') as f:
         mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
     # logger(message="MotionCor2 metadata read successfully.")
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
-    align_md_name = args.project_name.value + '_align_mdout.yaml'
+    align_md_name = args.project_name + '_align_mdout.yaml'
     if os.path.isfile(align_md_name):
         is_old_project = True
         with open(align_md_name, 'r') as f:
@@ -573,9 +569,9 @@ def update_yaml(args, logger):
 
     # Read in ctffind yaml file, modify, and update
     # read in MC2 yaml as well (some parameters depend on MC2 settings)
-    align_params = prmMod.read_yaml(project_name=args.project_name.value,
+    align_params = prmMod.read_yaml(project_name=args.project_name,
                                     filename=align_yaml_name)
-    mc2_params = prmMod.read_yaml(project_name=args.project_name.value,
+    mc2_params = prmMod.read_yaml(project_name=args.project_name,
                                   filename=mc2_yaml_name)
 
     align_params.params['System']['process_list'] = unique_ts_numbers
@@ -782,7 +778,7 @@ def get_align_stats(exclusive=True, args_in=None):
 
     # Loop through folders, find data and append to dataframe
     for curr_ts in aligned_ts:
-        target_file_path = f"{folder_path}/{rootname}_{curr_ts:04d}{suffix}/taLocals.log"
+        target_file_path = f"{folder_path}/{rootname}_{curr_ts}{suffix}/taLocals.log"
         if not os.path.isfile(target_file_path):
             raise IOError("Error in Ot2Rec.main.get_align_stats: alignment log file (taLocals) not found.")
 

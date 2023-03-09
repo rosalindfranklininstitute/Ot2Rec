@@ -148,59 +148,62 @@ def new_align_yaml(args):
 
     # Calculate patch sizes
     import numpy as np
-    image_dims = np.array(args.image_dims.value)
-    n_patches = np.array(args.num_patches.value)
-    overlap = args.patch_overlap.value * 0.01
+    image_dims = np.array(args.image_dims)
+    n_patches = np.array(args.num_patches)
+    overlap = args.patch_overlap * 0.01
     denom = n_patches - n_patches*overlap + overlap
     patch_dims = (image_dims / denom).astype(int)
 
-    align_yaml_name = args.project_name.value + '_align.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
 
     align_yaml_dict = {
         'System': {
             'process_list': 'all',
-            'output_path': str(args.output_folder.value),
-            'output_rootname': args.file_prefix.value if args.file_prefix.value != "" else args.project_name.value,
-            'output_suffix': args.file_suffix.value,
+            'newstack_path': str(args.newstack_path),
+            'brt_path': str(args.brt_path),
+            'output_path': str(args.output_folder),
+            'output_rootname': args.file_prefix if args.file_prefix != "" else args.project_name,
+            'output_suffix': args.file_suffix,
+            'output_ext': args.file_ext,
         },
 
         'BatchRunTomo': {
             'setup': {
-                'excluded_views': list(args.excl_views.value),
-                'use_rawtlt': not args.no_rawtlt.value,
+                'excluded_views': list(args.excl_views),
+                'use_rawtlt': not args.no_rawtlt,
                 'pixel_size': None,
-                'rot_angle': args.rot_angle.value,
-                'gold_size': args.fiducial_size.value,
-                'num_beads': args.num_beads.value,
-                'adoc_template': str(args.adoc_template.value),
-                'stack_bin_factor': args.stack_bin_factor.value,
+                'rot_angle': args.rot_angle,
+                'gold_size': args.fiducial_size,
+                'num_beads': args.num_beads,
+                'adoc_template': str(args.adoc_template),
+                'stack_bin_factor': args.stack_bin_factor,
             },
 
             'preprocessing': {
-                'delete_old_files': args.delete_old_files.value,
-                'remove_xrays': args.remove_xrays.value,
+                'delete_old_files': args.delete_old_files,
+                'remove_xrays': args.remove_xrays,
             },
 
             'coarse_align': {
-                'bin_factor': args.coarse_align_bin_factor.value,
+                'bin_factor': args.coarse_align_bin_factor,
             },
 
             'patch_track': {
                 'size_of_patches': patch_dims.tolist(),
-                'num_of_patches': list(args.num_patches.value),
-                'num_iterations': args.num_iter.value,
-                'limits_on_shift': list(args.limits_on_shift.value),
-                'adjust_tilt_angles': args.adjust_tilt_angles.value,
+                'num_of_patches': list(args.num_patches),
+                'num_iterations': args.num_iter,
+                'limits_on_shift': list(args.limits_on_shift),
+                'adjust_tilt_angles': args.adjust_tilt_angles,
             },
 
             'fine_align': {
-                'num_surfaces': args.num_surfaces.value,
-                'mag_option': args.mag_option.value,
-                'tilt_option': args.tilt_option.value,
-                'rot_option': args.rot_option.value,
-                'beam_tilt_option': args.beam_tilt_option.value,
-                'use_robust_fitting': args.robust_fitting.value,
-                'weight_all_contours': args.weight_contours.value,
+                'num_surfaces': args.num_surfaces,
+                'mag_option': args.mag_option,
+                'tilt_option': args.tilt_option,
+                'rot_option': args.rot_option,
+                'beam_tilt_option': args.beam_tilt_option,
+                'use_robust_fitting': args.robust_fitting,
+                'weight_all_contours': args.weight_contours,
             },
         }
     }
