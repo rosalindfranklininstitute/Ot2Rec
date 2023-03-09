@@ -107,7 +107,7 @@ def get_args_mc2(
     logger = logMod.Logger(log_path="o2r_motioncor2.log")
     args = asObject(locals())
 
-    if locals()['exec_path'] == "":
+    if locals()['exec_path'] == Path("."):
         args.exec_path = "MotionCor2_1.4.0_Cuda110"
 
     prmMod.new_mc2_yaml(args)
