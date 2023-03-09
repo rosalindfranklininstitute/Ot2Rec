@@ -372,11 +372,11 @@ def run(exclusive=True, args_in=None):
 
     if not os.path.isfile(ctffind_yaml):
         logger(level="error",
-               msg="CTFFind yaml config not found.")
+               message="CTFFind yaml config not found.")
         raise IOError("Error in Ot2Rec.main.run_ctffind: ctffind yaml config not found.")
     if not os.path.isfile(mc2_md_file):
         logger(level="error",
-               msg="MC2 output metadata not found.")
+               message="MC2 output metadata not found.")
         raise IOError("Error in Ot2Rec.main.run_ctffind: MC2 output metadata not found.")
 
     # Read in config and metadata
