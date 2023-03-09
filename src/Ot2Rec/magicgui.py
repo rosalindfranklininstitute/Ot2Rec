@@ -820,6 +820,10 @@ def get_args_imod_route(
     dark_tol={
         "label": "Tolerance to remove dark images",
         "tooltip": "Default 0.7, low number = fewer images removed",
+    },
+    aretomo_path={
+        "label": "Path to AreTomo executable (leave blank if module loaded)",
+        "tooltip": "Ensure the path is to the correct version to match CUDA",
     }
 )
 def get_args_aretomo(
@@ -839,6 +843,7 @@ def get_args_aretomo(
         recon_algo="SART",
         out_imod="N/A",
         dark_tol=0.7,
+        aretomo_path="",
 ):
     return locals()
 

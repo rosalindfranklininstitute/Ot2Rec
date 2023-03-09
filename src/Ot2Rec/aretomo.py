@@ -122,9 +122,11 @@ class AreTomo:
             '0',
             '-OutBin',
             str(self.params['AreTomo_setup']['output_binning']),
-            '-DarkTol',
-            str(self.params['AreTomo_setup']['dark_tol']),
         ]
+
+        # Specify path to AreTomo if not using module loaded version
+        if len(self.params['System']['aretomo_path']) > 0:
+            cmd[0] = self.params['System']['aretomo_path']
 
         return cmd
 
@@ -158,6 +160,10 @@ class AreTomo:
             cmd.append('-Wbp')
             cmd.append('1')
 
+        # Specify path to AreTomo if not using module loaded version
+        if len(self.params['System']['aretomo_path']) > 0:
+            cmd[0] = self.params['System']['aretomo_path']
+
         return cmd
 
     def _run_aretomo(self, i):
@@ -183,6 +189,11 @@ class AreTomo:
             }
             cmd.append('-OutImod')
             cmd.append(outimod_lookup[out_imod])
+        
+        # Add darktol
+        if self.params['AreTomo_setup']['aretomo_mode'] != 1:
+            cmd.append("-DarkTol")
+            cmd.append(str(self.params['AreTomo_setup']['dark_tol']))
 
         # Add extra kwargs
         kwargs = self.params["AreTomo_kwargs"].keys()
@@ -415,13 +426,22 @@ def update_yaml(args):
 
         # Set output mrc
         output_lookup = {0: "_ali.mrc", 2: "_rec.mrc"}
+        # out_file_list = [
+        #     (f"{aretomo_params.params['System']['output_path']}/"
+        #      f"{os.path.splitext(os.path.basename(file))[0]}/"
+        #      f"{os.path.splitext(os.path.basename(file))[0]}"
+        #      f"{output_lookup[args['aretomo_mode']]}") for file in st_file_list
+        # ]
+
+        rootname = aretomo_params.params['System']['output_rootname']
+        suffix = aretomo_params.params['System']['output_suffix']
+        ext = output_lookup[args['aretomo_mode']]
         out_file_list = [
             (f"{aretomo_params.params['System']['output_path']}/"
-             f"{os.path.splitext(os.path.basename(file))[0]}/"
-             f"{os.path.splitext(os.path.basename(file))[0]}"
-             f"{output_lookup[args['aretomo_mode']]}") for file in st_file_list
+             f"{rootname}_{curr_ts:04d}{suffix}/"
+             f"{rootname}_{curr_ts:04d}{suffix}{ext}"
+            ) for curr_ts in ts_list
         ]
-
 
         aretomo_params.params["AreTomo_setup"]["output_mrc"] = out_file_list
 
