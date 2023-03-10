@@ -25,7 +25,7 @@ from . import metadata as mdMod
 from . import params as prmMod
 from . import user_args as uaMod
 from . import logger as logMod
-from . import magicgui as mgMod
+from . import mgui_imod_recon as mgMod
 
 
 class Recon:
@@ -85,17 +85,17 @@ class Recon:
         # Create the folders and dictionary for future reference
         self._path_dict = {}
         for curr_ts in self.params['System']['process_list']:
-            subfolder = f"{self.basis_folder}/{self.rootname}_{int(curr_ts):04}{self.suffix}"
+            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts}{self.suffix}"
             os.makedirs(subfolder, exist_ok=True)
             self._path_dict[curr_ts] = subfolder
 
         self._recon_images = pd.DataFrame(columns=['ts', 'align_output', 'recon_output'])
         for curr_ts in self.params['System']['process_list']:
-            subfolder = f"{self.basis_folder}/{self.rootname}_{int(curr_ts):04}{self.suffix}"
+            subfolder = f"{self.basis_folder}/{self.rootname}_{curr_ts}{self.suffix}"
             _to_append = pd.DataFrame({
                 'ts': [curr_ts],
-                'align_output': [f"{subfolder}/{self.rootname}_{int(curr_ts):04}{self.suffix}_ali.mrc"],
-                'recon_output': [f"{subfolder}/{self.rootname}_{int(curr_ts):04}{self.suffix}_rec.mrc"],
+                'align_output': [f"{subfolder}/{self.rootname}_{curr_ts}{self.suffix}_ali.mrc"],
+                'recon_output': [f"{subfolder}/{self.rootname}_{curr_ts}{self.suffix}_rec.mrc"],
             })
             self._recon_images = pd.concat([self._recon_images, _to_append],
                                            ignore_index=True,
@@ -232,7 +232,7 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
                '-CPUMachineList', f"{temp_cpu}",
                '-GPUMachineList', '1',
                '-DirectiveFile', './recon.adoc',
-               '-RootName', f'{self.rootname}_{curr_ts:04d}',
+               '-RootName', f'{self.rootname}_{curr_ts}',
                '-CurrentLocation', self._path_dict[curr_ts],
                '-StartingStep', '8' if not ext else '0',
                '-EndingStep', '20' if not ext else '0',
@@ -331,17 +331,7 @@ def create_yaml(args=None):
     """
     Subroutine to create new yaml file for IMOD reconstruction
     """
-    logger = logMod.Logger(log_path="o2r_imod_recon.log")
-
-    # Parse user inputs
-    if args is None:
-        args = mgMod.get_args_recon.show(run=True)
-
-    # Create the yaml file, then automatically update it
-    prmMod.new_recon_yaml(args)
-    update_yaml(args)
-
-    logger(message="IMOD alignment metadata file created.")
+    mgMod.get_args_recon.show(run=True)
 
 
 def update_yaml(args):
@@ -354,8 +344,8 @@ def update_yaml(args):
     logger = logMod.Logger(log_path="o2r_imod_recon.log")
 
     # Check if recon and align yaml files exist
-    recon_yaml_name = args.project_name.value + '_recon.yaml'
-    align_yaml_name = args.project_name.value + '_align.yaml'
+    recon_yaml_name = args.project_name + '_recon.yaml'
+    align_yaml_name = args.project_name + '_align.yaml'
     if not os.path.isfile(recon_yaml_name):
         logger(level="error",
                message="IMOD reconstruction config file not found.")
@@ -366,13 +356,13 @@ def update_yaml(args):
         raise IOError("Error in Ot2Rec.main.update_recon_yaml: alignment config file not found.")
 
     # Read in alignment metadata (as Pandas dataframe)
-    align_md_name = args.project_name.value + '_align_mdout.yaml'
+    align_md_name = args.project_name + '_align_mdout.yaml'
     with open(align_md_name, 'r') as f:
         align_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[['ts']]
     logger(message="IMOD alignment metadata read successfully.")
 
     # Read in previous alignment output metadata (as Pandas dataframe) for old projects
-    recon_md_name = args.project_name.value + '_recon_mdout.yaml'
+    recon_md_name = args.project_name + '_recon_mdout.yaml'
     if os.path.isfile(recon_md_name):
         is_old_project = True
         with open(recon_md_name, 'r') as f:
@@ -394,9 +384,9 @@ def update_yaml(args):
 
     # Read in reconstruction yaml file, modify, and update
     # read in alignment yaml as well (some parameters depend on alignment settings)
-    recon_params = prmMod.read_yaml(project_name=args.project_name.value,
+    recon_params = prmMod.read_yaml(project_name=args.project_name,
                                     filename=recon_yaml_name)
-    align_params = prmMod.read_yaml(project_name=args.project_name.value,
+    align_params = prmMod.read_yaml(project_name=args.project_name,
                                     filename=align_yaml_name)
 
     recon_params.params['System']['output_rootname'] = align_params.params['System']['output_rootname']
