@@ -269,7 +269,7 @@ class Motioncorr:
                 cmd = self._get_command((file_in, file_out, gpu), (frame, ds, dose))
 
             else:
-                cmd = self._get_command((file_in, file_out, gpu), (frame, ds, dose))
+                cmd = self._get_command((file_in, file_out, gpu))
 
             job = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             try:
