@@ -164,17 +164,12 @@ def get_args_align(
     """
     logger = logMod.Logger(log_path="o2r_imod_align.log")
     args = asObject(locals())
-    print(list(zip(locals().keys(), locals().values())))
 
     if locals()['newstack_path'] == Path("."):
         args.newstack_path = "newstack"
 
     if locals()['brt_path'] == Path("."):
         args.brt_path = "batchruntomo"
-
-    # print(repr(locals()['newstack_path']))
-    print(args.newstack_path)
-    print(args.brt_path)
 
     # Create the yaml file, then automatically update it
     prmMod.new_align_yaml(args)
