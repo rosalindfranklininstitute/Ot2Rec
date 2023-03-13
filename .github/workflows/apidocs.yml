@@ -10,6 +10,9 @@ on:
     # Alternative: only build for tags.
     # tags:
     #   - '*'
+  pull_request:
+    branches:
+      - dev
 
 # security: restrict permissions for CI jobs.
 permissions:
