@@ -1,7 +1,0 @@
-source_folder: ./raw
-TS_folder_prefix: ''
-file_prefix: TS
-image_stack_field: 0
-image_index_field: 1
-image_tiltangle_field: 2
-filetype: mrc
