@@ -64,11 +64,11 @@ class ctffind():
         """
         Initialising a ctffind object
 
-        ARGS:
-        project_name (str) :: name of current project
-        md_in (Metadata)   :: metadata containing information of tilt-series to be processed
-        params_in (Params) :: params object containing configurations for ctffind
-        logger_in (Logger) :: logger object for recording ctffind process
+        Args:
+            project_name (str): name of current project
+            md_in (Metadata): metadata containing information of tilt-series to be processed
+            params_in (Params): params object containing configurations for ctffind
+            logger_in (Logger): logger object for recording ctffind process
         """
 
         self.proj_name = project_name
@@ -171,8 +171,8 @@ class ctffind():
         """
         Function to return command for CTFfind
 
-        ARGS:
-        ts (int) :: index of curent tilt-series
+        Args:
+            ts (int): index of curent tilt-series
         """
 
         self.cmd = [self.params['ctffind']['ctffind_path']]
@@ -297,8 +297,8 @@ def update_yaml(args):
     """
     Subroutine to update yaml file for ctffind
 
-    ARGS:
-    args (Namespace) :: Arguments obtained from user
+    Args:
+        args (Namespace): Arguments obtained from user
     """
     logger = logMod.Logger(log_path="o2r_ctffind.log")
 

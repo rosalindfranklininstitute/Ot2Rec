@@ -45,10 +45,10 @@ class AreTomo:
         """
         Initialising a AreTomo object
 
-        ARGS:
-        project_name (str) :: name of current project
-        params_in (Params) :: parameters for stack creation
-        logger_in (Logger) :: logger object to keep record of progress and errors
+        Args:
+            project_name (str): name of current project
+            params_in (Params): parameters for stack creation
+            logger_in (Logger): logger object to keep record of progress and errors
         """
 
         self.proj_name = project_name
@@ -107,8 +107,8 @@ class AreTomo:
         """
         Method to get command to set up AreTomo align
 
-        ARGS:
-        i (int): The i-th tilt series to process
+        Args:
+            i (int): The i-th tilt series to process
         """
         cmd = [
             'AreTomo',
@@ -134,8 +134,8 @@ class AreTomo:
         """
         Method to get command to set up AreTomo reconstruction
 
-        ARGS:
-        i (int): The i-th tilt series to process
+        Args:
+            i (int): The i-th tilt series to process
         """
         cmd = [
             'AreTomo',
@@ -346,8 +346,8 @@ def update_yaml(args):
     Method to update yaml file for AreTomo
 
     Args:
-    args (Namespace) :: Namespace containing user inputs
-    kwargs (list) :: List of extra inputs, used for extra AreTomo arguments
+        args (Namespace): Namespace containing user inputs
+        kwargs (list): List of extra inputs, used for extra AreTomo arguments
                      beyond those implemented here
     """
     # Read in YAML, set mundane things
