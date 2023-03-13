@@ -1,0 +1,2204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>Ot2Rec.magicgui API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Ot2Rec.magicgui</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># Copyright 2021 Rosalind Franklin Institute
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# &#34;AS IS&#34; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+
+from pathlib import Path
+
+from magicgui import magicgui as mg
+
+
+@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    source_folder={&#34;widget_type&#34;: &#34;FileEdit&#34;,
+                   &#34;label&#34;: &#34;Source folder *&#34;,
+                   &#34;mode&#34;: &#34;d&#34;},
+    folder_prefix={&#34;label&#34;: &#34;Folder prefix (if tilt series in subfolders)&#34;},
+    file_prefix={&#34;label&#34;: &#34;File prefix (if different from project name)&#34;},
+    ext={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+         &#34;label&#34;: &#34;Image file extension&#34;,
+         &#34;choices&#34;: [&#34;mrc&#34;, &#34;tif&#34;, &#34;eer&#34;]},
+    stack_field={&#34;min&#34;: 0,
+                 &#34;label&#34;: &#34;Stack index field #&#34;},
+    index_field={&#34;min&#34;: 0,
+                 &#34;label&#34;: &#34;Image index field #&#34;},
+    tiltangle_field={&#34;min&#34;: 0,
+                     &#34;label&#34;: &#34;Tilt angle field #&#34;},
+    no_mdoc={&#34;label&#34;: &#34;No MDOCs&#34;}
+)
+def get_args_new_proj(
+        project_name=&#34;&#34;,
+        source_folder=Path(&#34;../raw/&#34;),
+        folder_prefix=&#34;&#34;,
+        file_prefix=&#34;&#34;,
+        ext=&#34;mrc&#34;,
+        stack_field=0,
+        index_field=1,
+        tiltangle_field=2,
+        no_mdoc=False,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for new project
+
+    Args:
+        project_name (str): Name of current project
+        source_folder (str): Path to folder with raw images (Default: ../raw/)
+        folder_prefix (str): Common prefix of raw tilt series folder(s)
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        ext (str): Extension of raw image files (Default: mrc)
+        stack_field (int): Field number of tilt series indices (Default: 0)
+        index_field (int): Field number of image indices (Default: 1)
+        tiltangle_field (int): Field number of tilt angles (Default: 2)
+        no_mdoc (bool): True if no MDOC file provided (Default: False)
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()
+
+
+@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    pixel_size={&#34;label&#34;: &#34;Pixel size (A) *&#34;,
+                &#34;step&#34;: 0.001},
+    output_folder={&#34;label&#34;: &#34;MC2 output folder&#34;},
+    file_prefix={&#34;label&#34;: &#34;File prefix (if different from project name)&#34;},
+    exec_path={&#34;label&#34;: &#34;Path to MC2 executable&#34;},
+    jobs_per_gpu={&#34;label&#34;: &#34;Jobs per GPU&#34;,
+                  &#34;min&#34;: 1},
+    gpu_mem_usage={&#34;label&#34;: &#34;GPU memory usage (if applicable)&#34;,
+                #    &#34;widget_type&#34;: &#34;FloatSlider&#34;,
+                   &#34;min&#34;: 0.1,
+                   &#34;max&#34;: 2.0},
+    use_gain={&#34;label&#34;: &#34;Use gain reference?&#34;},
+    gain={&#34;label&#34;: &#34;Gain reference file (if applicable)&#34;,
+          &#34;widget_type&#34;: &#34;FileEdit&#34;,
+          &#34;mode&#34;: &#34;w&#34;},
+    super_res={&#34;label&#34;: &#34;Super-resolution images?&#34;},
+    discard_top={&#34;label&#34;: &#34;# Frames discarded FROM TOP of images&#34;,
+                 &#34;min&#34;: 0},
+    discard_bottom={&#34;label&#34;: &#34;# Frames discarded FROM BOTTOM of images&#34;,
+                    &#34;min&#34;: 0},
+    tolerance={&#34;label&#34;: &#34;Alignment error threshold (in pixels)&#34;,
+               &#34;min&#34;: 0},
+    max_iter={&#34;label&#34;: &#34;Maximum MC2 iterations&#34;,
+              &#34;min&#34;: 1},
+    patch_size={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Patch configurations (Nx, Ny, %overlap)&#34;},
+    use_subgroups={&#34;label&#34;: &#34;Use subgroups in alignments&#34;}
+)
+def get_args_mc2(
+        project_name=&#34;&#34;,
+        pixel_size=0.0,
+        output_folder=Path(Path.cwd() / &#34;motioncor&#34;),
+        file_prefix=&#34;&#34;,
+        exec_path=Path(&#34;/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110&#34;),
+        jobs_per_gpu=2,
+        gpu_mem_usage=1.0,
+        use_gain=False,
+        gain=&#34;&#34;,
+        super_res=False,
+        discard_top=0,
+        discard_bottom=0,
+        tolerance=0.5,
+        max_iter=10,
+        patch_size=[5,5,20],
+        use_subgroups=True,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for MotionCor
+
+    Args:
+        project_name (str): Name of current project
+        pixel_size (float): Image pixel size in Angstroms
+        output_folder (str): Path to folder for storing motion-corrected images (Default: ./motioncor/)
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        no_gpu (bool): Use CPU only for motion-correction
+        jobs_per_gpu (int): Number of job instance(s) per GPU
+        gpu_mem_usage (float): MotionCor2 GPU memory usage
+        exec_path (str): Path to MotionCor2 executable
+        use_gain (bool): Whether to use gain reference file
+        gain (str): Path to gain reference file (leave blank if use_gain==False)
+        super_res (bool): True if super-resolution images used
+        discard_top (int): Number of frames discarded from top per image
+        discard_bottom (int): Number of frames discarded from bottom per image
+        tolerance (float): Threshold of alignment errors in pixels
+        max_iter (int): Maximum number of iterations performed by MotionCor2
+        patch_size (int): Size of patches used in alignment
+        use_subgroups (bool): Use subgroups in alignment
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+    return locals()
+
+
+@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    output_folder={&#34;label&#34;: &#34;CTFFind4 output folder&#34;,
+                   &#34;mode&#34;: &#34;d&#34;},
+    file_prefix={&#34;label&#34;: &#34;File prefix (if different from project name)&#34;},
+    exec_path={&#34;label&#34;: &#34;Path to CTFFind4 executable&#34;},
+    voltage={&#34;label&#34;: &#34;Electron beam voltage (in keV)&#34;},
+    spherical_aberration={&#34;label&#34;: &#34;Objective lens spherical aberration (in mrad)&#34;,
+                          &#34;step&#34;: 0.1},
+    amp_contrast={&#34;widget_type&#34;: &#34;FloatSlider&#34;,
+                  &#34;min&#34;: 0.0,
+                  &#34;max&#34;: 1.0,
+                  &#34;label&#34;: &#34;Relative amplitude constrast w1&#34;},
+    spec_size={&#34;label&#34;: &#34;Size of amplitude spectrum (in pixels)&#34;},
+    res_range={&#34;label&#34;: &#34;Target function resolution range (in Angstroms)&#34;},
+    defocus_range={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                   &#34;label&#34;: &#34;Initial defocus search range (in Angstroms) [min, max, step]&#34;},
+    astigm_type={&#34;label&#34;: &#34;Type of astigmatism. USE NOT RECOMMENDED&#34;},
+    exhaustive_search={&#34;label&#34;: &#34;Use exhaustive search&#34;},
+    astigm_restraint={&#34;label&#34;: &#34;Restraint on astigmatism (in Angstroms)&#34;,
+                      &#34;min&#34;: 0},
+    phase_shift={&#34;label&#34;: &#34;Estimate phase shift&#34;}
+)
+def get_args_ctffind(
+        project_name=&#34;&#34;,
+        output_folder=Path(Path.cwd() / &#34;ctffind&#34;),
+        file_prefix=&#34;&#34;,
+        exec_path=Path(&#34;/opt/lmod/modules/ctffind/4.1.14/bin/ctffind&#34;),
+        voltage=300.0,
+        spherical_aberration=2.7,
+        amp_contrast=0.8,
+        spec_size=512,
+        res_range=[30, 5],
+        defocus_range=[5000, 50000, 500],
+        astigm_type=&#34;&#34;,
+        exhaustive_search=False,
+        astigm_restraint=0,
+        phase_shift=False,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for CTFFind
+
+    Args:
+        project_name (str): Name of current project
+        output_folder (str): Path to folder for storing CTFFind4 outputs
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        exec_path (str): Path to IMOD executable
+        voltage (float): Electron beam voltage in keV
+        spherical_aberration (float): Spherical aberration of objective lens in mrad
+        amp_contrast (float): Relative amplitude contrast w1
+        res_range (float): Range of resolutions in target function in Angstroms
+        defocus_range (float): Min, max and step size of initial defocus search in Angstroms
+        astigm_type (str): Type of astigmatism. FLAG USE NOT RECOMMENDED
+        exhaustive_search (bool): Use exhaustive search algorithm for defocus
+        astigm_restraint (int): Restraint on astigmatism in Angstroms
+        phase_shift (bool): Estimate phase shift
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()
+
+
+@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    rot_angle={&#34;label&#34;: &#34;Beam rotation angle *&#34;,
+               &#34;min&#34;: -180.00,
+               &#34;max&#34;: 180.00,
+               &#34;step&#34;: 0.01},
+    image_dims={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Image dimensions (in pixels) *&#34;},
+    excl_views={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Excluded views&#34;},
+    output_folder={&#34;label&#34;: &#34;IMOD output folder&#34;,
+                   &#34;mode&#34;: &#34;d&#34;},
+    file_prefix={&#34;label&#34;: &#34;File prefix (if different from project name)&#34;},
+    file_suffix={&#34;label&#34;: &#34;IMOD file suffix (if applicable)&#34;},
+    no_rawtlt={&#34;label&#34;: &#34;Ignore .rawtlt files?&#34;},
+    fiducial_size={&#34;label&#34;: &#34;Size of fiducial particles in nm (-1 if fiducial-free)&#34;,
+                   &#34;min&#34;: -1.0,
+                   &#34;step&#34;: 0.01},
+    num_beads={&#34;label&#34;: &#34;# of beads to track&#34;},
+    adoc_template={&#34;label&#34;: &#34;Path to BatchRunTomo directives template&#34;},
+    stack_bin_factor={&#34;label&#34;: &#34;Stack: Raw image stacks downsampling factor&#34;,
+                      &#34;min&#34;: 1},
+    delete_old_files={&#34;label&#34;: &#34;Preprocessing: Remove original stack when excluding views&#34;},
+    remove_xrays={&#34;label&#34;: &#34;Preprocessing: Remove X-rays and other artefacts&#34;},
+    coarse_align_bin_factor={&#34;label&#34;: &#34;Coarse-alignment: Coarse aligned stack binning&#34;,
+                             &#34;min&#34;: 1},
+    num_patches={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                 &#34;label&#34;: &#34;Patch-tracking: Number of patches to track in X and Y (Nx, Ny)&#34;},
+    patch_overlap={&#34;label&#34;: &#34;Patch-tracking: % overlap between patches&#34;,
+                   &#34;min&#34;: 0,
+                   &#34;max&#34;: 100},
+    num_iter={&#34;label&#34;: &#34;Patch-tracking: Number of iterations (1-4)&#34;,
+              &#34;min&#34;: 1,
+              &#34;max&#34;: 4},
+    limits_on_shift={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                     &#34;label&#34;: &#34;Patch-tracking: Limits on shifts (in pixels)&#34;},
+    adjust_tilt_angles={&#34;label&#34;: &#34;Patch-tracking: Rerun patch-tracking with tilt-angle offset&#34;},
+    num_surfaces={&#34;widget_type&#34;: &#34;RadioButtons&#34;,
+                  &#34;label&#34;: &#34;Fine-alignment: Number of surface(s) for angle analysis.&#34;,
+                  &#34;choices&#34;: [1, 2]},
+    mag_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                &#34;label&#34;: &#34;Fine-alignment: Type of magnification solution&#34;,
+                &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;fixed&#39;]},
+    tilt_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                 &#34;label&#34;: &#34;Fine-alignment: Type of tilt-angle solution&#34;,
+                 &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;fixed&#39;]},
+    rot_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                &#34;label&#34;: &#34;Fine-alignment: Type of rotation solution&#34;,
+                &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;one&#39;, &#39;fixed&#39;]},
+    beam_tilt_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                      &#34;label&#34;: &#34;Fine-alignment: Type of beam tilt-angle solution&#34;,
+                      &#34;choices&#34;: [&#39;fixed&#39;, &#39;search&#39;]},
+    robust_fitting={&#34;label&#34;: &#34;Fine-alignment: Use robust fitting?&#34;},
+    weight_contours={&#34;label&#34;: &#34;Fine-alignment: Apply weighting to entire contours from patch-tracking&#34;},
+)
+def get_args_align(
+        project_name=&#34;&#34;,
+        rot_angle=0.00,
+        image_dims=[100, 100],
+        excl_views=[0],
+        output_folder=Path(&#34;./stacks&#34;),
+        file_prefix=&#34;&#34;,
+        file_suffix=&#34;&#34;,
+        no_rawtlt=False,
+        fiducial_size=-1,
+        num_beads=0,
+        adoc_template=Path(&#34;/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc&#34;),
+        stack_bin_factor=4,
+        delete_old_files=False,
+        remove_xrays=True,
+        coarse_align_bin_factor=4,
+        num_patches=[24, 24],
+        patch_overlap=25,
+        num_iter=4,
+        limits_on_shift=[2, 2],
+        adjust_tilt_angles=True,
+        num_surfaces=1,
+        mag_option=&#34;fixed&#34;,
+        tilt_option=&#34;fixed&#34;,
+        rot_option=&#34;group&#34;,
+        beam_tilt_option=&#34;fixed&#34;,
+        robust_fitting=True,
+        weight_contours=True,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for IMOD alignment
+
+    Args:
+        project_name (str): Name of current project
+        rot_angle (float): Rotational angle of electron beam. Can be obtained from MDOC files
+        image_dims (int): Image dimensions (in pixels)
+        excl_views (int): Indices of micrographes to be excluded
+        output_folder (str): Path to folder for storing IMOD outputs
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        file_suffix (str): Extra information attached as suffix to output filenames
+        no_rawtlt (bool): Use information in filenames to determine tilt angles (rather than using .rawtlt files)
+        fiducial_size (float): Size (in nm) of gold fiducial particles
+        adoc_template (str): Path to template file of BatchRunTomo directives
+        stack_bin_factor (int): Stack: Raw image stacks downsampling factor
+        delete_old_files (bool): Preprocessing: Remove original stack when excluding views
+        remove_xrays (bool): Preprocessing: Attempt to remove X-rays and other artefacts
+        coarse_align_bin_factor (int): Coarse-alignment: Coarse aligned stack binning
+        num_patches (int): Patch-tracking: Number of patches to track in X and Y
+        patch_overlap (int): Patch-tracking: % overlap between patches
+        num_iter (int): Patch-tracking: Number of iterations. (Max. 4)
+        limits_on_shift (int): Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment
+        adjust_tilt_angles (bool): Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset
+        num_surfaces (int): Fine-alignment: Number of surface(s) for angle analysis
+        mag_option (str): Fine-alignment: Type of magnification solution
+        tilt_option (str): Fine-alignment: Type of tilt-angle solution
+        rot_option (str): Fine-alignment: Type of rotation solution
+        beam_tilt_option (str): Fine-alignment: Type of beam-tilt solution
+        robust_fitting (bool): Fine-alignment: Use robust fitting
+        weight_contours (bool): Fine-alignment: Apply weighting to entire contours from patch-tracking
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()
+
+
+@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    rot_angle={&#34;label&#34;: &#34;Beam rotation angle *&#34;,
+               &#34;min&#34;: -180.00,
+               &#34;max&#34;: 180.00,
+               &#34;step&#34;: 0.01},
+    image_dims={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Image dimensions (in pixels) *&#34;},
+    excl_views={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Excluded views&#34;},
+    pixel_size={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Image pixel size (in angstroms) *&#34;},
+    input_folder={&#34;label&#34;: &#34;Input folder with stacks&#34;,
+                  &#34;mode&#34;: &#34;d&#34;},
+    output_folder={&#34;label&#34;: &#34;IMOD output folder&#34;,
+                   &#34;mode&#34;: &#34;d&#34;},
+    file_prefix={&#34;label&#34;: &#34;File prefix (if different from project name)&#34;},
+    file_suffix={&#34;label&#34;: &#34;IMOD file suffix (if applicable)&#34;},
+    no_rawtlt={&#34;label&#34;: &#34;Ignore .rawtlt files?&#34;},
+    fiducial_size={&#34;label&#34;: &#34;Size of fiducial particles in nm (-1 if fiducial-free)&#34;,
+                   &#34;min&#34;: -1.0,
+                   &#34;step&#34;: 0.01},
+    num_beads={&#34;label&#34;: &#34;Target # of beads for tracking&#34;},
+    adoc_template={&#34;label&#34;: &#34;Path to BatchRunTomo directives template&#34;},
+    stack_bin_factor={&#34;label&#34;: &#34;Stack: Raw image stacks downsampling factor&#34;,
+                      &#34;min&#34;: 1},
+    delete_old_files={&#34;label&#34;: &#34;Preprocessing: Remove original stack when excluding views&#34;},
+    remove_xrays={&#34;label&#34;: &#34;Preprocessing: Remove X-rays and other artefacts&#34;},
+    coarse_align_bin_factor={&#34;label&#34;: &#34;Coarse-alignment: Coarse aligned stack binning&#34;,
+                             &#34;min&#34;: 1},
+    num_patches={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                 &#34;label&#34;: &#34;Patch-tracking: Number of patches to track in X and Y (Nx, Ny)&#34;},
+    patch_overlap={&#34;label&#34;: &#34;Patch-tracking: % overlap between patches&#34;,
+                   &#34;min&#34;: 0,
+                   &#34;max&#34;: 100},
+    num_iter={&#34;label&#34;: &#34;Patch-tracking: Number of iterations (1-4)&#34;,
+              &#34;min&#34;: 1,
+              &#34;max&#34;: 4},
+    limits_on_shift={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                     &#34;label&#34;: &#34;Patch-tracking: Limits on shifts (in pixels)&#34;},
+    adjust_tilt_angles={&#34;label&#34;: &#34;Patch-tracking: Rerun patch-tracking with tilt-angle offset&#34;},
+    num_surfaces={&#34;widget_type&#34;: &#34;RadioButtons&#34;,
+                  &#34;label&#34;: &#34;Fine-alignment: Number of surface(s) for angle analysis.&#34;,
+                  &#34;choices&#34;: [1, 2]},
+    mag_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                &#34;label&#34;: &#34;Fine-alignment: Type of magnification solution&#34;,
+                &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;fixed&#39;]},
+    tilt_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                 &#34;label&#34;: &#34;Fine-alignment: Type of tilt-angle solution&#34;,
+                 &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;fixed&#39;]},
+    rot_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                &#34;label&#34;: &#34;Fine-alignment: Type of rotation solution&#34;,
+                &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;one&#39;, &#39;fixed&#39;]},
+    beam_tilt_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                      &#34;label&#34;: &#34;Fine-alignment: Type of beam tilt-angle solution&#34;,
+                      &#34;choices&#34;: [&#39;fixed&#39;, &#39;search&#39;]},
+    robust_fitting={&#34;label&#34;: &#34;Fine-alignment: Use robust fitting?&#34;},
+    weight_contours={&#34;label&#34;: &#34;Fine-alignment: Apply weighting to entire contours from patch-tracking&#34;},
+)
+def get_args_align_ext(
+        project_name=&#34;&#34;,
+        rot_angle=0.00,
+        image_dims=[1000, 1000],
+        excl_views=[0],
+        pixel_size=0.00,
+        input_folder=Path(&#34;./stacks&#34;),
+        output_folder=Path(&#34;./stacks&#34;),
+        file_prefix=&#34;&#34;,
+        file_suffix=&#34;&#34;,
+        no_rawtlt=False,
+        fiducial_size=0.0,
+        num_beads = 0,
+        adoc_template=Path(&#34;/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc&#34;),
+        stack_bin_factor=4,
+        delete_old_files=False,
+        remove_xrays=True,
+        coarse_align_bin_factor=4,
+        num_patches=[24, 24],
+        patch_overlap=15,
+        num_iter=4,
+        limits_on_shift=[2, 2],
+        adjust_tilt_angles=True,
+        num_surfaces=1,
+        mag_option=&#34;fixed&#34;,
+        tilt_option=&#34;fixed&#34;,
+        rot_option=&#34;group&#34;,
+        beam_tilt_option=&#34;fixed&#34;,
+        robust_fitting=True,
+        weight_contours=True,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for IMOD alignment
+
+    Args:
+        project_name (str): Name of current project
+        rot_angle (float): Rotational angle of electron beam. Can be obtained from MDOC files
+        image_dims (int): Image dimensions (in pixels)
+        pixel_size (float): Image pixel size (in angstroms)
+        excl_views (int): Indices of micrographes to be excluded
+        input_folder (str): Path to folder with image stacks
+        output_folder (str): Path to folder for storing IMOD outputs
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        file_suffix (str): Extra information attached as suffix to output filenames
+        no_rawtlt (bool): Use information in filenames to determine tilt angles (rather than using .rawtlt files)
+        fiducial_size (float): Size (in nm) of gold fiducial particles
+        adoc_template (str): Path to template file of BatchRunTomo directives
+        stack_bin_factor (int): Stack: Raw image stacks downsampling factor
+        delete_old_files (bool): Preprocessing: Remove original stack when excluding views
+        remove_xrays (bool): Preprocessing: Attempt to remove X-rays and other artefacts
+        coarse_align_bin_factor (int): Coarse-alignment: Coarse aligned stack binning
+        num_patches (int): Patch-tracking: Number of patches to track in X and Y
+        patch_overlap (int): Patch-tracking: % overlap between patches
+        num_iter (int): Patch-tracking: Number of iterations. (Max. 4)
+        limits_on_shift (int): Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment
+        adjust_tilt_angles (bool): Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset
+        num_surfaces (int): Fine-alignment: Number of surface(s) for angle analysis
+        mag_option (str): Fine-alignment: Type of magnification solution
+        tilt_option (str): Fine-alignment: Type of tilt-angle solution
+        rot_option (str): Fine-alignment: Type of rotation solution
+        beam_tilt_option (str): Fine-alignment: Type of beam-tilt solution
+        robust_fitting (bool): Fine-alignment: Use robust fitting
+        weight_contours (bool): Fine-alignment: Apply weighting to entire contours from patch-tracking
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()
+
+
+@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    do_positioning={&#34;label&#34;: &#34;Positioning: Do positioning?&#34;},
+    unbinned_thickness={&#34;label&#34;: &#34;Positioning: Unbinned thickness (in pixels) for samples or whole tomogram *&#34;,
+                        &#34;min&#34;: 0,
+                        &#34;max&#34;: 50000,
+                        &#34;step&#34;: 100},
+    correct_ctf={&#34;label&#34;: &#34;Aligned stack: Correct CTF for aligned stacks?&#34;},
+    erase_gold={&#34;label&#34;: &#34;Aligned stack: Erase gold fiducials?&#34;},
+    filtering={&#34;label&#34;: &#34;Aligned stack: Perform 2D filtering?&#34;},
+    bin_factor={&#34;label&#34;: &#34;Aligned stack: Binning factor for aligned stack&#34;,
+                &#34;min&#34;: 1},
+    thickness={&#34;label&#34;: &#34;Reconstruction: Thickness (in pixels) for reconstruction *&#34;,
+               &#34;min&#34;: 0,
+               &#34;max&#34;: 50000,
+               &#34;step&#34;: 100},
+    use_sirt={&#34;label&#34;: &#34;Use SIRT?&#34;},
+    sirt_iter={&#34;label&#34;: &#34;# of SIRT iterations (if applicable)&#34;},
+    trimvol={&#34;label&#34;: &#34;Postprocessing: Run Trimvol on reconstruction&#34;},
+    trimvol_reorient={&#34;widget_type&#34;: &#34;RadioButtons&#34;,
+                      &#34;label&#34;: &#34;Postprocessing: Reorientation in Trimvol (if applicable)&#34;,
+                      &#34;choices&#34;: [&#34;none&#34;, &#34;flip&#34;, &#34;rotate&#34;]}
+)
+def get_args_recon(
+        project_name=&#34;&#34;,
+        do_positioning=False,
+        unbinned_thickness=1500,
+        correct_ctf=False,
+        erase_gold=False,
+        filtering=False,
+        bin_factor=1,
+        thickness=1500,
+        use_sirt=False,
+        sirt_iter=10,
+        trimvol=True,
+        trimvol_reorient=&#34;rotate&#34;
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for IMOD reconstruction
+
+    Args:
+        project_name (str): Name of current project
+        do_positioning (bool): Whether to perform positioning
+        unbinned_thickness (int): Unbinned thickness (in pixels) for samples or whole tomogram for positioning
+        correct_ctf (bool): Whether to correct CTF for aligned stacks
+        erase_gold (bool): Whether to erase gold fiducials
+        filtering (bool): Whether to perform 2D filtering
+        bin_factor (int): Binning factor for aligned stack
+        thickness (int): Thickness (in pixels) for reconstruction
+        trimvol (bool): Run Trimvol on reconstruction
+        trimvol_reorient (str): Reorientation in Trimvol
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+    return locals()
+
+
+@mg(
+    call_button=&#34;Get parameters&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    output_folder={&#34;widget_type&#34;: &#34;FileEdit&#34;,
+                   &#34;label&#34;: &#34;Folder for simulated PSF tomograms&#34;,
+                   &#34;mode&#34;:&#34;w&#34;},
+    pixel_res={&#34;label&#34;: &#34;Pixel resolution (in angstroms) *&#34;,
+               &#34;min&#34;: 0.0,
+               &#34;step&#34;: 0.001},
+    ds_factor={&#34;label&#34;: &#34;Alignment / reconstruction downsampling factor *&#34;,
+               &#34;min&#34;: 1},
+    rootname={&#34;label&#34;: &#34;Rootname of project (if different from project name)&#34;},
+    dims={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+          &#34;label&#34;: &#34;Dimensions of simulated CTF (in pixels)&#34;},
+)
+def get_args_ctfsim(
+        project_name=&#34;&#34;,
+        output_folder=Path(&#34;./PSF&#34;),
+        rootname=&#34;&#34;,
+        pixel_res=0.000,
+        ds_factor=4,
+        dims=[30, 30, 30],
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for O2R-CTFsim
+
+    Args:
+        project_name (str): Name of current project
+        pixel_res (float): Pixel resolution of motion-corrected images (in Angstroms)
+        ds_factor (int): Downsampling factor (must be same as alignment/reconstruction)
+        rootname (str): Rootname of project (if different from project name)
+        dims (int*2): Dimensions of simulated CTF (in pixels)
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()
+
+
+@mg(
+    call_button=&#34;Get parameters&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    file_suffix={&#34;label&#34;: &#34;IMOD file suffix (if applicable)&#34;},
+    raw_folder={&#34;widget_type&#34;: &#34;FileEdit&#34;,
+                &#34;label&#34;: &#34;Folder containing raw stacks&#34;,
+                &#34;mode&#34;: &#34;d&#34;},
+    psf_folder={&#34;widget_type&#34;: &#34;FileEdit&#34;,
+                &#34;label&#34;: &#34;Folder containing PSF stacks&#34;,
+                &#34;mode&#34;: &#34;d&#34;},
+    image_type={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                &#34;label&#34;: &#34;File type of raw image&#34;,
+                &#34;choices&#34;: [&#34;mrc&#34;, &#34;tiff&#34;]},
+    psf_type={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+              &#34;label&#34;: &#34;File type of PSF stack&#34;,
+              &#34;choices&#34;: [&#34;mrc&#34;, &#34;tiff&#34;]},
+    output_folder={&#34;widget_type&#34;: &#34;FileEdit&#34;,
+                   &#34;label&#34;: &#34;Folder for deconvolved image stacks&#34;,
+                   &#34;mode&#34;:&#34;w&#34;},
+    device={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+            &#34;label&#34;: &#34;Device to be used for deconvolution&#34;,
+            &#34;choices&#34;: [&#34;GPU&#34;, &#34;CPU&#34;]},
+    niter={&#34;label&#34;: &#34;Max number of iterations used in deconvolution&#34;,
+           &#34;min&#34;: 1},
+    block={&#34;label&#34;: &#34;Use block-iterative algorithm?&#34;},
+    uint={&#34;label&#34;: &#34;Store results as UInt8?&#34;}
+)
+def get_args_rldeconv(
+        project_name=&#34;&#34;,
+        file_suffix=&#34;&#34;,
+        raw_folder=Path(&#34;./stacks/&#34;),
+        image_type=&#34;mrc&#34;,
+        psf_folder=Path(&#34;./PSF/&#34;),
+        psf_type=&#34;mrc&#34;,
+        output_folder=Path(&#34;./deconv/&#34;),
+        device=&#34;GPU&#34;,
+        niter=10,
+        block=False,
+        uint=False,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for RedLionfish deconvolution
+
+    Args:
+        image_path (str): Path to raw image
+        image_type (str): File type of raw image
+        psf_path (str): Path to PSF for deconvolution
+        psf_type (str): File type of PSF stack
+        output_path (str): Path to deconvolved image
+        device (str): Device used for deconvolution
+        niter (int): Max number of iteration in deconvolution
+        block (bool): Whether to use block iterative algorithm for deconvolution
+        uint (int): Whether to encode results as UInt8
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()
+
+
+@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    stacks_folder={
+        &#34;label&#34;: &#34;Path to parent folder with stacks&#34;,
+        &#34;mode&#34;: &#34;d&#34;},
+    output_path={
+        &#34;label&#34;: &#34;Path to output folder&#34;,
+        &#34;mode&#34;: &#34;d&#34;},
+    rootname={&#34;label&#34;: &#34;Rootname of current project (if different from project name)&#34;},
+    suffix={&#34;label&#34;: &#34;Suffix of project files&#34;},
+    extension={&#34;label&#34;: &#34;File extension of stacks *&#34;},
+    imod_suffix={&#34;label&#34;: &#34;IMOD file suffix&#34;},
+    algorithm={
+        &#34;widget_type&#34;: &#34;RadioButtons&#34;,
+        &#34;label&#34;: &#34;Reconstruction algorithm&#34;,
+        &#34;choices&#34;: [&#34;FBP_CUDA&#34;, &#34;SIRT_CUDA&#34;, &#34;SART_CUDA&#34;, &#34;CGLS_CUDA&#34;, &#34;BP_CUDA&#34;]},
+    n_iters={
+        &#34;label&#34;: &#34;Number of iterations (ignored if iterative reconstruction not used)&#34;,
+        &#34;min&#34;:1,}
+)
+def get_args_savurecon(
+        project_name=&#34;&#34;,
+        stacks_folder=Path(&#34;./stacks&#34;),
+        output_path=Path(&#34;./savurecon&#34;),
+        rootname=&#34;&#34;,
+        suffix=&#34;&#34;,
+        extension=&#34;mrc&#34;,
+        imod_suffix=&#34;ali&#34;,
+        algorithm=&#34;CGLS_CUDA&#34;,
+        n_iters=100
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for Savu reconstruction
+
+    Args:
+        None
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()
+
+
+@mg(
+    call_button=&#34;Get parameters&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    mc2_path={&#34;label&#34;: &#34;Path to MC2 executable&#34;},
+    do_ctffind={&#34;label&#34;: &#34;Estimate CTF?&#34;},
+    ctffind_path={&#34;label&#34;: &#34;Path to CTFFind4 executable (if applicable)&#34;},
+    image_dims={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Image dimensions (in pixels)&#34;},
+    pixel_size={&#34;label&#34;: &#34;Pixel size (A)&#34;,
+                &#34;step&#34;: 0.001},
+    rot_angle={&#34;label&#34;: &#34;Beam rotation angle&#34;,
+               &#34;min&#34;: -180.00,
+               &#34;max&#34;: 180.00,
+               &#34;step&#34;: 0.01},
+    super_res={&#34;label&#34;: &#34;Super-resolution images?&#34;},
+    use_gain={&#34;label&#34;: &#34;Use gain reference?&#34;},
+    gain={&#34;label&#34;: &#34;Gain reference file (if applicable)&#34;,
+          &#34;widget_type&#34;: &#34;FileEdit&#34;,
+          &#34;mode&#34;: &#34;w&#34;},
+    do_positioning={&#34;label&#34;: &#34;Positioning: Do positioning?&#34;},
+    bin_factor={&#34;label&#34;: &#34;Binning factor for stack&#34;,
+                &#34;min&#34;: 1},
+    unbinned_thickness={&#34;label&#34;: &#34;Positioning: Unbinned thickness (in pixels) for samples or whole tomogram&#34;,
+                        &#34;min&#34;: 0,
+                        &#34;max&#34;: 50000,
+                        &#34;step&#34;: 100},
+    thickness={&#34;label&#34;: &#34;Reconstruction: Thickness (in pixels) for reconstruction&#34;,
+               &#34;min&#34;: 0,
+               &#34;max&#34;: 50000,
+               &#34;step&#34;: 100},
+    show_stats={&#34;label&#34;: &#34;Show alignment statistics?&#34;}
+)
+def get_args_imod_route(
+        mc2_path=Path(&#34;/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110&#34;),
+        do_ctffind=False,
+        ctffind_path=Path(&#34;/opt/lmod/modules/ctffind/4.1.14/bin/ctffind&#34;),
+        image_dims=[1000, 1000],
+        pixel_size=0.000,
+        rot_angle=0.00,
+        super_res=False,
+        use_gain=False,
+        gain=&#34;&#34;,
+        show_stats=True,
+        do_positioning=False,
+        bin_factor=4,
+        unbinned_thickness=1500,
+        thickness=1500,
+):
+    &#34;&#34;&#34;
+    Function to get essential parameters for processing steps on IMOD route
+
+    Args:
+        None
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()
+
+
+@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    aretomo_mode={
+        &#34;label&#34;: &#34;AreTomo Mode*. 0: align, 1: recon, 2: align + recon&#34;,
+        &#34;min&#34;: 0,
+        &#34;max&#34;: 2,
+        &#34;step&#34;: 1,
+    },
+    rot_angle={&#34;label&#34;: &#34;Rotation angle of electron beam, can be obtained from mdoc&#34;,
+               &#34;min&#34;: -180.0000,
+               &#34;max&#34;: 180.0000
+    },
+    pixel_size={&#34;label&#34;: &#34;Pixel size in A&#34;,
+                &#34;min&#34;: 0.001,
+    },
+    rootname={&#34;label&#34;: &#34;Rootname of current project (required if different from project name&#34;},
+    suffix={&#34;label&#34;: &#34;Suffix of project files&#34;},
+    input_mrc_folder={
+        &#34;label&#34;: &#34;Folder containing input mrc&#39;s&#34;,
+        &#34;mode&#34;: &#34;d&#34;,
+    },
+    input_ext={
+        &#34;label&#34;: &#34;Extension of input mrc files&#34;,
+        &#34;tooltip&#34;: &#34;.st or .mrc usually&#34;
+    },
+    output_path={
+        &#34;label&#34;: &#34;Path to output folder&#34;,
+        &#34;mode&#34;: &#34;d&#34;,
+    },
+    tilt_angles={&#34;label&#34;: &#34;Path to text file containing tilt angles, usually .tlt&#34;},
+    volz={&#34;label&#34;: &#34;Z-height of reconstructed volume in unbinned voxels.&#34;,
+          &#34;min&#34;: -1,
+          &#34;max&#34;: 50000,
+          &#34;step&#34;: 1,
+    },
+    sample_thickness={&#34;label&#34;: &#34;Sample thickness in nm, used to set volz automatically&#34;,
+                      &#34;min&#34;: -1,
+                      &#34;max&#34;: 50000,
+                      &#34;step&#34;: 1
+    },
+    output_binning={
+        &#34;label&#34;: &#34;Binning to be applied to saved .mrc&#34;,
+        &#34;min&#34;: 1,
+        &#34;step&#34;: 1
+    },
+    recon_algo={
+        &#34;label&#34;: &#34;Reconstruction algorithm&#34;,
+        &#34;choices&#34;: [&#34;WBP&#34;, &#34;SART&#34;]
+    },
+    out_imod={
+        &#34;label&#34;: &#34;Produce STA output for&#34;,
+        &#34;choices&#34;: [&#34;N/A&#34;, &#34;RELION4&#34;, &#34;Warp&#34;, &#34;Local alignment&#34;]
+    },
+    dark_tol={
+        &#34;label&#34;: &#34;Tolerance to remove dark images&#34;,
+        &#34;tooltip&#34;: &#34;Default 0.7, low number = fewer images removed&#34;,
+    },
+    aretomo_path={
+        &#34;label&#34;: &#34;Path to AreTomo executable (leave blank if module loaded)&#34;,
+        &#34;tooltip&#34;: &#34;Ensure the path is to the correct version to match CUDA&#34;,
+    }
+)
+def get_args_aretomo(
+        project_name=&#34;&#34;,
+        aretomo_mode=0,
+        rot_angle=0.001,
+        pixel_size=0.00,
+        rootname=&#34;&#34;,
+        suffix=&#34;&#34;,
+        input_mrc_folder=Path(&#34;./aretomo&#34;),
+        input_ext=&#34;.st&#34;,
+        output_path=Path(&#34;./aretomo&#34;),
+        tilt_angles=&#34;&#34;,
+        volz=-1,
+        sample_thickness=-1,
+        output_binning=4,
+        recon_algo=&#34;SART&#34;,
+        out_imod=&#34;N/A&#34;,
+        dark_tol=0.7,
+        aretomo_path=&#34;&#34;,
+):
+    return locals()
+
+
+@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    input_mrc_folder={
+        &#34;label&#34;: &#34;Folder containing input mrc&#39;s&#34;,
+        &#34;mode&#34;: &#34;d&#34;,
+    },
+    min_percentile={
+        &#34;label&#34;: &#34;Min percentile of stack grey value distribution to include&#34;,
+        &#34;min&#34;: 0,
+        &#34;max&#34;: 100,
+    },
+    max_percentile={
+        &#34;label&#34;: &#34;Max percentile of stack grey value distribution to include&#34;,
+        &#34;min&#34;: 0,
+        &#34;max&#34;: 100,
+    }
+)
+def get_args_exclude_bad_tilts(
+        project_name=&#34;&#34;,
+        input_mrc_folder=Path(&#34;./stacks&#34;),
+        min_percentile=5,
+        max_percentile=95,
+):
+    return locals()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Ot2Rec.magicgui.get_args_align"><code class="name flex">
+<span>def <span class="ident">get_args_align</span></span>(<span>project_name='', rot_angle=0.0, image_dims=[100, 100], excl_views=[0], output_folder=PosixPath('stacks'), file_prefix='', file_suffix='', no_rawtlt=False, fiducial_size=-1, num_beads=0, adoc_template=PosixPath('/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc'), stack_bin_factor=4, delete_old_files=False, remove_xrays=True, coarse_align_bin_factor=4, num_patches=[24, 24], patch_overlap=25, num_iter=4, limits_on_shift=[2, 2], adjust_tilt_angles=True, num_surfaces=1, mag_option='fixed', tilt_option='fixed', rot_option='group', beam_tilt_option='fixed', robust_fitting=True, weight_contours=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to add arguments to parser for IMOD alignment</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of current project</dd>
+<dt><strong><code>rot_angle</code></strong> :&ensp;<code>float</code></dt>
+<dd>Rotational angle of electron beam. Can be obtained from MDOC files</dd>
+<dt><strong><code>image_dims</code></strong> :&ensp;<code>int</code></dt>
+<dd>Image dimensions (in pixels)</dd>
+<dt><strong><code>excl_views</code></strong> :&ensp;<code>int</code></dt>
+<dd>Indices of micrographes to be excluded</dd>
+<dt><strong><code>output_folder</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to folder for storing IMOD outputs</dd>
+<dt><strong><code>file_prefix</code></strong> :&ensp;<code>str</code></dt>
+<dd>Common prefix of raw image files (Default: project)</dd>
+<dt><strong><code>file_suffix</code></strong> :&ensp;<code>str</code></dt>
+<dd>Extra information attached as suffix to output filenames</dd>
+<dt><strong><code>no_rawtlt</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Use information in filenames to determine tilt angles (rather than using .rawtlt files)</dd>
+<dt><strong><code>fiducial_size</code></strong> :&ensp;<code>float</code></dt>
+<dd>Size (in nm) of gold fiducial particles</dd>
+<dt><strong><code>adoc_template</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to template file of BatchRunTomo directives</dd>
+<dt><strong><code>stack_bin_factor</code></strong> :&ensp;<code>int</code></dt>
+<dd>Stack: Raw image stacks downsampling factor</dd>
+<dt><strong><code>delete_old_files</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Preprocessing: Remove original stack when excluding views</dd>
+<dt><strong><code>remove_xrays</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Preprocessing: Attempt to remove X-rays and other artefacts</dd>
+<dt><strong><code>coarse_align_bin_factor</code></strong> :&ensp;<code>int</code></dt>
+<dd>Coarse-alignment: Coarse aligned stack binning</dd>
+<dt><strong><code>num_patches</code></strong> :&ensp;<code>int</code></dt>
+<dd>Patch-tracking: Number of patches to track in X and Y</dd>
+<dt><strong><code>patch_overlap</code></strong> :&ensp;<code>int</code></dt>
+<dd>Patch-tracking: % overlap between patches</dd>
+<dt><strong><code>num_iter</code></strong> :&ensp;<code>int</code></dt>
+<dd>Patch-tracking: Number of iterations. (Max. 4)</dd>
+<dt><strong><code>limits_on_shift</code></strong> :&ensp;<code>int</code></dt>
+<dd>Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment</dd>
+<dt><strong><code>adjust_tilt_angles</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset</dd>
+<dt><strong><code>num_surfaces</code></strong> :&ensp;<code>int</code></dt>
+<dd>Fine-alignment: Number of surface(s) for angle analysis</dd>
+<dt><strong><code>mag_option</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-alignment: Type of magnification solution</dd>
+<dt><strong><code>tilt_option</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-alignment: Type of tilt-angle solution</dd>
+<dt><strong><code>rot_option</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-alignment: Type of rotation solution</dd>
+<dt><strong><code>beam_tilt_option</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-alignment: Type of beam-tilt solution</dd>
+<dt><strong><code>robust_fitting</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Fine-alignment: Use robust fitting</dd>
+<dt><strong><code>weight_contours</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Fine-alignment: Apply weighting to entire contours from patch-tracking</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Namespace</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    rot_angle={&#34;label&#34;: &#34;Beam rotation angle *&#34;,
+               &#34;min&#34;: -180.00,
+               &#34;max&#34;: 180.00,
+               &#34;step&#34;: 0.01},
+    image_dims={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Image dimensions (in pixels) *&#34;},
+    excl_views={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Excluded views&#34;},
+    output_folder={&#34;label&#34;: &#34;IMOD output folder&#34;,
+                   &#34;mode&#34;: &#34;d&#34;},
+    file_prefix={&#34;label&#34;: &#34;File prefix (if different from project name)&#34;},
+    file_suffix={&#34;label&#34;: &#34;IMOD file suffix (if applicable)&#34;},
+    no_rawtlt={&#34;label&#34;: &#34;Ignore .rawtlt files?&#34;},
+    fiducial_size={&#34;label&#34;: &#34;Size of fiducial particles in nm (-1 if fiducial-free)&#34;,
+                   &#34;min&#34;: -1.0,
+                   &#34;step&#34;: 0.01},
+    num_beads={&#34;label&#34;: &#34;# of beads to track&#34;},
+    adoc_template={&#34;label&#34;: &#34;Path to BatchRunTomo directives template&#34;},
+    stack_bin_factor={&#34;label&#34;: &#34;Stack: Raw image stacks downsampling factor&#34;,
+                      &#34;min&#34;: 1},
+    delete_old_files={&#34;label&#34;: &#34;Preprocessing: Remove original stack when excluding views&#34;},
+    remove_xrays={&#34;label&#34;: &#34;Preprocessing: Remove X-rays and other artefacts&#34;},
+    coarse_align_bin_factor={&#34;label&#34;: &#34;Coarse-alignment: Coarse aligned stack binning&#34;,
+                             &#34;min&#34;: 1},
+    num_patches={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                 &#34;label&#34;: &#34;Patch-tracking: Number of patches to track in X and Y (Nx, Ny)&#34;},
+    patch_overlap={&#34;label&#34;: &#34;Patch-tracking: % overlap between patches&#34;,
+                   &#34;min&#34;: 0,
+                   &#34;max&#34;: 100},
+    num_iter={&#34;label&#34;: &#34;Patch-tracking: Number of iterations (1-4)&#34;,
+              &#34;min&#34;: 1,
+              &#34;max&#34;: 4},
+    limits_on_shift={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                     &#34;label&#34;: &#34;Patch-tracking: Limits on shifts (in pixels)&#34;},
+    adjust_tilt_angles={&#34;label&#34;: &#34;Patch-tracking: Rerun patch-tracking with tilt-angle offset&#34;},
+    num_surfaces={&#34;widget_type&#34;: &#34;RadioButtons&#34;,
+                  &#34;label&#34;: &#34;Fine-alignment: Number of surface(s) for angle analysis.&#34;,
+                  &#34;choices&#34;: [1, 2]},
+    mag_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                &#34;label&#34;: &#34;Fine-alignment: Type of magnification solution&#34;,
+                &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;fixed&#39;]},
+    tilt_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                 &#34;label&#34;: &#34;Fine-alignment: Type of tilt-angle solution&#34;,
+                 &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;fixed&#39;]},
+    rot_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                &#34;label&#34;: &#34;Fine-alignment: Type of rotation solution&#34;,
+                &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;one&#39;, &#39;fixed&#39;]},
+    beam_tilt_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                      &#34;label&#34;: &#34;Fine-alignment: Type of beam tilt-angle solution&#34;,
+                      &#34;choices&#34;: [&#39;fixed&#39;, &#39;search&#39;]},
+    robust_fitting={&#34;label&#34;: &#34;Fine-alignment: Use robust fitting?&#34;},
+    weight_contours={&#34;label&#34;: &#34;Fine-alignment: Apply weighting to entire contours from patch-tracking&#34;},
+)
+def get_args_align(
+        project_name=&#34;&#34;,
+        rot_angle=0.00,
+        image_dims=[100, 100],
+        excl_views=[0],
+        output_folder=Path(&#34;./stacks&#34;),
+        file_prefix=&#34;&#34;,
+        file_suffix=&#34;&#34;,
+        no_rawtlt=False,
+        fiducial_size=-1,
+        num_beads=0,
+        adoc_template=Path(&#34;/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc&#34;),
+        stack_bin_factor=4,
+        delete_old_files=False,
+        remove_xrays=True,
+        coarse_align_bin_factor=4,
+        num_patches=[24, 24],
+        patch_overlap=25,
+        num_iter=4,
+        limits_on_shift=[2, 2],
+        adjust_tilt_angles=True,
+        num_surfaces=1,
+        mag_option=&#34;fixed&#34;,
+        tilt_option=&#34;fixed&#34;,
+        rot_option=&#34;group&#34;,
+        beam_tilt_option=&#34;fixed&#34;,
+        robust_fitting=True,
+        weight_contours=True,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for IMOD alignment
+
+    Args:
+        project_name (str): Name of current project
+        rot_angle (float): Rotational angle of electron beam. Can be obtained from MDOC files
+        image_dims (int): Image dimensions (in pixels)
+        excl_views (int): Indices of micrographes to be excluded
+        output_folder (str): Path to folder for storing IMOD outputs
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        file_suffix (str): Extra information attached as suffix to output filenames
+        no_rawtlt (bool): Use information in filenames to determine tilt angles (rather than using .rawtlt files)
+        fiducial_size (float): Size (in nm) of gold fiducial particles
+        adoc_template (str): Path to template file of BatchRunTomo directives
+        stack_bin_factor (int): Stack: Raw image stacks downsampling factor
+        delete_old_files (bool): Preprocessing: Remove original stack when excluding views
+        remove_xrays (bool): Preprocessing: Attempt to remove X-rays and other artefacts
+        coarse_align_bin_factor (int): Coarse-alignment: Coarse aligned stack binning
+        num_patches (int): Patch-tracking: Number of patches to track in X and Y
+        patch_overlap (int): Patch-tracking: % overlap between patches
+        num_iter (int): Patch-tracking: Number of iterations. (Max. 4)
+        limits_on_shift (int): Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment
+        adjust_tilt_angles (bool): Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset
+        num_surfaces (int): Fine-alignment: Number of surface(s) for angle analysis
+        mag_option (str): Fine-alignment: Type of magnification solution
+        tilt_option (str): Fine-alignment: Type of tilt-angle solution
+        rot_option (str): Fine-alignment: Type of rotation solution
+        beam_tilt_option (str): Fine-alignment: Type of beam-tilt solution
+        robust_fitting (bool): Fine-alignment: Use robust fitting
+        weight_contours (bool): Fine-alignment: Apply weighting to entire contours from patch-tracking
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.magicgui.get_args_align_ext"><code class="name flex">
+<span>def <span class="ident">get_args_align_ext</span></span>(<span>project_name='', rot_angle=0.0, image_dims=[1000, 1000], excl_views=[0], pixel_size=0.0, input_folder=PosixPath('stacks'), output_folder=PosixPath('stacks'), file_prefix='', file_suffix='', no_rawtlt=False, fiducial_size=0.0, num_beads=0, adoc_template=PosixPath('/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc'), stack_bin_factor=4, delete_old_files=False, remove_xrays=True, coarse_align_bin_factor=4, num_patches=[24, 24], patch_overlap=15, num_iter=4, limits_on_shift=[2, 2], adjust_tilt_angles=True, num_surfaces=1, mag_option='fixed', tilt_option='fixed', rot_option='group', beam_tilt_option='fixed', robust_fitting=True, weight_contours=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to add arguments to parser for IMOD alignment</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of current project</dd>
+<dt><strong><code>rot_angle</code></strong> :&ensp;<code>float</code></dt>
+<dd>Rotational angle of electron beam. Can be obtained from MDOC files</dd>
+<dt><strong><code>image_dims</code></strong> :&ensp;<code>int</code></dt>
+<dd>Image dimensions (in pixels)</dd>
+<dt><strong><code>pixel_size</code></strong> :&ensp;<code>float</code></dt>
+<dd>Image pixel size (in angstroms)</dd>
+<dt><strong><code>excl_views</code></strong> :&ensp;<code>int</code></dt>
+<dd>Indices of micrographes to be excluded</dd>
+<dt><strong><code>input_folder</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to folder with image stacks</dd>
+<dt><strong><code>output_folder</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to folder for storing IMOD outputs</dd>
+<dt><strong><code>file_prefix</code></strong> :&ensp;<code>str</code></dt>
+<dd>Common prefix of raw image files (Default: project)</dd>
+<dt><strong><code>file_suffix</code></strong> :&ensp;<code>str</code></dt>
+<dd>Extra information attached as suffix to output filenames</dd>
+<dt><strong><code>no_rawtlt</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Use information in filenames to determine tilt angles (rather than using .rawtlt files)</dd>
+<dt><strong><code>fiducial_size</code></strong> :&ensp;<code>float</code></dt>
+<dd>Size (in nm) of gold fiducial particles</dd>
+<dt><strong><code>adoc_template</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to template file of BatchRunTomo directives</dd>
+<dt><strong><code>stack_bin_factor</code></strong> :&ensp;<code>int</code></dt>
+<dd>Stack: Raw image stacks downsampling factor</dd>
+<dt><strong><code>delete_old_files</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Preprocessing: Remove original stack when excluding views</dd>
+<dt><strong><code>remove_xrays</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Preprocessing: Attempt to remove X-rays and other artefacts</dd>
+<dt><strong><code>coarse_align_bin_factor</code></strong> :&ensp;<code>int</code></dt>
+<dd>Coarse-alignment: Coarse aligned stack binning</dd>
+<dt><strong><code>num_patches</code></strong> :&ensp;<code>int</code></dt>
+<dd>Patch-tracking: Number of patches to track in X and Y</dd>
+<dt><strong><code>patch_overlap</code></strong> :&ensp;<code>int</code></dt>
+<dd>Patch-tracking: % overlap between patches</dd>
+<dt><strong><code>num_iter</code></strong> :&ensp;<code>int</code></dt>
+<dd>Patch-tracking: Number of iterations. (Max. 4)</dd>
+<dt><strong><code>limits_on_shift</code></strong> :&ensp;<code>int</code></dt>
+<dd>Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment</dd>
+<dt><strong><code>adjust_tilt_angles</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset</dd>
+<dt><strong><code>num_surfaces</code></strong> :&ensp;<code>int</code></dt>
+<dd>Fine-alignment: Number of surface(s) for angle analysis</dd>
+<dt><strong><code>mag_option</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-alignment: Type of magnification solution</dd>
+<dt><strong><code>tilt_option</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-alignment: Type of tilt-angle solution</dd>
+<dt><strong><code>rot_option</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-alignment: Type of rotation solution</dd>
+<dt><strong><code>beam_tilt_option</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-alignment: Type of beam-tilt solution</dd>
+<dt><strong><code>robust_fitting</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Fine-alignment: Use robust fitting</dd>
+<dt><strong><code>weight_contours</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Fine-alignment: Apply weighting to entire contours from patch-tracking</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Namespace</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    rot_angle={&#34;label&#34;: &#34;Beam rotation angle *&#34;,
+               &#34;min&#34;: -180.00,
+               &#34;max&#34;: 180.00,
+               &#34;step&#34;: 0.01},
+    image_dims={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Image dimensions (in pixels) *&#34;},
+    excl_views={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Excluded views&#34;},
+    pixel_size={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Image pixel size (in angstroms) *&#34;},
+    input_folder={&#34;label&#34;: &#34;Input folder with stacks&#34;,
+                  &#34;mode&#34;: &#34;d&#34;},
+    output_folder={&#34;label&#34;: &#34;IMOD output folder&#34;,
+                   &#34;mode&#34;: &#34;d&#34;},
+    file_prefix={&#34;label&#34;: &#34;File prefix (if different from project name)&#34;},
+    file_suffix={&#34;label&#34;: &#34;IMOD file suffix (if applicable)&#34;},
+    no_rawtlt={&#34;label&#34;: &#34;Ignore .rawtlt files?&#34;},
+    fiducial_size={&#34;label&#34;: &#34;Size of fiducial particles in nm (-1 if fiducial-free)&#34;,
+                   &#34;min&#34;: -1.0,
+                   &#34;step&#34;: 0.01},
+    num_beads={&#34;label&#34;: &#34;Target # of beads for tracking&#34;},
+    adoc_template={&#34;label&#34;: &#34;Path to BatchRunTomo directives template&#34;},
+    stack_bin_factor={&#34;label&#34;: &#34;Stack: Raw image stacks downsampling factor&#34;,
+                      &#34;min&#34;: 1},
+    delete_old_files={&#34;label&#34;: &#34;Preprocessing: Remove original stack when excluding views&#34;},
+    remove_xrays={&#34;label&#34;: &#34;Preprocessing: Remove X-rays and other artefacts&#34;},
+    coarse_align_bin_factor={&#34;label&#34;: &#34;Coarse-alignment: Coarse aligned stack binning&#34;,
+                             &#34;min&#34;: 1},
+    num_patches={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                 &#34;label&#34;: &#34;Patch-tracking: Number of patches to track in X and Y (Nx, Ny)&#34;},
+    patch_overlap={&#34;label&#34;: &#34;Patch-tracking: % overlap between patches&#34;,
+                   &#34;min&#34;: 0,
+                   &#34;max&#34;: 100},
+    num_iter={&#34;label&#34;: &#34;Patch-tracking: Number of iterations (1-4)&#34;,
+              &#34;min&#34;: 1,
+              &#34;max&#34;: 4},
+    limits_on_shift={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                     &#34;label&#34;: &#34;Patch-tracking: Limits on shifts (in pixels)&#34;},
+    adjust_tilt_angles={&#34;label&#34;: &#34;Patch-tracking: Rerun patch-tracking with tilt-angle offset&#34;},
+    num_surfaces={&#34;widget_type&#34;: &#34;RadioButtons&#34;,
+                  &#34;label&#34;: &#34;Fine-alignment: Number of surface(s) for angle analysis.&#34;,
+                  &#34;choices&#34;: [1, 2]},
+    mag_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                &#34;label&#34;: &#34;Fine-alignment: Type of magnification solution&#34;,
+                &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;fixed&#39;]},
+    tilt_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                 &#34;label&#34;: &#34;Fine-alignment: Type of tilt-angle solution&#34;,
+                 &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;fixed&#39;]},
+    rot_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                &#34;label&#34;: &#34;Fine-alignment: Type of rotation solution&#34;,
+                &#34;choices&#34;: [&#39;all&#39;, &#39;group&#39;, &#39;one&#39;, &#39;fixed&#39;]},
+    beam_tilt_option={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                      &#34;label&#34;: &#34;Fine-alignment: Type of beam tilt-angle solution&#34;,
+                      &#34;choices&#34;: [&#39;fixed&#39;, &#39;search&#39;]},
+    robust_fitting={&#34;label&#34;: &#34;Fine-alignment: Use robust fitting?&#34;},
+    weight_contours={&#34;label&#34;: &#34;Fine-alignment: Apply weighting to entire contours from patch-tracking&#34;},
+)
+def get_args_align_ext(
+        project_name=&#34;&#34;,
+        rot_angle=0.00,
+        image_dims=[1000, 1000],
+        excl_views=[0],
+        pixel_size=0.00,
+        input_folder=Path(&#34;./stacks&#34;),
+        output_folder=Path(&#34;./stacks&#34;),
+        file_prefix=&#34;&#34;,
+        file_suffix=&#34;&#34;,
+        no_rawtlt=False,
+        fiducial_size=0.0,
+        num_beads = 0,
+        adoc_template=Path(&#34;/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc&#34;),
+        stack_bin_factor=4,
+        delete_old_files=False,
+        remove_xrays=True,
+        coarse_align_bin_factor=4,
+        num_patches=[24, 24],
+        patch_overlap=15,
+        num_iter=4,
+        limits_on_shift=[2, 2],
+        adjust_tilt_angles=True,
+        num_surfaces=1,
+        mag_option=&#34;fixed&#34;,
+        tilt_option=&#34;fixed&#34;,
+        rot_option=&#34;group&#34;,
+        beam_tilt_option=&#34;fixed&#34;,
+        robust_fitting=True,
+        weight_contours=True,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for IMOD alignment
+
+    Args:
+        project_name (str): Name of current project
+        rot_angle (float): Rotational angle of electron beam. Can be obtained from MDOC files
+        image_dims (int): Image dimensions (in pixels)
+        pixel_size (float): Image pixel size (in angstroms)
+        excl_views (int): Indices of micrographes to be excluded
+        input_folder (str): Path to folder with image stacks
+        output_folder (str): Path to folder for storing IMOD outputs
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        file_suffix (str): Extra information attached as suffix to output filenames
+        no_rawtlt (bool): Use information in filenames to determine tilt angles (rather than using .rawtlt files)
+        fiducial_size (float): Size (in nm) of gold fiducial particles
+        adoc_template (str): Path to template file of BatchRunTomo directives
+        stack_bin_factor (int): Stack: Raw image stacks downsampling factor
+        delete_old_files (bool): Preprocessing: Remove original stack when excluding views
+        remove_xrays (bool): Preprocessing: Attempt to remove X-rays and other artefacts
+        coarse_align_bin_factor (int): Coarse-alignment: Coarse aligned stack binning
+        num_patches (int): Patch-tracking: Number of patches to track in X and Y
+        patch_overlap (int): Patch-tracking: % overlap between patches
+        num_iter (int): Patch-tracking: Number of iterations. (Max. 4)
+        limits_on_shift (int): Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment
+        adjust_tilt_angles (bool): Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset
+        num_surfaces (int): Fine-alignment: Number of surface(s) for angle analysis
+        mag_option (str): Fine-alignment: Type of magnification solution
+        tilt_option (str): Fine-alignment: Type of tilt-angle solution
+        rot_option (str): Fine-alignment: Type of rotation solution
+        beam_tilt_option (str): Fine-alignment: Type of beam-tilt solution
+        robust_fitting (bool): Fine-alignment: Use robust fitting
+        weight_contours (bool): Fine-alignment: Apply weighting to entire contours from patch-tracking
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.magicgui.get_args_aretomo"><code class="name flex">
+<span>def <span class="ident">get_args_aretomo</span></span>(<span>project_name='', aretomo_mode=0, rot_angle=0.001, pixel_size=0.0, rootname='', suffix='', input_mrc_folder=PosixPath('aretomo'), input_ext='.st', output_path=PosixPath('aretomo'), tilt_angles='', volz=-1, sample_thickness=-1, output_binning=4, recon_algo='SART', out_imod='N/A', dark_tol=0.7, aretomo_path='')</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    aretomo_mode={
+        &#34;label&#34;: &#34;AreTomo Mode*. 0: align, 1: recon, 2: align + recon&#34;,
+        &#34;min&#34;: 0,
+        &#34;max&#34;: 2,
+        &#34;step&#34;: 1,
+    },
+    rot_angle={&#34;label&#34;: &#34;Rotation angle of electron beam, can be obtained from mdoc&#34;,
+               &#34;min&#34;: -180.0000,
+               &#34;max&#34;: 180.0000
+    },
+    pixel_size={&#34;label&#34;: &#34;Pixel size in A&#34;,
+                &#34;min&#34;: 0.001,
+    },
+    rootname={&#34;label&#34;: &#34;Rootname of current project (required if different from project name&#34;},
+    suffix={&#34;label&#34;: &#34;Suffix of project files&#34;},
+    input_mrc_folder={
+        &#34;label&#34;: &#34;Folder containing input mrc&#39;s&#34;,
+        &#34;mode&#34;: &#34;d&#34;,
+    },
+    input_ext={
+        &#34;label&#34;: &#34;Extension of input mrc files&#34;,
+        &#34;tooltip&#34;: &#34;.st or .mrc usually&#34;
+    },
+    output_path={
+        &#34;label&#34;: &#34;Path to output folder&#34;,
+        &#34;mode&#34;: &#34;d&#34;,
+    },
+    tilt_angles={&#34;label&#34;: &#34;Path to text file containing tilt angles, usually .tlt&#34;},
+    volz={&#34;label&#34;: &#34;Z-height of reconstructed volume in unbinned voxels.&#34;,
+          &#34;min&#34;: -1,
+          &#34;max&#34;: 50000,
+          &#34;step&#34;: 1,
+    },
+    sample_thickness={&#34;label&#34;: &#34;Sample thickness in nm, used to set volz automatically&#34;,
+                      &#34;min&#34;: -1,
+                      &#34;max&#34;: 50000,
+                      &#34;step&#34;: 1
+    },
+    output_binning={
+        &#34;label&#34;: &#34;Binning to be applied to saved .mrc&#34;,
+        &#34;min&#34;: 1,
+        &#34;step&#34;: 1
+    },
+    recon_algo={
+        &#34;label&#34;: &#34;Reconstruction algorithm&#34;,
+        &#34;choices&#34;: [&#34;WBP&#34;, &#34;SART&#34;]
+    },
+    out_imod={
+        &#34;label&#34;: &#34;Produce STA output for&#34;,
+        &#34;choices&#34;: [&#34;N/A&#34;, &#34;RELION4&#34;, &#34;Warp&#34;, &#34;Local alignment&#34;]
+    },
+    dark_tol={
+        &#34;label&#34;: &#34;Tolerance to remove dark images&#34;,
+        &#34;tooltip&#34;: &#34;Default 0.7, low number = fewer images removed&#34;,
+    },
+    aretomo_path={
+        &#34;label&#34;: &#34;Path to AreTomo executable (leave blank if module loaded)&#34;,
+        &#34;tooltip&#34;: &#34;Ensure the path is to the correct version to match CUDA&#34;,
+    }
+)
+def get_args_aretomo(
+        project_name=&#34;&#34;,
+        aretomo_mode=0,
+        rot_angle=0.001,
+        pixel_size=0.00,
+        rootname=&#34;&#34;,
+        suffix=&#34;&#34;,
+        input_mrc_folder=Path(&#34;./aretomo&#34;),
+        input_ext=&#34;.st&#34;,
+        output_path=Path(&#34;./aretomo&#34;),
+        tilt_angles=&#34;&#34;,
+        volz=-1,
+        sample_thickness=-1,
+        output_binning=4,
+        recon_algo=&#34;SART&#34;,
+        out_imod=&#34;N/A&#34;,
+        dark_tol=0.7,
+        aretomo_path=&#34;&#34;,
+):
+    return locals()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.magicgui.get_args_ctffind"><code class="name flex">
+<span>def <span class="ident">get_args_ctffind</span></span>(<span>project_name='', output_folder=PosixPath('/ceph/users/dmv31621/o2r/Ot2Rec/ctffind'), file_prefix='', exec_path=PosixPath('/opt/lmod/modules/ctffind/4.1.14/bin/ctffind'), voltage=300.0, spherical_aberration=2.7, amp_contrast=0.8, spec_size=512, res_range=[30, 5], defocus_range=[5000, 50000, 500], astigm_type='', exhaustive_search=False, astigm_restraint=0, phase_shift=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to add arguments to parser for CTFFind</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of current project</dd>
+<dt><strong><code>output_folder</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to folder for storing CTFFind4 outputs</dd>
+<dt><strong><code>file_prefix</code></strong> :&ensp;<code>str</code></dt>
+<dd>Common prefix of raw image files (Default: project)</dd>
+<dt><strong><code>exec_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to IMOD executable</dd>
+<dt><strong><code>voltage</code></strong> :&ensp;<code>float</code></dt>
+<dd>Electron beam voltage in keV</dd>
+<dt><strong><code>spherical_aberration</code></strong> :&ensp;<code>float</code></dt>
+<dd>Spherical aberration of objective lens in mrad</dd>
+<dt><strong><code>amp_contrast</code></strong> :&ensp;<code>float</code></dt>
+<dd>Relative amplitude contrast w1</dd>
+<dt><strong><code>res_range</code></strong> :&ensp;<code>float</code></dt>
+<dd>Range of resolutions in target function in Angstroms</dd>
+<dt><strong><code>defocus_range</code></strong> :&ensp;<code>float</code></dt>
+<dd>Min, max and step size of initial defocus search in Angstroms</dd>
+<dt><strong><code>astigm_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>Type of astigmatism. FLAG USE NOT RECOMMENDED</dd>
+<dt><strong><code>exhaustive_search</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Use exhaustive search algorithm for defocus</dd>
+<dt><strong><code>astigm_restraint</code></strong> :&ensp;<code>int</code></dt>
+<dd>Restraint on astigmatism in Angstroms</dd>
+<dt><strong><code>phase_shift</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Estimate phase shift</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Namespace</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    output_folder={&#34;label&#34;: &#34;CTFFind4 output folder&#34;,
+                   &#34;mode&#34;: &#34;d&#34;},
+    file_prefix={&#34;label&#34;: &#34;File prefix (if different from project name)&#34;},
+    exec_path={&#34;label&#34;: &#34;Path to CTFFind4 executable&#34;},
+    voltage={&#34;label&#34;: &#34;Electron beam voltage (in keV)&#34;},
+    spherical_aberration={&#34;label&#34;: &#34;Objective lens spherical aberration (in mrad)&#34;,
+                          &#34;step&#34;: 0.1},
+    amp_contrast={&#34;widget_type&#34;: &#34;FloatSlider&#34;,
+                  &#34;min&#34;: 0.0,
+                  &#34;max&#34;: 1.0,
+                  &#34;label&#34;: &#34;Relative amplitude constrast w1&#34;},
+    spec_size={&#34;label&#34;: &#34;Size of amplitude spectrum (in pixels)&#34;},
+    res_range={&#34;label&#34;: &#34;Target function resolution range (in Angstroms)&#34;},
+    defocus_range={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                   &#34;label&#34;: &#34;Initial defocus search range (in Angstroms) [min, max, step]&#34;},
+    astigm_type={&#34;label&#34;: &#34;Type of astigmatism. USE NOT RECOMMENDED&#34;},
+    exhaustive_search={&#34;label&#34;: &#34;Use exhaustive search&#34;},
+    astigm_restraint={&#34;label&#34;: &#34;Restraint on astigmatism (in Angstroms)&#34;,
+                      &#34;min&#34;: 0},
+    phase_shift={&#34;label&#34;: &#34;Estimate phase shift&#34;}
+)
+def get_args_ctffind(
+        project_name=&#34;&#34;,
+        output_folder=Path(Path.cwd() / &#34;ctffind&#34;),
+        file_prefix=&#34;&#34;,
+        exec_path=Path(&#34;/opt/lmod/modules/ctffind/4.1.14/bin/ctffind&#34;),
+        voltage=300.0,
+        spherical_aberration=2.7,
+        amp_contrast=0.8,
+        spec_size=512,
+        res_range=[30, 5],
+        defocus_range=[5000, 50000, 500],
+        astigm_type=&#34;&#34;,
+        exhaustive_search=False,
+        astigm_restraint=0,
+        phase_shift=False,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for CTFFind
+
+    Args:
+        project_name (str): Name of current project
+        output_folder (str): Path to folder for storing CTFFind4 outputs
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        exec_path (str): Path to IMOD executable
+        voltage (float): Electron beam voltage in keV
+        spherical_aberration (float): Spherical aberration of objective lens in mrad
+        amp_contrast (float): Relative amplitude contrast w1
+        res_range (float): Range of resolutions in target function in Angstroms
+        defocus_range (float): Min, max and step size of initial defocus search in Angstroms
+        astigm_type (str): Type of astigmatism. FLAG USE NOT RECOMMENDED
+        exhaustive_search (bool): Use exhaustive search algorithm for defocus
+        astigm_restraint (int): Restraint on astigmatism in Angstroms
+        phase_shift (bool): Estimate phase shift
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.magicgui.get_args_ctfsim"><code class="name flex">
+<span>def <span class="ident">get_args_ctfsim</span></span>(<span>project_name='', output_folder=PosixPath('PSF'), rootname='', pixel_res=0.0, ds_factor=4, dims=[30, 30, 30])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to add arguments to parser for O2R-CTFsim</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of current project</dd>
+<dt><strong><code>pixel_res</code></strong> :&ensp;<code>float</code></dt>
+<dd>Pixel resolution of motion-corrected images (in Angstroms)</dd>
+<dt><strong><code>ds_factor</code></strong> :&ensp;<code>int</code></dt>
+<dd>Downsampling factor (must be same as alignment/reconstruction)</dd>
+<dt><strong><code>rootname</code></strong> :&ensp;<code>str</code></dt>
+<dd>Rootname of project (if different from project name)</dd>
+</dl>
+<p>dims (int*2): Dimensions of simulated CTF (in pixels)</p>
+<h2 id="returns">Returns</h2>
+<p>Namespace</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Get parameters&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    output_folder={&#34;widget_type&#34;: &#34;FileEdit&#34;,
+                   &#34;label&#34;: &#34;Folder for simulated PSF tomograms&#34;,
+                   &#34;mode&#34;:&#34;w&#34;},
+    pixel_res={&#34;label&#34;: &#34;Pixel resolution (in angstroms) *&#34;,
+               &#34;min&#34;: 0.0,
+               &#34;step&#34;: 0.001},
+    ds_factor={&#34;label&#34;: &#34;Alignment / reconstruction downsampling factor *&#34;,
+               &#34;min&#34;: 1},
+    rootname={&#34;label&#34;: &#34;Rootname of project (if different from project name)&#34;},
+    dims={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+          &#34;label&#34;: &#34;Dimensions of simulated CTF (in pixels)&#34;},
+)
+def get_args_ctfsim(
+        project_name=&#34;&#34;,
+        output_folder=Path(&#34;./PSF&#34;),
+        rootname=&#34;&#34;,
+        pixel_res=0.000,
+        ds_factor=4,
+        dims=[30, 30, 30],
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for O2R-CTFsim
+
+    Args:
+        project_name (str): Name of current project
+        pixel_res (float): Pixel resolution of motion-corrected images (in Angstroms)
+        ds_factor (int): Downsampling factor (must be same as alignment/reconstruction)
+        rootname (str): Rootname of project (if different from project name)
+        dims (int*2): Dimensions of simulated CTF (in pixels)
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.magicgui.get_args_exclude_bad_tilts"><code class="name flex">
+<span>def <span class="ident">get_args_exclude_bad_tilts</span></span>(<span>project_name='', input_mrc_folder=PosixPath('stacks'), min_percentile=5, max_percentile=95)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    input_mrc_folder={
+        &#34;label&#34;: &#34;Folder containing input mrc&#39;s&#34;,
+        &#34;mode&#34;: &#34;d&#34;,
+    },
+    min_percentile={
+        &#34;label&#34;: &#34;Min percentile of stack grey value distribution to include&#34;,
+        &#34;min&#34;: 0,
+        &#34;max&#34;: 100,
+    },
+    max_percentile={
+        &#34;label&#34;: &#34;Max percentile of stack grey value distribution to include&#34;,
+        &#34;min&#34;: 0,
+        &#34;max&#34;: 100,
+    }
+)
+def get_args_exclude_bad_tilts(
+        project_name=&#34;&#34;,
+        input_mrc_folder=Path(&#34;./stacks&#34;),
+        min_percentile=5,
+        max_percentile=95,
+):
+    return locals()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.magicgui.get_args_imod_route"><code class="name flex">
+<span>def <span class="ident">get_args_imod_route</span></span>(<span>mc2_path=PosixPath('/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110'), do_ctffind=False, ctffind_path=PosixPath('/opt/lmod/modules/ctffind/4.1.14/bin/ctffind'), image_dims=[1000, 1000], pixel_size=0.0, rot_angle=0.0, super_res=False, use_gain=False, gain='', show_stats=True, do_positioning=False, bin_factor=4, unbinned_thickness=1500, thickness=1500)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to get essential parameters for processing steps on IMOD route</p>
+<h2 id="args">Args</h2>
+<p>None</p>
+<h2 id="returns">Returns</h2>
+<p>Namespace</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Get parameters&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    mc2_path={&#34;label&#34;: &#34;Path to MC2 executable&#34;},
+    do_ctffind={&#34;label&#34;: &#34;Estimate CTF?&#34;},
+    ctffind_path={&#34;label&#34;: &#34;Path to CTFFind4 executable (if applicable)&#34;},
+    image_dims={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Image dimensions (in pixels)&#34;},
+    pixel_size={&#34;label&#34;: &#34;Pixel size (A)&#34;,
+                &#34;step&#34;: 0.001},
+    rot_angle={&#34;label&#34;: &#34;Beam rotation angle&#34;,
+               &#34;min&#34;: -180.00,
+               &#34;max&#34;: 180.00,
+               &#34;step&#34;: 0.01},
+    super_res={&#34;label&#34;: &#34;Super-resolution images?&#34;},
+    use_gain={&#34;label&#34;: &#34;Use gain reference?&#34;},
+    gain={&#34;label&#34;: &#34;Gain reference file (if applicable)&#34;,
+          &#34;widget_type&#34;: &#34;FileEdit&#34;,
+          &#34;mode&#34;: &#34;w&#34;},
+    do_positioning={&#34;label&#34;: &#34;Positioning: Do positioning?&#34;},
+    bin_factor={&#34;label&#34;: &#34;Binning factor for stack&#34;,
+                &#34;min&#34;: 1},
+    unbinned_thickness={&#34;label&#34;: &#34;Positioning: Unbinned thickness (in pixels) for samples or whole tomogram&#34;,
+                        &#34;min&#34;: 0,
+                        &#34;max&#34;: 50000,
+                        &#34;step&#34;: 100},
+    thickness={&#34;label&#34;: &#34;Reconstruction: Thickness (in pixels) for reconstruction&#34;,
+               &#34;min&#34;: 0,
+               &#34;max&#34;: 50000,
+               &#34;step&#34;: 100},
+    show_stats={&#34;label&#34;: &#34;Show alignment statistics?&#34;}
+)
+def get_args_imod_route(
+        mc2_path=Path(&#34;/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110&#34;),
+        do_ctffind=False,
+        ctffind_path=Path(&#34;/opt/lmod/modules/ctffind/4.1.14/bin/ctffind&#34;),
+        image_dims=[1000, 1000],
+        pixel_size=0.000,
+        rot_angle=0.00,
+        super_res=False,
+        use_gain=False,
+        gain=&#34;&#34;,
+        show_stats=True,
+        do_positioning=False,
+        bin_factor=4,
+        unbinned_thickness=1500,
+        thickness=1500,
+):
+    &#34;&#34;&#34;
+    Function to get essential parameters for processing steps on IMOD route
+
+    Args:
+        None
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.magicgui.get_args_mc2"><code class="name flex">
+<span>def <span class="ident">get_args_mc2</span></span>(<span>project_name='', pixel_size=0.0, output_folder=PosixPath('/ceph/users/dmv31621/o2r/Ot2Rec/motioncor'), file_prefix='', exec_path=PosixPath('/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110'), jobs_per_gpu=2, gpu_mem_usage=1.0, use_gain=False, gain='', super_res=False, discard_top=0, discard_bottom=0, tolerance=0.5, max_iter=10, patch_size=[5, 5, 20], use_subgroups=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to add arguments to parser for MotionCor</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of current project</dd>
+<dt><strong><code>pixel_size</code></strong> :&ensp;<code>float</code></dt>
+<dd>Image pixel size in Angstroms</dd>
+<dt><strong><code>output_folder</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to folder for storing motion-corrected images (Default: ./motioncor/)</dd>
+<dt><strong><code>file_prefix</code></strong> :&ensp;<code>str</code></dt>
+<dd>Common prefix of raw image files (Default: project)</dd>
+<dt><strong><code>no_gpu</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Use CPU only for motion-correction</dd>
+<dt><strong><code>jobs_per_gpu</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of job instance(s) per GPU</dd>
+<dt><strong><code>gpu_mem_usage</code></strong> :&ensp;<code>float</code></dt>
+<dd>MotionCor2 GPU memory usage</dd>
+<dt><strong><code>exec_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to MotionCor2 executable</dd>
+<dt><strong><code>use_gain</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to use gain reference file</dd>
+<dt><strong><code>gain</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to gain reference file (leave blank if use_gain==False)</dd>
+<dt><strong><code>super_res</code></strong> :&ensp;<code>bool</code></dt>
+<dd>True if super-resolution images used</dd>
+<dt><strong><code>discard_top</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of frames discarded from top per image</dd>
+<dt><strong><code>discard_bottom</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of frames discarded from bottom per image</dd>
+<dt><strong><code>tolerance</code></strong> :&ensp;<code>float</code></dt>
+<dd>Threshold of alignment errors in pixels</dd>
+<dt><strong><code>max_iter</code></strong> :&ensp;<code>int</code></dt>
+<dd>Maximum number of iterations performed by MotionCor2</dd>
+<dt><strong><code>patch_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>Size of patches used in alignment</dd>
+<dt><strong><code>use_subgroups</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Use subgroups in alignment</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Namespace</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    pixel_size={&#34;label&#34;: &#34;Pixel size (A) *&#34;,
+                &#34;step&#34;: 0.001},
+    output_folder={&#34;label&#34;: &#34;MC2 output folder&#34;},
+    file_prefix={&#34;label&#34;: &#34;File prefix (if different from project name)&#34;},
+    exec_path={&#34;label&#34;: &#34;Path to MC2 executable&#34;},
+    jobs_per_gpu={&#34;label&#34;: &#34;Jobs per GPU&#34;,
+                  &#34;min&#34;: 1},
+    gpu_mem_usage={&#34;label&#34;: &#34;GPU memory usage (if applicable)&#34;,
+                #    &#34;widget_type&#34;: &#34;FloatSlider&#34;,
+                   &#34;min&#34;: 0.1,
+                   &#34;max&#34;: 2.0},
+    use_gain={&#34;label&#34;: &#34;Use gain reference?&#34;},
+    gain={&#34;label&#34;: &#34;Gain reference file (if applicable)&#34;,
+          &#34;widget_type&#34;: &#34;FileEdit&#34;,
+          &#34;mode&#34;: &#34;w&#34;},
+    super_res={&#34;label&#34;: &#34;Super-resolution images?&#34;},
+    discard_top={&#34;label&#34;: &#34;# Frames discarded FROM TOP of images&#34;,
+                 &#34;min&#34;: 0},
+    discard_bottom={&#34;label&#34;: &#34;# Frames discarded FROM BOTTOM of images&#34;,
+                    &#34;min&#34;: 0},
+    tolerance={&#34;label&#34;: &#34;Alignment error threshold (in pixels)&#34;,
+               &#34;min&#34;: 0},
+    max_iter={&#34;label&#34;: &#34;Maximum MC2 iterations&#34;,
+              &#34;min&#34;: 1},
+    patch_size={&#34;widget_type&#34;: &#34;LiteralEvalLineEdit&#34;,
+                &#34;label&#34;: &#34;Patch configurations (Nx, Ny, %overlap)&#34;},
+    use_subgroups={&#34;label&#34;: &#34;Use subgroups in alignments&#34;}
+)
+def get_args_mc2(
+        project_name=&#34;&#34;,
+        pixel_size=0.0,
+        output_folder=Path(Path.cwd() / &#34;motioncor&#34;),
+        file_prefix=&#34;&#34;,
+        exec_path=Path(&#34;/opt/lmod/modules/motioncor2/1.4.0/MotionCor2_1.4.0/MotionCor2_1.4.0_Cuda110&#34;),
+        jobs_per_gpu=2,
+        gpu_mem_usage=1.0,
+        use_gain=False,
+        gain=&#34;&#34;,
+        super_res=False,
+        discard_top=0,
+        discard_bottom=0,
+        tolerance=0.5,
+        max_iter=10,
+        patch_size=[5,5,20],
+        use_subgroups=True,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for MotionCor
+
+    Args:
+        project_name (str): Name of current project
+        pixel_size (float): Image pixel size in Angstroms
+        output_folder (str): Path to folder for storing motion-corrected images (Default: ./motioncor/)
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        no_gpu (bool): Use CPU only for motion-correction
+        jobs_per_gpu (int): Number of job instance(s) per GPU
+        gpu_mem_usage (float): MotionCor2 GPU memory usage
+        exec_path (str): Path to MotionCor2 executable
+        use_gain (bool): Whether to use gain reference file
+        gain (str): Path to gain reference file (leave blank if use_gain==False)
+        super_res (bool): True if super-resolution images used
+        discard_top (int): Number of frames discarded from top per image
+        discard_bottom (int): Number of frames discarded from bottom per image
+        tolerance (float): Threshold of alignment errors in pixels
+        max_iter (int): Maximum number of iterations performed by MotionCor2
+        patch_size (int): Size of patches used in alignment
+        use_subgroups (bool): Use subgroups in alignment
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+    return locals()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.magicgui.get_args_new_proj"><code class="name flex">
+<span>def <span class="ident">get_args_new_proj</span></span>(<span>project_name='', source_folder=PosixPath('../raw'), folder_prefix='', file_prefix='', ext='mrc', stack_field=0, index_field=1, tiltangle_field=2, no_mdoc=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to add arguments to parser for new project</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of current project</dd>
+<dt><strong><code>source_folder</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to folder with raw images (Default: ../raw/)</dd>
+<dt><strong><code>folder_prefix</code></strong> :&ensp;<code>str</code></dt>
+<dd>Common prefix of raw tilt series folder(s)</dd>
+<dt><strong><code>file_prefix</code></strong> :&ensp;<code>str</code></dt>
+<dd>Common prefix of raw image files (Default: project)</dd>
+<dt><strong><code>ext</code></strong> :&ensp;<code>str</code></dt>
+<dd>Extension of raw image files (Default: mrc)</dd>
+<dt><strong><code>stack_field</code></strong> :&ensp;<code>int</code></dt>
+<dd>Field number of tilt series indices (Default: 0)</dd>
+<dt><strong><code>index_field</code></strong> :&ensp;<code>int</code></dt>
+<dd>Field number of image indices (Default: 1)</dd>
+<dt><strong><code>tiltangle_field</code></strong> :&ensp;<code>int</code></dt>
+<dd>Field number of tilt angles (Default: 2)</dd>
+<dt><strong><code>no_mdoc</code></strong> :&ensp;<code>bool</code></dt>
+<dd>True if no MDOC file provided (Default: False)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Namespace</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    source_folder={&#34;widget_type&#34;: &#34;FileEdit&#34;,
+                   &#34;label&#34;: &#34;Source folder *&#34;,
+                   &#34;mode&#34;: &#34;d&#34;},
+    folder_prefix={&#34;label&#34;: &#34;Folder prefix (if tilt series in subfolders)&#34;},
+    file_prefix={&#34;label&#34;: &#34;File prefix (if different from project name)&#34;},
+    ext={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+         &#34;label&#34;: &#34;Image file extension&#34;,
+         &#34;choices&#34;: [&#34;mrc&#34;, &#34;tif&#34;, &#34;eer&#34;]},
+    stack_field={&#34;min&#34;: 0,
+                 &#34;label&#34;: &#34;Stack index field #&#34;},
+    index_field={&#34;min&#34;: 0,
+                 &#34;label&#34;: &#34;Image index field #&#34;},
+    tiltangle_field={&#34;min&#34;: 0,
+                     &#34;label&#34;: &#34;Tilt angle field #&#34;},
+    no_mdoc={&#34;label&#34;: &#34;No MDOCs&#34;}
+)
+def get_args_new_proj(
+        project_name=&#34;&#34;,
+        source_folder=Path(&#34;../raw/&#34;),
+        folder_prefix=&#34;&#34;,
+        file_prefix=&#34;&#34;,
+        ext=&#34;mrc&#34;,
+        stack_field=0,
+        index_field=1,
+        tiltangle_field=2,
+        no_mdoc=False,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for new project
+
+    Args:
+        project_name (str): Name of current project
+        source_folder (str): Path to folder with raw images (Default: ../raw/)
+        folder_prefix (str): Common prefix of raw tilt series folder(s)
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        ext (str): Extension of raw image files (Default: mrc)
+        stack_field (int): Field number of tilt series indices (Default: 0)
+        index_field (int): Field number of image indices (Default: 1)
+        tiltangle_field (int): Field number of tilt angles (Default: 2)
+        no_mdoc (bool): True if no MDOC file provided (Default: False)
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.magicgui.get_args_recon"><code class="name flex">
+<span>def <span class="ident">get_args_recon</span></span>(<span>project_name='', do_positioning=False, unbinned_thickness=1500, correct_ctf=False, erase_gold=False, filtering=False, bin_factor=1, thickness=1500, use_sirt=False, sirt_iter=10, trimvol=True, trimvol_reorient='rotate')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to add arguments to parser for IMOD reconstruction</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of current project</dd>
+<dt><strong><code>do_positioning</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to perform positioning</dd>
+<dt><strong><code>unbinned_thickness</code></strong> :&ensp;<code>int</code></dt>
+<dd>Unbinned thickness (in pixels) for samples or whole tomogram for positioning</dd>
+<dt><strong><code>correct_ctf</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to correct CTF for aligned stacks</dd>
+<dt><strong><code>erase_gold</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to erase gold fiducials</dd>
+<dt><strong><code>filtering</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to perform 2D filtering</dd>
+<dt><strong><code>bin_factor</code></strong> :&ensp;<code>int</code></dt>
+<dd>Binning factor for aligned stack</dd>
+<dt><strong><code>thickness</code></strong> :&ensp;<code>int</code></dt>
+<dd>Thickness (in pixels) for reconstruction</dd>
+<dt><strong><code>trimvol</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Run Trimvol on reconstruction</dd>
+<dt><strong><code>trimvol_reorient</code></strong> :&ensp;<code>str</code></dt>
+<dd>Reorientation in Trimvol</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Namespace</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    do_positioning={&#34;label&#34;: &#34;Positioning: Do positioning?&#34;},
+    unbinned_thickness={&#34;label&#34;: &#34;Positioning: Unbinned thickness (in pixels) for samples or whole tomogram *&#34;,
+                        &#34;min&#34;: 0,
+                        &#34;max&#34;: 50000,
+                        &#34;step&#34;: 100},
+    correct_ctf={&#34;label&#34;: &#34;Aligned stack: Correct CTF for aligned stacks?&#34;},
+    erase_gold={&#34;label&#34;: &#34;Aligned stack: Erase gold fiducials?&#34;},
+    filtering={&#34;label&#34;: &#34;Aligned stack: Perform 2D filtering?&#34;},
+    bin_factor={&#34;label&#34;: &#34;Aligned stack: Binning factor for aligned stack&#34;,
+                &#34;min&#34;: 1},
+    thickness={&#34;label&#34;: &#34;Reconstruction: Thickness (in pixels) for reconstruction *&#34;,
+               &#34;min&#34;: 0,
+               &#34;max&#34;: 50000,
+               &#34;step&#34;: 100},
+    use_sirt={&#34;label&#34;: &#34;Use SIRT?&#34;},
+    sirt_iter={&#34;label&#34;: &#34;# of SIRT iterations (if applicable)&#34;},
+    trimvol={&#34;label&#34;: &#34;Postprocessing: Run Trimvol on reconstruction&#34;},
+    trimvol_reorient={&#34;widget_type&#34;: &#34;RadioButtons&#34;,
+                      &#34;label&#34;: &#34;Postprocessing: Reorientation in Trimvol (if applicable)&#34;,
+                      &#34;choices&#34;: [&#34;none&#34;, &#34;flip&#34;, &#34;rotate&#34;]}
+)
+def get_args_recon(
+        project_name=&#34;&#34;,
+        do_positioning=False,
+        unbinned_thickness=1500,
+        correct_ctf=False,
+        erase_gold=False,
+        filtering=False,
+        bin_factor=1,
+        thickness=1500,
+        use_sirt=False,
+        sirt_iter=10,
+        trimvol=True,
+        trimvol_reorient=&#34;rotate&#34;
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for IMOD reconstruction
+
+    Args:
+        project_name (str): Name of current project
+        do_positioning (bool): Whether to perform positioning
+        unbinned_thickness (int): Unbinned thickness (in pixels) for samples or whole tomogram for positioning
+        correct_ctf (bool): Whether to correct CTF for aligned stacks
+        erase_gold (bool): Whether to erase gold fiducials
+        filtering (bool): Whether to perform 2D filtering
+        bin_factor (int): Binning factor for aligned stack
+        thickness (int): Thickness (in pixels) for reconstruction
+        trimvol (bool): Run Trimvol on reconstruction
+        trimvol_reorient (str): Reorientation in Trimvol
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+    return locals()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.magicgui.get_args_rldeconv"><code class="name flex">
+<span>def <span class="ident">get_args_rldeconv</span></span>(<span>project_name='', file_suffix='', raw_folder=PosixPath('stacks'), image_type='mrc', psf_folder=PosixPath('PSF'), psf_type='mrc', output_folder=PosixPath('deconv'), device='GPU', niter=10, block=False, uint=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to add arguments to parser for RedLionfish deconvolution</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to raw image</dd>
+<dt><strong><code>image_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>File type of raw image</dd>
+<dt><strong><code>psf_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to PSF for deconvolution</dd>
+<dt><strong><code>psf_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>File type of PSF stack</dd>
+<dt><strong><code>output_path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to deconvolved image</dd>
+<dt><strong><code>device</code></strong> :&ensp;<code>str</code></dt>
+<dd>Device used for deconvolution</dd>
+<dt><strong><code>niter</code></strong> :&ensp;<code>int</code></dt>
+<dd>Max number of iteration in deconvolution</dd>
+<dt><strong><code>block</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to use block iterative algorithm for deconvolution</dd>
+<dt><strong><code>uint</code></strong> :&ensp;<code>int</code></dt>
+<dd>Whether to encode results as UInt8</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Namespace</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Get parameters&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    file_suffix={&#34;label&#34;: &#34;IMOD file suffix (if applicable)&#34;},
+    raw_folder={&#34;widget_type&#34;: &#34;FileEdit&#34;,
+                &#34;label&#34;: &#34;Folder containing raw stacks&#34;,
+                &#34;mode&#34;: &#34;d&#34;},
+    psf_folder={&#34;widget_type&#34;: &#34;FileEdit&#34;,
+                &#34;label&#34;: &#34;Folder containing PSF stacks&#34;,
+                &#34;mode&#34;: &#34;d&#34;},
+    image_type={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+                &#34;label&#34;: &#34;File type of raw image&#34;,
+                &#34;choices&#34;: [&#34;mrc&#34;, &#34;tiff&#34;]},
+    psf_type={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+              &#34;label&#34;: &#34;File type of PSF stack&#34;,
+              &#34;choices&#34;: [&#34;mrc&#34;, &#34;tiff&#34;]},
+    output_folder={&#34;widget_type&#34;: &#34;FileEdit&#34;,
+                   &#34;label&#34;: &#34;Folder for deconvolved image stacks&#34;,
+                   &#34;mode&#34;:&#34;w&#34;},
+    device={&#34;widget_type&#34;: &#34;ComboBox&#34;,
+            &#34;label&#34;: &#34;Device to be used for deconvolution&#34;,
+            &#34;choices&#34;: [&#34;GPU&#34;, &#34;CPU&#34;]},
+    niter={&#34;label&#34;: &#34;Max number of iterations used in deconvolution&#34;,
+           &#34;min&#34;: 1},
+    block={&#34;label&#34;: &#34;Use block-iterative algorithm?&#34;},
+    uint={&#34;label&#34;: &#34;Store results as UInt8?&#34;}
+)
+def get_args_rldeconv(
+        project_name=&#34;&#34;,
+        file_suffix=&#34;&#34;,
+        raw_folder=Path(&#34;./stacks/&#34;),
+        image_type=&#34;mrc&#34;,
+        psf_folder=Path(&#34;./PSF/&#34;),
+        psf_type=&#34;mrc&#34;,
+        output_folder=Path(&#34;./deconv/&#34;),
+        device=&#34;GPU&#34;,
+        niter=10,
+        block=False,
+        uint=False,
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for RedLionfish deconvolution
+
+    Args:
+        image_path (str): Path to raw image
+        image_type (str): File type of raw image
+        psf_path (str): Path to PSF for deconvolution
+        psf_type (str): File type of PSF stack
+        output_path (str): Path to deconvolved image
+        device (str): Device used for deconvolution
+        niter (int): Max number of iteration in deconvolution
+        block (bool): Whether to use block iterative algorithm for deconvolution
+        uint (int): Whether to encode results as UInt8
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.magicgui.get_args_savurecon"><code class="name flex">
+<span>def <span class="ident">get_args_savurecon</span></span>(<span>project_name='', stacks_folder=PosixPath('stacks'), output_path=PosixPath('savurecon'), rootname='', suffix='', extension='mrc', imod_suffix='ali', algorithm='CGLS_CUDA', n_iters=100)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to add arguments to parser for Savu reconstruction</p>
+<h2 id="args">Args</h2>
+<p>None</p>
+<h2 id="returns">Returns</h2>
+<p>Namespace</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@mg(
+    call_button=&#34;Create config file&#34;,
+    layout=&#34;vertical&#34;,
+    result_widget=False,
+
+    project_name={&#34;label&#34;: &#34;Project name *&#34;},
+    stacks_folder={
+        &#34;label&#34;: &#34;Path to parent folder with stacks&#34;,
+        &#34;mode&#34;: &#34;d&#34;},
+    output_path={
+        &#34;label&#34;: &#34;Path to output folder&#34;,
+        &#34;mode&#34;: &#34;d&#34;},
+    rootname={&#34;label&#34;: &#34;Rootname of current project (if different from project name)&#34;},
+    suffix={&#34;label&#34;: &#34;Suffix of project files&#34;},
+    extension={&#34;label&#34;: &#34;File extension of stacks *&#34;},
+    imod_suffix={&#34;label&#34;: &#34;IMOD file suffix&#34;},
+    algorithm={
+        &#34;widget_type&#34;: &#34;RadioButtons&#34;,
+        &#34;label&#34;: &#34;Reconstruction algorithm&#34;,
+        &#34;choices&#34;: [&#34;FBP_CUDA&#34;, &#34;SIRT_CUDA&#34;, &#34;SART_CUDA&#34;, &#34;CGLS_CUDA&#34;, &#34;BP_CUDA&#34;]},
+    n_iters={
+        &#34;label&#34;: &#34;Number of iterations (ignored if iterative reconstruction not used)&#34;,
+        &#34;min&#34;:1,}
+)
+def get_args_savurecon(
+        project_name=&#34;&#34;,
+        stacks_folder=Path(&#34;./stacks&#34;),
+        output_path=Path(&#34;./savurecon&#34;),
+        rootname=&#34;&#34;,
+        suffix=&#34;&#34;,
+        extension=&#34;mrc&#34;,
+        imod_suffix=&#34;ali&#34;,
+        algorithm=&#34;CGLS_CUDA&#34;,
+        n_iters=100
+):
+    &#34;&#34;&#34;
+    Function to add arguments to parser for Savu reconstruction
+
+    Args:
+        None
+
+    Returns:
+        Namespace
+    &#34;&#34;&#34;
+
+    return locals()</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Ot2Rec" href="index.html">Ot2Rec</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Ot2Rec.magicgui.get_args_align" href="#Ot2Rec.magicgui.get_args_align">get_args_align</a></code></li>
+<li><code><a title="Ot2Rec.magicgui.get_args_align_ext" href="#Ot2Rec.magicgui.get_args_align_ext">get_args_align_ext</a></code></li>
+<li><code><a title="Ot2Rec.magicgui.get_args_aretomo" href="#Ot2Rec.magicgui.get_args_aretomo">get_args_aretomo</a></code></li>
+<li><code><a title="Ot2Rec.magicgui.get_args_ctffind" href="#Ot2Rec.magicgui.get_args_ctffind">get_args_ctffind</a></code></li>
+<li><code><a title="Ot2Rec.magicgui.get_args_ctfsim" href="#Ot2Rec.magicgui.get_args_ctfsim">get_args_ctfsim</a></code></li>
+<li><code><a title="Ot2Rec.magicgui.get_args_exclude_bad_tilts" href="#Ot2Rec.magicgui.get_args_exclude_bad_tilts">get_args_exclude_bad_tilts</a></code></li>
+<li><code><a title="Ot2Rec.magicgui.get_args_imod_route" href="#Ot2Rec.magicgui.get_args_imod_route">get_args_imod_route</a></code></li>
+<li><code><a title="Ot2Rec.magicgui.get_args_mc2" href="#Ot2Rec.magicgui.get_args_mc2">get_args_mc2</a></code></li>
+<li><code><a title="Ot2Rec.magicgui.get_args_new_proj" href="#Ot2Rec.magicgui.get_args_new_proj">get_args_new_proj</a></code></li>
+<li><code><a title="Ot2Rec.magicgui.get_args_recon" href="#Ot2Rec.magicgui.get_args_recon">get_args_recon</a></code></li>
+<li><code><a title="Ot2Rec.magicgui.get_args_rldeconv" href="#Ot2Rec.magicgui.get_args_rldeconv">get_args_rldeconv</a></code></li>
+<li><code><a title="Ot2Rec.magicgui.get_args_savurecon" href="#Ot2Rec.magicgui.get_args_savurecon">get_args_savurecon</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

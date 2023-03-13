@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>Ot2Rec.ctffind API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Ot2Rec.ctffind</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># Copyright 2021 Rosalind Franklin Institute
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# &#34;AS IS&#34; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+
+import os
+import argparse
+import subprocess
+import contextlib
+import multiprocessing as mp
+import joblib
+import yaml
+from tqdm import tqdm
+import pandas as pd
+from icecream import ic
+
+from . import user_args as uaMod
+from . import magicgui as mgMod
+from . import metadata as mdMod
+from . import logger as logMod
+from . import params as prmMod
+
+
+@contextlib.contextmanager
+def tqdm_joblib(tqdm_object):
+    &#34;&#34;&#34;
+    Context manager to patch joblib to report into tqdm progress bar given as argument
+    &#34;&#34;&#34;
+    class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
+        def __call__(self, *args, **kwargs):
+            tqdm_object.update(n=self.batch_size)
+            return super().__call__(*args, **kwargs)
+
+    old_batch_callback = joblib.parallel.BatchCompletionCallBack
+    joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
+    try:
+        yield tqdm_object
+    finally:
+        joblib.parallel.BatchCompletionCallBack = old_batch_callback
+        tqdm_object.close()
+
+
+class ctffind():
+    &#34;&#34;&#34;
+    Class encapsulating a ctffind object
+    &#34;&#34;&#34;
+
+    def __init__(self,
+                 project_name,
+                 md_in,
+                 params_in,
+                 logger_in,
+                 ):
+        &#34;&#34;&#34;
+        Initialising a ctffind object
+
+        Args:
+            project_name (str): name of current project
+            md_in (Metadata): metadata containing information of tilt-series to be processed
+            params_in (Params): params object containing configurations for ctffind
+            logger_in (Logger): logger object for recording ctffind process
+        &#34;&#34;&#34;
+
+        self.proj_name = project_name
+
+        self.prmObj = params_in
+        self.params = self.prmObj.params
+
+        self.logObj = logger_in
+        self.log = []
+
+        self._process_list = self.params[&#39;System&#39;][&#39;process_list&#39;]
+        self.meta = pd.DataFrame(md_in.metadata)
+        self.meta = self.meta[self.meta[&#39;ts&#39;].isin(self._process_list)]
+
+        self._get_images()
+        self.no_processes = False
+        self._check_processed_images()
+        self._set_output_path()
+
+        # Check if output folder exists, create if not
+        if not os.path.isdir(self.params[&#39;System&#39;][&#39;output_path&#39;]):
+            subprocess.run([&#39;mkdir&#39;, self.params[&#39;System&#39;][&#39;output_path&#39;]],
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
+                           encoding=&#39;ascii&#39;,
+                           check=True,
+                           )
+
+    def _get_images(self):
+        &#34;&#34;&#34;
+        Method to extract images for ctffind
+        Note: one image per tilt-series, criterion: image closest to 0 tilt angle
+        &#34;&#34;&#34;
+
+        self.ctf_images = pd.DataFrame(columns=self.meta.columns)
+        for curr_ts in self._process_list:
+            temp = self.meta[self.meta[&#39;ts&#39;] == curr_ts]
+            self.ctf_images = pd.concat([self.ctf_images, temp],
+                                        ignore_index=True)
+
+    def _set_output_path(self):
+        &#34;&#34;&#34;
+        Subroutine to set input and output path for &#34;ctffound&#34; images
+        &#34;&#34;&#34;
+        # copy values from output column to file_paths (input) column
+        self.ctf_images[&#39;file_paths&#39;] = self.ctf_images.apply(lambda df: df[&#39;output&#39;], axis=1)
+
+        # update output column
+        self.ctf_images[&#39;output&#39;] = self.ctf_images.apply(
+            lambda row: f&#34;{self.params[&#39;System&#39;][&#39;output_path&#39;]}/&#34;
+            f&#34;{self.params[&#39;System&#39;][&#39;output_prefix&#39;]}_{row[&#39;ts&#39;]:04}_{row[&#39;angles&#39;]}_ctffind.mrc&#34;, axis=1)
+
+    def _check_processed_images(self):
+        &#34;&#34;&#34;
+        Method to check images which have already been processed before
+        &#34;&#34;&#34;
+        # Create new empty internal output metadata if no record exists
+        if not os.path.isfile(self.proj_name + &#39;_ctffind_mdout.yaml&#39;):
+            self.meta_out = pd.DataFrame(columns=self.meta.columns)
+
+        # Read in serialised metadata and turn into DataFrame if record exists
+        else:
+            _meta_record = mdMod.read_md_yaml(project_name=self.proj_name,
+                                              job_type=&#39;ctffind&#39;,
+                                              filename=self.proj_name + &#39;_ctffind_mdout.yaml&#39;)
+            self.meta_out = pd.DataFrame(_meta_record.metadata)
+        self.meta_out.drop_duplicates(inplace=True)
+
+        # Compare output metadata and output folder
+        # If a file (in specified TS) is in record but missing, remove from record
+        if len(self.meta_out) &gt; 0:
+            self._missing = self.meta_out.loc[~self.meta_out[&#39;output&#39;].apply(lambda x: os.path.isfile(x))]
+            self._missing_specified = pd.DataFrame(columns=self.meta.columns)
+
+            for curr_ts in self.params[&#39;System&#39;][&#39;process_list&#39;]:
+                _to_append = self._missing[self._missing[&#39;ts&#39;] == curr_ts]
+                self._missing_specified = pd.concat([self._missing_specified, _to_append],
+                                                    ignore_index=True,
+                                                    )
+            self._merged = self.meta_out.merge(self._missing_specified, how=&#39;left&#39;, indicator=True)
+            self.meta_out = self.meta_out[self._merged[&#39;_merge&#39;] == &#39;left_only&#39;]
+
+            if len(self._missing_specified) &gt; 0:
+                self.logObj(f&#34;Info: {len(self._missing_specified)} images in record missing in folder. &#34;
+                            &#34;Will be added back for processing.&#34;)
+
+        # Drop the items in input metadata if they are in the output record
+        _ignored = self.ctf_images[self.ctf_images.output.isin(self.meta_out.file_paths)]
+        if len(_ignored) &gt; 0 and len(_ignored) &lt; len(self.ctf_images):
+            self.logObj(f&#34;Info: {len(_ignored)} images had been processed and will be omitted.&#34;)
+        elif len(_ignored) == len(self.ctf_images):
+            self.logObj(&#34;Info: All specified images had been processed. Nothing will be done.&#34;)
+            self.no_processes = True
+
+        self._merged = self.ctf_images.merge(_ignored, how=&#39;left&#39;, indicator=True)
+        self.ctf_images = self.ctf_images[self._merged[&#39;_merge&#39;] == &#39;left_only&#39;]
+        self._process_list = self.ctf_images[&#39;ts&#39;].sort_values(ascending=True).unique().tolist()
+
+    def _get_ctffind_command(self, image):
+        &#34;&#34;&#34;
+        Function to return command for CTFfind
+
+        Args:
+            ts (int): index of curent tilt-series
+        &#34;&#34;&#34;
+
+        self.cmd = [self.params[&#39;ctffind&#39;][&#39;ctffind_path&#39;]]
+        input_dict = [image[&#39;file_paths&#39;],
+                      image[&#39;output&#39;],
+                      str(self.params[&#39;ctffind&#39;][&#39;pixel_size&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;voltage&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;spherical_aberration&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;amp_contrast&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;amp_spec_size&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;resolution_min&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;resolution_max&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;defocus_min&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;defocus_max&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;defocus_step&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;astigm_type&#39;]) if self.params[&#39;ctffind&#39;][&#39;astigm_type&#39;] else &#39;no&#39;,
+                      &#39;yes&#39; if self.params[&#39;ctffind&#39;][&#39;exhaustive_search&#39;] else &#39;no&#39;,
+                      &#39;yes&#39; if self.params[&#39;ctffind&#39;][&#39;astigm_restraint&#39;] else &#39;no&#39;,
+                      &#39;yes&#39; if self.params[&#39;ctffind&#39;][&#39;phase_shift&#39;] else &#39;no&#39;,
+                      &#39;no&#39;]
+        self.input_string = &#39;\n&#39;.join(input_dict)
+
+
+    def _ctffind_single(self, idx):
+        self._get_ctffind_command(self.ctf_images.iloc[idx])
+        ctffind_run = subprocess.run(self.cmd,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT,
+                                     input=self.input_string,
+                                     encoding=&#39;ascii&#39;,
+                                     check=True,
+        )
+
+        try:
+            assert(not ctffind_run.stderr)
+        except:
+            error_count += 1
+            self.logObj(f&#34;CTFFind4: An error has occurred ({ctffind_run.returncode}) &#34;
+                        f&#34;on stack{index}.&#34;)
+
+        self.stdout = ctffind_run.stdout
+        self.update_ctffind_metadata()
+        self.export_metadata()
+
+
+    def run_ctffind(self):
+        &#34;&#34;&#34;
+        Method to run ctffind on tilt-series sequentially
+        &#34;&#34;&#34;
+        # Add log entry when job starts
+        self.logObj(&#34;Ot2Rec-CTFFind4 started.&#34;)
+
+        error_count = 0
+        ts_list = list(self.ctf_images.iterrows())
+        tqdm_iter = tqdm(ts_list, ncols=100)
+
+        with tqdm_joblib(tqdm_iter) as progress_bar:
+            joblib.Parallel(n_jobs=mp.cpu_count())(
+                joblib.delayed(self._ctffind_single)(idx) for idx in range(len(ts_list))
+            )
+
+
+        # Log progress when all jobs have successfully terminated
+        if error_count == 0:
+            self.logObj(&#34;All Ot2Rec-CTFFind4 jobs successfully finished.&#34;)
+        else:
+            self.logObj(&#34;WARNING: All Ot2Rec-CTTFFind4 jobs finished.&#34;
+                        f&#34;{error_count} of {len(tqdm_iter)} jobs failed.&#34;
+            )
+
+
+    def update_ctffind_metadata(self):
+        &#34;&#34;&#34;
+        Subroutine to update metadata after one set of runs
+        &#34;&#34;&#34;
+
+        # Search for files with output paths specified in the metadata
+        # If the files don&#39;t exist, keep the line in the input metadata
+        # If they do, move them to the output metadata
+
+        _to_append = self.ctf_images.loc[self.ctf_images[&#39;output&#39;].apply(lambda x: os.path.isfile(x))]
+        self.meta_out = pd.concat([self.meta_out, _to_append],
+                                  ignore_index=True)
+        self.ctf_images = self.ctf_images.loc[~self.ctf_images[&#39;output&#39;].apply(lambda x: os.path.isfile(x))]
+
+        # Sometimes data might be duplicated (unlikely) -- need to drop the duplicates
+        self.meta_out.drop_duplicates(inplace=True)
+
+    def export_metadata(self):
+        &#34;&#34;&#34;
+        Method to serialise output metadata, export as yaml
+        &#34;&#34;&#34;
+
+        yaml_file = self.proj_name + &#39;_ctffind_mdout.yaml&#39;
+
+        with open(yaml_file, &#39;w&#39;) as f:
+            yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False)
+
+
+&#34;&#34;&#34;
+PLUGIN METHODS
+&#34;&#34;&#34;
+
+
+def create_yaml():
+    &#34;&#34;&#34;
+    Subroutine to create new yaml file for ctffind
+    &#34;&#34;&#34;
+    logger = logMod.Logger(log_path=&#34;o2r_ctffind.log&#34;)
+
+    # Parse user inputs
+    args = mgMod.get_args_ctffind.show(run=True)
+
+    # Create the yaml file, then automatically update it
+    prmMod.new_ctffind_yaml(args)
+    update_yaml(args)
+
+    logger(message=&#34;MotionCor2 metadata file created.&#34;)
+
+
+def update_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to update yaml file for ctffind
+
+    Args:
+        args (Namespace): Arguments obtained from user
+    &#34;&#34;&#34;
+    logger = logMod.Logger(log_path=&#34;o2r_ctffind.log&#34;)
+
+    # Check if ctffind and motioncorr yaml files exist
+    ctf_yaml_name = args.project_name.value + &#39;_ctffind.yaml&#39;
+    mc2_yaml_name = args.project_name.value + &#39;_mc2.yaml&#39;
+    if not os.path.isfile(ctf_yaml_name):
+        logger(level=&#34;error&#34;,
+               message=&#34;CTFFind4 config file not found.&#34;)
+        raise IOError(&#34;Error in Ot2Rec.main.update_ctffind_yaml: ctffind config file not found.&#34;)
+    if not os.path.isfile(mc2_yaml_name):
+        logger(level=&#34;error&#34;,
+               message=&#34;MotionCor2 config file not found.&#34;)
+        raise IOError(&#34;Error in Ot2Rec.main.update_ctffind_yaml: motioncorr config file not found.&#34;)
+
+    # Read in MC2 metadata (as Pandas dataframe)
+    # We only need the TS number and the tilt angle for comparisons at this stage
+    mc2_md_name = args.project_name.value + &#39;_mc2_mdout.yaml&#39;
+    with open(mc2_md_name, &#39;r&#39;) as f:
+        mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[[&#39;ts&#39;, &#39;angles&#39;]]
+    logger(message=&#34;MotionCor2 metadata read successfully.&#34;)
+
+    # Read in previous ctffind output metadata (as Pandas dataframe) for old projects
+    ctf_md_name = args.project_name.value + &#39;_ctffind_mdout.yaml&#39;
+    if os.path.isfile(ctf_md_name):
+        is_old_project = True
+        with open(ctf_md_name, &#39;r&#39;) as f:
+            ctf_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[[&#39;ts&#39;, &#39;angles&#39;]]
+        logger(message=&#34;Previous CTFFind metadata found and read.&#34;)
+    else:
+        is_old_project = False
+        logger(message=&#34;Previous CTFFind metadata not found.&#34;)
+
+    # Diff the two dataframes to get numbers of tilt-series with unprocessed data
+    if is_old_project:
+        merged_md = mc2_md.merge(ctf_md,
+                                 how=&#39;outer&#39;,
+                                 indicator=True)
+        unprocessed_images = merged_md.loc[lambda x: x[&#39;_merge&#39;] == &#39;left_only&#39;]
+    else:
+        unprocessed_images = mc2_md
+
+    unique_ts_numbers = unprocessed_images[&#39;ts&#39;].sort_values(ascending=True).unique().tolist()
+
+    # Read in ctffind yaml file, modify, and update
+    # read in MC2 yaml as well (some parameters depend on MC2 settings)
+    ctf_params = prmMod.read_yaml(project_name=args.project_name.value,
+                                  filename=ctf_yaml_name)
+    mc2_params = prmMod.read_yaml(project_name=args.project_name.value,
+                                  filename=mc2_yaml_name)
+
+    ctf_params.params[&#39;System&#39;][&#39;process_list&#39;] = unique_ts_numbers
+    ctf_params.params[&#39;ctffind&#39;][&#39;pixel_size&#39;] = mc2_params.params[&#39;MC2&#39;][&#39;desired_pixel_size&#39;]
+
+    with open(ctf_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(ctf_params.params, f, indent=4, sort_keys=False)
+
+    logger(message=&#34;CTFFind metadata updated.&#34;)
+
+
+def run(exclusive=True, args_in=None):
+    &#34;&#34;&#34;
+    Method to run ctffind
+    &#34;&#34;&#34;
+    logger = logMod.Logger(log_path=&#34;o2r_ctffind.log&#34;)
+
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument(&#34;project_name&#34;,
+                            type=str,
+                            help=&#34;Name of current project&#34;)
+        args = parser.parse_args()
+        project_name = args.project_name
+    else:
+        project_name = args_in.project_name.value
+
+    # Check if prerequisite files exist
+    ctffind_yaml = project_name + &#39;_ctffind.yaml&#39;
+    mc2_md_file = project_name + &#39;_mc2_mdout.yaml&#39;
+
+    if not os.path.isfile(ctffind_yaml):
+        logger(level=&#34;error&#34;,
+               msg=&#34;CTFFind yaml config not found.&#34;)
+        raise IOError(&#34;Error in Ot2Rec.main.run_ctffind: ctffind yaml config not found.&#34;)
+    if not os.path.isfile(mc2_md_file):
+        logger(level=&#34;error&#34;,
+               msg=&#34;MC2 output metadata not found.&#34;)
+        raise IOError(&#34;Error in Ot2Rec.main.run_ctffind: MC2 output metadata not found.&#34;)
+
+    # Read in config and metadata
+    ctffind_config = prmMod.read_yaml(project_name=project_name,
+                                      filename=ctffind_yaml)
+    mc2_md = mdMod.read_md_yaml(project_name=project_name,
+                                job_type=&#39;ctffind&#39;,
+                                filename=mc2_md_file)
+
+    # Create ctffind object
+    ctffind_obj = ctffind(project_name=project_name,
+                          md_in=mc2_md,
+                          params_in=ctffind_config,
+                          logger_in=logger,
+    )
+
+    if not ctffind_obj.no_processes:
+        ctffind_obj.run_ctffind()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Ot2Rec.ctffind.create_yaml"><code class="name flex">
+<span>def <span class="ident">create_yaml</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subroutine to create new yaml file for ctffind</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_yaml():
+    &#34;&#34;&#34;
+    Subroutine to create new yaml file for ctffind
+    &#34;&#34;&#34;
+    logger = logMod.Logger(log_path=&#34;o2r_ctffind.log&#34;)
+
+    # Parse user inputs
+    args = mgMod.get_args_ctffind.show(run=True)
+
+    # Create the yaml file, then automatically update it
+    prmMod.new_ctffind_yaml(args)
+    update_yaml(args)
+
+    logger(message=&#34;MotionCor2 metadata file created.&#34;)</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.ctffind.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>exclusive=True, args_in=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Method to run ctffind</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run(exclusive=True, args_in=None):
+    &#34;&#34;&#34;
+    Method to run ctffind
+    &#34;&#34;&#34;
+    logger = logMod.Logger(log_path=&#34;o2r_ctffind.log&#34;)
+
+    if exclusive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument(&#34;project_name&#34;,
+                            type=str,
+                            help=&#34;Name of current project&#34;)
+        args = parser.parse_args()
+        project_name = args.project_name
+    else:
+        project_name = args_in.project_name.value
+
+    # Check if prerequisite files exist
+    ctffind_yaml = project_name + &#39;_ctffind.yaml&#39;
+    mc2_md_file = project_name + &#39;_mc2_mdout.yaml&#39;
+
+    if not os.path.isfile(ctffind_yaml):
+        logger(level=&#34;error&#34;,
+               msg=&#34;CTFFind yaml config not found.&#34;)
+        raise IOError(&#34;Error in Ot2Rec.main.run_ctffind: ctffind yaml config not found.&#34;)
+    if not os.path.isfile(mc2_md_file):
+        logger(level=&#34;error&#34;,
+               msg=&#34;MC2 output metadata not found.&#34;)
+        raise IOError(&#34;Error in Ot2Rec.main.run_ctffind: MC2 output metadata not found.&#34;)
+
+    # Read in config and metadata
+    ctffind_config = prmMod.read_yaml(project_name=project_name,
+                                      filename=ctffind_yaml)
+    mc2_md = mdMod.read_md_yaml(project_name=project_name,
+                                job_type=&#39;ctffind&#39;,
+                                filename=mc2_md_file)
+
+    # Create ctffind object
+    ctffind_obj = ctffind(project_name=project_name,
+                          md_in=mc2_md,
+                          params_in=ctffind_config,
+                          logger_in=logger,
+    )
+
+    if not ctffind_obj.no_processes:
+        ctffind_obj.run_ctffind()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.ctffind.tqdm_joblib"><code class="name flex">
+<span>def <span class="ident">tqdm_joblib</span></span>(<span>tqdm_object)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Context manager to patch joblib to report into tqdm progress bar given as argument</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@contextlib.contextmanager
+def tqdm_joblib(tqdm_object):
+    &#34;&#34;&#34;
+    Context manager to patch joblib to report into tqdm progress bar given as argument
+    &#34;&#34;&#34;
+    class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
+        def __call__(self, *args, **kwargs):
+            tqdm_object.update(n=self.batch_size)
+            return super().__call__(*args, **kwargs)
+
+    old_batch_callback = joblib.parallel.BatchCompletionCallBack
+    joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
+    try:
+        yield tqdm_object
+    finally:
+        joblib.parallel.BatchCompletionCallBack = old_batch_callback
+        tqdm_object.close()</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.ctffind.update_yaml"><code class="name flex">
+<span>def <span class="ident">update_yaml</span></span>(<span>args)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subroutine to update yaml file for ctffind</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>args</code></strong> :&ensp;<code>Namespace</code></dt>
+<dd>Arguments obtained from user</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to update yaml file for ctffind
+
+    Args:
+        args (Namespace): Arguments obtained from user
+    &#34;&#34;&#34;
+    logger = logMod.Logger(log_path=&#34;o2r_ctffind.log&#34;)
+
+    # Check if ctffind and motioncorr yaml files exist
+    ctf_yaml_name = args.project_name.value + &#39;_ctffind.yaml&#39;
+    mc2_yaml_name = args.project_name.value + &#39;_mc2.yaml&#39;
+    if not os.path.isfile(ctf_yaml_name):
+        logger(level=&#34;error&#34;,
+               message=&#34;CTFFind4 config file not found.&#34;)
+        raise IOError(&#34;Error in Ot2Rec.main.update_ctffind_yaml: ctffind config file not found.&#34;)
+    if not os.path.isfile(mc2_yaml_name):
+        logger(level=&#34;error&#34;,
+               message=&#34;MotionCor2 config file not found.&#34;)
+        raise IOError(&#34;Error in Ot2Rec.main.update_ctffind_yaml: motioncorr config file not found.&#34;)
+
+    # Read in MC2 metadata (as Pandas dataframe)
+    # We only need the TS number and the tilt angle for comparisons at this stage
+    mc2_md_name = args.project_name.value + &#39;_mc2_mdout.yaml&#39;
+    with open(mc2_md_name, &#39;r&#39;) as f:
+        mc2_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[[&#39;ts&#39;, &#39;angles&#39;]]
+    logger(message=&#34;MotionCor2 metadata read successfully.&#34;)
+
+    # Read in previous ctffind output metadata (as Pandas dataframe) for old projects
+    ctf_md_name = args.project_name.value + &#39;_ctffind_mdout.yaml&#39;
+    if os.path.isfile(ctf_md_name):
+        is_old_project = True
+        with open(ctf_md_name, &#39;r&#39;) as f:
+            ctf_md = pd.DataFrame(yaml.load(f, Loader=yaml.FullLoader))[[&#39;ts&#39;, &#39;angles&#39;]]
+        logger(message=&#34;Previous CTFFind metadata found and read.&#34;)
+    else:
+        is_old_project = False
+        logger(message=&#34;Previous CTFFind metadata not found.&#34;)
+
+    # Diff the two dataframes to get numbers of tilt-series with unprocessed data
+    if is_old_project:
+        merged_md = mc2_md.merge(ctf_md,
+                                 how=&#39;outer&#39;,
+                                 indicator=True)
+        unprocessed_images = merged_md.loc[lambda x: x[&#39;_merge&#39;] == &#39;left_only&#39;]
+    else:
+        unprocessed_images = mc2_md
+
+    unique_ts_numbers = unprocessed_images[&#39;ts&#39;].sort_values(ascending=True).unique().tolist()
+
+    # Read in ctffind yaml file, modify, and update
+    # read in MC2 yaml as well (some parameters depend on MC2 settings)
+    ctf_params = prmMod.read_yaml(project_name=args.project_name.value,
+                                  filename=ctf_yaml_name)
+    mc2_params = prmMod.read_yaml(project_name=args.project_name.value,
+                                  filename=mc2_yaml_name)
+
+    ctf_params.params[&#39;System&#39;][&#39;process_list&#39;] = unique_ts_numbers
+    ctf_params.params[&#39;ctffind&#39;][&#39;pixel_size&#39;] = mc2_params.params[&#39;MC2&#39;][&#39;desired_pixel_size&#39;]
+
+    with open(ctf_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(ctf_params.params, f, indent=4, sort_keys=False)
+
+    logger(message=&#34;CTFFind metadata updated.&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Ot2Rec.ctffind.ctffind"><code class="flex name class">
+<span>class <span class="ident">ctffind</span></span>
+<span>(</span><span>project_name, md_in, params_in, logger_in)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Class encapsulating a ctffind object</p>
+<p>Initialising a ctffind object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>name of current project</dd>
+<dt><strong><code>md_in</code></strong> :&ensp;<code>Metadata</code></dt>
+<dd>metadata containing information of tilt-series to be processed</dd>
+<dt><strong><code>params_in</code></strong> :&ensp;<code>Params</code></dt>
+<dd>params object containing configurations for ctffind</dd>
+<dt><strong><code>logger_in</code></strong> :&ensp;<code>Logger</code></dt>
+<dd>logger object for recording ctffind process</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ctffind():
+    &#34;&#34;&#34;
+    Class encapsulating a ctffind object
+    &#34;&#34;&#34;
+
+    def __init__(self,
+                 project_name,
+                 md_in,
+                 params_in,
+                 logger_in,
+                 ):
+        &#34;&#34;&#34;
+        Initialising a ctffind object
+
+        Args:
+            project_name (str): name of current project
+            md_in (Metadata): metadata containing information of tilt-series to be processed
+            params_in (Params): params object containing configurations for ctffind
+            logger_in (Logger): logger object for recording ctffind process
+        &#34;&#34;&#34;
+
+        self.proj_name = project_name
+
+        self.prmObj = params_in
+        self.params = self.prmObj.params
+
+        self.logObj = logger_in
+        self.log = []
+
+        self._process_list = self.params[&#39;System&#39;][&#39;process_list&#39;]
+        self.meta = pd.DataFrame(md_in.metadata)
+        self.meta = self.meta[self.meta[&#39;ts&#39;].isin(self._process_list)]
+
+        self._get_images()
+        self.no_processes = False
+        self._check_processed_images()
+        self._set_output_path()
+
+        # Check if output folder exists, create if not
+        if not os.path.isdir(self.params[&#39;System&#39;][&#39;output_path&#39;]):
+            subprocess.run([&#39;mkdir&#39;, self.params[&#39;System&#39;][&#39;output_path&#39;]],
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
+                           encoding=&#39;ascii&#39;,
+                           check=True,
+                           )
+
+    def _get_images(self):
+        &#34;&#34;&#34;
+        Method to extract images for ctffind
+        Note: one image per tilt-series, criterion: image closest to 0 tilt angle
+        &#34;&#34;&#34;
+
+        self.ctf_images = pd.DataFrame(columns=self.meta.columns)
+        for curr_ts in self._process_list:
+            temp = self.meta[self.meta[&#39;ts&#39;] == curr_ts]
+            self.ctf_images = pd.concat([self.ctf_images, temp],
+                                        ignore_index=True)
+
+    def _set_output_path(self):
+        &#34;&#34;&#34;
+        Subroutine to set input and output path for &#34;ctffound&#34; images
+        &#34;&#34;&#34;
+        # copy values from output column to file_paths (input) column
+        self.ctf_images[&#39;file_paths&#39;] = self.ctf_images.apply(lambda df: df[&#39;output&#39;], axis=1)
+
+        # update output column
+        self.ctf_images[&#39;output&#39;] = self.ctf_images.apply(
+            lambda row: f&#34;{self.params[&#39;System&#39;][&#39;output_path&#39;]}/&#34;
+            f&#34;{self.params[&#39;System&#39;][&#39;output_prefix&#39;]}_{row[&#39;ts&#39;]:04}_{row[&#39;angles&#39;]}_ctffind.mrc&#34;, axis=1)
+
+    def _check_processed_images(self):
+        &#34;&#34;&#34;
+        Method to check images which have already been processed before
+        &#34;&#34;&#34;
+        # Create new empty internal output metadata if no record exists
+        if not os.path.isfile(self.proj_name + &#39;_ctffind_mdout.yaml&#39;):
+            self.meta_out = pd.DataFrame(columns=self.meta.columns)
+
+        # Read in serialised metadata and turn into DataFrame if record exists
+        else:
+            _meta_record = mdMod.read_md_yaml(project_name=self.proj_name,
+                                              job_type=&#39;ctffind&#39;,
+                                              filename=self.proj_name + &#39;_ctffind_mdout.yaml&#39;)
+            self.meta_out = pd.DataFrame(_meta_record.metadata)
+        self.meta_out.drop_duplicates(inplace=True)
+
+        # Compare output metadata and output folder
+        # If a file (in specified TS) is in record but missing, remove from record
+        if len(self.meta_out) &gt; 0:
+            self._missing = self.meta_out.loc[~self.meta_out[&#39;output&#39;].apply(lambda x: os.path.isfile(x))]
+            self._missing_specified = pd.DataFrame(columns=self.meta.columns)
+
+            for curr_ts in self.params[&#39;System&#39;][&#39;process_list&#39;]:
+                _to_append = self._missing[self._missing[&#39;ts&#39;] == curr_ts]
+                self._missing_specified = pd.concat([self._missing_specified, _to_append],
+                                                    ignore_index=True,
+                                                    )
+            self._merged = self.meta_out.merge(self._missing_specified, how=&#39;left&#39;, indicator=True)
+            self.meta_out = self.meta_out[self._merged[&#39;_merge&#39;] == &#39;left_only&#39;]
+
+            if len(self._missing_specified) &gt; 0:
+                self.logObj(f&#34;Info: {len(self._missing_specified)} images in record missing in folder. &#34;
+                            &#34;Will be added back for processing.&#34;)
+
+        # Drop the items in input metadata if they are in the output record
+        _ignored = self.ctf_images[self.ctf_images.output.isin(self.meta_out.file_paths)]
+        if len(_ignored) &gt; 0 and len(_ignored) &lt; len(self.ctf_images):
+            self.logObj(f&#34;Info: {len(_ignored)} images had been processed and will be omitted.&#34;)
+        elif len(_ignored) == len(self.ctf_images):
+            self.logObj(&#34;Info: All specified images had been processed. Nothing will be done.&#34;)
+            self.no_processes = True
+
+        self._merged = self.ctf_images.merge(_ignored, how=&#39;left&#39;, indicator=True)
+        self.ctf_images = self.ctf_images[self._merged[&#39;_merge&#39;] == &#39;left_only&#39;]
+        self._process_list = self.ctf_images[&#39;ts&#39;].sort_values(ascending=True).unique().tolist()
+
+    def _get_ctffind_command(self, image):
+        &#34;&#34;&#34;
+        Function to return command for CTFfind
+
+        Args:
+            ts (int): index of curent tilt-series
+        &#34;&#34;&#34;
+
+        self.cmd = [self.params[&#39;ctffind&#39;][&#39;ctffind_path&#39;]]
+        input_dict = [image[&#39;file_paths&#39;],
+                      image[&#39;output&#39;],
+                      str(self.params[&#39;ctffind&#39;][&#39;pixel_size&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;voltage&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;spherical_aberration&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;amp_contrast&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;amp_spec_size&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;resolution_min&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;resolution_max&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;defocus_min&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;defocus_max&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;defocus_step&#39;]),
+                      str(self.params[&#39;ctffind&#39;][&#39;astigm_type&#39;]) if self.params[&#39;ctffind&#39;][&#39;astigm_type&#39;] else &#39;no&#39;,
+                      &#39;yes&#39; if self.params[&#39;ctffind&#39;][&#39;exhaustive_search&#39;] else &#39;no&#39;,
+                      &#39;yes&#39; if self.params[&#39;ctffind&#39;][&#39;astigm_restraint&#39;] else &#39;no&#39;,
+                      &#39;yes&#39; if self.params[&#39;ctffind&#39;][&#39;phase_shift&#39;] else &#39;no&#39;,
+                      &#39;no&#39;]
+        self.input_string = &#39;\n&#39;.join(input_dict)
+
+
+    def _ctffind_single(self, idx):
+        self._get_ctffind_command(self.ctf_images.iloc[idx])
+        ctffind_run = subprocess.run(self.cmd,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT,
+                                     input=self.input_string,
+                                     encoding=&#39;ascii&#39;,
+                                     check=True,
+        )
+
+        try:
+            assert(not ctffind_run.stderr)
+        except:
+            error_count += 1
+            self.logObj(f&#34;CTFFind4: An error has occurred ({ctffind_run.returncode}) &#34;
+                        f&#34;on stack{index}.&#34;)
+
+        self.stdout = ctffind_run.stdout
+        self.update_ctffind_metadata()
+        self.export_metadata()
+
+
+    def run_ctffind(self):
+        &#34;&#34;&#34;
+        Method to run ctffind on tilt-series sequentially
+        &#34;&#34;&#34;
+        # Add log entry when job starts
+        self.logObj(&#34;Ot2Rec-CTFFind4 started.&#34;)
+
+        error_count = 0
+        ts_list = list(self.ctf_images.iterrows())
+        tqdm_iter = tqdm(ts_list, ncols=100)
+
+        with tqdm_joblib(tqdm_iter) as progress_bar:
+            joblib.Parallel(n_jobs=mp.cpu_count())(
+                joblib.delayed(self._ctffind_single)(idx) for idx in range(len(ts_list))
+            )
+
+
+        # Log progress when all jobs have successfully terminated
+        if error_count == 0:
+            self.logObj(&#34;All Ot2Rec-CTFFind4 jobs successfully finished.&#34;)
+        else:
+            self.logObj(&#34;WARNING: All Ot2Rec-CTTFFind4 jobs finished.&#34;
+                        f&#34;{error_count} of {len(tqdm_iter)} jobs failed.&#34;
+            )
+
+
+    def update_ctffind_metadata(self):
+        &#34;&#34;&#34;
+        Subroutine to update metadata after one set of runs
+        &#34;&#34;&#34;
+
+        # Search for files with output paths specified in the metadata
+        # If the files don&#39;t exist, keep the line in the input metadata
+        # If they do, move them to the output metadata
+
+        _to_append = self.ctf_images.loc[self.ctf_images[&#39;output&#39;].apply(lambda x: os.path.isfile(x))]
+        self.meta_out = pd.concat([self.meta_out, _to_append],
+                                  ignore_index=True)
+        self.ctf_images = self.ctf_images.loc[~self.ctf_images[&#39;output&#39;].apply(lambda x: os.path.isfile(x))]
+
+        # Sometimes data might be duplicated (unlikely) -- need to drop the duplicates
+        self.meta_out.drop_duplicates(inplace=True)
+
+    def export_metadata(self):
+        &#34;&#34;&#34;
+        Method to serialise output metadata, export as yaml
+        &#34;&#34;&#34;
+
+        yaml_file = self.proj_name + &#39;_ctffind_mdout.yaml&#39;
+
+        with open(yaml_file, &#39;w&#39;) as f:
+            yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="Ot2Rec.ctffind.ctffind.export_metadata"><code class="name flex">
+<span>def <span class="ident">export_metadata</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Method to serialise output metadata, export as yaml</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def export_metadata(self):
+    &#34;&#34;&#34;
+    Method to serialise output metadata, export as yaml
+    &#34;&#34;&#34;
+
+    yaml_file = self.proj_name + &#39;_ctffind_mdout.yaml&#39;
+
+    with open(yaml_file, &#39;w&#39;) as f:
+        yaml.dump(self.meta_out.to_dict(), f, indent=4, sort_keys=False)</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.ctffind.ctffind.run_ctffind"><code class="name flex">
+<span>def <span class="ident">run_ctffind</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Method to run ctffind on tilt-series sequentially</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_ctffind(self):
+    &#34;&#34;&#34;
+    Method to run ctffind on tilt-series sequentially
+    &#34;&#34;&#34;
+    # Add log entry when job starts
+    self.logObj(&#34;Ot2Rec-CTFFind4 started.&#34;)
+
+    error_count = 0
+    ts_list = list(self.ctf_images.iterrows())
+    tqdm_iter = tqdm(ts_list, ncols=100)
+
+    with tqdm_joblib(tqdm_iter) as progress_bar:
+        joblib.Parallel(n_jobs=mp.cpu_count())(
+            joblib.delayed(self._ctffind_single)(idx) for idx in range(len(ts_list))
+        )
+
+
+    # Log progress when all jobs have successfully terminated
+    if error_count == 0:
+        self.logObj(&#34;All Ot2Rec-CTFFind4 jobs successfully finished.&#34;)
+    else:
+        self.logObj(&#34;WARNING: All Ot2Rec-CTTFFind4 jobs finished.&#34;
+                    f&#34;{error_count} of {len(tqdm_iter)} jobs failed.&#34;
+        )</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.ctffind.ctffind.update_ctffind_metadata"><code class="name flex">
+<span>def <span class="ident">update_ctffind_metadata</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subroutine to update metadata after one set of runs</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_ctffind_metadata(self):
+    &#34;&#34;&#34;
+    Subroutine to update metadata after one set of runs
+    &#34;&#34;&#34;
+
+    # Search for files with output paths specified in the metadata
+    # If the files don&#39;t exist, keep the line in the input metadata
+    # If they do, move them to the output metadata
+
+    _to_append = self.ctf_images.loc[self.ctf_images[&#39;output&#39;].apply(lambda x: os.path.isfile(x))]
+    self.meta_out = pd.concat([self.meta_out, _to_append],
+                              ignore_index=True)
+    self.ctf_images = self.ctf_images.loc[~self.ctf_images[&#39;output&#39;].apply(lambda x: os.path.isfile(x))]
+
+    # Sometimes data might be duplicated (unlikely) -- need to drop the duplicates
+    self.meta_out.drop_duplicates(inplace=True)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Ot2Rec" href="index.html">Ot2Rec</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Ot2Rec.ctffind.create_yaml" href="#Ot2Rec.ctffind.create_yaml">create_yaml</a></code></li>
+<li><code><a title="Ot2Rec.ctffind.run" href="#Ot2Rec.ctffind.run">run</a></code></li>
+<li><code><a title="Ot2Rec.ctffind.tqdm_joblib" href="#Ot2Rec.ctffind.tqdm_joblib">tqdm_joblib</a></code></li>
+<li><code><a title="Ot2Rec.ctffind.update_yaml" href="#Ot2Rec.ctffind.update_yaml">update_yaml</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Ot2Rec.ctffind.ctffind" href="#Ot2Rec.ctffind.ctffind">ctffind</a></code></h4>
+<ul class="">
+<li><code><a title="Ot2Rec.ctffind.ctffind.export_metadata" href="#Ot2Rec.ctffind.ctffind.export_metadata">export_metadata</a></code></li>
+<li><code><a title="Ot2Rec.ctffind.ctffind.run_ctffind" href="#Ot2Rec.ctffind.ctffind.run_ctffind">run_ctffind</a></code></li>
+<li><code><a title="Ot2Rec.ctffind.ctffind.update_ctffind_metadata" href="#Ot2Rec.ctffind.ctffind.update_ctffind_metadata">update_ctffind_metadata</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

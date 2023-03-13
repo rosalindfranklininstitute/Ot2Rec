@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>Ot2Rec.params API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Ot2Rec.params</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># Copyright 2021 Rosalind Franklin Institute
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# &#34;AS IS&#34; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+
+import os
+import yaml
+from pathlib import Path
+from icecream import ic
+
+
+class Params:
+    &#34;&#34;&#34;
+    Class encapsulating Params objects
+    &#34;&#34;&#34;
+
+    def __init__(self,
+                 project_name: str,
+                 params_in=None):
+        &#34;&#34;&#34;
+        Initialise Params object
+
+        Args:
+            project_name: Name of current project
+            params_in: Parameters being read in
+        &#34;&#34;&#34;
+
+        self.project_name = project_name
+        self.params = params_in
+
+
+def new_master_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for processing master metadata
+
+    Args:
+        args (Namespace): Namespace generated with user inputs
+    &#34;&#34;&#34;
+
+    master_yaml_name = args.project_name.value + &#39;_proj.yaml&#39;
+
+    proj_yaml_dict = {
+        &#39;source_folder&#39;: str(args.source_folder.value),
+        &#39;TS_folder_prefix&#39;: args.folder_prefix.value,
+        &#39;file_prefix&#39;: args.project_name.value if args.file_prefix.value==&#34;&#34; else args.file_prefix.value,
+        &#39;image_stack_field&#39;: args.stack_field.value,
+        &#39;image_index_field&#39;: args.index_field.value,
+        &#39;image_tiltangle_field&#39;: args.tiltangle_field.value,
+        &#39;filetype&#39;: args.ext.value,
+    }
+
+    with open(master_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False)
+
+
+def new_mc2_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for motioncorr
+
+    Args:
+        args (Namespace): Namespace generated with user inputs
+    &#34;&#34;&#34;
+
+    mc2_yaml_name = args.project_name.value + &#39;_mc2.yaml&#39;
+
+    mc2_yaml_dict = {
+        &#39;System&#39;: {
+            &#39;process_list&#39;: None,
+            &#39;output_path&#39;: str(args.output_folder.value),
+            &#39;output_prefix&#39;: args.file_prefix.value if args.file_prefix.value != &#34;&#34; else args.project_name.value,
+            &#39;use_gpu&#39;: &#39;auto&#39;, # if not args.no_gpu.value else False,
+            &#39;jobs_per_gpu&#39;: args.jobs_per_gpu.value,
+            &#39;gpu_memory_usage&#39;: args.gpu_mem_usage.value,
+        },
+        &#39;MC2&#39;: {
+            &#39;MC2_path&#39;: str(args.exec_path.value),
+            &#39;gain_reference&#39;: &#39;nogain&#39; if not args.use_gain.value else str(args.gain.value),
+            &#39;pixel_size&#39;: args.pixel_size.value,
+            &#39;desired_pixel_size&#39;: args.pixel_size.value * 2 if args.super_res.value else args.pixel_size.value,
+            &#39;discard_frames_top&#39;: args.discard_top.value,
+            &#39;discard_frames_bottom&#39;: args.discard_bottom.value,
+            &#39;tolerance&#39;: args.tolerance.value,
+            &#39;max_iterations&#39;: args.max_iter.value,
+            &#39;patch_size&#39;: args.patch_size.value,
+            &#39;use_subgroups&#39;: args.use_subgroups.value,
+        },
+    }
+
+    with open(mc2_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(mc2_yaml_dict, f, indent=4, sort_keys=False)
+
+
+def new_ctffind_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for ctffind
+
+    Args:
+        args (Namespace): Namespace generated with user inputs
+    &#34;&#34;&#34;
+
+    ctf_yaml_name = args.project_name.value + &#39;_ctffind.yaml&#39;
+
+    ctf_yaml_dict = {
+        &#39;System&#39;: {
+            &#39;process_list&#39;: &#39;all&#39;,
+            &#39;output_path&#39;: str(args.output_folder.value),
+            &#39;output_prefix&#39;: args.file_prefix.value if args.file_prefix.value != &#34;&#34; else args.project_name.value,
+        },
+        &#39;ctffind&#39;: {
+            &#39;ctffind_path&#39;: str(args.exec_path.value),
+            &#39;pixel_size&#39;: None,
+            &#39;voltage&#39;: args.voltage.value,
+            &#39;spherical_aberration&#39;: args.spherical_aberration.value,
+            &#39;amp_contrast&#39;: args.amp_contrast.value,
+            &#39;amp_spec_size&#39;: args.spec_size.value,
+            &#39;resolution_min&#39;: max(args.res_range.value),
+            &#39;resolution_max&#39;: min(args.res_range.value),
+            &#39;defocus_min&#39;: args.defocus_range.value[0],
+            &#39;defocus_max&#39;: args.defocus_range.value[1],
+            &#39;defocus_step&#39;: args.defocus_range.value[2],
+            &#39;astigm_type&#39;: args.astigm_type.value,
+            &#39;exhaustive_search&#39;: args.exhaustive_search.value,
+            &#39;astigm_restraint&#39;: args.astigm_restraint.value if args.astigm_restraint.value &gt; 0 else False,
+            &#39;phase_shift&#39;: args.phase_shift.value,
+        },
+    }
+
+    with open(ctf_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(ctf_yaml_dict, f, indent=4, sort_keys=False)
+
+
+def new_align_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for stack creation and BatchTomo (up till alignment)
+
+    Args:
+        args (Namespace): Namespace generated with user inputs
+    &#34;&#34;&#34;
+
+    # Calculate patch sizes
+    import numpy as np
+    image_dims = np.array(args.image_dims.value)
+    n_patches = np.array(args.num_patches.value)
+    overlap = args.patch_overlap.value * 0.01
+    denom = n_patches - n_patches*overlap + overlap
+    patch_dims = (image_dims / denom).astype(int)
+
+    align_yaml_name = args.project_name.value + &#39;_align.yaml&#39;
+
+    align_yaml_dict = {
+        &#39;System&#39;: {
+            &#39;process_list&#39;: &#39;all&#39;,
+            &#39;output_path&#39;: str(args.output_folder.value),
+            &#39;output_rootname&#39;: args.file_prefix.value if args.file_prefix.value != &#34;&#34; else args.project_name.value,
+            &#39;output_suffix&#39;: args.file_suffix.value,
+        },
+
+        &#39;BatchRunTomo&#39;: {
+            &#39;setup&#39;: {
+                &#39;excluded_views&#39;: list(args.excl_views.value),
+                &#39;use_rawtlt&#39;: not args.no_rawtlt.value,
+                &#39;pixel_size&#39;: None,
+                &#39;rot_angle&#39;: args.rot_angle.value,
+                &#39;gold_size&#39;: args.fiducial_size.value,
+                &#39;num_beads&#39;: args.num_beads.value,
+                &#39;adoc_template&#39;: str(args.adoc_template.value),
+                &#39;stack_bin_factor&#39;: args.stack_bin_factor.value,
+            },
+
+            &#39;preprocessing&#39;: {
+                &#39;delete_old_files&#39;: args.delete_old_files.value,
+                &#39;remove_xrays&#39;: args.remove_xrays.value,
+            },
+
+            &#39;coarse_align&#39;: {
+                &#39;bin_factor&#39;: args.coarse_align_bin_factor.value,
+            },
+
+            &#39;patch_track&#39;: {
+                &#39;size_of_patches&#39;: patch_dims.tolist(),
+                &#39;num_of_patches&#39;: list(args.num_patches.value),
+                &#39;num_iterations&#39;: args.num_iter.value,
+                &#39;limits_on_shift&#39;: list(args.limits_on_shift.value),
+                &#39;adjust_tilt_angles&#39;: args.adjust_tilt_angles.value,
+            },
+
+            &#39;fine_align&#39;: {
+                &#39;num_surfaces&#39;: args.num_surfaces.value,
+                &#39;mag_option&#39;: args.mag_option.value,
+                &#39;tilt_option&#39;: args.tilt_option.value,
+                &#39;rot_option&#39;: args.rot_option.value,
+                &#39;beam_tilt_option&#39;: args.beam_tilt_option.value,
+                &#39;use_robust_fitting&#39;: args.robust_fitting.value,
+                &#39;weight_all_contours&#39;: args.weight_contours.value,
+            },
+        }
+    }
+
+    with open(align_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(align_yaml_dict, f, indent=4, sort_keys=False)
+
+
+def new_recon_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for batchtomo (continuing from aligned stacks to full reconstruction)
+
+    Args:
+        args (Namespace): Namespace generated with user inputs
+    &#34;&#34;&#34;
+    recon_yaml_name = args.project_name.value + &#39;_recon.yaml&#39;
+
+    recon_yaml_dict = {
+        &#39;System&#39;: {
+            &#39;process_list&#39;: &#39;all&#39;,
+            &#39;output_path&#39;: &#39;./stacks/&#39;,
+            &#39;output_rootname&#39;: &#39;TS&#39;,
+            &#39;output_suffix&#39;: &#39;&#39;,
+        },
+
+        &#39;BatchRunTomo&#39;: {
+            &#39;setup&#39;: {
+                &#39;use_rawtlt&#39;: True,
+                &#39;pixel_size&#39;: &#39;default&#39;,
+                &#39;rot_angle&#39;: 86.,
+                &#39;gold_size&#39;: 0.,
+                &#39;adoc_template&#39;: &#39;/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc&#39;,
+            },
+
+            &#39;positioning&#39;: {
+                &#39;do_positioning&#39;: args.do_positioning.value,
+                &#39;unbinned_thickness&#39;: args.unbinned_thickness.value,
+            },
+
+            &#39;aligned_stack&#39;: {
+                &#39;correct_ctf&#39;: args.correct_ctf.value,
+                &#39;erase_gold&#39;: args.erase_gold.value,
+                &#39;2d_filtering&#39;: args.filtering.value,
+                &#39;bin_factor&#39;: args.bin_factor.value,
+            },
+
+            &#39;reconstruction&#39;: {
+                &#39;thickness&#39;: args.thickness.value,
+                &#39;use_sirt&#39;: args.use_sirt.value,
+                &#39;sirt_iter&#39;: args.sirt_iter.value,
+            },
+
+            &#39;postprocessing&#39;: {
+                &#39;run_trimvol&#39;: args.trimvol.value,
+                &#39;trimvol_reorient&#39;: args.trimvol_reorient.value,
+            },
+        }
+    }
+
+    with open(recon_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(recon_yaml_dict, f, indent=4, sort_keys=False)
+
+
+def new_savurecon_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for savurecon (continuing from aligned stacks to full reconstruction)
+
+    Args:
+        args (Namespace): Namespace containing user parameter inputs
+    &#34;&#34;&#34;
+
+    savurecon_yaml_name = args.project_name.value + &#39;_savurecon.yaml&#39;
+
+    savurecon_yaml_dict = {
+        &#39;System&#39;: {
+            &#39;process_list&#39;: None,
+            &#39;output_path&#39;: str(args.output_path.value),
+            &#39;output_rootname&#39;: args.project_name.value if args.rootname.value is None else args.rootname.value,
+            &#39;output_suffix&#39;: args.suffix.value,
+        },
+
+        &#39;Savu&#39;: {
+            &#39;setup&#39;: {
+                &#39;tilt_angles&#39;: None,
+                &#39;aligned_projections&#39;: None,
+                &#39;algorithm&#39;: &#39;CGLS_CUDA&#39;,
+                &#39;centre_of_rotation&#39;: &#39;autocenter&#39;,
+            }
+        }
+    }
+
+    with open(savurecon_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(savurecon_yaml_dict, f, indent=4, sort_keys=False)
+
+
+def new_aretomo_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for aretomo
+
+    Args:
+        args (Namespace): Namespace containing user parameter inputs
+    &#34;&#34;&#34;
+
+    aretomo_yaml_names = {0: args[&#34;project_name&#34;] + &#34;_aretomo_align.yaml&#34;,
+                          1: args[&#34;project_name&#34;] + &#34;_aretomo_recon.yaml&#34;,
+                          2: args[&#34;project_name&#34;] + &#34;_aretomo_align-recon.yaml&#34;}
+
+    aretomo_yaml_name = aretomo_yaml_names[int(args[&#34;aretomo_mode&#34;])]
+    print(f&#34;{aretomo_yaml_name} created&#34;)
+
+    aretomo_yaml_dict = {
+        &#34;System&#34;: {
+            &#34;process_list&#34;: None,
+            &#34;output_path&#34;: str(args[&#34;output_path&#34;]),
+            &#34;output_rootname&#34;: args[&#34;project_name&#34;] if args[&#34;rootname&#34;] == &#34;&#34; else args[&#34;rootname&#34;],
+            &#34;output_suffix&#34;: args[&#34;suffix&#34;],
+            &#34;aretomo_path&#34;: args[&#34;aretomo_path&#34;]
+        },
+
+        &#34;AreTomo_setup&#34;: {
+            &#34;aretomo_mode&#34;: args[&#34;aretomo_mode&#34;],
+            &#34;rot_angle&#34;: args[&#34;rot_angle&#34;],
+            &#34;input_mrc&#34;: None,
+            &#34;output_mrc&#34;: None,
+            &#34;tilt_angles&#34;: None,
+            &#34;output_binning&#34;: None,
+            &#34;out_imod&#34;: args[&#34;out_imod&#34;],
+            &#34;dark_tol&#34;: args[&#34;dark_tol&#34;]
+        },
+
+        &#34;AreTomo_recon&#34;: {
+            &#34;volz&#34;: None,
+            &#34;sample_thickness&#34;: None,
+            &#34;pixel_size&#34;: args[&#34;pixel_size&#34;],
+            &#34;recon_algo&#34;: args[&#34;recon_algo&#34;],
+        },
+
+        &#34;AreTomo_kwargs&#34;: {
+            # placeholder for extra kwargs
+        },
+    }
+
+    with open(aretomo_yaml_name, &#34;w&#34;) as f:
+        yaml.dump(aretomo_yaml_dict, f, indent=4, sort_keys=False)
+
+
+def new_exclude_bad_tilts_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for excluding bad tilts
+
+    Args:
+        args (Namespace): Namespace containing user parameter inputs
+    &#34;&#34;&#34;
+
+    ebt_yaml_name = f&#34;{args.project_name.value}_exclude_bad_tilts.yaml&#34;
+    print(f&#34;{ebt_yaml_name} created&#34;)
+
+    ebt_yaml_dict = {
+        &#34;System&#34;: {
+            &#34;process_list&#34;: None,
+        },
+
+        &#34;EBT_setup&#34;: {
+            &#34;input_mrc&#34;: None,
+            &#34;min_percentile&#34;: None,
+            &#34;max_percentile&#34;: None,
+        },
+    }
+
+    with open(ebt_yaml_name, &#34;w&#34;) as f:
+        yaml.dump(ebt_yaml_dict, f, indent=4, sort_keys=False)
+
+
+def read_yaml(project_name: str,
+              filename: str):
+    &#34;&#34;&#34;
+    Function to read in config file
+
+    Args:
+        project_name: name of current project
+        filename: config file name
+
+    Returns:
+        ot2rec.params.Params
+    &#34;&#34;&#34;
+
+    # Check if file exists
+    if not os.path.isfile(filename):
+        raise IOError(f&#34;Error in Ot2Rec.params.read_yaml: {filename}: File not found.&#34;)
+
+    with open(filename, &#39;r&#39;) as f:
+        params = yaml.load(f.read(), Loader=yaml.FullLoader)
+
+    return Params(project_name, params)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Ot2Rec.params.new_align_yaml"><code class="name flex">
+<span>def <span class="ident">new_align_yaml</span></span>(<span>args)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subroutine to create yaml file for stack creation and BatchTomo (up till alignment)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>args</code></strong> :&ensp;<code>Namespace</code></dt>
+<dd>Namespace generated with user inputs</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def new_align_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for stack creation and BatchTomo (up till alignment)
+
+    Args:
+        args (Namespace): Namespace generated with user inputs
+    &#34;&#34;&#34;
+
+    # Calculate patch sizes
+    import numpy as np
+    image_dims = np.array(args.image_dims.value)
+    n_patches = np.array(args.num_patches.value)
+    overlap = args.patch_overlap.value * 0.01
+    denom = n_patches - n_patches*overlap + overlap
+    patch_dims = (image_dims / denom).astype(int)
+
+    align_yaml_name = args.project_name.value + &#39;_align.yaml&#39;
+
+    align_yaml_dict = {
+        &#39;System&#39;: {
+            &#39;process_list&#39;: &#39;all&#39;,
+            &#39;output_path&#39;: str(args.output_folder.value),
+            &#39;output_rootname&#39;: args.file_prefix.value if args.file_prefix.value != &#34;&#34; else args.project_name.value,
+            &#39;output_suffix&#39;: args.file_suffix.value,
+        },
+
+        &#39;BatchRunTomo&#39;: {
+            &#39;setup&#39;: {
+                &#39;excluded_views&#39;: list(args.excl_views.value),
+                &#39;use_rawtlt&#39;: not args.no_rawtlt.value,
+                &#39;pixel_size&#39;: None,
+                &#39;rot_angle&#39;: args.rot_angle.value,
+                &#39;gold_size&#39;: args.fiducial_size.value,
+                &#39;num_beads&#39;: args.num_beads.value,
+                &#39;adoc_template&#39;: str(args.adoc_template.value),
+                &#39;stack_bin_factor&#39;: args.stack_bin_factor.value,
+            },
+
+            &#39;preprocessing&#39;: {
+                &#39;delete_old_files&#39;: args.delete_old_files.value,
+                &#39;remove_xrays&#39;: args.remove_xrays.value,
+            },
+
+            &#39;coarse_align&#39;: {
+                &#39;bin_factor&#39;: args.coarse_align_bin_factor.value,
+            },
+
+            &#39;patch_track&#39;: {
+                &#39;size_of_patches&#39;: patch_dims.tolist(),
+                &#39;num_of_patches&#39;: list(args.num_patches.value),
+                &#39;num_iterations&#39;: args.num_iter.value,
+                &#39;limits_on_shift&#39;: list(args.limits_on_shift.value),
+                &#39;adjust_tilt_angles&#39;: args.adjust_tilt_angles.value,
+            },
+
+            &#39;fine_align&#39;: {
+                &#39;num_surfaces&#39;: args.num_surfaces.value,
+                &#39;mag_option&#39;: args.mag_option.value,
+                &#39;tilt_option&#39;: args.tilt_option.value,
+                &#39;rot_option&#39;: args.rot_option.value,
+                &#39;beam_tilt_option&#39;: args.beam_tilt_option.value,
+                &#39;use_robust_fitting&#39;: args.robust_fitting.value,
+                &#39;weight_all_contours&#39;: args.weight_contours.value,
+            },
+        }
+    }
+
+    with open(align_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(align_yaml_dict, f, indent=4, sort_keys=False)</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.params.new_aretomo_yaml"><code class="name flex">
+<span>def <span class="ident">new_aretomo_yaml</span></span>(<span>args)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subroutine to create yaml file for aretomo</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>args</code></strong> :&ensp;<code>Namespace</code></dt>
+<dd>Namespace containing user parameter inputs</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def new_aretomo_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for aretomo
+
+    Args:
+        args (Namespace): Namespace containing user parameter inputs
+    &#34;&#34;&#34;
+
+    aretomo_yaml_names = {0: args[&#34;project_name&#34;] + &#34;_aretomo_align.yaml&#34;,
+                          1: args[&#34;project_name&#34;] + &#34;_aretomo_recon.yaml&#34;,
+                          2: args[&#34;project_name&#34;] + &#34;_aretomo_align-recon.yaml&#34;}
+
+    aretomo_yaml_name = aretomo_yaml_names[int(args[&#34;aretomo_mode&#34;])]
+    print(f&#34;{aretomo_yaml_name} created&#34;)
+
+    aretomo_yaml_dict = {
+        &#34;System&#34;: {
+            &#34;process_list&#34;: None,
+            &#34;output_path&#34;: str(args[&#34;output_path&#34;]),
+            &#34;output_rootname&#34;: args[&#34;project_name&#34;] if args[&#34;rootname&#34;] == &#34;&#34; else args[&#34;rootname&#34;],
+            &#34;output_suffix&#34;: args[&#34;suffix&#34;],
+            &#34;aretomo_path&#34;: args[&#34;aretomo_path&#34;]
+        },
+
+        &#34;AreTomo_setup&#34;: {
+            &#34;aretomo_mode&#34;: args[&#34;aretomo_mode&#34;],
+            &#34;rot_angle&#34;: args[&#34;rot_angle&#34;],
+            &#34;input_mrc&#34;: None,
+            &#34;output_mrc&#34;: None,
+            &#34;tilt_angles&#34;: None,
+            &#34;output_binning&#34;: None,
+            &#34;out_imod&#34;: args[&#34;out_imod&#34;],
+            &#34;dark_tol&#34;: args[&#34;dark_tol&#34;]
+        },
+
+        &#34;AreTomo_recon&#34;: {
+            &#34;volz&#34;: None,
+            &#34;sample_thickness&#34;: None,
+            &#34;pixel_size&#34;: args[&#34;pixel_size&#34;],
+            &#34;recon_algo&#34;: args[&#34;recon_algo&#34;],
+        },
+
+        &#34;AreTomo_kwargs&#34;: {
+            # placeholder for extra kwargs
+        },
+    }
+
+    with open(aretomo_yaml_name, &#34;w&#34;) as f:
+        yaml.dump(aretomo_yaml_dict, f, indent=4, sort_keys=False)</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.params.new_ctffind_yaml"><code class="name flex">
+<span>def <span class="ident">new_ctffind_yaml</span></span>(<span>args)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subroutine to create yaml file for ctffind</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>args</code></strong> :&ensp;<code>Namespace</code></dt>
+<dd>Namespace generated with user inputs</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def new_ctffind_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for ctffind
+
+    Args:
+        args (Namespace): Namespace generated with user inputs
+    &#34;&#34;&#34;
+
+    ctf_yaml_name = args.project_name.value + &#39;_ctffind.yaml&#39;
+
+    ctf_yaml_dict = {
+        &#39;System&#39;: {
+            &#39;process_list&#39;: &#39;all&#39;,
+            &#39;output_path&#39;: str(args.output_folder.value),
+            &#39;output_prefix&#39;: args.file_prefix.value if args.file_prefix.value != &#34;&#34; else args.project_name.value,
+        },
+        &#39;ctffind&#39;: {
+            &#39;ctffind_path&#39;: str(args.exec_path.value),
+            &#39;pixel_size&#39;: None,
+            &#39;voltage&#39;: args.voltage.value,
+            &#39;spherical_aberration&#39;: args.spherical_aberration.value,
+            &#39;amp_contrast&#39;: args.amp_contrast.value,
+            &#39;amp_spec_size&#39;: args.spec_size.value,
+            &#39;resolution_min&#39;: max(args.res_range.value),
+            &#39;resolution_max&#39;: min(args.res_range.value),
+            &#39;defocus_min&#39;: args.defocus_range.value[0],
+            &#39;defocus_max&#39;: args.defocus_range.value[1],
+            &#39;defocus_step&#39;: args.defocus_range.value[2],
+            &#39;astigm_type&#39;: args.astigm_type.value,
+            &#39;exhaustive_search&#39;: args.exhaustive_search.value,
+            &#39;astigm_restraint&#39;: args.astigm_restraint.value if args.astigm_restraint.value &gt; 0 else False,
+            &#39;phase_shift&#39;: args.phase_shift.value,
+        },
+    }
+
+    with open(ctf_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(ctf_yaml_dict, f, indent=4, sort_keys=False)</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.params.new_exclude_bad_tilts_yaml"><code class="name flex">
+<span>def <span class="ident">new_exclude_bad_tilts_yaml</span></span>(<span>args)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subroutine to create yaml file for excluding bad tilts</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>args</code></strong> :&ensp;<code>Namespace</code></dt>
+<dd>Namespace containing user parameter inputs</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def new_exclude_bad_tilts_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for excluding bad tilts
+
+    Args:
+        args (Namespace): Namespace containing user parameter inputs
+    &#34;&#34;&#34;
+
+    ebt_yaml_name = f&#34;{args.project_name.value}_exclude_bad_tilts.yaml&#34;
+    print(f&#34;{ebt_yaml_name} created&#34;)
+
+    ebt_yaml_dict = {
+        &#34;System&#34;: {
+            &#34;process_list&#34;: None,
+        },
+
+        &#34;EBT_setup&#34;: {
+            &#34;input_mrc&#34;: None,
+            &#34;min_percentile&#34;: None,
+            &#34;max_percentile&#34;: None,
+        },
+    }
+
+    with open(ebt_yaml_name, &#34;w&#34;) as f:
+        yaml.dump(ebt_yaml_dict, f, indent=4, sort_keys=False)</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.params.new_master_yaml"><code class="name flex">
+<span>def <span class="ident">new_master_yaml</span></span>(<span>args)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subroutine to create yaml file for processing master metadata</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>args</code></strong> :&ensp;<code>Namespace</code></dt>
+<dd>Namespace generated with user inputs</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def new_master_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for processing master metadata
+
+    Args:
+        args (Namespace): Namespace generated with user inputs
+    &#34;&#34;&#34;
+
+    master_yaml_name = args.project_name.value + &#39;_proj.yaml&#39;
+
+    proj_yaml_dict = {
+        &#39;source_folder&#39;: str(args.source_folder.value),
+        &#39;TS_folder_prefix&#39;: args.folder_prefix.value,
+        &#39;file_prefix&#39;: args.project_name.value if args.file_prefix.value==&#34;&#34; else args.file_prefix.value,
+        &#39;image_stack_field&#39;: args.stack_field.value,
+        &#39;image_index_field&#39;: args.index_field.value,
+        &#39;image_tiltangle_field&#39;: args.tiltangle_field.value,
+        &#39;filetype&#39;: args.ext.value,
+    }
+
+    with open(master_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(proj_yaml_dict, f, indent=4, sort_keys=False)</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.params.new_mc2_yaml"><code class="name flex">
+<span>def <span class="ident">new_mc2_yaml</span></span>(<span>args)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subroutine to create yaml file for motioncorr</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>args</code></strong> :&ensp;<code>Namespace</code></dt>
+<dd>Namespace generated with user inputs</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def new_mc2_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for motioncorr
+
+    Args:
+        args (Namespace): Namespace generated with user inputs
+    &#34;&#34;&#34;
+
+    mc2_yaml_name = args.project_name.value + &#39;_mc2.yaml&#39;
+
+    mc2_yaml_dict = {
+        &#39;System&#39;: {
+            &#39;process_list&#39;: None,
+            &#39;output_path&#39;: str(args.output_folder.value),
+            &#39;output_prefix&#39;: args.file_prefix.value if args.file_prefix.value != &#34;&#34; else args.project_name.value,
+            &#39;use_gpu&#39;: &#39;auto&#39;, # if not args.no_gpu.value else False,
+            &#39;jobs_per_gpu&#39;: args.jobs_per_gpu.value,
+            &#39;gpu_memory_usage&#39;: args.gpu_mem_usage.value,
+        },
+        &#39;MC2&#39;: {
+            &#39;MC2_path&#39;: str(args.exec_path.value),
+            &#39;gain_reference&#39;: &#39;nogain&#39; if not args.use_gain.value else str(args.gain.value),
+            &#39;pixel_size&#39;: args.pixel_size.value,
+            &#39;desired_pixel_size&#39;: args.pixel_size.value * 2 if args.super_res.value else args.pixel_size.value,
+            &#39;discard_frames_top&#39;: args.discard_top.value,
+            &#39;discard_frames_bottom&#39;: args.discard_bottom.value,
+            &#39;tolerance&#39;: args.tolerance.value,
+            &#39;max_iterations&#39;: args.max_iter.value,
+            &#39;patch_size&#39;: args.patch_size.value,
+            &#39;use_subgroups&#39;: args.use_subgroups.value,
+        },
+    }
+
+    with open(mc2_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(mc2_yaml_dict, f, indent=4, sort_keys=False)</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.params.new_recon_yaml"><code class="name flex">
+<span>def <span class="ident">new_recon_yaml</span></span>(<span>args)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subroutine to create yaml file for batchtomo (continuing from aligned stacks to full reconstruction)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>args</code></strong> :&ensp;<code>Namespace</code></dt>
+<dd>Namespace generated with user inputs</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def new_recon_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for batchtomo (continuing from aligned stacks to full reconstruction)
+
+    Args:
+        args (Namespace): Namespace generated with user inputs
+    &#34;&#34;&#34;
+    recon_yaml_name = args.project_name.value + &#39;_recon.yaml&#39;
+
+    recon_yaml_dict = {
+        &#39;System&#39;: {
+            &#39;process_list&#39;: &#39;all&#39;,
+            &#39;output_path&#39;: &#39;./stacks/&#39;,
+            &#39;output_rootname&#39;: &#39;TS&#39;,
+            &#39;output_suffix&#39;: &#39;&#39;,
+        },
+
+        &#39;BatchRunTomo&#39;: {
+            &#39;setup&#39;: {
+                &#39;use_rawtlt&#39;: True,
+                &#39;pixel_size&#39;: &#39;default&#39;,
+                &#39;rot_angle&#39;: 86.,
+                &#39;gold_size&#39;: 0.,
+                &#39;adoc_template&#39;: &#39;/opt/lmod/modules/imod/4.11.1/IMOD/SystemTemplate/cryoSample.adoc&#39;,
+            },
+
+            &#39;positioning&#39;: {
+                &#39;do_positioning&#39;: args.do_positioning.value,
+                &#39;unbinned_thickness&#39;: args.unbinned_thickness.value,
+            },
+
+            &#39;aligned_stack&#39;: {
+                &#39;correct_ctf&#39;: args.correct_ctf.value,
+                &#39;erase_gold&#39;: args.erase_gold.value,
+                &#39;2d_filtering&#39;: args.filtering.value,
+                &#39;bin_factor&#39;: args.bin_factor.value,
+            },
+
+            &#39;reconstruction&#39;: {
+                &#39;thickness&#39;: args.thickness.value,
+                &#39;use_sirt&#39;: args.use_sirt.value,
+                &#39;sirt_iter&#39;: args.sirt_iter.value,
+            },
+
+            &#39;postprocessing&#39;: {
+                &#39;run_trimvol&#39;: args.trimvol.value,
+                &#39;trimvol_reorient&#39;: args.trimvol_reorient.value,
+            },
+        }
+    }
+
+    with open(recon_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(recon_yaml_dict, f, indent=4, sort_keys=False)</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.params.new_savurecon_yaml"><code class="name flex">
+<span>def <span class="ident">new_savurecon_yaml</span></span>(<span>args)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subroutine to create yaml file for savurecon (continuing from aligned stacks to full reconstruction)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>args</code></strong> :&ensp;<code>Namespace</code></dt>
+<dd>Namespace containing user parameter inputs</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def new_savurecon_yaml(args):
+    &#34;&#34;&#34;
+    Subroutine to create yaml file for savurecon (continuing from aligned stacks to full reconstruction)
+
+    Args:
+        args (Namespace): Namespace containing user parameter inputs
+    &#34;&#34;&#34;
+
+    savurecon_yaml_name = args.project_name.value + &#39;_savurecon.yaml&#39;
+
+    savurecon_yaml_dict = {
+        &#39;System&#39;: {
+            &#39;process_list&#39;: None,
+            &#39;output_path&#39;: str(args.output_path.value),
+            &#39;output_rootname&#39;: args.project_name.value if args.rootname.value is None else args.rootname.value,
+            &#39;output_suffix&#39;: args.suffix.value,
+        },
+
+        &#39;Savu&#39;: {
+            &#39;setup&#39;: {
+                &#39;tilt_angles&#39;: None,
+                &#39;aligned_projections&#39;: None,
+                &#39;algorithm&#39;: &#39;CGLS_CUDA&#39;,
+                &#39;centre_of_rotation&#39;: &#39;autocenter&#39;,
+            }
+        }
+    }
+
+    with open(savurecon_yaml_name, &#39;w&#39;) as f:
+        yaml.dump(savurecon_yaml_dict, f, indent=4, sort_keys=False)</code></pre>
+</details>
+</dd>
+<dt id="Ot2Rec.params.read_yaml"><code class="name flex">
+<span>def <span class="ident">read_yaml</span></span>(<span>project_name: str, filename: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Function to read in config file</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_name</code></strong></dt>
+<dd>name of current project</dd>
+<dt><strong><code>filename</code></strong></dt>
+<dd>config file name</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ot2rec.params.Params</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read_yaml(project_name: str,
+              filename: str):
+    &#34;&#34;&#34;
+    Function to read in config file
+
+    Args:
+        project_name: name of current project
+        filename: config file name
+
+    Returns:
+        ot2rec.params.Params
+    &#34;&#34;&#34;
+
+    # Check if file exists
+    if not os.path.isfile(filename):
+        raise IOError(f&#34;Error in Ot2Rec.params.read_yaml: {filename}: File not found.&#34;)
+
+    with open(filename, &#39;r&#39;) as f:
+        params = yaml.load(f.read(), Loader=yaml.FullLoader)
+
+    return Params(project_name, params)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Ot2Rec.params.Params"><code class="flex name class">
+<span>class <span class="ident">Params</span></span>
+<span>(</span><span>project_name: str, params_in=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Class encapsulating Params objects</p>
+<p>Initialise Params object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_name</code></strong></dt>
+<dd>Name of current project</dd>
+<dt><strong><code>params_in</code></strong></dt>
+<dd>Parameters being read in</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Params:
+    &#34;&#34;&#34;
+    Class encapsulating Params objects
+    &#34;&#34;&#34;
+
+    def __init__(self,
+                 project_name: str,
+                 params_in=None):
+        &#34;&#34;&#34;
+        Initialise Params object
+
+        Args:
+            project_name: Name of current project
+            params_in: Parameters being read in
+        &#34;&#34;&#34;
+
+        self.project_name = project_name
+        self.params = params_in</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Ot2Rec" href="index.html">Ot2Rec</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Ot2Rec.params.new_align_yaml" href="#Ot2Rec.params.new_align_yaml">new_align_yaml</a></code></li>
+<li><code><a title="Ot2Rec.params.new_aretomo_yaml" href="#Ot2Rec.params.new_aretomo_yaml">new_aretomo_yaml</a></code></li>
+<li><code><a title="Ot2Rec.params.new_ctffind_yaml" href="#Ot2Rec.params.new_ctffind_yaml">new_ctffind_yaml</a></code></li>
+<li><code><a title="Ot2Rec.params.new_exclude_bad_tilts_yaml" href="#Ot2Rec.params.new_exclude_bad_tilts_yaml">new_exclude_bad_tilts_yaml</a></code></li>
+<li><code><a title="Ot2Rec.params.new_master_yaml" href="#Ot2Rec.params.new_master_yaml">new_master_yaml</a></code></li>
+<li><code><a title="Ot2Rec.params.new_mc2_yaml" href="#Ot2Rec.params.new_mc2_yaml">new_mc2_yaml</a></code></li>
+<li><code><a title="Ot2Rec.params.new_recon_yaml" href="#Ot2Rec.params.new_recon_yaml">new_recon_yaml</a></code></li>
+<li><code><a title="Ot2Rec.params.new_savurecon_yaml" href="#Ot2Rec.params.new_savurecon_yaml">new_savurecon_yaml</a></code></li>
+<li><code><a title="Ot2Rec.params.read_yaml" href="#Ot2Rec.params.read_yaml">read_yaml</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Ot2Rec.params.Params" href="#Ot2Rec.params.Params">Params</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
