@@ -41,10 +41,11 @@ class SavuRecon:
                  ):
         """
         Initialising a SavuRecon object
-        ARGS:
-        project_name (str) :: name of current project
-        params_in (Params) :: parameters for stack creation
-        logger_in (Logger) :: logger object to keep record of progress and errors
+
+        Args:
+            project_name (str): name of current project
+            params_in (Params): parameters for stack creation
+            logger_in (Logger): logger object to keep record of progress and errors
         """
 
         self.proj_name = project_name
@@ -87,8 +88,9 @@ class SavuRecon:
     def _get_savuconfig_recon_command(self, i):
         """
         Method to get command to set up Savu process list
-        ARGS:
-        i (int): The i-th tilt series to process
+        
+        Args:
+            i (int): The i-th tilt series to process
         """
 
         curr_ts = self.params['System']['process_list'][i]
@@ -250,8 +252,9 @@ def create_yaml(args=None):
 def update_yaml(args):
     """
     Method to update yaml file for savu reconstruction --- if stacks already exist
+    
     Args:
-    args (Namespace) :: Namespace containing user inputs
+        args (Namespace): Namespace containing user inputs
     """
     logger = logMod.Logger(log_path="o2r_savu_recon.log")
 

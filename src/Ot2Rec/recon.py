@@ -42,11 +42,11 @@ class Recon:
         """
         Initialising a Recon object
 
-        ARGS:
-        project_name (str) :: name of current project
-        md_in (Metadata)   :: metadata containing images to be put into stack(s) for alignment
-        params_in (Params) :: parameters for stack creation
-        logger_in (Logger) :: logger object to keep record of progress and errors
+        Args:
+            project_name (str): name of current project
+            md_in (Metadata): metadata containing images to be put into stack(s) for alignment
+            params_in (Params): parameters for stack creation
+            logger_in (Logger): logger object to keep record of progress and errors
         """
 
         self.proj_name = project_name
@@ -218,11 +218,11 @@ runtime.Trimvol.any.reorient = <trimvol_reorient>
         """
         Method to get command to run batchtomo for reconstruction
 
-        ARGS:
-        curr_ts :: index of the tilt-series currently being processed
+        Args:
+            curr_ts: index of the tilt-series currently being processed
 
-        RETURNS:
-        list
+        Returns:
+            list
         """
 
         # Get indices of usable CPUs
@@ -348,8 +348,8 @@ def update_yaml(args):
     """
     Subroutine to update yaml file for IMOD reconstruction
 
-    ARGS:
-    args (Namespace) :: Namespace generated with user inputs
+    Args:
+        args (Namespace): Namespace generated with user inputs
     """
     logger = logMod.Logger(log_path="o2r_imod_recon.log")
 

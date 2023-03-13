@@ -48,11 +48,11 @@ class Align:
         """
         Initialising an Align object
 
-        ARGS:
-        project_name (str) :: name of current project
-        md_in (Metadata)   :: metadata containing images to be put into stack(s) for alignment
-        params_in (Params) :: parameters for stack creation
-        logger_in (Logger) :: logger object to keep record of progress and errors
+        Args:
+            project_name (str): name of current project
+            md_in (Metadata): metadata containing images to be put into stack(s) for alignment
+            params_in (Params): parameters for stack creation
+            logger_in (Logger): logger object to keep record of progress and errors
         """
 
         self.proj_name = project_name
@@ -177,11 +177,11 @@ class Align:
         """
         Method to sort images within a tilt-series according to their tilt angles
 
-        ARGS:
-        curr_ts :: index of the tilt-series currently being processed
+        Args:
+            curr_ts: index of the tilt-series currently being processed
 
-        RETURNS:
-        pandas df
+        Returns:
+            pd.DataFrame
         """
 
         # Extract metadata for current TS
@@ -405,11 +405,11 @@ comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
         """
         Method to get command to run batchtomo for alignment
 
-        ARGS:
-        curr_ts :: index of the tilt-series currently being processed
+        Args:
+            curr_ts: index of the tilt-series currently being processed
 
-        RETURNS:
-        list
+        Returns:
+            list
         """
 
         # Get indices of usable CPUs
@@ -527,8 +527,8 @@ def update_yaml(args, logger):
     """
     Subroutine to update yaml file for IMOD newstack / alignment
 
-    ARGS:
-    args (Namespace) :: Namespace generated with user inputs
+    Args:
+        args (Namespace): Namespace generated with user inputs
     """
     # Check if align and motioncorr yaml files exist
     align_yaml_name = args.project_name.value + '_align.yaml'
@@ -590,7 +590,7 @@ def update_yaml(args, logger):
 def create_yaml_stacked():
     """
     Subroutine to create new yaml file for IMOD newstack / alignment
-    prestack (bool) :: if stacks already exist
+    prestack (bool) : if stacks already exist
     """
     # Parse user inputs
     args = mgMod.get_args_align_ext.show(run=True)
@@ -604,8 +604,8 @@ def update_yaml_stacked(args):
     """
     Method to update yaml file for IMOD newstack / alignment --- if stacks already exist
 
-    ARGS:
-    args (Namespace) :: User input parameters
+    Args:
+        args (Namespace): User input parameters
     """
     project_name = args.project_name.value
     parent_path = str(args.input_folder.value)
@@ -647,10 +647,10 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None, exclusive=True
     """
     Method to run IMOD newstack / alignment
 
-    ARGS:
-    newstack (bool) :: whether to create new stack(s)
-    do_align (bool) :: whether to perform IMOD alignment
-    ext (bool)      :: whether external stack(s) are available and to be used
+    Args:
+        newstack (bool): whether to create new stack(s)
+        do_align (bool): whether to perform IMOD alignment
+        ext (bool): whether external stack(s) are available and to be used
     """
     # logger = logMod.Logger(log_path="o2r_imod_align.log")
 
