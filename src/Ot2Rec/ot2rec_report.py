@@ -26,10 +26,10 @@ class Ot2Rec_Report:
 
     def __init__(
         self,
+        *flags: str,
         project_name: str,
         logger_in: logMod.Logger,
         docker_image_name: str = None,
-        *flags: str
     ):
         """Initialise a Ot2Rec Report plugin object.
 
@@ -58,7 +58,7 @@ class Ot2Rec_Report:
                 self.docker_image_name = docker_image_name        
         
         # Add flags to attrs
-        self.flags_to_append = []
+        self.flags_to_add = []
         for flag in flags:
             if (flag == "--to_html") or (flag == "--to_slides"):
                 self.flags_to_add.append(flag)
@@ -82,10 +82,6 @@ class Ot2Rec_Report:
             self.docker_image_name,
             self.proj_name,
         ]
-
-        if len(self.flags_to_append) > 0:
-            for flag in self.flags_to_append:
-                cmd.append(flag)
         
         return cmd
 
@@ -102,9 +98,6 @@ class Ot2Rec_Report:
             "o2r.report.run",
             self.proj_name,
         ]
-        if len(self.flags_to_append) > 0:
-            for flag in self.flags_to_append:
-                cmd.append(flag)
         
         return cmd
 
@@ -122,6 +115,10 @@ class Ot2Rec_Report:
             cmd = self._get_ot2rec_report_subprocess_command()
         else:
             cmd = self._get_ot2rec_report_docker_command()
+        
+        if len(self.flags_to_add) > 0:
+            for flag in self.flags_to_add:
+                cmd.append(flag)
         
         if shutil.which("o2r.report.run") is None:
             self.logObj(

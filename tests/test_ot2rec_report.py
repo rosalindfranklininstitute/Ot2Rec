@@ -58,3 +58,17 @@ class Ot2RecReportSmokeTest(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             o2r_report._get_ot2rec_report_command()
+
+    def test_flags_added(self):
+        o2r_report = ot2rec_report.Ot2Rec_Report(
+            "--to_html",
+            "ignore",
+            "this",
+            project_name="TS",
+            logger_in = logger.Logger(),
+            docker_image_name=None,
+        )
+        self.assertListEqual(
+            o2r_report.flags_to_add,
+            ["--to_html"]
+        )
