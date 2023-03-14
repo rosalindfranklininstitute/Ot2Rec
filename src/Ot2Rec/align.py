@@ -307,9 +307,9 @@ setupset.systemTemplate = <adoc_template>
 runtime.Excludeviews.any.deleteOldFiles = <delete_old_files>
 runtime.Preprocessing.any.removeXrays = <remove_xrays>
 
-comparam.prenewst.newstack.BinByFactor = 1
+comparam.prenewst.newstack.BinByFactor = <aligned_bin_factor>
 
-runtime.AlignedStack.any.binByFactor = 1
+runtime.AlignedStack.any.binByFactor = <aligned_bin_factor>
 """
 
         fiducial_temp = """
@@ -371,18 +371,18 @@ comparam.align.tiltalign.WeightWholeTracks = <weight_contours>
         convert_dict = {
             'ext': self.params['System']['output_ext'],
             'use_rawtlt': 1 if self.params['BatchRunTomo']['setup']['use_rawtlt'] else 0,
-            'pixel_size': self.params['BatchRunTomo']['setup']['pixel_size'],
+            'pixel_size': self.params['BatchRunTomo']['setup']['pixel_size'] * self.params['BatchRunTomo']['setup']['stack_bin_factor'],
             'rot_angle': self.params['BatchRunTomo']['setup']['rot_angle'],
             'excl_views': "" if self.params["BatchRunTomo"]["setup"]["excluded_views"] == [0] \
             else f'{",".join(map(str, self.params["BatchRunTomo"]["setup"]["excluded_views"]))}',
             'gold_size': self.params['BatchRunTomo']['setup']['gold_size'] if fiducial else 0,
             'adoc_template': self.params['BatchRunTomo']['setup']['adoc_template'],
             'stack_bin_factor': self.params['BatchRunTomo']['setup']['stack_bin_factor'],
+            'aligned_bin_factor': self.params['BatchRunTomo']['setup']['aligned_bin_factor'],
 
             'delete_old_files': 1 if self.params['BatchRunTomo']['preprocessing']['delete_old_files'] else 0,
             'remove_xrays': 1 if self.params['BatchRunTomo']['preprocessing']['remove_xrays'] else 0,
 
-            'ca_bin_factor': self.params['BatchRunTomo']['coarse_align']['bin_factor'],
             'num_beads': self.params['BatchRunTomo']['setup']['num_beads'],
 
             'size_of_patches': f'{",".join(map(str, self.params["BatchRunTomo"]["patch_track"]["size_of_patches"]))}',
