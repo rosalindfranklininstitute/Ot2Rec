@@ -45,14 +45,14 @@ class RLF_deconv():
         """
         Initialise the RLF_deconv object
 
-        ARGS:
-        rootname (str)          :: rootname of project
-        orig_folder (ndarray)   :: parent folder containing original images to be deconvolved
-        kernel_folder (ndarray) :: parent folder containing kernel with which the image is to be deconvolved
-        out_folder (ndarray)    :: output parent folder for deconvolved tomograms
-        params_dict (dict)      :: dictionary containing all parameters used in RLF
-        orig_mrc (bool)         :: whether the original image is in MRC format (TIFF if false)
-        kernel_mrc (bool)       :: whether the kernel is in MRC format (TIFF if false)
+        Args:
+            rootname (str): rootname of project
+            orig_folder (ndarray): parent folder containing original images to be deconvolved
+            kernel_folder (ndarray): parent folder containing kernel with which the image is to be deconvolved
+            out_folder (ndarray): output parent folder for deconvolved tomograms
+            params_dict (dict): dictionary containing all parameters used in RLF
+            orig_mrc (bool): whether the original image is in MRC format (TIFF if false)
+            kernel_mrc (bool): whether the kernel is in MRC format (TIFF if false)
         """
         self.rootname = rootname
         self.suffix = suffix
@@ -120,7 +120,7 @@ class RLF_deconv():
         Method to read an MRC file and return a numpy array
 
         Returns:
-        ndarray
+            ndarray
         """
         with mrcfile.open(path) as image:
             data = image.data
@@ -134,7 +134,7 @@ class RLF_deconv():
         Method to read a TIFF file and return a numpy array
 
         Returns:
-        ndarray
+            ndarray
         """
         data = tifffile.imread(path)
 
