@@ -175,7 +175,7 @@ runtime.AlignedStack.any.binByFactor = <stack_bin_factor>
 runtime.Reconstruction.any.useSirt = <use_sirt>
 comparam.sirtsetup.sirtsetup.LeaveIterations = <sirt_iter>
 
-comparam.tilt.tilt.THICKNESS = <recon_thickness>
+runtime.Reconstruction.any.binnedThickness = <recon_thickness>
 
 runtime.Postprocess.any.doTrimvol = <run_trimvol>
 runtime.Trimvol.any.reorient = <trimvol_reorient>

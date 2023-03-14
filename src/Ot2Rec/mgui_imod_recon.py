@@ -43,9 +43,9 @@ class asObject(object):
     correct_ctf={"label": "Aligned stack: Correct CTF for aligned stacks?"},
     erase_gold={"label": "Aligned stack: Erase gold fiducials?"},
     filtering={"label": "Aligned stack: Perform 2D filtering?"},
-    bin_factor={"label": "Aligned stack: Binning factor for aligned stack",
+    bin_factor={"label": "Tomogram: Binning factor (further binning from aligned stack)",
                 "min": 1},
-    thickness={"label": "Reconstruction: Thickness (in pixels) for reconstruction *",
+    thickness={"label": "Reconstruction: BINNED thickness (in pixels) for reconstruction *",
                "min": 0,
                "max": 50000,
                "step": 100},
@@ -90,10 +90,6 @@ def get_args_recon(
     """
     logger = logMod.Logger(log_path="o2r_imod_recon.log")
     args = asObject(locals())
-
-    # Parse user inputs
-    if args is None:
-        args = mgMod.get_args_recon.show(run=True)
 
     prmMod.new_recon_yaml(args)
     recon.update_yaml(args)

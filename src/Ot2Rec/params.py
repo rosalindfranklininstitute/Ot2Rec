@@ -177,15 +177,12 @@ def new_align_yaml(args):
                 'num_beads': args.num_beads,
                 'adoc_template': str(args.adoc_template),
                 'stack_bin_factor': args.stack_bin_factor,
+                'aligned_bin_factor': args.aligned_bin_factor,
             },
 
             'preprocessing': {
                 'delete_old_files': args.delete_old_files,
                 'remove_xrays': args.remove_xrays,
-            },
-
-            'coarse_align': {
-                'bin_factor': args.coarse_align_bin_factor,
             },
 
             'patch_track': {
