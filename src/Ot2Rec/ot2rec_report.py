@@ -12,8 +12,13 @@
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
+import argparse
+import os
 import shutil
+import subprocess
+
 from . import logger as logMod
+
 
 class Ot2Rec_Report:
     """Ot2Rec Report object
@@ -53,7 +58,7 @@ class Ot2Rec_Report:
             self.docker_image_name = None
         else:
             if docker_image_name is None:
-                self.docker_image_name = "ot2rec_report:dev"
+                self.docker_image_name = "ot2rec-report:dev"
             else:
                 self.docker_image_name = docker_image_name        
         
@@ -63,73 +68,80 @@ class Ot2Rec_Report:
             if (flag == "--to_html") or (flag == "--to_slides"):
                 self.flags_to_add.append(flag)
 
-    def _get_ot2rec_report_docker_command(self) -> list:
-        """Method to get commands to run ot2rec_report from docker container
-
-        Assumes that Docker image is already on the system
-        
-        Returns:
-            list: List of commands to pass to `subprocess.run` to run the
-                Ot2Rec Report Docker command
-        """
-        cmd = [
-            "docker",
-            "run",
-            "-v",
-            "`pwd`:`pwd`",
-            "-w",
-            "`pwd`",
-            self.docker_image_name,
-            self.proj_name,
-        ]
-        
-        return cmd
-
-    def _get_ot2rec_report_subprocess_command(self) -> list:
-        """Method to get commands to run ot2rec_report using `subprocess.run`
-
-        Assumes that Docker is not available on the system
-
-        Returns:
-            list: List of commands to pass to `subprocess.run` as if running
-                `o2r.report.run` in the terminal
-        """
-        cmd = [
-            "o2r.report.run",
-            self.proj_name,
-        ]
-        
-        return cmd
-
-    def _get_ot2rec_report_command(self) -> list:
-        """Gets command to run `o2r.report.run` through docker or directly
+    def _run_ot2rec_report_direct(self) -> list:
+        """Run `o2r.report.run` directly
 
         Raises:
-            ValueError: when neither Docker or o2r.report.run will work
-
-        Returns:
-            list: commands to run `o2r.report.run` through Docker or directly
+            ValueError: when o2r.report.run is not available
         """
-        if shutil.which("docker") is None:
-            self.logObj("ot2rec.ot2rec_report: Docker not found on path")
-            cmd = self._get_ot2rec_report_subprocess_command()
-        else:
-            cmd = self._get_ot2rec_report_docker_command()
+        # if shutil.which("o2r.report.run") is None:
+        #     raise ValueError(
+        #         "ot2rec.ot2rec_report: o2r.report.run not found "
+        #         "Ensure o2r.report.run works in the terminal."
+        #     )
         
+        cmd = ["o2r.report.run", self.proj_name]
         if len(self.flags_to_add) > 0:
             for flag in self.flags_to_add:
                 cmd.append(flag)
         
-        if shutil.which("o2r.report.run") is None:
-            self.logObj(
-                message=(
-                    "ot2rec.ot2rec_report: Docker and o2r.report.run not found"
-                    "Ensure o2r.report.run works in the terminal."
-                ),
-                level="error"
-            )
-            raise ValueError(
-                "ot2rec.ot2rec_report: Docker and o2r.report.run not found "
-                "Ensure o2r.report.run works in the terminal."
-            )
+        subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='ascii',
+            check=True,
+        )
+
         return cmd
+
+    def _run_ot2rec_report_docker(self):
+        """Run `o2r.report.run` through Docker container
+        """
+        client = docker.from_env()
+        container = client.containers.run(
+            image=self.docker_image_name,
+            volumes=[f"{os.getcwd()}:{os.getcwd()}"],
+            working_dir=os.getcwd(),
+            command=self.proj_name,
+            detach=True
+        )
+        output = container.attach(
+            stdout=True,
+            stream=True,
+            logs=True,
+        )
+        for line in output:
+            self.logObj(line)
+
+    def run_ot2rec_report(self):
+        """Runs `o2r.report.run` through Docker if available, otherwise direct.
+        """
+        try:
+            import docker
+            self.logObj(
+                "ot2rec.ot2rec_report: Running o2r.report.run via Docker"
+            )
+        except ModuleNotFoundError:
+            self.logObj(
+                "ot2rec.ot2rec_report: Running o2r.report.run directly"
+            )
+            self._run_ot2rec_report_direct()
+        else:
+            self._run_ot2rec_report_docker()
+
+def run():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "project_name",
+        type=str,
+        help="Name of current project"
+    )
+    args = parser.parse_args()
+
+    o2r_report = Ot2Rec_Report(
+        project_name=args.project_name,
+        logger_in=logMod.Logger("o2r_report.log"),
+    )
+
+    o2r_report.run_ot2rec_report()

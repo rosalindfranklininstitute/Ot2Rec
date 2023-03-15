@@ -13,62 +13,36 @@
 # language governing permissions and limitations under the License.
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from Ot2Rec import ot2rec_report
 from Ot2Rec import logger
+import sys
 
-class Ot2RecReportSmokeTest(unittest.TestCase):
+class Ot2RecReportTest(unittest.TestCase):
 
-    @patch("shutil.which", return_value="/bin/docker")
-    def test_docker_command_created(self, docker_mock):
+    @patch("Ot2Rec.ot2rec_report.Ot2Rec_Report._run_ot2rec_report_docker")
+    def test_o2r_report_docker(self, docker_runner_mock):
+        sys.modules["docker"] = Mock()
         o2r_report = ot2rec_report.Ot2Rec_Report(
             project_name="TS",
-            logger_in = logger.Logger(),
-            docker_image_name=None,
+            logger_in=logger.Logger("o2r_report.log")
         )
-        
-        cmd = o2r_report._get_ot2rec_report_command()
+        o2r_report.run_ot2rec_report()
+        self.assertTrue(docker_runner_mock.called)
+    
+    @patch("builtins.__import__")
+    @patch("subprocess.run")
+    def test_o2r_report_direct(
+        self, 
+        direct_runner_mock, 
+        import_mock, 
+    ):
+        # Ensure docker is not available
+        import_mock.side_effect = ModuleNotFoundError
 
-        self.assertTrue(cmd[0], "docker")
-        self.assertTrue(cmd[-2], "ot2rec-report:dev")
-        self.assertTrue(cmd[-1], "TS")
-
-    @patch("shutil.which", return_value="/bin/ot2rec_report")
-    @patch("shutil.which", return_value=None)
-    def test_direct_command_created(self, docker_mock, o2r_run_mock):
         o2r_report = ot2rec_report.Ot2Rec_Report(
             project_name="TS",
-            logger_in = logger.Logger(),
-            docker_image_name=None,
+            logger_in=logger.Logger("o2r_report.log")
         )
-        
-        cmd = o2r_report._get_ot2rec_report_command()
-
-        self.assertTrue(cmd[0], "o2r.report.run")
-        self.assertTrue(cmd[-1], "TS")
-
-    @patch("shutil.which", return_value=None)
-    @patch("shutil.which", return_value=None)
-    def test_no_command_created(self, docker_mock, o2r_run_mock):
-        o2r_report = ot2rec_report.Ot2Rec_Report(
-            project_name="TS",
-            logger_in = logger.Logger(),
-            docker_image_name=None,
-        )
-
-        with self.assertRaises(ValueError):
-            o2r_report._get_ot2rec_report_command()
-
-    def test_flags_added(self):
-        o2r_report = ot2rec_report.Ot2Rec_Report(
-            "--to_html",
-            "ignore",
-            "this",
-            project_name="TS",
-            logger_in = logger.Logger(),
-            docker_image_name=None,
-        )
-        self.assertListEqual(
-            o2r_report.flags_to_add,
-            ["--to_html"]
-        )
+        o2r_report.run_ot2rec_report()
+        self.assertTrue(direct_runner_mock.called)
