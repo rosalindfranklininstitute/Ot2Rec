@@ -40,8 +40,12 @@ setup(
         'magicgui',
         'pyqt5',
         'mdocfile',
-        'joblib'
+        'joblib',
     ],
+    extras_require={
+        "docker": ["docker"],
+        "test": ["coverage"]
+    },
     entry_points={
         "console_scripts": [
             "o2r.new=Ot2Rec.main:new_proj",
@@ -81,6 +85,8 @@ setup(
             "o2r.cleanup=Ot2Rec.main:cleanup",
 
             "o2r.runall.imod=Ot2Rec.main:run_all_imod",
+
+            "o2r.report.run=Ot2Rec.ot2rec_report:run",
         ]
     }
 )
