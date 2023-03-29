@@ -81,6 +81,7 @@ setup(
             "o2r.cleanup=Ot2Rec.main:cleanup",
 
             "o2r.runall.imod=Ot2Rec.main:run_all_imod",
+            "o2r.previewer=Ot2Rec.main:run_all_aretomo",
         ]
     }
 )
