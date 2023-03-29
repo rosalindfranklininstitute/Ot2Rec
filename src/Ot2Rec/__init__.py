@@ -22,6 +22,7 @@ from . import ctffind
 from . import align
 from . import recon
 from . import main
+from . import previewer
 
 
 VERSION = 'v1.0a'
