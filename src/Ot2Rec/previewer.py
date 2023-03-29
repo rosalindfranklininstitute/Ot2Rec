@@ -50,7 +50,7 @@ def run_previewer():
     Method to run MotionCor2 + Aretomo automatically
     """
     # Get user parameters
-    user_params = asObject(reviewerMGUI.get_params_full_aretomo.show(run=True).asdict())
+    user_params = asObject(previewerMGUI.get_params_full_aretomo.show(run=True).asdict())
     assert(user_params.project_name != ""), \
         "FATAL ERROR: Project name cannot be blank."
 
@@ -140,6 +140,7 @@ def run_previewer():
     at_params.input_ext = "mrc"
     at_params.sample_thickness = user_params.thickness
     at_params.output_binning = user_params.binning
+    at_params.aretomo_path = "AreTomo"
 
     logger = logMod.Logger(log_path="o2r_aretomo_align-recon.log")
     prmMod.new_aretomo_yaml(at_params)
