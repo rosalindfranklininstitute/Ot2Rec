@@ -86,7 +86,7 @@ class AreTomo:
                                                self.params['System']['process_list']))
         for curr_ts in self.params['System']['process_list']:
             subfolder = (f"{self.basis_folder}/"
-                         f"{self.rootname}_{curr_ts:04d}{self.suffix}")
+                         f"{self.rootname}_{curr_ts}{self.suffix}")
             os.makedirs(subfolder, exist_ok=True)
             # self._path_dict[curr_ts] = subfolder
             if "aretomo_output_dir" not in list(self.md_out.keys()):
@@ -95,7 +95,7 @@ class AreTomo:
             self.md_out["aretomo_output_dir"][curr_ts] = subfolder
             self.md_out["aretomo_align_stats"][curr_ts] = (
                 f"{subfolder}/"
-                f"{self.rootname}_{curr_ts:04d}{self.suffix}.st.aln"
+                f"{self.rootname}_{curr_ts}{self.suffix}.st.aln"
             )
 
         if self.params["AreTomo_setup"]["out_imod"] != "N/A":
@@ -152,7 +152,7 @@ class AreTomo:
         if self.params['AreTomo_setup']['aretomo_mode'] == 1:
             cmd.append('-Align')
             cmd.append('0')
-        
+
         if self.params['AreTomo_recon']['recon_algo'] == "WBP":
             # WBP
             cmd.append('-Wbp')
@@ -209,7 +209,7 @@ class AreTomo:
             output_mrc = self.params["AreTomo_setup"]["output_mrc"][i]
             self.sta[curr_ts] = (
                 f'{self.basis_folder}/'
-                f'{self.rootname}_{curr_ts:04d}{self.suffix}/'
+                f'{self.rootname}_{curr_ts}{self.suffix}/'
                 f'{os.path.splitext(os.path.basename(output_mrc))[0]}_Imod/'
             )
 
@@ -232,7 +232,7 @@ class AreTomo:
         Method to export metadata as yaml
         """
         # If STA files created, move to common folder
-        if self.params["AreTomo_setup"]["out_imod"] != "N/A": 
+        if self.params["AreTomo_setup"]["out_imod"] != "N/A":
             for ts in list(self.sta.keys()):
                 sta_ts_folder = (
                     f"{self.sta_folder}/{self.sta[ts].split(os.sep)[-2]}"
@@ -321,11 +321,11 @@ def _get_process_list(file_list, rootname, suffix, ext):
         st_bn = os.path.basename(st)
         if suffix != "":
             ts_list.append(
-                int(st_bn.split(f"{rootname}_")[1].split(f"_{suffix}{ext}")[0])
+                st_bn.split(f"{rootname}_")[1].split(f"_{suffix}{ext}")[0][:-1]
             )
         else:
             ts_list.append(
-                int(st_bn.split(f"{rootname}_")[1].split(ext)[0])
+                st_bn.split(f"{rootname}_")[1].split(ext)[0][:-1]
             )
     return ts_list
 
