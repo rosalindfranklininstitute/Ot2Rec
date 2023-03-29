@@ -33,7 +33,6 @@ from . import align as alignMod
 from . import recon as reconMod
 from . import aretomo as atMod
 
-from . import mgui_auto_aretomo as autoatMGUI
 from . import mgui_import as importMGUI
 from . import mgui_mc2 as mc2MGUI
 from . import mgui_aretomo as atMGUI
