@@ -27,10 +27,10 @@ from tqdm import tqdm
 
 from . import align
 from . import logger as logMod
-from . import magicgui as mgMod
 from . import params as prmMod
 from . import user_args as uaMod
 from . import mgui_imod_align as alignMGUI
+from . import mgui_aretomo as mgMod
 
 
 class asObject(object):
@@ -195,7 +195,7 @@ class AreTomo:
             }
             cmd.append('-OutImod')
             cmd.append(outimod_lookup[out_imod])
-        
+
         # Add darktol
         if self.params['AreTomo_setup']['aretomo_mode'] != 1:
             cmd.append("-DarkTol")
