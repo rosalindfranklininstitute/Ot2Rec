@@ -109,36 +109,36 @@ def get_args_align(
     """
     Function to add arguments to parser for IMOD alignment
 
-    ARGS:
-    project_name (str)            :: Name of current project
-    rot_angle (float)             :: Rotational angle of electron beam. Can be obtained from MDOC files
-    image_dims (int)              :: Image dimensions (in pixels)
-    excl_views (int)              :: Indices of micrographes to be excluded
-    output_folder (str)           :: Path to folder for storing IMOD outputs
-    file_prefix (str)             :: Common prefix of raw image files (Default: project)
-    file_suffix (str)             :: Extra information attached as suffix to output filenames
-    no_rawtlt (bool)              :: Use information in filenames to determine tilt angles (rather than using .rawtlt files)
-    fiducial_size (float)         :: Size (in nm) of gold fiducial particles
-    adoc_template (str)           :: Path to template file of BatchRunTomo directives
-    stack_bin_factor (int)        :: Stack: Raw image stacks downsampling factor
-    delete_old_files (bool)       :: Preprocessing: Remove original stack when excluding views
-    remove_xrays (bool)           :: Preprocessing: Attempt to remove X-rays and other artefacts
-    coarse_align_bin_factor (int) :: Coarse-alignment: Coarse aligned stack binning
-    num_patches (int)             :: Patch-tracking: Number of patches to track in X and Y
-    patch_overlap (int)           :: Patch-tracking: % overlap between patches
-    num_iter (int)                :: Patch-tracking: Number of iterations. (Max. 4)
-    limits_on_shift (int)         :: Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment
-    adjust_tilt_angles (bool)     :: Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset
-    num_surfaces (int)            :: Fine-alignment: Number of surface(s) for angle analysis
-    mag_option (str)              :: Fine-alignment: Type of magnification solution
-    tilt_option (str)             :: Fine-alignment: Type of tilt-angle solution
-    rot_option (str)              :: Fine-alignment: Type of rotation solution
-    beam_tilt_option (str)        :: Fine-alignment: Type of beam-tilt solution
-    robust_fitting (bool)         :: Fine-alignment: Use robust fitting
-    weight_contours (bool)        :: Fine-alignment: Apply weighting to entire contours from patch-tracking
+    Args:
+        project_name (str): Name of current project
+        rot_angle (float): Rotational angle of electron beam. Can be obtained from MDOC files
+        image_dims (int): Image dimensions (in pixels)
+        excl_views (int): Indices of micrographes to be excluded
+        output_folder (str): Path to folder for storing IMOD outputs
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        file_suffix (str): Extra information attached as suffix to output filenames
+        no_rawtlt (bool): Use information in filenames to determine tilt angles (rather than using .rawtlt files)
+        fiducial_size (float): Size (in nm) of gold fiducial particles
+        adoc_template (str): Path to template file of BatchRunTomo directives
+        stack_bin_factor (int): Stack: Raw image stacks downsampling factor
+        delete_old_files (bool): Preprocessing: Remove original stack when excluding views
+        remove_xrays (bool): Preprocessing: Attempt to remove X-rays and other artefacts
+        coarse_align_bin_factor (int): Coarse-alignment: Coarse aligned stack binning
+        num_patches (int): Patch-tracking: Number of patches to track in X and Y
+        patch_overlap (int): Patch-tracking: % overlap between patches
+        num_iter (int): Patch-tracking: Number of iterations. (Max. 4)
+        limits_on_shift (int): Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment
+        adjust_tilt_angles (bool): Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset
+        num_surfaces (int): Fine-alignment: Number of surface(s) for angle analysis
+        mag_option (str): Fine-alignment: Type of magnification solution
+        tilt_option (str): Fine-alignment: Type of tilt-angle solution
+        rot_option (str): Fine-alignment: Type of rotation solution
+        beam_tilt_option (str): Fine-alignment: Type of beam-tilt solution
+        robust_fitting (bool): Fine-alignment: Use robust fitting
+        weight_contours (bool): Fine-alignment: Apply weighting to entire contours from patch-tracking
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
 
     return locals()
@@ -241,38 +241,38 @@ def get_args_align_ext(
     """
     Function to add arguments to parser for IMOD alignment
 
-    ARGS:
-    project_name (str)            :: Name of current project
-    rot_angle (float)             :: Rotational angle of electron beam. Can be obtained from MDOC files
-    image_dims (int)              :: Image dimensions (in pixels)
-    pixel_size (float)            :: Image pixel size (in angstroms)
-    excl_views (int)              :: Indices of micrographes to be excluded
-    input_folder (str)            :: Path to folder with image stacks
-    output_folder (str)           :: Path to folder for storing IMOD outputs
-    file_prefix (str)             :: Common prefix of raw image files (Default: project)
-    file_suffix (str)             :: Extra information attached as suffix to output filenames
-    no_rawtlt (bool)              :: Use information in filenames to determine tilt angles (rather than using .rawtlt files)
-    fiducial_size (float)         :: Size (in nm) of gold fiducial particles
-    adoc_template (str)           :: Path to template file of BatchRunTomo directives
-    stack_bin_factor (int)        :: Stack: Raw image stacks downsampling factor
-    delete_old_files (bool)       :: Preprocessing: Remove original stack when excluding views
-    remove_xrays (bool)           :: Preprocessing: Attempt to remove X-rays and other artefacts
-    coarse_align_bin_factor (int) :: Coarse-alignment: Coarse aligned stack binning
-    num_patches (int)             :: Patch-tracking: Number of patches to track in X and Y
-    patch_overlap (int)           :: Patch-tracking: % overlap between patches
-    num_iter (int)                :: Patch-tracking: Number of iterations. (Max. 4)
-    limits_on_shift (int)         :: Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment
-    adjust_tilt_angles (bool)     :: Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset
-    num_surfaces (int)            :: Fine-alignment: Number of surface(s) for angle analysis
-    mag_option (str)              :: Fine-alignment: Type of magnification solution
-    tilt_option (str)             :: Fine-alignment: Type of tilt-angle solution
-    rot_option (str)              :: Fine-alignment: Type of rotation solution
-    beam_tilt_option (str)        :: Fine-alignment: Type of beam-tilt solution
-    robust_fitting (bool)         :: Fine-alignment: Use robust fitting
-    weight_contours (bool)        :: Fine-alignment: Apply weighting to entire contours from patch-tracking
+    Args:
+        project_name (str): Name of current project
+        rot_angle (float): Rotational angle of electron beam. Can be obtained from MDOC files
+        image_dims (int): Image dimensions (in pixels)
+        pixel_size (float): Image pixel size (in angstroms)
+        excl_views (int): Indices of micrographes to be excluded
+        input_folder (str): Path to folder with image stacks
+        output_folder (str): Path to folder for storing IMOD outputs
+        file_prefix (str): Common prefix of raw image files (Default: project)
+        file_suffix (str): Extra information attached as suffix to output filenames
+        no_rawtlt (bool): Use information in filenames to determine tilt angles (rather than using .rawtlt files)
+        fiducial_size (float): Size (in nm) of gold fiducial particles
+        adoc_template (str): Path to template file of BatchRunTomo directives
+        stack_bin_factor (int): Stack: Raw image stacks downsampling factor
+        delete_old_files (bool): Preprocessing: Remove original stack when excluding views
+        remove_xrays (bool): Preprocessing: Attempt to remove X-rays and other artefacts
+        coarse_align_bin_factor (int): Coarse-alignment: Coarse aligned stack binning
+        num_patches (int): Patch-tracking: Number of patches to track in X and Y
+        patch_overlap (int): Patch-tracking: % overlap between patches
+        num_iter (int): Patch-tracking: Number of iterations. (Max. 4)
+        limits_on_shift (int): Patch-tracking: Maximum extent (in pixels) to which patches are allowed to move during alignment
+        adjust_tilt_angles (bool): Patch-tracking: Rerun patch-tracking procedure with tilt-angle offset
+        num_surfaces (int): Fine-alignment: Number of surface(s) for angle analysis
+        mag_option (str): Fine-alignment: Type of magnification solution
+        tilt_option (str): Fine-alignment: Type of tilt-angle solution
+        rot_option (str): Fine-alignment: Type of rotation solution
+        beam_tilt_option (str): Fine-alignment: Type of beam-tilt solution
+        robust_fitting (bool): Fine-alignment: Use robust fitting
+        weight_contours (bool): Fine-alignment: Apply weighting to entire contours from patch-tracking
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
 
     return locals()
@@ -322,20 +322,20 @@ def get_args_recon(
     """
     Function to add arguments to parser for IMOD reconstruction
 
-    ARGS:
-    project_name (str)       :: Name of current project
-    do_positioning (bool)    :: Whether to perform positioning
-    unbinned_thickness (int) :: Unbinned thickness (in pixels) for samples or whole tomogram for positioning
-    correct_ctf (bool)       :: Whether to correct CTF for aligned stacks
-    erase_gold (bool)        :: Whether to erase gold fiducials
-    filtering (bool)         :: Whether to perform 2D filtering
-    bin_factor (int)         :: Binning factor for aligned stack
-    thickness (int)          :: Thickness (in pixels) for reconstruction
-    trimvol (bool)           :: Run Trimvol on reconstruction
-    trimvol_reorient (str)   :: Reorientation in Trimvol
+    Args:
+        project_name (str): Name of current project
+        do_positioning (bool): Whether to perform positioning
+        unbinned_thickness (int): Unbinned thickness (in pixels) for samples or whole tomogram for positioning
+        correct_ctf (bool): Whether to correct CTF for aligned stacks
+        erase_gold (bool): Whether to erase gold fiducials
+        filtering (bool): Whether to perform 2D filtering
+        bin_factor (int): Binning factor for aligned stack
+        thickness (int): Thickness (in pixels) for reconstruction
+        trimvol (bool): Run Trimvol on reconstruction
+        trimvol_reorient (str): Reorientation in Trimvol
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
     return locals()
 
@@ -369,15 +369,15 @@ def get_args_ctfsim(
     """
     Function to add arguments to parser for O2R-CTFsim
 
-    ARGS:
-    project_name (str) :: Name of current project
-    pixel_res (float)  :: Pixel resolution of motion-corrected images (in Angstroms)
-    ds_factor (int)    :: Downsampling factor (must be same as alignment/reconstruction)
-    rootname (str)     :: Rootname of project (if different from project name)
-    dims (int*2)       :: Dimensions of simulated CTF (in pixels)
+    Args:
+        project_name (str): Name of current project
+        pixel_res (float): Pixel resolution of motion-corrected images (in Angstroms)
+        ds_factor (int): Downsampling factor (must be same as alignment/reconstruction)
+        rootname (str): Rootname of project (if different from project name)
+        dims (int*2): Dimensions of simulated CTF (in pixels)
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
 
     return locals()
@@ -429,19 +429,19 @@ def get_args_rldeconv(
     """
     Function to add arguments to parser for RedLionfish deconvolution
 
-    ARGS:
-    image_path (str) :: Path to raw image
-    image_type (str) :: File type of raw image
-    psf_path (str) :: Path to PSF for deconvolution
-    psf_type (str) :: File type of PSF stack
-    output_path (str) :: Path to deconvolved image
-    device (str) :: Device used for deconvolution
-    niter (int) :: Max number of iteration in deconvolution
-    block (bool) :: Whether to use block iterative algorithm for deconvolution
-    uint (int) :: Whether to encode results as UInt8
+    Args:
+        image_path (str): Path to raw image
+        image_type (str): File type of raw image
+        psf_path (str): Path to PSF for deconvolution
+        psf_type (str): File type of PSF stack
+        output_path (str): Path to deconvolved image
+        device (str): Device used for deconvolution
+        niter (int): Max number of iteration in deconvolution
+        block (bool): Whether to use block iterative algorithm for deconvolution
+        uint (int): Whether to encode results as UInt8
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
 
     return locals()
@@ -485,11 +485,11 @@ def get_args_savurecon(
     """
     Function to add arguments to parser for Savu reconstruction
 
-    ARGS:
-    None
+    Args:
+        None
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
 
     return locals()
@@ -548,11 +548,11 @@ def get_args_imod_route(
     """
     Function to get essential parameters for processing steps on IMOD route
 
-    ARGS:
+    Args:
+        None
 
-
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
 
     return locals()
@@ -618,6 +618,10 @@ def get_args_imod_route(
     dark_tol={
         "label": "Tolerance to remove dark images",
         "tooltip": "Default 0.7, low number = fewer images removed",
+    },
+    aretomo_path={
+        "label": "Path to AreTomo executable (leave blank if module loaded)",
+        "tooltip": "Ensure the path is to the correct version to match CUDA",
     }
 )
 def get_args_aretomo(
@@ -637,6 +641,7 @@ def get_args_aretomo(
         recon_algo="SART",
         out_imod="N/A",
         dark_tol=0.7,
+        aretomo_path="",
 ):
     return locals()
 

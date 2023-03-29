@@ -30,9 +30,9 @@ class Params:
         """
         Initialise Params object
 
-        ARGS:
-        project_name :: Name of current project
-        params_in    :: Parameters being read in
+        Args:
+            project_name: Name of current project
+            params_in: Parameters being read in
         """
 
         self.project_name = project_name
@@ -43,8 +43,8 @@ def new_master_yaml(args):
     """
     Subroutine to create yaml file for processing master metadata
 
-    ARGS:
-    args (Namespace) :: Namespace generated with user inputs
+    Args:
+        args (Namespace): Namespace generated with user inputs
     """
 
     master_yaml_name = args.project_name + '_proj.yaml'
@@ -68,8 +68,8 @@ def new_mc2_yaml(args):
     """
     Subroutine to create yaml file for motioncorr
 
-    ARGS:
-    args (Namespace) :: Namespace generated with user inputs
+    Args:
+        args (Namespace): Namespace generated with user inputs
     """
 
     mc2_yaml_name = args.project_name + '_mc2.yaml'
@@ -104,8 +104,8 @@ def new_ctffind_yaml(args):
     """
     Subroutine to create yaml file for ctffind
 
-    ARGS:
-    args (Namespace) :: Namespace generated with user inputs
+    Args:
+        args (Namespace): Namespace generated with user inputs
     """
 
     ctf_yaml_name = args.project_name + '_ctffind.yaml'
@@ -143,8 +143,8 @@ def new_align_yaml(args):
     """
     Subroutine to create yaml file for stack creation and BatchTomo (up till alignment)
 
-    ARGS:
-    args (Namespace) :: Namespace generated with user inputs
+    Args:
+        args (Namespace): Namespace generated with user inputs
     """
 
     # Calculate patch sizes
@@ -214,8 +214,8 @@ def new_recon_yaml(args):
     """
     Subroutine to create yaml file for batchtomo (continuing from aligned stacks to full reconstruction)
 
-    ARGS:
-    args (Namespace) :: Namespace generated with user inputs
+    Args:
+        args (Namespace): Namespace generated with user inputs
     """
     recon_yaml_name = args.project_name + '_recon.yaml'
 
@@ -269,8 +269,8 @@ def new_savurecon_yaml(args):
     """
     Subroutine to create yaml file for savurecon (continuing from aligned stacks to full reconstruction)
 
-    ARGS:
-    args (Namespace) :: Namespace containing user parameter inputs
+    Args:
+        args (Namespace): Namespace containing user parameter inputs
     """
 
     savurecon_yaml_name = args.project_name.value + '_savurecon.yaml'
@@ -301,8 +301,8 @@ def new_aretomo_yaml(args):
     """
     Subroutine to create yaml file for aretomo
 
-    ARGS:
-    args (Namespace) :: Namespace containing user parameter inputs
+    Args:
+        args (Namespace): Namespace containing user parameter inputs
     """
 
     aretomo_yaml_names = {0: args.project_name + "_aretomo_align.yaml",
@@ -318,6 +318,7 @@ def new_aretomo_yaml(args):
             "output_path": str(args.output_path),
             "output_rootname": args.project_name if args.rootname == "" else args.rootname,
             "output_suffix": args.suffix,
+            "aretomo_path": args.aretomo_path,
         },
 
         "AreTomo_setup": {
@@ -351,8 +352,8 @@ def new_exclude_bad_tilts_yaml(args):
     """
     Subroutine to create yaml file for excluding bad tilts
 
-    ARGS:
-    args (Namespace) :: Namespace containing user parameter inputs
+    Args:
+        args (Namespace): Namespace containing user parameter inputs
     """
 
     ebt_yaml_name = f"{args.project_name.value}_exclude_bad_tilts.yaml"
@@ -379,12 +380,12 @@ def read_yaml(project_name: str,
     """
     Function to read in config file
 
-    ARGS:
-    project_name :: name of current project
-    filename     :: config file name
+    Args:
+        project_name: name of current project
+        filename: config file name
 
-    RETURNS:
-    Params object
+    Returns:
+        ot2rec.params.Params
     """
 
     # Check if file exists

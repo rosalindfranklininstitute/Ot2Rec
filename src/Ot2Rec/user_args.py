@@ -8,7 +8,7 @@
 #
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,::
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
@@ -18,13 +18,13 @@ import argparse
 
 def get_args_new_proj():
     """
-    Function to add arguments to parser for new project
+    (DEPRECATED) Function to add arguments to parser for new project
 
-    ARGS:
-    None
+    Args:
+        None
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name",
@@ -67,13 +67,13 @@ def get_args_new_proj():
 
 def get_args_mc2():
     """
-    Function to add arguments to parser for MotionCor
+    (DEPRECATED) Function to add arguments to parser for MotionCor
 
-    ARGS:
-    None
+    Args:
+        None
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name",
@@ -141,13 +141,13 @@ def get_args_mc2():
 
 def get_args_ctffind():
     """
-    Function to add arguments to parser for CTFFind
+    (DEPRECATED) Function to add arguments to parser for CTFFind
 
-    ARGS:
-    None
+    Args:
+        None
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name",
@@ -209,13 +209,13 @@ def get_args_ctffind():
 
 def get_args_align():
     """
-    Function to add arguments to parser for IMOD alignment
+    (DEPRECATED) Function to add arguments to parser for IMOD alignment
 
-    ARGS:
-    None
+    Args:
+        None
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name",
@@ -323,13 +323,13 @@ def get_args_align():
 
 def get_args_align_ext():
     """
-    Function to add arguments to parser for IMOD alignment (with external image stacks)
+    (DEPRECATED) Function to add arguments to parser for IMOD alignment (with external image stacks)
 
-    ARGS:
-    None
+    Args:
+        None
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name",
@@ -443,13 +443,13 @@ def get_args_align_ext():
 
 def get_args_recon():
     """
-    Function to add arguments to parser for IMOD reconstruction
+    (DEPRECATED) Function to add arguments to parser for IMOD reconstruction
 
-    ARGS:
-    None
+    Args:
+        None
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name",
@@ -491,13 +491,13 @@ def get_args_recon():
 
 def get_args_ctfsim():
     """
-    Function to add arguments to parser for O2R-CTFsim
+    (DEPRECATED) Function to add arguments to parser for O2R-CTFsim
 
-    ARGS:
-    None
+    Args:
+        None
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name",
@@ -523,13 +523,13 @@ def get_args_ctfsim():
 
 def get_args_savurecon():
     """
-    Function to add arguments to parser for Savu reconstruction
+    (DEPRECATED) Function to add arguments to parser for Savu reconstruction
 
-    ARGS:
-    None
+    Args:
+        None
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("project_name",
@@ -564,13 +564,13 @@ def get_args_savurecon():
 
 def get_args_rldeconv():
     """
-    Function to add arguments to parser for RedLionfish deconvolution
+    (DEPRECATED) Function to add arguments to parser for RedLionfish deconvolution
 
-    ARGS:
-    None
+    Args:
+        None
 
-    OUTPUTs:
-    Namespace
+    Returns:
+        Namespace
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("image_path",
@@ -613,14 +613,14 @@ def get_args_rldeconv():
 
 def get_args_aretomo():
     """
-    Function to add arguments to parser for AreTomo
+    (DEPRECATED) Function to add arguments to parser for AreTomo
 
-    ARGS:
-    None
+    Args:
+        None
 
-    OUTPUTs:
-    Namespace
-    kwargs (list) : list of extra parameters to pass to AreTomo, empty if none are passed
+    Returns:
+        Namespace
+        kwargs (list) : list of extra parameters to pass to AreTomo, empty if none are passed
 
     """
     parser = argparse.ArgumentParser()

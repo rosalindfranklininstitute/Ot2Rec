@@ -91,12 +91,12 @@ def calculate_k_grids(image_size, pixel_size):
     """
     Method to calculate alpha_g (angle between g vector and horizontal axis) and norm2 on reciprocal grid
 
-    ARGS:
-    image_size (list) :: size of original image
-    pixel_size (float) :: pixel size of original image
+    Args:
+        image_size (list): size of original image
+        pixel_size (float): pixel size of original image
 
-    OUTPUTS:
-    ndarray, ndarray
+    Returns:
+        ndarray, ndarray
     """
 
     # Create k-space coordinate grid
