@@ -30,6 +30,12 @@ from . import logger as logMod
 from . import magicgui as mgMod
 from . import params as prmMod
 from . import user_args as uaMod
+from . import mgui_imod_align as alignMGUI
+
+
+class asObject(object):
+    def __init__(self, dict_obj):
+        self.__dict__ = dict_obj
 
 
 class AreTomo:

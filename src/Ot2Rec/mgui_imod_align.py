@@ -95,6 +95,7 @@ class asObject(object):
                       "choices": ['fixed', 'search']},
     robust_fitting={"label": "Fine-alignment: Use robust fitting?"},
     weight_contours={"label": "Fine-alignment: Apply weighting to entire contours from patch-tracking"},
+    return_only={"label": "Only return parameters without file creation (not recommended)"}
 )
 def get_args_align(
         project_name="",
@@ -127,6 +128,8 @@ def get_args_align(
         beam_tilt_option="fixed",
         robust_fitting=True,
         weight_contours=True,
+        *,
+        return_only=False,
 ):
     """
     Function to add arguments to parser for IMOD alignment
@@ -162,6 +165,9 @@ def get_args_align(
     OUTPUTs:
     Namespace
     """
+    if return_only:
+        return locals()
+
     logger = logMod.Logger(log_path="o2r_imod_align.log")
     args = asObject(locals())
 

@@ -30,12 +30,14 @@ class asObject(object):
 @mg(
     call_button="Create config file",
     layout="vertical",
-    result_widget=True,
 
     project_name={"label": "Project name *"},
     source_folder={"widget_type": "FileEdit",
                    "label": "Source folder *",
                    "mode": "d"},
+    mdocs_folder={"widget_type": "FileEdit",
+                 "label": "MDOCs folder (overridden if 'No MDOCs'==True) *",
+                 "mode": "d"},
     folder_prefix={"label": "Folder prefix (if tilt series in subfolders)"},
     file_prefix={"label": "File prefix (if different from project name)"},
     ext={"widget_type": "ComboBox",
@@ -47,11 +49,13 @@ class asObject(object):
                  "label": "Image index field #"},
     tiltangle_field={"min": 0,
                      "label": "Tilt angle field #"},
-    no_mdoc={"label": "No MDOCs"}
+    no_mdoc={"label": "No MDOCs"},
+    return_only={"label": "Only return parameters without file creation (not recommended)"}
 )
 def get_args_new_proj(
         project_name="",
         source_folder=Path("../raw/"),
+        mdocs_folder=Path("../raw/"),
         folder_prefix="",
         file_prefix="",
         ext="mrc",
@@ -59,6 +63,8 @@ def get_args_new_proj(
         index_field=1,
         tiltangle_field=2,
         no_mdoc=False,
+        *,
+        return_only=False,
 ):
     """
     Function to add arguments to parser for new project
@@ -73,12 +79,16 @@ def get_args_new_proj(
     index_field (int)     :: Field number of image indices (Default: 1)
     tiltangle_field (int) :: Field number of tilt angles (Default: 2)
     no_mdoc (bool)        :: True if no MDOC file provided (Default: False)
+    mdoc_folder (str)     :: Path to folder with raw images (Default: ../raw/)
 
     OUTPUTs:
     Namespace
     """
     logger = logMod.Logger(log_path="new_proj.log")
     args = asObject(locals())
+
+    if return_only:
+        return locals()
 
     prmMod.new_master_yaml(args)
 
@@ -103,5 +113,4 @@ def get_args_new_proj(
     logger(level="info",
            message="Master metadata file created.")
 
-
-    return "Done. You can close this window now."
+    return locals()

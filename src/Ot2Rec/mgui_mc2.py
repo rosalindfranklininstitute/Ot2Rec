@@ -61,7 +61,8 @@ class asObject(object):
               "min": 1},
     patch_size={"widget_type": "LiteralEvalLineEdit",
                 "label": "Patch configurations (Nx, Ny, %overlap)"},
-    use_subgroups={"label": "Use subgroups in alignments"}
+    use_subgroups={"label": "Use subgroups in alignments"},
+    return_only={"label": "Only return parameters without file creation (not recommended)"}
 )
 def get_args_mc2(
         project_name="",
@@ -79,6 +80,8 @@ def get_args_mc2(
         max_iter=10,
         patch_size=[5,5,20],
         use_subgroups=True,
+        *,
+        return_only=False,
 ):
     """
     Function to add arguments to parser for MotionCor
@@ -104,6 +107,9 @@ def get_args_mc2(
     OUTPUTs:
     Namespace
     """
+    if return_only:
+        return locals()
+
     logger = logMod.Logger(log_path="o2r_motioncor2.log")
     args = asObject(locals())
 

@@ -403,7 +403,7 @@ def run(exclusive=True, args_in=None):
         args = parser.parse_args()
         project_name = args.project_name
     else:
-        project_name = args_in.project_name.value
+        project_name = args_in.project_name
 
     # Check if prerequisite files exist
     mc2_yaml = project_name + '_mc2.yaml'

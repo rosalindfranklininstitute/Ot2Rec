@@ -67,7 +67,7 @@ class Metadata:
             self.get_param()
 
         # Define empty lists for later use
-        self.image_paths, self.tilt_series, self.image_idx, self.tilt_angles = [], [], [], []
+        self.image_paths, self.mdocs_paths, self.tilt_series, self.image_idx, self.tilt_angles = [], [], [], [], []
 
     def get_param(self):
         """
@@ -96,6 +96,10 @@ class Metadata:
         while self.params['source_folder'].endswith('/'):
             self.params['source_folder'] = self.params['source_folder'][:-1]
 
+        # Source folder should not end with forward slash so remove them
+        while self.params['mdocs_folder'].endswith('/'):
+            self.params['mdocs_folder'] = self.params['mdocs_folder'][:-1]
+
         # Find files and check
         if len(self.params['TS_folder_prefix']) > 0:
             raw_images_list = glob("{}/{}/{}_*.{}".format(
@@ -115,8 +119,21 @@ class Metadata:
             raise IOError("Error in Ot2Rec.metadata.Metadata.create_master_metadata: "
                           "No vaild files found using given criteria.")
 
+        # Find MDOC files and check
+        if self.params['mdocs_folder'] is None:
+            self.mdocs_paths = glob("{}/{}_*.mdoc".format(
+                self.params['source_folder'],
+                self.params['file_prefix'],
+            ))
+        else:
+            self.mdocs_paths = glob("{}/{}_*.mdoc".format(
+                self.params['mdocs_folder'],
+                self.params['file_prefix'],
+            ))
+
         # Convert potentially relative file paths to absolute paths
         raw_images_list = sorted([os.path.abspath(image) for image in raw_images_list])
+        self.mdocs_paths = sorted([os.path.abspath(mdoc) for mdoc in self.mdocs_paths])
 
         # Extract information from image file names
         for curr_image in raw_images_list:
@@ -217,7 +234,11 @@ class Metadata:
 
     def get_mc2_temp(self):
         df = pd.DataFrame(self.metadata)
-        base_folder = '/'.join(df.file_paths.values[0].split('/')[:-1])
+
+        if self.params['mdocs_folder'] is None:
+            base_folder = '/'.join(df.file_paths.values[0].split('/')[:-1])
+        else:
+            base_folder = '/'.join(self.mdocs_paths[0].split('/')[:-1])
 
         df['num_frames'] = None
         df['ds_factor'] = None
@@ -246,7 +267,10 @@ class Metadata:
 
     def get_acquisition_settings(self):
         df = pd.DataFrame(self.metadata)
-        base_folder = '/'.join(df.file_paths.values[0].split('/')[:-1])
+        if self.params['mdocs_folder'] is None:
+            base_folder = '/'.join(df.file_paths.values[0].split('/')[:-1])
+        else:
+            base_folder = '/'.join(self.mdocs_paths[0].split('/')[:-1])
 
         ts = list(set(df.ts))[0] # Assuming settings same across one data set
         mdoc_path = f"{base_folder}/{self.params['file_prefix']}_" + str(ts) + ".mdoc"

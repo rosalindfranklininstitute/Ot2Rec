@@ -665,7 +665,7 @@ def run(newstack=False, do_align=True, ext=False, args_pass=None, exclusive=True
             args = parser.parse_args()
         project_name = args.project_name
     else:
-        project_name = args_in.project_name.value
+        project_name = args_in.project_name
 
     # Check if prerequisite files exist
     align_yaml = project_name + '_align.yaml'
