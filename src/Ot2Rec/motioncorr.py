@@ -37,11 +37,11 @@ class Motioncorr:
         """
         Initialise Motioncorr object
 
-        ARGS:
-        project_name (str)  :: Name of current project
-        mc2_params (Params) :: Parameters read in from yaml file
-        md_in (Metadata)    :: Metadata containing information of images
-        logger (Logger)     :: Logger for recording events
+        Args:
+            project_name (str): Name of current project.
+            mc2_params (Params): Parameters read in from yaml file.
+            md_in (Metadata): Metadata containing information of images.
+            logger (Logger): Logger for recording events.
         """
 
         self.proj_name = project_name
@@ -186,12 +186,12 @@ class Motioncorr:
         """
         Subroutine to get commands for running MotionCor2
 
-        ARGS:
-        image (tuple)      :: metadata for current image (in_path, out_path, #GPU)
-        extra_info (tuple) :: extra information (#EER frames, binning factor, frame dose rate)
+        Args:
+            image (tuple)      : metadata for current image (in_path, out_path, #GPU)
+            extra_info (tuple) : extra information (#EER frames, binning factor, frame dose rate)
 
-        RETURNS:
-        list
+        Returns:
+            list
         """
 
         in_path, out_path, gpu_number = image
@@ -328,8 +328,8 @@ def update_yaml(args):
     """
     Subroutine to update yaml file for motioncorr
 
-    ARGS:
-    args (Namespace) :: Arguments obtained from user
+    Args:
+        args (Namespace) : Arguments obtained from user
     """
     logger = logMod.Logger(log_path="o2r_motioncor2.log")
 

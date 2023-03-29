@@ -51,10 +51,11 @@ class Metadata:
         """
         Initialise Metadata object
 
-        ARGS:
-        project_name :: project name
-        job_type     :: what job is being done (motioncorr/ctffind/align/reconstruct)
-        md_in        :: dictionary read from yaml file containing existing metadata
+        Args:
+            project_name: project name
+            job_type: what job is being done 
+                (motioncorr/ctffind/align/reconstruct)
+            md_in: dictionary read from yaml file containing existing metadata
         """
 
         self.project_name = project_name
@@ -180,8 +181,11 @@ class Metadata:
     @staticmethod
     def get_num_frames(curr_file, target_frames):
         """
-        curr_file (str)     :: path to current file
-        target_frames (int) :: target number of frames in the 'mrc'
+        Get number of frames from the micrograph
+
+        Args:
+            curr_file (str): path to current file
+            target_frames (int): target number of frames in the 'mrc'
         """
 
         command = ["header", curr_file]
@@ -200,8 +204,9 @@ class Metadata:
     @staticmethod
     def get_num_frames_parallel(func, filelist, target_frames=15, np=8):
         """
-        func (func)     :: function to be parallelised
-        filelist (list) :: list of image files to be passed into the function
+        Args:
+            func (func): function to be parallelised
+            filelist (list): list of image files to be passed into the function
         """
         func_filelist = partial(func, target_frames=target_frames)
         with mp.Pool(np) as p:
@@ -291,13 +296,13 @@ def read_md_yaml(project_name: str,
     """
     Function to read in YAML file containing metadata
 
-    ARGS:
-    project_name :: Name of current project
-    job_type     :: what job is being done (motioncorr/ctffind/align/reconstruct)
-    filename     :: Name of the YAML file to be read
+    Args:
+        project_name: Name of current project
+        job_type: what job is being done (motioncorr/ctffind/align/reconstruct)
+        filename: Name of the YAML file to be read
 
-    RETURNS:
-    Metadata object
+    Returns:
+        ot2rec.metadata.Metadata
     """
 
     # Check if file exists

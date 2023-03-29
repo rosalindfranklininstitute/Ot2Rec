@@ -34,8 +34,8 @@ class Logger():
         """
         Initialise Logger object
 
-        ARGS:
-        log_path :: Path to the log file
+        Args:
+            log_path: Path to the log file
         """
         self.log_path = log_path
 
@@ -56,10 +56,10 @@ class Logger():
         """
         Send a string to stdout and log file one process at a time.
 
-        ARGS:
-        message  :: message to be output to file
-        level    :: type of log (info / warning / error)
-        stdout   :: whether to output to shell
+        Args:
+            message: message to be output to file
+            level: type of log (info / warning / error)
+            stdout: whether to output to shell
         """
 
         logging.log(level=self.LEVELS[level.lower()],
