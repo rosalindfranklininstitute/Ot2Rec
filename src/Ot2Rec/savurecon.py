@@ -260,10 +260,10 @@ def update_yaml(args):
     if not os.path.isfile(savu_yaml_name):
         logger(level="error",
                message="Savu metadata file not found.")
-        raise IOError("Error in Ot2Rec.main.update_savu_yaml: File not found.")    
+        raise IOError("Error in Ot2Rec.main.update_savu_yaml: File not found.")
 
     parent_path = args.stacks_folder.value
-    rootname = args.project_name.value if args.rootname.value is "" else args.rootname.value
+    rootname = args.project_name.value if args.rootname.value == "" else args.rootname.value
     suffix = args.suffix.value
     ext = args.extension.value
     imod_suffix = args.imod_suffix.value
