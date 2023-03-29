@@ -18,6 +18,7 @@ import time
 import subprocess
 import sys
 from glob import glob
+from pathlib import Path
 
 import yaml
 
@@ -30,6 +31,18 @@ from . import motioncorr as mcMod
 from . import ctffind as ctffindMod
 from . import align as alignMod
 from . import recon as reconMod
+from . import aretomo as atMod
+
+from . import mgui_auto_aretomo as autoatMGUI
+from . import mgui_import as importMGUI
+from . import mgui_mc2 as mc2MGUI
+from . import mgui_aretomo as atMGUI
+from . import mgui_imod_align as imodMGUI
+
+
+class asObject(object):
+    def __init__(self, dict_obj):
+        self.__dict__ = dict_obj
 
 
 def get_proj_name():
@@ -50,7 +63,8 @@ def new_proj():
     """
     Method to create a new project and get master metadata from raw images
     """
-    mgMod.get_args_new_proj.show(run=True)
+    params = mgMod.get_args_new_proj.show(run=True)
+
 
 
 def cleanup():
@@ -173,3 +187,123 @@ def run_all_imod():
     reconMod.run(exclusive=False,
                  args_in=recon_args,
     )
+
+
+def run_all_aretomo():
+    """
+    Method to run MotionCor2 + Aretomo automatically
+    """
+    # Get user parameters
+    user_params = asObject(autoatMGUI.get_params_full_aretomo.show(run=True).asdict())
+    assert(user_params.project_name != ""), \
+        "FATAL ERROR: Project name cannot be blank."
+
+    # Collect raw images and produce master metadata
+    new_proj_params = asObject(importMGUI.get_args_new_proj(return_only=True))
+    new_proj_params.project_name = user_params.project_name
+    new_proj_params.source_folder = user_params.source_folder
+    new_proj_params.mdocs_folder = user_params.mdocs_folder
+    new_proj_params.stack_field = user_params.stack_field
+    new_proj_params.index_field = user_params.index_field
+    new_proj_params.tiltangle_field = user_params.tiltangle_field
+    new_proj_params.ext = user_params.ext
+
+    prmMod.new_master_yaml(new_proj_params)
+
+    # Create empty Metadata object
+    # Master yaml file will be read automatically
+    meta = mdMod.Metadata(project_name=new_proj_params.project_name,
+                          job_type='master')
+
+    # Create master metadata and serialise it as yaml file
+    meta.create_master_metadata()
+    if not new_proj_params.no_mdoc:
+        meta.get_mc2_temp()
+        meta.get_acquisition_settings()
+
+    master_md_name = new_proj_params.project_name + '_master_md.yaml'
+    acqui_md_name =  new_proj_params.project_name + '_acquisition_md.yaml'
+    with open(master_md_name, 'w') as f:
+        yaml.dump(meta.metadata, f, indent=4)
+    with open(acqui_md_name, 'w') as g:
+        yaml.dump(meta.acquisition, g, indent=4)
+
+    logger = logMod.Logger(log_path="o2r_general.log")
+    logger(level="info",
+           message="Master metadata file created.")
+
+
+    # Motion-correction (MotionCor2)
+    mc2_params = asObject(mc2MGUI.get_args_mc2(return_only=True))
+    mc2_params.project_name = user_params.project_name
+    mc2_params.pixel_size = meta.acquisition['pixel_spacing']
+    mc2_params.exec_path = "MotionCor2_1.4.0_Cuda110"
+
+    logger = logMod.Logger(log_path="o2r_motioncor2.log")
+    prmMod.new_mc2_yaml(mc2_params)
+    logger(level="info",
+           message="MotionCor2 metadata file created.")
+    mcMod.update_yaml(mc2_params)
+
+    logger(level="info",
+           message="Motion correction in progress...")
+    mcMod.run(exclusive=False,
+              args_in=mc2_params)
+
+    time.sleep(2)
+
+
+    # Create stacks (IMOD)
+    imod_params = asObject(imodMGUI.get_args_align(return_only=True))
+    imod_params.project_name = user_params.project_name
+    imod_params.pixel_size = meta.acquisition['pixel_spacing']
+    imod_params.image_dims = meta.acquisition['image_size']
+    imod_params.rot_angle = meta.acquisition['rotation_angle']
+    imod_params.output_folder = Path("./stacks/")
+
+    logger = logMod.Logger()
+    logger(level="info",
+           message="Creating stacks for reconstruction...")
+
+    prmMod.new_align_yaml(imod_params)
+    alignMod.update_yaml(imod_params, logger)
+    alignMod.run(newstack=True,
+                 do_align=False,
+                 exclusive=False,
+                 args_in=imod_params)
+
+
+    # Alignment + reconstruction (AreTomo)
+    at_params_dict = atMGUI.get_args_aretomo(return_only=True)
+    at_params = asObject(at_params_dict)
+    at_params.project_name = user_params.project_name
+    at_params.aretomo_mode = 2
+    at_params.pixel_size = meta.acquisition['pixel_spacing']
+    at_params.rot_angle = meta.acquisition['rotation_angle']
+    at_params.input_mrc_folder = Path("./stacks/")
+    at_params.input_ext = "mrc"
+    at_params.sample_thickness = user_params.thickness
+    at_params.output_binning = user_params.binning
+
+    logger = logMod.Logger(log_path="o2r_aretomo_align-recon.log")
+    prmMod.new_aretomo_yaml(at_params)
+    logger(level="info",
+           message="AreTomo metadata file created.")
+    atMod.update_yaml(at_params_dict)
+
+    logger(level="info",
+           message="AreTomo processing in progress...")
+
+    aretomo_config = prmMod.read_yaml(
+        project_name=user_params.project_name,
+        filename=f"{user_params.project_name}_aretomo_align-recon.yaml"
+    )
+
+    aretomo_obj = atMod.AreTomo(
+        project_name=user_params.project_name,
+        params_in=aretomo_config,
+        logger_in=logger
+    )
+
+    # Run AreTomo commands
+    aretomo_obj.run_aretomo_all()
