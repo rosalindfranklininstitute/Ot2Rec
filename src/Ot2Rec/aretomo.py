@@ -444,8 +444,8 @@ def update_yaml(args):
         ext = output_lookup[args['aretomo_mode']]
         out_file_list = [
             (f"{aretomo_params.params['System']['output_path']}/"
-             f"{rootname}_{curr_ts:04d}{suffix}/"
-             f"{rootname}_{curr_ts:04d}{suffix}{ext}"
+             f"{rootname}_{curr_ts}{suffix}/"
+             f"{rootname}_{curr_ts}{suffix}{ext}"
             ) for curr_ts in ts_list
         ]
 
