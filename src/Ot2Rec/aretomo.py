@@ -29,7 +29,7 @@ from . import align
 from . import logger as logMod
 from . import params as prmMod
 from . import user_args as uaMod
-from . import mgui_imod_align as alignMGUI
+from . import mgui_imod_align as imod_newstack_MGUI
 from . import mgui_aretomo as mgMod
 
 
@@ -296,7 +296,7 @@ def _update_volz(args, aretomo_params):
 def _create_stacks_with_imod(args):
     # Uses align to create the InMrc and AngFile in correct form
         try:
-            args_in_align = alignMGUI.get_args_align
+            args_in_align = imod_newstack_MGUI.get_args_align
             args_in_align.project_name.value = args["project_name"]
             args_in_align.rot_angle.value = args["rot_angle"]
             args_in_align.output_folder.value = args["output_path"]
