@@ -19,6 +19,7 @@ import subprocess
 import sys
 from glob import glob
 from pathlib import Path
+from ot2rec_report import main as o2r_report
 
 import yaml
 
@@ -151,3 +152,15 @@ def run_previewer():
 
     # Run AreTomo commands
     aretomo_obj.run_aretomo_all()
+
+    # Run Ot2Rec report
+    ot2rec_report_args = o2r_report.get_args_o2r_report
+    ot2rec_report_args.project_name.value = user_params.project_name
+    ot2rec_report_args.processes.value = [
+        o2r_report.Choices.motioncor2,
+        o2r_report.Choices.aretomo_align,
+        o2r_report.Choices.aretomo_recon,
+    ]
+    ot2rec_report_args.to_slides.value = True
+
+    o2r_report.main(args=ot2rec_report_args)
