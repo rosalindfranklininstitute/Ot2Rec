@@ -41,6 +41,7 @@ setup(
         "pyqt5",
         "mdocfile",
         "joblib",
+        "ot2rec-report",
     ],
     entry_points={
         "console_scripts": [
