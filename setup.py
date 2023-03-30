@@ -39,7 +39,7 @@ setup(
         "redlionfish",
         "magicgui",
         "pyqt5",
-        "mdocfile",
+        "mdocfile>=0.0.7",
         "joblib",
         "ot2rec-report",
     ],
