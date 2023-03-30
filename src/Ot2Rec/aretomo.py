@@ -95,7 +95,7 @@ class AreTomo:
                 self.params["System"]["process_list"],
             )
         )
-        for curr_ts in self.params["System"]["process_list"]:
+        for i, curr_ts in enumerate(self.params["System"]["process_list"]):
             subfolder = (
                 f"{self.basis_folder}/" f"{self.rootname}_{curr_ts}{self.suffix}"
             )
@@ -105,9 +105,12 @@ class AreTomo:
                 self.md_out["aretomo_output_dir"] = {}
                 self.md_out["aretomo_align_stats"] = {}
             self.md_out["aretomo_output_dir"][curr_ts] = subfolder
-            self.md_out["aretomo_align_stats"][curr_ts] = (
-                f"{subfolder}/" f"{self.rootname}_{curr_ts}{self.suffix}.st.aln"
-            )
+            input_img_name = os.path.splitext(
+                os.path.basename(self.params["AreTomo_setup"]["input_mrc"][i])
+            )[0]
+            self.md_out["aretomo_align_stats"][
+                curr_ts
+            ] = f"{subfolder}/{input_img_name}.aln"
 
         if self.params["AreTomo_setup"]["out_imod"] != "N/A":
             self.sta_folder = f"{self.basis_folder}/STA"
