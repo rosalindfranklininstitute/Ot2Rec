@@ -130,7 +130,7 @@ def run_previewer():
     at_params.input_ext = "mrc"
     at_params.sample_thickness = user_params.thickness
     at_params.output_binning = user_params.binning
-    at_params.aretomo_path = "AreTomo"
+    at_params.aretomo_path = str(user_params.aretomo_path)
 
     logger = logMod.Logger(log_path="o2r_aretomo_align-recon.log")
     prmMod.new_aretomo_yaml(at_params)

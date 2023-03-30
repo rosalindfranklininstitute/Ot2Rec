@@ -45,6 +45,11 @@ class asObject(object):
     tiltangle_field={"min": 0, "label": "Tilt angle field #"},
     thickness={"min": 0, "step": 0.1, "label": "Lamella thickness (in nm)"},
     binning={"min": 1, "label": "Output tomogram binning factor"},
+    aretomo_path={
+        "widget_type": "FileEdit",
+        "label": "AreTomo executable",
+        "mode": "r",
+    },
 )
 def get_params_full_aretomo(
     project_name="",
@@ -56,6 +61,7 @@ def get_params_full_aretomo(
     tiltangle_field=2,
     thickness=200,
     binning=4,
+    aretomo_path="AreTomo",
 ):
     logger = logMod.Logger()
     logger(message="Parameters recorded. You can close the GUI window now.")
