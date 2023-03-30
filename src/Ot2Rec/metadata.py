@@ -336,12 +336,12 @@ class Metadata:
         mdoc_path = f"{base_folder}/{self.params['file_prefix']}_" + str(ts) + ".mdoc"
         mdoc = mdf.read(mdoc_path)
 
-        self.acquisition["magnification"] = int(mdoc.magnification.unique()[0])
-        self.acquisition["pixel_spacing"] = float(mdoc.pixel_spacing.unique()[0])
-        self.acquisition["spot_size"] = float(mdoc.spot_size.unique()[0])
-        self.acquisition["rotation_angle"] = float(mdoc.rotation_angle.unique()[0])
-        self.acquisition["voltage"] = float(mdoc.voltage.unique()[0])
-        self.acquisition["image_size"] = list(mdoc.image_size.unique()[0])
+        self.acquisition["magnification"] = int(mdoc.Magnification.unique()[0])
+        self.acquisition["pixel_spacing"] = float(mdoc.PixelSpacing.unique()[0])
+        self.acquisition["spot_size"] = float(mdoc.SpotSize.unique()[0])
+        self.acquisition["rotation_angle"] = float(mdoc.RotationAngle.unique()[0])
+        self.acquisition["voltage"] = float(mdoc.Voltage.unique()[0])
+        self.acquisition["image_size"] = list(mdoc.ImageSize.unique()[0])
 
 
 def read_md_yaml(
