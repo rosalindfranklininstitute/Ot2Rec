@@ -29,7 +29,6 @@ from Ot2Rec import params as prmMod
 
 
 class MotioncorrSmokeTest(unittest.TestCase):
-
     def _create_expected_input_args(self):
         """Create expected input magicgui args"""
         args = magicgui.widgets.FunctionGui(mgMod.get_args_mc2)
@@ -54,12 +53,12 @@ class MotioncorrSmokeTest(unittest.TestCase):
         os.mkdir(f"{tmpdir.name}/raw")
         tas = [-30.0, 0.0, 30.0]
         raw_mrcs = [
-            f"{tmpdir.name}/raw/"
-            f"TS_0001_{i:04}_{ang}.mrc" for i, ang in enumerate(tas)
+            f"{tmpdir.name}/raw/" f"TS_0001_{i:04}_{ang}.mrc"
+            for i, ang in enumerate(tas)
         ]
         for raw_mrc in raw_mrcs:
             with mrcfile.new(raw_mrc) as mrc:
-                mrc.set_data(np.arange(9, dtype=np.int8).reshape(3,3))
+                mrc.set_data(np.arange(9, dtype=np.int8).reshape(3, 3))
 
         return tmpdir
 
@@ -74,21 +73,16 @@ class MotioncorrSmokeTest(unittest.TestCase):
         motioncorr.create_yaml(args)
 
         # Read params
-        params = prmMod.read_yaml(
-            project_name="TS",
-            filename="./TS_mc2.yaml"
-        )
+        params = prmMod.read_yaml(project_name="TS", filename="./TS_mc2.yaml")
 
         # Ensure process list is not empty
         self.assertNotEqual(len(params.params["System"]["process_list"]), 0)
 
         tmpdir.cleanup()
 
-
     @unittest.skip("Cannot figure out how to exit the while loop in run_mc2")
     @patch("subprocess.Popen")
     def test_mc2_called(self, mc2_mock):
-
         # Create expected input
         tmpdir = self._create_expected_folder_structure()
         os.chdir(tmpdir.name)
@@ -98,32 +92,23 @@ class MotioncorrSmokeTest(unittest.TestCase):
         motioncorr.create_yaml(args)
 
         # Read params
-        params = prmMod.read_yaml(
-            project_name="TS",
-            filename="./TS_mc2.yaml"
-        )
+        params = prmMod.read_yaml(project_name="TS", filename="./TS_mc2.yaml")
 
         # Get mc2_md
         master_md = mdMod.read_md_yaml(
-            project_name="TS",
-            job_type="motioncorr",
-            filename="./TS_master_md.yaml")
+            project_name="TS", job_type="motioncorr", filename="./TS_master_md.yaml"
+        )
 
         # Run
         logger = logMod.Logger("./o2r_mc2.log")
 
         # Create MagicMock to spoof _get_gpu_nvidia_smi
-        motioncorr.Motioncorr._get_gpu_nvidia_smi = MagicMock(
-            return_value=['0']
-        )
+        motioncorr.Motioncorr._get_gpu_nvidia_smi = MagicMock(return_value=["0"])
 
         mc2_obj = motioncorr.Motioncorr(
-            project_name="TS",
-            mc2_params=params,
-            md_in=master_md,
-            logger=logger
+            project_name="TS", mc2_params=params, md_in=master_md, logger=logger
         )
-        mc2_obj.use_gpu = ['0']
+        mc2_obj.use_gpu = ["0"]
         mc2_mock.return_value.returncode = None
         mc2_obj._curr_meta = []
         mc2_obj.run_mc2()

@@ -29,7 +29,6 @@ from Ot2Rec import params as prmMod
 
 
 class ImodReconSmokeTest(unittest.TestCase):
-
     def _create_expected_input_args(self):
         """Create expected input magicgui args"""
         args = magicgui.widgets.FunctionGui(mgMod.get_args_recon)
@@ -47,10 +46,7 @@ class ImodReconSmokeTest(unittest.TestCase):
 
         # create align_mdout.yaml file
         align_md_yaml = f"{tmpdir.name}/TS_align_mdout.yaml"
-        shutil.copyfile(
-            f"{template_folder}/TS_align_mdout.yaml",
-            align_md_yaml
-        )
+        shutil.copyfile(f"{template_folder}/TS_align_mdout.yaml", align_md_yaml)
 
         # create imod_aligned folder input
         # create ali.mrc files
@@ -58,7 +54,7 @@ class ImodReconSmokeTest(unittest.TestCase):
         os.mkdir(f"{tmpdir.name}/stacks/TS_0001")
         st_file = f"{tmpdir.name}/stacks/TS_0001/TS_0001_ali.mrc"
         with mrcfile.new(st_file) as mrc:
-            mrc.set_data(np.arange(18, dtype=np.int8).reshape(2,3,3))
+            mrc.set_data(np.arange(18, dtype=np.int8).reshape(2, 3, 3))
 
         # create tlt files
         tlt_file = f"{tmpdir.name}/stacks/TS_0001/TS_0001.tlt"
@@ -107,18 +103,13 @@ class ImodReconSmokeTest(unittest.TestCase):
 
         # Get align mdout
         align_md = mdMod.read_md_yaml(
-            project_name="TS",
-            job_type="reconstruct",
-            filename="./TS_align_mdout.yaml"
+            project_name="TS", job_type="reconstruct", filename="./TS_align_mdout.yaml"
         )
 
         # Run
         logger = logMod.Logger("./o2r_imod_recon.log")
         imod_recon_obj = recon.Recon(
-            project_name="TS",
-            md_in=align_md,
-            params_in=params,
-            logger_in=logger
+            project_name="TS", md_in=align_md, params_in=params, logger_in=logger
         )
         imod_recon_obj.recon_stack()
 

@@ -33,42 +33,49 @@ class asObject(object):
     call_button="Create config file",
     layout="vertical",
     result_widget=True,
-
     project_name={"label": "Project name *"},
     do_positioning={"label": "Positioning: Do positioning?"},
-    unbinned_thickness={"label": "Positioning: Unbinned thickness (in pixels) for samples or whole tomogram *",
-                        "min": 0,
-                        "max": 50000,
-                        "step": 100},
+    unbinned_thickness={
+        "label": "Positioning: Unbinned thickness (in pixels) for samples or whole tomogram *",
+        "min": 0,
+        "max": 50000,
+        "step": 100,
+    },
     correct_ctf={"label": "Aligned stack: Correct CTF for aligned stacks?"},
     erase_gold={"label": "Aligned stack: Erase gold fiducials?"},
     filtering={"label": "Aligned stack: Perform 2D filtering?"},
-    bin_factor={"label": "Tomogram: Binning factor (further binning from aligned stack)",
-                "min": 1},
-    thickness={"label": "Reconstruction: BINNED thickness (in pixels) for reconstruction *",
-               "min": 0,
-               "max": 50000,
-               "step": 100},
+    bin_factor={
+        "label": "Tomogram: Binning factor (further binning from aligned stack)",
+        "min": 1,
+    },
+    thickness={
+        "label": "Reconstruction: BINNED thickness (in pixels) for reconstruction *",
+        "min": 0,
+        "max": 50000,
+        "step": 100,
+    },
     use_sirt={"label": "Use SIRT?"},
     sirt_iter={"label": "# of SIRT iterations (if applicable)"},
     trimvol={"label": "Postprocessing: Run Trimvol on reconstruction"},
-    trimvol_reorient={"widget_type": "RadioButtons",
-                      "label": "Postprocessing: Reorientation in Trimvol (if applicable)",
-                      "choices": ["none", "flip", "rotate"]}
+    trimvol_reorient={
+        "widget_type": "RadioButtons",
+        "label": "Postprocessing: Reorientation in Trimvol (if applicable)",
+        "choices": ["none", "flip", "rotate"],
+    },
 )
 def get_args_recon(
-        project_name="",
-        do_positioning=False,
-        unbinned_thickness=1500,
-        correct_ctf=False,
-        erase_gold=False,
-        filtering=False,
-        bin_factor=1,
-        thickness=1500,
-        use_sirt=False,
-        sirt_iter=10,
-        trimvol=True,
-        trimvol_reorient="rotate"
+    project_name="",
+    do_positioning=False,
+    unbinned_thickness=1500,
+    correct_ctf=False,
+    erase_gold=False,
+    filtering=False,
+    bin_factor=1,
+    thickness=1500,
+    use_sirt=False,
+    sirt_iter=10,
+    trimvol=True,
+    trimvol_reorient="rotate",
 ):
     """
     Function to add arguments to parser for IMOD reconstruction
@@ -95,6 +102,5 @@ def get_args_recon(
     recon.update_yaml(args)
 
     logger(message="IMOD alignment metadata file created.")
-
 
     return "Done. You can close this window now."

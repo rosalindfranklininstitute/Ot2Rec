@@ -51,9 +51,11 @@ def get_proj_name():
 
     project_name = sys.argv[1]
     # Check input validity
-    for char in ['<', '>', ':', '"', '/', '\\', '|', '?', '*']:
+    for char in ["<", ">", ":", '"', "/", "\\", "|", "?", "*"]:
         if project_name.find(char) != -1:
-            raise ValueError(f"Error in Ot2Rec.main.new_proj: Illegal character ({char}) found in input project name.")
+            raise ValueError(
+                f"Error in Ot2Rec.main.new_proj: Illegal character ({char}) found in input project name."
+            )
 
     return project_name
 
@@ -65,7 +67,6 @@ def new_proj():
     params = mgMod.get_args_new_proj.show(run=True)
 
 
-
 def cleanup():
     """
     Method to clean up project folder to save space
@@ -73,35 +74,34 @@ def cleanup():
 
     project_name = get_proj_name()
 
-    mc2_yaml = project_name + '_mc2.yaml'
-    recon_yaml = project_name + '_recon.yaml'
+    mc2_yaml = project_name + "_mc2.yaml"
+    recon_yaml = project_name + "_recon.yaml"
 
     # Create Logger object
     logger = logMod.Logger()
 
     if os.path.isfile(mc2_yaml):
-        mc2_config = prmMod.read_yaml(project_name=project_name,
-                                      filename=mc2_yaml)
-        mc2_path = mc2_config.params['System']['output_path']
+        mc2_config = prmMod.read_yaml(project_name=project_name, filename=mc2_yaml)
+        mc2_path = mc2_config.params["System"]["output_path"]
         if os.path.isdir(mc2_path):
             logger(f"Deleting {mc2_path} folder and its contents...")
-            cmd = ['rm', '-rf', mc2_path]
-            del_mc2 = subprocess.run(cmd,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.STDOUT)
+            cmd = ["rm", "-rf", mc2_path]
+            del_mc2 = subprocess.run(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            )
 
     if os.path.isfile(recon_yaml):
-        recon_config = prmMod.read_yaml(project_name=project_name,
-                                        filename=recon_yaml)
-        recon_path = recon_config.params['System']['output_path']
+        recon_config = prmMod.read_yaml(project_name=project_name, filename=recon_yaml)
+        recon_path = recon_config.params["System"]["output_path"]
         if os.path.isdir(recon_path):
             logger("Deleting intermediary IMOD files...")
-            files = glob(recon_path + 'stack*/*.*~') + \
-                glob(recon_path + 'stack*/*_full_rec.*')
-            cmd = ['rm', *files]
-            del_recon = subprocess.run(cmd,
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.STDOUT)
+            files = glob(recon_path + "stack*/*.*~") + glob(
+                recon_path + "stack*/*_full_rec.*"
+            )
+            cmd = ["rm", *files]
+            del_recon = subprocess.run(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            )
 
 
 def run_all_imod():
@@ -129,8 +129,7 @@ def run_all_imod():
     mcMod.update_yaml(mc2_args)
 
     logger("Motion correction in progress...")
-    mcMod.run(exclusive=False,
-              args_in=mc2_args)
+    mcMod.run(exclusive=False, args_in=mc2_args)
 
     time.sleep(2)
 
@@ -144,8 +143,7 @@ def run_all_imod():
         ctffindMod.update_yaml(ctffind_args)
 
         logger("CTF estimation in progress...")
-        ctffindMod.run(exclusive=False,
-                       args_in=ctffind_args)
+        ctffindMod.run(exclusive=False, args_in=ctffind_args)
 
         time.sleep(2)
 
@@ -161,13 +159,13 @@ def run_all_imod():
     alignMod.update_yaml(align_args)
 
     logger("Alignment in progress...")
-    alignMod.run(exclusive=False,
-                 args_in=align_args,
-                 newstack=True,
+    alignMod.run(
+        exclusive=False,
+        args_in=align_args,
+        newstack=True,
     )
     if user_args.show_stats.value:
-        alignMod.get_align_stats(exclusive=False,
-                                 args_in=align_args)
+        alignMod.get_align_stats(exclusive=False, args_in=align_args)
 
     time.sleep(2)
 
@@ -183,6 +181,7 @@ def run_all_imod():
     reconMod.update_yaml(recon_args)
 
     logger("Reconstruction in progress...")
-    reconMod.run(exclusive=False,
-                 args_in=recon_args,
+    reconMod.run(
+        exclusive=False,
+        args_in=recon_args,
     )

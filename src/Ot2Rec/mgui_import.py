@@ -30,41 +30,41 @@ class asObject(object):
 @mg(
     call_button="Create config file",
     layout="vertical",
-
     project_name={"label": "Project name *"},
-    source_folder={"widget_type": "FileEdit",
-                   "label": "Source folder *",
-                   "mode": "d"},
-    mdocs_folder={"widget_type": "FileEdit",
-                 "label": "MDOCs folder (overridden if 'No MDOCs'==True) *",
-                 "mode": "d"},
+    source_folder={"widget_type": "FileEdit", "label": "Source folder *", "mode": "d"},
+    mdocs_folder={
+        "widget_type": "FileEdit",
+        "label": "MDOCs folder (overridden if 'No MDOCs'==True) *",
+        "mode": "d",
+    },
     folder_prefix={"label": "Folder prefix (if tilt series in subfolders)"},
     file_prefix={"label": "File prefix (if different from project name)"},
-    ext={"widget_type": "ComboBox",
-         "label": "Image file extension",
-         "choices": ["mrc", "tif", "eer"]},
-    stack_field={"min": 0,
-                 "label": "Stack index field #"},
-    index_field={"min": 0,
-                 "label": "Image index field #"},
-    tiltangle_field={"min": 0,
-                     "label": "Tilt angle field #"},
+    ext={
+        "widget_type": "ComboBox",
+        "label": "Image file extension",
+        "choices": ["mrc", "tif", "eer"],
+    },
+    stack_field={"min": 0, "label": "Stack index field #"},
+    index_field={"min": 0, "label": "Image index field #"},
+    tiltangle_field={"min": 0, "label": "Tilt angle field #"},
     no_mdoc={"label": "No MDOCs"},
-    return_only={"label": "Only return parameters without file creation (not recommended)"}
+    return_only={
+        "label": "Only return parameters without file creation (not recommended)"
+    },
 )
 def get_args_new_proj(
-        project_name="",
-        source_folder=Path("../raw/"),
-        mdocs_folder=Path("../raw/"),
-        folder_prefix="",
-        file_prefix="",
-        ext="mrc",
-        stack_field=0,
-        index_field=1,
-        tiltangle_field=2,
-        no_mdoc=False,
-        *,
-        return_only=False,
+    project_name="",
+    source_folder=Path("../raw/"),
+    mdocs_folder=Path("../raw/"),
+    folder_prefix="",
+    file_prefix="",
+    ext="mrc",
+    stack_field=0,
+    index_field=1,
+    tiltangle_field=2,
+    no_mdoc=False,
+    *,
+    return_only=False,
 ):
     """
     Function to add arguments to parser for new project
@@ -94,8 +94,7 @@ def get_args_new_proj(
 
     # Create empty Metadata object
     # Master yaml file will be read automatically
-    meta = mdMod.Metadata(project_name=args.project_name,
-                          job_type='master')
+    meta = mdMod.Metadata(project_name=args.project_name, job_type="master")
 
     # Create master metadata and serialise it as yaml file
     meta.create_master_metadata()
@@ -103,14 +102,13 @@ def get_args_new_proj(
         meta.get_mc2_temp()
         meta.get_acquisition_settings()
 
-    master_md_name = args.project_name + '_master_md.yaml'
-    acqui_md_name =  args.project_name + '_acquisition_md.yaml'
-    with open(master_md_name, 'w') as f:
+    master_md_name = args.project_name + "_master_md.yaml"
+    acqui_md_name = args.project_name + "_acquisition_md.yaml"
+    with open(master_md_name, "w") as f:
         yaml.dump(meta.metadata, f, indent=4)
-    with open(acqui_md_name, 'w') as g:
+    with open(acqui_md_name, "w") as g:
         yaml.dump(meta.acquisition, g, indent=4)
 
-    logger(level="info",
-           message="Master metadata file created.")
+    logger(level="info", message="Master metadata file created.")
 
     return locals()

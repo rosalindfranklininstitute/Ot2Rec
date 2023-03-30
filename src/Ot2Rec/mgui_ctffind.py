@@ -32,46 +32,51 @@ class asObject(object):
     call_button="Create config file",
     layout="vertical",
     result_widget=True,
-
     project_name={"label": "Project name *"},
-    output_folder={"label": "CTFFind4 output folder",
-                   "mode": "d"},
+    output_folder={"label": "CTFFind4 output folder", "mode": "d"},
     file_prefix={"label": "File prefix (if different from project name)"},
-    exec_path={"widget_type": "FileEdit",
-               "mode": "w",
-               "label": "Path to CTFFind4 executable (Default: ctffind)"},
+    exec_path={
+        "widget_type": "FileEdit",
+        "mode": "w",
+        "label": "Path to CTFFind4 executable (Default: ctffind)",
+    },
     voltage={"label": "Electron beam voltage (in keV)"},
-    spherical_aberration={"label": "Objective lens spherical aberration (in mrad)",
-                          "step": 0.1},
-    amp_contrast={"widget_type": "FloatSlider",
-                  "min": 0.0,
-                  "max": 1.0,
-                  "label": "Relative amplitude constrast w1"},
+    spherical_aberration={
+        "label": "Objective lens spherical aberration (in mrad)",
+        "step": 0.1,
+    },
+    amp_contrast={
+        "widget_type": "FloatSlider",
+        "min": 0.0,
+        "max": 1.0,
+        "label": "Relative amplitude constrast w1",
+    },
     spec_size={"label": "Size of amplitude spectrum (in pixels)"},
     res_range={"label": "Target function resolution range (in Angstroms)"},
-    defocus_range={"widget_type": "LiteralEvalLineEdit",
-                   "label": "Initial defocus search range (in Angstroms) [min, max, step]"},
+    defocus_range={
+        "widget_type": "LiteralEvalLineEdit",
+        "label": "Initial defocus search range (in Angstroms) [min, max, step]",
+    },
     astigm_type={"label": "Type of astigmatism. USE NOT RECOMMENDED"},
     exhaustive_search={"label": "Use exhaustive search"},
-    astigm_restraint={"label": "Restraint on astigmatism (in Angstroms)",
-                      "min": 0},
-    phase_shift={"label": "Estimate phase shift"}
+    astigm_restraint={"label": "Restraint on astigmatism (in Angstroms)", "min": 0},
+    phase_shift={"label": "Estimate phase shift"},
 )
 def get_args_ctffind(
-        project_name="",
-        output_folder=Path(Path.cwd() / "ctffind"),
-        file_prefix="",
-        exec_path="",
-        voltage=300.0,
-        spherical_aberration=2.7,
-        amp_contrast=0.8,
-        spec_size=512,
-        res_range=[30, 5],
-        defocus_range=[5000, 50000, 500],
-        astigm_type="",
-        exhaustive_search=False,
-        astigm_restraint=0,
-        phase_shift=False,
+    project_name="",
+    output_folder=Path(Path.cwd() / "ctffind"),
+    file_prefix="",
+    exec_path="",
+    voltage=300.0,
+    spherical_aberration=2.7,
+    amp_contrast=0.8,
+    spec_size=512,
+    res_range=[30, 5],
+    defocus_range=[5000, 50000, 500],
+    astigm_type="",
+    exhaustive_search=False,
+    astigm_restraint=0,
+    phase_shift=False,
 ):
     """
     Function to add arguments to parser for CTFFind
@@ -97,7 +102,7 @@ def get_args_ctffind(
     logger = logMod.Logger(log_path="o2r_ctffind.log")
     args = asObject(locals())
 
-    if locals()['exec_path'] == Path("."):
+    if locals()["exec_path"] == Path("."):
         args.exec_path = "ctffind"
 
     # Create the yaml file, then automatically update it

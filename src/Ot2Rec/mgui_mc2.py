@@ -32,56 +32,59 @@ class asObject(object):
     call_button="Create config file",
     layout="vertical",
     result_widget=True,
-
     project_name={"label": "Project name *"},
-    pixel_size={"label": "Pixel size (A) *",
-                "step": 0.001},
+    pixel_size={"label": "Pixel size (A) *", "step": 0.001},
     output_folder={"label": "MC2 output folder"},
     file_prefix={"label": "File prefix (if different from project name)"},
-    exec_path={"widget_type": "FileEdit",
-               "mode": "w",
-               "label": "Path to MC2 executable (Default: MotionCor2_1.4.0_Cuda110)"},
-    gpu_mem_usage={"label": "GPU memory usage (if applicable)",
-                   "min": 0.0,
-                   "max": 1.0,
-                   "step": 0.05,
+    exec_path={
+        "widget_type": "FileEdit",
+        "mode": "w",
+        "label": "Path to MC2 executable (Default: MotionCor2_1.4.0_Cuda110)",
+    },
+    gpu_mem_usage={
+        "label": "GPU memory usage (if applicable)",
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.05,
     },
     use_gain={"label": "Use gain reference?"},
-    gain={"label": "Gain reference file (if applicable)",
-          "widget_type": "FileEdit",
-          "mode": "w"},
+    gain={
+        "label": "Gain reference file (if applicable)",
+        "widget_type": "FileEdit",
+        "mode": "w",
+    },
     super_res={"label": "Super-resolution images?"},
-    discard_top={"label": "# Frames discarded FROM TOP of images",
-                 "min": 0},
-    discard_bottom={"label": "# Frames discarded FROM BOTTOM of images",
-                    "min": 0},
-    tolerance={"label": "Alignment error threshold (in pixels)",
-               "min": 0},
-    max_iter={"label": "Maximum MC2 iterations",
-              "min": 1},
-    patch_size={"widget_type": "LiteralEvalLineEdit",
-                "label": "Patch configurations (Nx, Ny, %overlap)"},
+    discard_top={"label": "# Frames discarded FROM TOP of images", "min": 0},
+    discard_bottom={"label": "# Frames discarded FROM BOTTOM of images", "min": 0},
+    tolerance={"label": "Alignment error threshold (in pixels)", "min": 0},
+    max_iter={"label": "Maximum MC2 iterations", "min": 1},
+    patch_size={
+        "widget_type": "LiteralEvalLineEdit",
+        "label": "Patch configurations (Nx, Ny, %overlap)",
+    },
     use_subgroups={"label": "Use subgroups in alignments"},
-    return_only={"label": "Only return parameters without file creation (not recommended)"}
+    return_only={
+        "label": "Only return parameters without file creation (not recommended)"
+    },
 )
 def get_args_mc2(
-        project_name="",
-        pixel_size=0.0,
-        output_folder=Path(Path.cwd() / "motioncor"),
-        file_prefix="",
-        exec_path="",
-        gpu_mem_usage=1.0,
-        use_gain=False,
-        gain="",
-        super_res=False,
-        discard_top=0,
-        discard_bottom=0,
-        tolerance=0.5,
-        max_iter=10,
-        patch_size=[5,5,20],
-        use_subgroups=True,
-        *,
-        return_only=False,
+    project_name="",
+    pixel_size=0.0,
+    output_folder=Path(Path.cwd() / "motioncor"),
+    file_prefix="",
+    exec_path="",
+    gpu_mem_usage=1.0,
+    use_gain=False,
+    gain="",
+    super_res=False,
+    discard_top=0,
+    discard_bottom=0,
+    tolerance=0.5,
+    max_iter=10,
+    patch_size=[5, 5, 20],
+    use_subgroups=True,
+    *,
+    return_only=False,
 ):
     """
     Function to add arguments to parser for MotionCor
@@ -113,7 +116,7 @@ def get_args_mc2(
     logger = logMod.Logger(log_path="o2r_motioncor2.log")
     args = asObject(locals())
 
-    if locals()['exec_path'] == Path("."):
+    if locals()["exec_path"] == Path("."):
         args.exec_path = "MotionCor2_1.4.0_Cuda110"
 
     prmMod.new_mc2_yaml(args)

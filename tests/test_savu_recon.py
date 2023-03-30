@@ -26,7 +26,6 @@ from Ot2Rec import savurecon
 
 
 class SavuSmokeTest(unittest.TestCase):
-
     def _create_expected_input_args(self):
         """Create expected input magicGUI args"""
         args = magicgui.widgets.FunctionGui(mgMod.get_args_savurecon)
@@ -37,7 +36,7 @@ class SavuSmokeTest(unittest.TestCase):
         return args
 
     def _create_expected_folder_structure(self):
-        """Create expected folder structure """
+        """Create expected folder structure"""
         tmpdir = tempfile.TemporaryDirectory()
         os.mkdir(f"{tmpdir.name}/stacks")
         os.mkdir(f"{tmpdir.name}/stacks/TS_0001")
@@ -65,10 +64,7 @@ class SavuSmokeTest(unittest.TestCase):
         savurecon.create_yaml(args)
 
         # Read params
-        params = prmMod.read_yaml(
-            project_name="TS",
-            filename="./TS_savurecon.yaml"
-        )
+        params = prmMod.read_yaml(project_name="TS", filename="./TS_savurecon.yaml")
 
         # Ensure process list is not empty
         self.assertNotEqual(len(params.params["System"]["process_list"]), 0)
@@ -96,17 +92,12 @@ class SavuSmokeTest(unittest.TestCase):
         savurecon.create_yaml(args)
 
         # Read params
-        params = prmMod.read_yaml(
-            project_name="TS",
-            filename="./TS_savurecon.yaml"
-        )
+        params = prmMod.read_yaml(project_name="TS", filename="./TS_savurecon.yaml")
 
         # Run
         logger = logMod.Logger("./o2r_savu_recon.log")
         savurecon_obj = savurecon.SavuRecon(
-            project_name="TS",
-            params_in=params,
-            logger_in=logger
+            project_name="TS", params_in=params, logger_in=logger
         )
         savurecon_obj.run_savu_all()
 

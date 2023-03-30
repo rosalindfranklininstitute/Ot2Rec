@@ -25,7 +25,7 @@ from . import main
 from . import previewer
 
 
-VERSION = 'v1.0a'
+VERSION = "v1.0a"
 """
 str : Ot2Rec version string.
 """

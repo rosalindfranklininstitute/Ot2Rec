@@ -18,19 +18,17 @@ import threading
 import datetime as dt
 
 
-class Logger():
+class Logger:
     """
     Class encapsulating a Logger object
     """
-    LEVELS = {"info": 20,
-              "warning": 30,
-              "error": 40,
-              "critical": 50}
 
+    LEVELS = {"info": 20, "warning": 30, "error": 40, "critical": 50}
 
-    def __init__(self,
-                 log_path: str = None,
-                 ):
+    def __init__(
+        self,
+        log_path: str = None,
+    ):
         """
         Initialise Logger object
 
@@ -43,15 +41,15 @@ class Logger():
         logging.basicConfig(
             filename=self.log_path,
             level=logging.INFO,
-            format='[%(asctime)s] %(levelname)s - %(message)s',
-            datefmt="%d%b%Y-%H:%M:%S"
+            format="[%(asctime)s] %(levelname)s - %(message)s",
+            datefmt="%d%b%Y-%H:%M:%S",
         )
 
-
-    def __call__(self,
-                 message: str,
-                 level: str = "info",
-                 stdout: bool = True,
+    def __call__(
+        self,
+        message: str,
+        level: str = "info",
+        stdout: bool = True,
     ):
         """
         Send a string to stdout and log file one process at a time.
@@ -62,8 +60,7 @@ class Logger():
             stdout: whether to output to shell
         """
 
-        logging.log(level=self.LEVELS[level.lower()],
-                    msg=message)
+        logging.log(level=self.LEVELS[level.lower()], msg=message)
 
         if stdout:
             print(message)

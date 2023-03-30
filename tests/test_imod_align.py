@@ -29,7 +29,6 @@ from Ot2Rec import params as prmMod
 
 
 class ImodAlignSmokeTest(unittest.TestCase):
-
     def _create_expected_input_args(self):
         """Create expected input magicgui args"""
         args = magicgui.widgets.FunctionGui(mgMod.get_args_align)
@@ -52,12 +51,10 @@ class ImodAlignSmokeTest(unittest.TestCase):
         # create motioncor folder input
         os.mkdir(f"{tmpdir.name}/motioncor")
         tas = [-30.0, 0.0, 30.0]
-        mc_mrcs = [
-            f"{tmpdir.name}/motioncor/TS_0001_{ang}.mrc" for ang in tas
-        ]
+        mc_mrcs = [f"{tmpdir.name}/motioncor/TS_0001_{ang}.mrc" for ang in tas]
         for mc_mrc in mc_mrcs:
             with mrcfile.new(mc_mrc) as mrc:
-                mrc.set_data(np.arange(9, dtype=np.int8).reshape(3,3))
+                mrc.set_data(np.arange(9, dtype=np.int8).reshape(3, 3))
 
         return tmpdir
 
@@ -72,10 +69,7 @@ class ImodAlignSmokeTest(unittest.TestCase):
         align.create_yaml(args)
 
         # Read params
-        params = prmMod.read_yaml(
-            project_name="TS",
-            filename="./TS_align.yaml"
-        )
+        params = prmMod.read_yaml(project_name="TS", filename="./TS_align.yaml")
 
         # Ensure process list is not empty
         self.assertNotEqual(len(params.params["System"]["process_list"]), 0)
@@ -93,16 +87,11 @@ class ImodAlignSmokeTest(unittest.TestCase):
         align.create_yaml(args)
 
         # Read params
-        params = prmMod.read_yaml(
-            project_name="TS",
-            filename="./TS_align.yaml"
-        )
+        params = prmMod.read_yaml(project_name="TS", filename="./TS_align.yaml")
 
         # Get mc2 mdout
         mc2_md = mdMod.read_md_yaml(
-            project_name="TS",
-            job_type="align",
-            filename="./TS_mc2_mdout.yaml"
+            project_name="TS", job_type="align", filename="./TS_mc2_mdout.yaml"
         )
 
         # Run

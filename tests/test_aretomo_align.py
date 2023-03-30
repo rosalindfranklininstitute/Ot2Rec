@@ -27,7 +27,6 @@ from Ot2Rec import params as prmMod
 
 
 class AreTomoAlignSmokeTest(unittest.TestCase):
-
     def _create_expected_input_args(self):
         """Create expected input magicGUI args
         NOTE: This is not the proper way to write this function,
@@ -59,12 +58,10 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
         # create motioncor folder input
         os.mkdir(f"{tmpdir.name}/motioncor")
         tas = [-30.0, 0.0, 30.0]
-        mc_mrcs = [
-            f"{tmpdir.name}/motioncor/TS_0001_{ang}.mrc" for ang in tas
-        ]
+        mc_mrcs = [f"{tmpdir.name}/motioncor/TS_0001_{ang}.mrc" for ang in tas]
         for mc_mrc in mc_mrcs:
             with mrcfile.new(mc_mrc) as mrc:
-                mrc.set_data(np.arange(9, dtype=np.int8).reshape(3,3))
+                mrc.set_data(np.arange(9, dtype=np.int8).reshape(3, 3))
 
         return tmpdir
 
@@ -77,17 +74,14 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
 
         # create align_mdout.yaml file
         align_md_yaml = f"{tmpdir.name}/TS_align_mdout.yaml"
-        shutil.copyfile(
-            f"{template_folder}/TS_align_mdout.yaml",
-            align_md_yaml
-        )
+        shutil.copyfile(f"{template_folder}/TS_align_mdout.yaml", align_md_yaml)
 
         # create st files
         os.mkdir(f"{tmpdir.name}/aligned")
         os.mkdir(f"{tmpdir.name}/aligned/TS_0001")
         st_file = f"{tmpdir.name}/aligned/TS_0001/TS_0001.st"
         with mrcfile.new(st_file) as mrc:
-            mrc.set_data(np.arange(18, dtype=np.int8).reshape(2,3,3))
+            mrc.set_data(np.arange(18, dtype=np.int8).reshape(2, 3, 3))
 
         # create rawtlt files
         rawtlt_file = f"{tmpdir.name}/aligned/TS_0001/TS_0001.rawtlt"
@@ -152,9 +146,7 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
         # Run
         logger = logMod.Logger("./o2r_aretomo_align.log")
         aretomo_obj = aretomo.AreTomo(
-            project_name="TS",
-            params_in=params,
-            logger_in=logger
+            project_name="TS", params_in=params, logger_in=logger
         )
         aretomo_obj.run_aretomo_all()
 
@@ -162,9 +154,9 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
         self.assertTrue(aretomo_mock.called)
 
         tmpdir.cleanup()
-    
+
     def test_aretomo_path_specified(self):
-        """ Tests that AreTomo path can be specified correctly in command """
+        """Tests that AreTomo path can be specified correctly in command"""
         # Create expected input
         tmpdir = self._create_expected_folder_structure()
         os.chdir(tmpdir.name)
@@ -184,17 +176,11 @@ class AreTomoAlignSmokeTest(unittest.TestCase):
         # Run
         logger = logMod.Logger("./o2r_aretomo_align.log")
         aretomo_obj = aretomo.AreTomo(
-            project_name="TS",
-            params_in=params,
-            logger_in=logger
-        )        
+            project_name="TS", params_in=params, logger_in=logger
+        )
 
         cmd = aretomo_obj._get_aretomo_align_command(0)
 
-        self.assertEqual(
-            cmd[0],
-            "/home/AreTomo_1.2.5_Cuda113_08-01-2022"
-        )
-        
-        tmpdir.cleanup()
+        self.assertEqual(cmd[0], "/home/AreTomo_1.2.5_Cuda113_08-01-2022")
 
+        tmpdir.cleanup()
