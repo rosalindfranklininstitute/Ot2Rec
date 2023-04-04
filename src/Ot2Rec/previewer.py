@@ -161,6 +161,6 @@ def run_previewer():
         o2r_report.Choices.aretomo_align,
         o2r_report.Choices.aretomo_recon,
     ]
-    ot2rec_report_args.to_slides.value = True
+    ot2rec_report_args.to_html.value = True
 
     o2r_report.main(args=ot2rec_report_args)
