@@ -21,6 +21,9 @@ import multiprocessing as mp
 import subprocess
 from glob import glob
 
+from tifffile import TiffFile as tf
+import xmltodict as x2d
+
 import yaml
 import mdocfile as mdf
 import pandas as pd
@@ -225,40 +228,43 @@ class Metadata:
         )
 
     @staticmethod
-    def get_num_frames(curr_file, target_frames):
-        """
-        Get number of frames from the micrograph
+    def get_num_frames(file_path, target_nframes=15):
+        with tf(file_path) as f:
+            tag = f.pages[0].tags['65001']
+            data = tag.value.decode('UTF-8')
 
-        Args:
-            curr_file (str): path to current file
-            target_frames (int): target number of frames in the 'mrc'
-        """
+        parsed = x2d.parse(data)
+        metadata = dict()
+        for item in parsed["metadata"]["item"]:
+            key = item["@name"]
+            value = item["#text"]
+            metadata[key] = value
 
-        command = ["header", curr_file]
-        text = subprocess.run(command, capture_output=True, check=True)
+            try:
+                unit = item["@unit"]
+                metadata[f"{key}.unit"] = unit
+            except:
+                pass
 
-        text_split = str(text.stdout).split("\\n")
+        nframes = int(metadata["numberOfFrames"])
+        sampling = max(1, nframes // target_nframes)
 
-        r = re.compile(r"^\s*Number")
-        line = list(filter(r.match, text_split))[0].lstrip()
+        return [nframes, sampling]
 
-        num_frames = int(re.split(r"\s+", line)[-1])
-        sampling = max(1, num_frames // target_frames)
-
-        return [num_frames, sampling]
 
     @staticmethod
-    def get_num_frames_parallel(func, filelist, target_frames=15, np=8):
+    def get_num_frames_parallel(func, filelist, target_nframes=15, np=8):
         """
         Args:
             func (func): function to be parallelised
             filelist (list): list of image files to be passed into the function
         """
-        func_filelist = partial(func, target_frames=target_frames)
+        func_filelist = partial(func, target_nframes=target_nframes)
         with mp.Pool(np) as p:
             result = p.map(func_filelist, filelist)
 
         return result
+
 
     @staticmethod
     def get_ts_dose(mdoc_in, start=0):
@@ -283,6 +289,7 @@ class Metadata:
             ts_dose_dict[file_idx] = float(image_dict["ExposureDose"])
 
         return ts_dose_dict
+
 
     def get_mc2_temp(self):
         df = pd.DataFrame(self.metadata)
@@ -320,6 +327,7 @@ class Metadata:
                 df.loc[
                     (df.ts == curr_ts) & (df.image_idx == curr_idx), "frame_dose"
                 ] = (ts_dose_dict[curr_idx] / nf)
+        exit()
 
         self.metadata["num_frames"] = df.num_frames.to_list()
         self.metadata["ds_factor"] = df.ds_factor.to_list()
