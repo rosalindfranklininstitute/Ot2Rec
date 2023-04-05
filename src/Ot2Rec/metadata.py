@@ -20,6 +20,7 @@ from functools import partial
 import multiprocessing as mp
 import subprocess
 from glob import glob
+from tqdm import tqdm
 
 from tifffile import TiffFile as tf
 import xmltodict as x2d
@@ -302,7 +303,9 @@ class Metadata:
         df["num_frames"] = None
         df["ds_factor"] = None
         df["frame_dose"] = None
-        for curr_ts in list(set(df.ts)):
+
+        tqdm_iter = tqdm(list(set(df.ts)), ncols=100)
+        for curr_ts in tqdm_iter:
             mdoc_path = (
                 f"{base_folder}/{self.params['file_prefix']}_" + str(curr_ts) + ".mdoc"
             )
