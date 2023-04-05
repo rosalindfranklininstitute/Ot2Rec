@@ -50,6 +50,9 @@ def run_previewer():
     """
     Method to run MotionCor2 + Aretomo automatically
     """
+    logger = logMod.Logger(log_path="o2r_general.log")
+    logger(level="info", message="Ot2Rec-Previewer started.")
+
     # Get user parameters
     user_params = asObject(
         previewerMGUI.get_params_full_aretomo.show(run=True).asdict()
@@ -70,6 +73,7 @@ def run_previewer():
 
     # Create empty Metadata object
     # Master yaml file will be read automatically
+    logger(level="info", message="Aggregating metadata...")
     meta = mdMod.Metadata(project_name=new_proj_params.project_name, job_type="master")
 
     # Create master metadata and serialise it as yaml file
@@ -85,8 +89,7 @@ def run_previewer():
     with open(acqui_md_name, "w") as g:
         yaml.dump(meta.acquisition, g, indent=4)
 
-    logger = logMod.Logger(log_path="o2r_general.log")
-    logger(level="info", message="Master metadata file created.")
+    logger(level="info", message="All metadata successfully aggregated.")
 
     # Motion-correction (MotionCor2)
     mc2_params = asObject(mc2MGUI.get_args_mc2(return_only=True))
