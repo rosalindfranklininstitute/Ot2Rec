@@ -13,57 +13,52 @@
 # language governing permissions and limitations under the License.
 
 
+import sys
 import logging
 import threading
 import datetime as dt
 
 
-class Logger():
+class Logger:
     """
     Class encapsulating a Logger object
     """
-    LEVELS = {"info": 20,
-              "warning": 30,
-              "error": 40,
-              "critical": 50}
 
+    LEVELS = {"info": 20, "warning": 30, "error": 40, "critical": 50}
 
-    def __init__(self,
-                 log_path: str = None,
-                 ):
+    def __init__(
+            self,
+            name: str = None,
+            log_path: str = "",
+            level: str = "info",
+    ):
         """
         Initialise Logger object
 
         Args:
             log_path: Path to the log file
         """
+        self.name = name
         self.log_path = log_path
-
-        # Define default logging behaviour
-        logging.basicConfig(
-            filename=self.log_path,
-            level=logging.INFO,
-            format='[%(asctime)s] %(levelname)s - %(message)s',
-            datefmt="%d%b%Y-%H:%M:%S"
-        )
+        self.level = level
+        self.logger = self._setup_logger()
 
 
-    def __call__(self,
-                 message: str,
-                 level: str = "info",
-                 stdout: bool = True,
-    ):
-        """
-        Send a string to stdout and log file one process at a time.
+    def _setup_logger(self):
+        logger = logging.getLogger(self.name)
+        logger.setLevel(logging.INFO)
+        formatter = logging.Formatter(fmt="[%(asctime)s] %(levelname)s - %(message)s",
+                                      datefmt="%d %b %Y-%H:%M:%S")
 
-        Args:
-            message: message to be output to file
-            level: type of log (info / warning / error)
-            stdout: whether to output to shell
-        """
+        screen_handler = logging.StreamHandler(stream=sys.stdout)
+        screen_handler.setFormatter(formatter)
 
-        logging.log(level=self.LEVELS[level.lower()],
-                    msg=message)
+        if not logger.hasHandlers():
+            logger.addHandler(screen_handler)
 
-        if stdout:
-            print(message)
+        if self.log_path != "":
+            file_handler = logging.FileHandler(self.log_path, mode="a")
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+
+        return logger

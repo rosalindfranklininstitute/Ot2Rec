@@ -41,17 +41,17 @@ def get_psf(ctffile, point_source_recip, k2_grid, alpha_g):
     """
     Method to calculate PSF from CTFFIND4 outputs
     """
-    with open(ctffile, 'r') as f:
+    with open(ctffile, "r") as f:
         lines = f.readlines()
 
     # Get system configs
-    get_pixel = re.compile('^# Pixel')
+    get_pixel = re.compile("^# Pixel")
     pixel_line = list(filter(get_pixel.match, lines))[0]
-    w2 = float(pixel_line.split(';')[3].split()[2])
-    cs = float(pixel_line.split(';')[2].split()[2]) * 1e-3
-    voltage = float(pixel_line.split(';')[1].split()[2]) * 1e3
+    w2 = float(pixel_line.split(";")[3].split()[2])
+    cs = float(pixel_line.split(";")[2].split()[2]) * 1e-3
+    voltage = float(pixel_line.split(";")[1].split()[2]) * 1e3
 
-    get_def = re.compile('^[^#]')
+    get_def = re.compile("^[^#]")
     def_line = list(filter(get_def.match, lines))[0]
     df1 = float(def_line.split()[1]) * 1e-10
     df2 = float(def_line.split()[2]) * 1e-10
@@ -68,23 +68,24 @@ def get_psf(ctffile, point_source_recip, k2_grid, alpha_g):
     wvl = hc / denom
 
     # Calculate phase shift chi
-    chi = np.pi * wvl * k2_grid * (df - 0.5 * wvl**2 * k2_grid * cs) + \
-        (dphi + np.arctan2(w2, np.sqrt(1 - w2**2)))
+    chi = np.pi * wvl * k2_grid * (df - 0.5 * wvl**2 * k2_grid * cs) + (
+        dphi + np.arctan2(w2, np.sqrt(1 - w2**2))
+    )
 
     # Calculate CTF
-    ctf = np.exp(-1j*chi)
+    ctf = np.exp(-1j * chi)
 
     # Calculate first-zero of CTF
-    denom0 = wvl * (cs/wvl)**0.25
-    df_min = np.min(df) / np.sqrt(cs*wvl)
-    df_max = np.max(df) / np.sqrt(cs*wvl)
-    q_min = np.sqrt(-df_min + np.sqrt(df_min**2+2)) / denom0
-    q_max = np.sqrt(-df_max + np.sqrt(df_max**2+2)) / denom0
+    denom0 = wvl * (cs / wvl) ** 0.25
+    df_min = np.min(df) / np.sqrt(cs * wvl)
+    df_max = np.max(df) / np.sqrt(cs * wvl)
+    q_min = np.sqrt(-df_min + np.sqrt(df_min**2 + 2)) / denom0
+    q_max = np.sqrt(-df_max + np.sqrt(df_max**2 + 2)) / denom0
 
     # FT point-source and convolve with CTF
     ps_ctf_k = point_source_recip * ctf
 
-    return 1/q_min, 1/q_max, np.absolute(np.fft.ifft2(ps_ctf_k))
+    return 1 / q_min, 1 / q_max, np.absolute(np.fft.ifft2(ps_ctf_k))
 
 
 def calculate_k_grids(image_size, pixel_size):
@@ -103,10 +104,10 @@ def calculate_k_grids(image_size, pixel_size):
     kx_gridpts = np.fft.fftfreq(image_size[0], d=pixel_size)
     ky_gridpts = np.fft.fftfreq(image_size[1], d=pixel_size)
 
-    kxv, kyv = np.meshgrid(kx_gridpts, ky_gridpts, indexing='ij', sparse=True)
+    kxv, kyv = np.meshgrid(kx_gridpts, ky_gridpts, indexing="ij", sparse=True)
     k2_grid = kxv**2 + kyv**2
 
-    alpha_g = np.angle(kxv + 1j*kyv)
+    alpha_g = np.angle(kxv + 1j * kyv)
 
     return k2_grid, alpha_g
 
@@ -138,9 +139,13 @@ def normalise_stack(tomo, pixel_size):
     ctf_stack = np.fft.fftn(tomo)
 
     # Normalise CTF stack and back FFT
-    zero_freq = np.array([np.argmin(np.abs(kx_gridpts)),
-                          np.argmin(np.abs(ky_gridpts)),
-                          np.argmin(np.abs(kz_gridpts))])
+    zero_freq = np.array(
+        [
+            np.argmin(np.abs(kx_gridpts)),
+            np.argmin(np.abs(ky_gridpts)),
+            np.argmin(np.abs(kz_gridpts)),
+        ]
+    )
     ctf_stack_norm = ctf_stack / ctf_stack[zero_freq[0], zero_freq[1], zero_freq[2]]
     psf_out = np.absolute(np.fft.ifftn(ctf_stack_norm))
     psf_out /= np.max(psf_out)
@@ -160,22 +165,21 @@ def run():
     project_name = args.project_name.value
     rootname = project_name
     if args.rootname.value != "":
-        while args.rootname.value.endswith('/'):
+        while args.rootname.value.endswith("/"):
             rootname = args.rootname.value[:-1]
 
     pixel_size = args.pixel_res.value * 1e-10
     ds_factor = args.ds_factor.value
 
     # Read in metadata from ctffind
-    ctffind_md_file = project_name + '_ctffind_mdout.yaml'
+    ctffind_md_file = project_name + "_ctffind_mdout.yaml"
     if not os.path.isfile(ctffind_md_file):
-        logger(level="error",
-               message="CTFFind metadata not found.")
+        logger(level="error", message="CTFFind metadata not found.")
         raise IOError("Error in Ot2Rec.ctfsim.run: ctffind metadata not found.")
 
-    ctffind_obj = mdMod.read_md_yaml(project_name=project_name,
-                                     job_type='ctfsim',
-                                     filename=ctffind_md_file)
+    ctffind_obj = mdMod.read_md_yaml(
+        project_name=project_name, job_type="ctfsim", filename=ctffind_md_file
+    )
     ctffind_md = pd.DataFrame(ctffind_obj.metadata)
 
     # Read image to get dimensions
@@ -192,34 +196,33 @@ def run():
     k2_grid, alpha_g_grid = calculate_k_grids(source_dim, pixel_size * ds_factor)
 
     # Grab tilt series numbers and tilt angles from metadata
-    ts_list = sorted(pd.Series(ctffind_md['ts']).unique())
+    ts_list = sorted(pd.Series(ctffind_md["ts"]).unique())
 
-    logger(level="info",
-           message="Ot2Rec-CTFSim started.")
+    logger(level="info", message="Ot2Rec-CTFSim started.")
 
     tqdm_iter = tqdm(ts_list, ncols=100)
     for curr_ts in tqdm_iter:
         # Create folders and subfolders
-        subfolder_path = f'{args.output_folder.value}/{rootname}_{curr_ts:04}'
+        subfolder_path = f"{args.output_folder.value}/{rootname}_{curr_ts:04}"
         os.makedirs(subfolder_path, exist_ok=True)
 
         # Find txt files from ctffind
-        glob_list = glob1('./ctffind/', f'{rootname}_{curr_ts:04}_*ctffind.txt')
+        glob_list = glob1("./ctffind/", f"{rootname}_{curr_ts:04}_*ctffind.txt")
 
-        angle_list = [float(i.split('/')[-1].split('_')[2]) for i in glob_list]
+        angle_list = [float(i.split("/")[-1].split("_")[2]) for i in glob_list]
         angle_index = [sorted(angle_list).index(i) for i in angle_list]
 
-        full_ctf = np.empty(shape=(len(angle_list), *source_dim[-2:]),
-                            dtype=np.float32)
-        mean_res = np.empty(shape=(len(angle_list)),
-                            dtype=np.float32)
+        full_ctf = np.empty(shape=(len(angle_list), *source_dim[-2:]), dtype=np.float32)
+        mean_res = np.empty(shape=(len(angle_list)), dtype=np.float32)
 
         for index in range(len(angle_index)):
-            res0, res1, full_ctf[angle_index[index], ...] = get_psf(ctffile='./ctffind/' + glob_list[index],
-                                                                    point_source_recip=ps_k,
-                                                                    k2_grid=k2_grid,
-                                                                    alpha_g=alpha_g_grid)
-            mean_res[index] = 0.5*(res0+res1) * 1e10
+            res0, res1, full_ctf[angle_index[index], ...] = get_psf(
+                ctffile="./ctffind/" + glob_list[index],
+                point_source_recip=ps_k,
+                k2_grid=k2_grid,
+                alpha_g=alpha_g_grid,
+            )
+            mean_res[index] = 0.5 * (res0 + res1) * 1e10
 
         # calculate PSF
         (xmin, ymin, zmin) = (
@@ -227,20 +230,28 @@ def run():
             (source_dim[0] - args.dims.value[1]) // 2,
             (source_dim[1] - args.dims.value[2]) // 2,
         )
-        (xmax, ymax, zmax) = (xmin + args.dims.value[0], ymin + args.dims.value[1], zmin + args.dims.value[2])
-        psf_unnorm = reconstruct_full_stack(full_ctf, sorted(angle_list))[xmin:xmax, ymin:ymax, zmin:zmax]
+        (xmax, ymax, zmax) = (
+            xmin + args.dims.value[0],
+            ymin + args.dims.value[1],
+            zmin + args.dims.value[2],
+        )
+        psf_unnorm = reconstruct_full_stack(full_ctf, sorted(angle_list))[
+            xmin:xmax, ymin:ymax, zmin:zmax
+        ]
 
-        full_psf = normalise_stack(psf_unnorm, pixel_size*ds_factor)
+        full_psf = normalise_stack(psf_unnorm, pixel_size * ds_factor)
 
         # Write out psf stack
-        with mrcfile.new(subfolder_path + f'/{rootname}_{curr_ts:04}_PSF.mrc', overwrite=True) as f:
+        with mrcfile.new(
+            subfolder_path + f"/{rootname}_{curr_ts:04}_PSF.mrc", overwrite=True
+        ) as f:
             f.set_data(np.asarray(full_psf, dtype=np.float32))
 
         # Write out rawtlt file
-        with open(subfolder_path + f'/{rootname}_{curr_ts:04}.tlt', 'w') as f:
+        with open(subfolder_path + f"/{rootname}_{curr_ts:04}.tlt", "w") as f:
             for angle in sorted(angle_list):
-                f.writelines(str(angle) + '\n')
+                f.writelines(str(angle) + "\n")
 
         # Write out resolution file
-        with open(subfolder_path + f'/{rootname}_{curr_ts:04}.res', 'w') as f:
+        with open(subfolder_path + f"/{rootname}_{curr_ts:04}.res", "w") as f:
             np.savetxt(f, X=mean_res)

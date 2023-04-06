@@ -27,7 +27,6 @@ from Ot2Rec import params as prmMod
 
 
 class AreTomoReconSmokeTest(unittest.TestCase):
-
     def _create_expected_input_args(self):
         """Create expected input magicGUI args
         NOTE: This is not the proper way to write this function,
@@ -54,7 +53,7 @@ class AreTomoReconSmokeTest(unittest.TestCase):
         os.mkdir(f"{tmpdir.name}/aretomo_aligned/TS_0001")
         st_file = f"{tmpdir.name}/aretomo_aligned/TS_0001/TS_0001_ali.mrc"
         with mrcfile.new(st_file) as mrc:
-            mrc.set_data(np.arange(18, dtype=np.int8).reshape(2,3,3))
+            mrc.set_data(np.arange(18, dtype=np.int8).reshape(2, 3, 3))
 
         # create tlt files
         tlt_file = f"{tmpdir.name}/aretomo_aligned/TS_0001/TS_0001.tlt"
@@ -104,9 +103,7 @@ class AreTomoReconSmokeTest(unittest.TestCase):
         # Run
         logger = logMod.Logger("./o2r_aretomo_recon.log")
         aretomo_obj = aretomo.AreTomo(
-            project_name="TS",
-            params_in=params,
-            logger_in=logger
+            project_name="TS", params_in=params, logger_in=logger
         )
         aretomo_obj.run_aretomo_all()
 
@@ -114,14 +111,14 @@ class AreTomoReconSmokeTest(unittest.TestCase):
         self.assertTrue(aretomo_mock.called)
 
         tmpdir.cleanup()
-    
+
     @patch("subprocess.run")
     def test_aretomo_STA_output_folders_created(self, aretomo_mock):
         # Create expected input
         tmpdir = self._create_expected_folder_structure()
         os.chdir(tmpdir.name)
         args = self._create_expected_input_args()
-        args["out_imod"] = "Warp"   
+        args["out_imod"] = "Warp"
 
         # Create yaml
         aretomo.create_yaml(args)
@@ -135,9 +132,7 @@ class AreTomoReconSmokeTest(unittest.TestCase):
         # Run
         logger = logMod.Logger("./o2r_aretomo_recon.log")
         aretomo_obj = aretomo.AreTomo(
-            project_name="TS",
-            params_in=params,
-            logger_in=logger
+            project_name="TS", params_in=params, logger_in=logger
         )
         sta_folder = "./aretomo_recon/STA"
         aretomo_obj._run_aretomo(0)
@@ -145,12 +140,10 @@ class AreTomoReconSmokeTest(unittest.TestCase):
 
         aretomo_obj.export_metadata()
 
-        self.assertTrue(
-            os.path.isdir(f"{sta_folder}/TS_0001_ali_rec_Imod")
-        )
+        self.assertTrue(os.path.isdir(f"{sta_folder}/TS_0001_ali_rec_Imod"))
 
         tmpdir.cleanup()
-    
+
     def test_aretomo_path_specified(self):
         # Create expected input
         tmpdir = self._create_expected_folder_structure()
@@ -170,16 +163,11 @@ class AreTomoReconSmokeTest(unittest.TestCase):
         # Run
         logger = logMod.Logger("./o2r_aretomo_recon.log")
         aretomo_obj = aretomo.AreTomo(
-            project_name="TS",
-            params_in=params,
-            logger_in=logger
+            project_name="TS", params_in=params, logger_in=logger
         )
 
         cmd = aretomo_obj._get_aretomo_recon_command(0)
 
-        self.assertEqual(
-            cmd[0],
-            "/home/AreTomo_1.2.5_Cuda113_08-01-2022"
-        )
+        self.assertEqual(cmd[0], "/home/AreTomo_1.2.5_Cuda113_08-01-2022")
 
         tmpdir.cleanup()

@@ -68,8 +68,7 @@ class ExcludeBadTilts:
         self.md_out["Excluded_Tilt_Angles"] = {}
 
     def _get_internal_metadata(self):
-        """Prepare internal metadata from params object
-        """
+        """Prepare internal metadata from params object"""
 
         # Process list
         self.md_out["process_list"] = dict(
@@ -78,7 +77,7 @@ class ExcludeBadTilts:
                     1,
                     len(self.params["System"]["process_list"]) + 1,
                 ),
-                self.params["System"]["process_list"]
+                self.params["System"]["process_list"],
             )
         )
 
@@ -110,17 +109,13 @@ class ExcludeBadTilts:
 
         tilts_to_exclude = []
         for proj in range(img.shape[0]):
-            tilt_mean = np.mean(img[proj,:,:])
+            tilt_mean = np.mean(img[proj, :, :])
             if (tilt_mean < min_accept) or (tilt_mean > max_accept):
                 tilts_to_exclude.append(proj)
 
         return tilts_to_exclude
 
-    def _exclude_tilt_one_ts(
-        self,
-        i: int,
-        existing_file: bool = False
-    ):
+    def _exclude_tilt_one_ts(self, i: int, existing_file: bool = False):
         """Excludes tilts from one tilt series, saves excluded tilts as a
         separate .mrc file and edits .tlt accordingly. Old .tlt file is
         renamed to *_original.tlt. Index (starts at 0) of excluded tilts saved
@@ -128,7 +123,7 @@ class ExcludeBadTilts:
 
         Args:
             i (int): Index of tilt series on the process list
-            existing_file (bool): If True, use existing 
+            existing_file (bool): If True, use existing
             <proj_name>_EBTdryrun.yaml to find tilt angles to exclude.
         """
         # Read image and determine tilts to exclude
@@ -145,11 +140,10 @@ class ExcludeBadTilts:
                     contents = yaml.load(f, Loader=yaml.FullLoader)
                     tilts_to_exclude = contents[ts_list[i]]
                     print(tilts_to_exclude)
-        
+
         else:
             tilts_to_exclude = self._determine_tilts_to_exclude(img)
-        self.md_out["Excluded_Tilt_Index"][i+1] = tilts_to_exclude
-
+        self.md_out["Excluded_Tilt_Index"][i + 1] = tilts_to_exclude
 
         # Take excluded tilt angles out of rawtlt file
         rawtlt_file = self.params["EBT_setup"]["tilt_angles"][i]
@@ -163,14 +157,15 @@ class ExcludeBadTilts:
                 del all_tilt_angles[tilt]
             with open(rawtlt_file, "w+") as f:
                 f.writelines(all_tilt_angles)
-            self.md_out["Excluded_Tilt_Angles"][i+1] = [
+            self.md_out["Excluded_Tilt_Angles"][i + 1] = [
                 float(t) for t in list(tilt_angles_to_exclude.values())
             ]
 
         else:
             raise ValueError(
                 f".rawtlt file has {len(all_tilt_angles)} lines, should have "
-                f"{img.shape[0]} lines instead.")
+                f"{img.shape[0]} lines instead."
+            )
 
         # Create stack of excluded tilts
         exclude_filename = st_file.replace(".st", ".excl")
@@ -180,23 +175,15 @@ class ExcludeBadTilts:
         ) as mrc:
             excluded_stack = img[tilts_to_exclude, :, :]
             mrc.set_data(excluded_stack)
-        self.md_out["Excluded_St_Files"][i+1] = exclude_filename
+        self.md_out["Excluded_St_Files"][i + 1] = exclude_filename
 
         # Remove excluded tilts from original data
-        cropped_ts = np.delete(
-            arr=img,
-            obj=tilts_to_exclude,
-            axis=0
-        )
+        cropped_ts = np.delete(arr=img, obj=tilts_to_exclude, axis=0)
         with mrcfile.mmap(st_file, mode="r+") as mrc:
             mrc.set_data(cropped_ts)
 
-    def run_exclude_bad_tilts(
-        self,
-        existing_file: bool = False
-    ):
-        """Method to exclude bad tilts for all tilt series
-        """
+    def run_exclude_bad_tilts(self, existing_file: bool = False):
+        """Method to exclude bad tilts for all tilt series"""
         ts_list = self.params["System"]["process_list"]
         tqdm_iter = tqdm(ts_list, ncols=100)
         for i, curr_ts in enumerate(tqdm_iter):
@@ -212,9 +199,7 @@ class ExcludeBadTilts:
         tqdm_iter = tqdm(ts_list, ncols=100)
         tilts_to_exclude = {}
         for i, curr_ts in enumerate(tqdm_iter):
-            tqdm_iter.set_description(
-                f"Determining bad tilts from ts {curr_ts}"
-            )
+            tqdm_iter.set_description(f"Determining bad tilts from ts {curr_ts}")
             # Read image and determine tilts to exclude
             st_file = self.params["EBT_setup"]["input_mrc"][i]
             with mrcfile.mmap(st_file) as mrc:
@@ -250,20 +235,15 @@ def update_yaml(args: dict):
     ebt_yaml_name = f"{args.project_name.value}_exclude_bad_tilts.yaml"
 
     ebt_params = prmMod.read_yaml(
-        project_name=args.project_name.value,
-        filename=ebt_yaml_name
+        project_name=args.project_name.value, filename=ebt_yaml_name
     )
 
     # Get input mrc's
-    st_file_list = glob(
-        f"{args.input_mrc_folder.value}/*/*.st"
-    )
+    st_file_list = glob(f"{args.input_mrc_folder.value}/*/*.st")
     st_file_list.sort()
 
     # Get tilt angle files
-    rawtlt_file_list = glob(
-        f"{args.input_mrc_folder.value}/*/*.rawtlt"
-    )
+    rawtlt_file_list = glob(f"{args.input_mrc_folder.value}/*/*.rawtlt")
     rawtlt_file_list.sort()
 
     # Ensure # st = # rawtlt
@@ -279,8 +259,7 @@ def update_yaml(args: dict):
 
     # Extract tilt series number
     ts_list = [
-        int(os.path.basename(i).split("_")[-1].split(".")[0])
-        for i in st_file_list
+        int(os.path.basename(i).split("_")[-1].split(".")[0]) for i in st_file_list
     ]
 
     # Set process list
@@ -301,8 +280,7 @@ def update_yaml(args: dict):
 
 
 def create_yaml(args=None):
-    """Subroutine to create new yaml file for excluding bad tilts
-    """
+    """Subroutine to create new yaml file for excluding bad tilts"""
 
     if args is None:
         args = mgMod.get_args_exclude_bad_tilts.show(run=True)
@@ -312,30 +290,21 @@ def create_yaml(args=None):
 
 
 def run():
-    """ Method to exclude bad tilts
-    """
+    """Method to exclude bad tilts"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "project_name",
         type=str,
         help="Name of current project",
     )
-    parser.add_argument(
-        "--dryrun",
-        action="store_true"
-    )
-    parser.add_argument(
-        "--existing_file",
-        action="store_true"
-    )
+    parser.add_argument("--dryrun", action="store_true")
+    parser.add_argument("--existing_file", action="store_true")
     run_args = parser.parse_args()
 
     # check that ebt yaml file exists
     ebt_yaml = f"{run_args.project_name}_exclude_bad_tilts.yaml"
     if not os.path.isfile(ebt_yaml):
-        raise IOError(
-            "Error in Ot2Rec.exclude_bad_tilts.run: yaml file not found"
-        )
+        raise IOError("Error in Ot2Rec.exclude_bad_tilts.run: yaml file not found")
 
     # Read in config and metadata
     ebt_config = prmMod.read_yaml(
@@ -364,11 +333,12 @@ def run():
     else:
         ebt_obj.run_exclude_bad_tilts(existing_file=run_args.existing_file)
 
+
 def _recombine_tilt_one_ts(
-        i: int,
-        params: dict,
-        md_in: dict,
-    ):
+    i: int,
+    params: dict,
+    md_in: dict,
+):
     """Recombines excluded tilts for one tilt series
 
     Args:
@@ -377,7 +347,7 @@ def _recombine_tilt_one_ts(
         md_in (dict): Metadata read from exclude_bad_tilts_mdout.yaml
     """
     # Check that we have the metadata we need, i.e. tilts have been removed
-    tilts_to_exclude = md_in["Excluded_Tilt_Index"][i+1]
+    tilts_to_exclude = md_in["Excluded_Tilt_Index"][i + 1]
     if len(tilts_to_exclude) == 0:
         print("Skipping this TS as no excluded tilts")
         pass
@@ -389,15 +359,13 @@ def _recombine_tilt_one_ts(
             img = mrc.data
             dtype = mrcfile.utils.data_dtype_from_header(mrc.header)
 
-        exclude_filename = md_in["Excluded_St_Files"][i+1]
+        exclude_filename = md_in["Excluded_St_Files"][i + 1]
         with mrcfile.mmap(exclude_filename) as mrc:
             excl_st = mrc.data
 
         # Create an empty array for the full tilt
-        full_ts = np.empty(shape=(
-            img.shape[0]+excl_st.shape[0],
-            img.shape[1],
-            img.shape[2])
+        full_ts = np.empty(
+            shape=(img.shape[0] + excl_st.shape[0], img.shape[1], img.shape[2])
         )
 
         # Replace excluded tilts
@@ -420,7 +388,7 @@ def _recombine_tilt_one_ts(
         with open(rawtlt_file, "r") as f:
             cropped_ta = f.readlines()
         cropped_ta = [float(ta.strip("\n")) for ta in cropped_ta]
-        excl_ta = md_in["Excluded_Tilt_Angles"][i+1]
+        excl_ta = md_in["Excluded_Tilt_Angles"][i + 1]
 
         number_of_cropped_st_added = 0
         number_of_excl_st_added = 0
@@ -435,14 +403,13 @@ def _recombine_tilt_one_ts(
                 number_of_cropped_st_added += 1
         with open(rawtlt_file, "w+") as f:
             f.writelines(f"{ta}\n" for ta in full_ta)
-        
+
         # Delete excl files
         os.remove(exclude_filename)
 
 
 def recombine_bad_tilts():
-    """Method to recombine bad tilts with original .st files
-    """
+    """Method to recombine bad tilts with original .st files"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "project_name",
@@ -454,15 +421,11 @@ def recombine_bad_tilts():
     # check that ebt yaml file exists
     ebt_yaml = f"{run_args.project_name}_exclude_bad_tilts.yaml"
     if not os.path.isfile(ebt_yaml):
-        raise IOError(
-            "Error in Ot2Rec.exclude_bad_tilts.run: yaml file not found"
-        )
+        raise IOError("Error in Ot2Rec.exclude_bad_tilts.run: yaml file not found")
 
     ebt_mdout_yaml = f"{run_args.project_name}_exclude_bad_tilts_mdout.yaml"
     if not os.path.isfile(ebt_mdout_yaml):
-        raise IOError(
-            "Error in Ot2Rec.exclude_bad_tilts.run: yaml file not found"
-        )
+        raise IOError("Error in Ot2Rec.exclude_bad_tilts.run: yaml file not found")
 
     # Read in config and metadata
     ebt_config = prmMod.read_yaml(

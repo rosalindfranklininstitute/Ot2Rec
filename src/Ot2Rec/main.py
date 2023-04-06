@@ -18,18 +18,30 @@ import time
 import subprocess
 import sys
 from glob import glob
+from pathlib import Path
 
 import yaml
 
 from . import logger as logMod
 from . import metadata as mdMod
 from . import params as prmMod
-from . import magicgui as mgMod
+from . import mgui_import as mgMod
 
 from . import motioncorr as mcMod
 from . import ctffind as ctffindMod
 from . import align as alignMod
 from . import recon as reconMod
+from . import aretomo as atMod
+
+from . import mgui_import as importMGUI
+from . import mgui_mc2 as mc2MGUI
+from . import mgui_aretomo as atMGUI
+from . import mgui_imod_align as imodMGUI
+
+
+class asObject(object):
+    def __init__(self, dict_obj):
+        self.__dict__ = dict_obj
 
 
 def get_proj_name():
@@ -39,9 +51,11 @@ def get_proj_name():
 
     project_name = sys.argv[1]
     # Check input validity
-    for char in ['<', '>', ':', '"', '/', '\\', '|', '?', '*']:
+    for char in ["<", ">", ":", '"', "/", "\\", "|", "?", "*"]:
         if project_name.find(char) != -1:
-            raise ValueError(f"Error in Ot2Rec.main.new_proj: Illegal character ({char}) found in input project name.")
+            raise ValueError(
+                f"Error in Ot2Rec.main.new_proj: Illegal character ({char}) found in input project name."
+            )
 
     return project_name
 
@@ -50,32 +64,7 @@ def new_proj():
     """
     Method to create a new project and get master metadata from raw images
     """
-    logger = logMod.Logger(log_path="new_proj.log")
-
-    # Parse user inputs
-    args = mgMod.get_args_new_proj.show(run=True)
-
-    # Create master yaml config file
-    prmMod.new_master_yaml(args)
-
-    # Create empty Metadata object
-    # Master yaml file will be read automatically
-    meta = mdMod.Metadata(project_name=args.project_name.value,
-                          job_type='master')
-
-    # Create master metadata and serialise it as yaml file
-    meta.create_master_metadata()
-    if not args.no_mdoc.value:
-        meta.get_mc2_temp()
-        meta.get_acquisition_settings()
-
-    master_md_name = args.project_name.value + '_master_md.yaml'
-    with open(master_md_name, 'w') as f:
-        yaml.dump(meta.metadata, f, indent=4)
-
-    logger(level="info",
-           message="Master metadata file created.")
-
+    params = mgMod.get_args_new_proj.show(run=True)
 
 
 def cleanup():
@@ -85,35 +74,34 @@ def cleanup():
 
     project_name = get_proj_name()
 
-    mc2_yaml = project_name + '_mc2.yaml'
-    recon_yaml = project_name + '_recon.yaml'
+    mc2_yaml = project_name + "_mc2.yaml"
+    recon_yaml = project_name + "_recon.yaml"
 
     # Create Logger object
     logger = logMod.Logger()
 
     if os.path.isfile(mc2_yaml):
-        mc2_config = prmMod.read_yaml(project_name=project_name,
-                                      filename=mc2_yaml)
-        mc2_path = mc2_config.params['System']['output_path']
+        mc2_config = prmMod.read_yaml(project_name=project_name, filename=mc2_yaml)
+        mc2_path = mc2_config.params["System"]["output_path"]
         if os.path.isdir(mc2_path):
             logger(f"Deleting {mc2_path} folder and its contents...")
-            cmd = ['rm', '-rf', mc2_path]
-            del_mc2 = subprocess.run(cmd,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.STDOUT)
+            cmd = ["rm", "-rf", mc2_path]
+            del_mc2 = subprocess.run(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            )
 
     if os.path.isfile(recon_yaml):
-        recon_config = prmMod.read_yaml(project_name=project_name,
-                                        filename=recon_yaml)
-        recon_path = recon_config.params['System']['output_path']
+        recon_config = prmMod.read_yaml(project_name=project_name, filename=recon_yaml)
+        recon_path = recon_config.params["System"]["output_path"]
         if os.path.isdir(recon_path):
             logger("Deleting intermediary IMOD files...")
-            files = glob(recon_path + 'stack*/*.*~') + \
-                glob(recon_path + 'stack*/*_full_rec.*')
-            cmd = ['rm', *files]
-            del_recon = subprocess.run(cmd,
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.STDOUT)
+            files = glob(recon_path + "stack*/*.*~") + glob(
+                recon_path + "stack*/*_full_rec.*"
+            )
+            cmd = ["rm", *files]
+            del_recon = subprocess.run(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            )
 
 
 def run_all_imod():
@@ -141,8 +129,7 @@ def run_all_imod():
     mcMod.update_yaml(mc2_args)
 
     logger("Motion correction in progress...")
-    mcMod.run(exclusive=False,
-              args_in=mc2_args)
+    mcMod.run(exclusive=False, args_in=mc2_args)
 
     time.sleep(2)
 
@@ -156,8 +143,7 @@ def run_all_imod():
         ctffindMod.update_yaml(ctffind_args)
 
         logger("CTF estimation in progress...")
-        ctffindMod.run(exclusive=False,
-                       args_in=ctffind_args)
+        ctffindMod.run(exclusive=False, args_in=ctffind_args)
 
         time.sleep(2)
 
@@ -173,13 +159,13 @@ def run_all_imod():
     alignMod.update_yaml(align_args)
 
     logger("Alignment in progress...")
-    alignMod.run(exclusive=False,
-                 args_in=align_args,
-                 newstack=True,
+    alignMod.run(
+        exclusive=False,
+        args_in=align_args,
+        newstack=True,
     )
     if user_args.show_stats.value:
-        alignMod.get_align_stats(exclusive=False,
-                                 args_in=align_args)
+        alignMod.get_align_stats(exclusive=False, args_in=align_args)
 
     time.sleep(2)
 
@@ -195,6 +181,7 @@ def run_all_imod():
     reconMod.update_yaml(recon_args)
 
     logger("Reconstruction in progress...")
-    reconMod.run(exclusive=False,
-                 args_in=recon_args,
+    reconMod.run(
+        exclusive=False,
+        args_in=recon_args,
     )
