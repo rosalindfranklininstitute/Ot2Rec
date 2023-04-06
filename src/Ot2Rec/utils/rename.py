@@ -12,14 +12,17 @@
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-import os
-from pathlib import Path
-import mdocfile as mdf
-import re
-import pandas as pd
-from mdocfile.mdoc import Mdoc
-import yaml
 import glob
+import os
+import re
+from pathlib import Path
+
+import mdocfile as mdf
+import yaml
+from mdocfile.mdoc import Mdoc
+
+from magicgui import magicgui
+from Ot2Rec import logger as logMod
 
 
 def reassign_names_from_mdoc(mdocs: list) -> dict:
@@ -127,7 +130,29 @@ def write_md_out(reassigned_names: dict):
         yaml.dump(reassigned_names)
 
 
-def rename_all(mdocs_directory: Path, micrograph_directory: Path):
+@magicgui(
+    call_button="Rename files",
+    layout="vertical",
+    mdocs_directory={
+        "widget_type": "FileEdit",
+        "label": "Directory where mdocs are stored*",
+        "mode": "d",
+    },
+    micrograph_directory={
+        "widget_type": "FileEdit",
+        "label": "Directory where raw micrographs are stored*",
+        "mode": "d",
+    },
+    message={
+        "widget_type": "Label",
+        "label": """
+        Renames micrographs and creates new mdocs based on the file naming convention
+        <project_name>_<tomogram_number>_<tilt_number>_<tilt_angle>.<ext>
+        where each unique mdoc gets its own tomogram number starting from 001.
+    """,
+    },
+)
+def rename_all(mdocs_directory: Path, micrograph_directory: Path, message: str = ""):
     """Renames microraphs and mdocs to an Ot2Rec-friendly filenaming pattern
     and save updated mdocs in a new directory `ot2rec_mdocs`.
 
@@ -141,10 +166,43 @@ def rename_all(mdocs_directory: Path, micrograph_directory: Path):
     Args:
         mdocs_directory (Path): Original directory containing mdocs
         micrograph_directory (Path): Directory containing raw micrographs
+        message (str): Dummy variable required to print the help message
     """
-    # Write a function to rename everything accordingly
+    logger = logMod.Logger(log_path="./o2r_rename.log")
+    logger(
+        level="info",
+        message=f"Renaming files in {micrograph_directory} according to mdocs in {mdocs_directory}",
+    )
+
     mdocs_list = glob.glob(f"{mdocs_directory}/*mdoc")
     reassigned_names = reassign_names_from_mdoc(mdocs_list)
     rename_files(micrograph_directory, reassigned_names)
+    logger(level="info", message=f"Renamed {len(reassigned_names)} files")
+
     update_mdocs(mdocs_list, "./ot2rec_mdocs", micrograph_directory, reassigned_names)
+    logger(level="info", message="Updated mdocs now saved in ./ot2rec_mdocs")
+
     write_md_out(reassigned_names)
+    logger(
+        level="info",
+        message="Mapping of old to new filenames available in ot2rec_reassigned_names.yaml",
+    )
+    logger(level="info", message="Renaming complete, you can close the GUI now")
+
+
+def rename_all_with_mgui():
+    """Collects user parameters and renames microraphs and mdocs to an
+    Ot2Rec-friendly filenaming pattern and save updated mdocs in a new
+    irectory `ot2rec_mdocs`.
+
+    MagicGUI will collect `mdocs_directory` and `micrograph_directory`.
+
+    New filename format is
+    <project name>_<tomogram number>_<tilt number>_<tilt angle>.<ext>
+    Each unique mdoc receives a new tomogram number, e.g.,
+        TS_01.mdoc -> tomogram number 001
+        TS_01_02.mdoc -> tomogram number 002
+        TS_abc.mdoc -> tomogram number 003
+
+    """
+    rename_all.show(run=True)
