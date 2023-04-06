@@ -113,7 +113,8 @@ def get_args_mc2(
     if return_only:
         return locals()
 
-    logger = logMod.Logger(log_path="o2r_motioncor2.log")
+    log_mc2 = logMod.Logger(name="mc2",
+                            log_path="o2r_motioncor2.log")
     args = asObject(locals())
 
     if locals()["exec_path"] == Path("."):
@@ -122,6 +123,6 @@ def get_args_mc2(
     prmMod.new_mc2_yaml(args)
     mcMod.update_yaml(args)
 
-    logger(message="MotionCor2 metadata file created.")
+    log_mc2.logger.info("MotionCor2 metadata file created.")
 
     return "Done. You can close this window now."
