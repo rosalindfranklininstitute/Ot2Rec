@@ -63,7 +63,7 @@ def get_params_full_aretomo(
     binning=4,
     aretomo_path="AreTomo",
 ):
-    logger = logMod.Logger()
-    logger(message="Parameters recorded. You can close the GUI window now.")
+    logger = logMod.Logger("o2r_general.log")
+    logger.logger.info("Parameters recorded. You can close the GUI window now.")
 
     return locals()

@@ -17,6 +17,7 @@ import os
 import time
 import subprocess
 import sys
+import logging
 from glob import glob
 from pathlib import Path
 from ot2rec_report import main as o2r_report
@@ -50,9 +51,9 @@ def run_previewer():
     """
     Method to run MotionCor2 + Aretomo automatically
     """
-    logger = logMod.Logger(log_path="o2r_general.log")
-    logger(message="Ot2Rec-Previewer started.")
-    exit()
+    log_general = logMod.Logger(name="general",
+                                log_path="o2r_general.log")
+    log_general.logger.info("Ot2Rec-Previewer started.")
 
     # Get user parameters
     user_params = asObject(
@@ -74,7 +75,7 @@ def run_previewer():
 
     # Create empty Metadata object
     # Master yaml file will be read automatically
-    logger(level="info", message="Aggregating metadata...")
+    log_general.logger.info("Aggregating metadata...")
     meta = mdMod.Metadata(project_name=new_proj_params.project_name, job_type="master")
 
     # Create master metadata and serialise it as yaml file
@@ -90,23 +91,22 @@ def run_previewer():
     with open(acqui_md_name, "w") as g:
         yaml.dump(meta.acquisition, g, indent=4)
 
-    logger(level="info", message="All metadata successfully aggregated.")
+    log_general.logger.info("All metadata successfully aggregated.")
 
     # Motion-correction (MotionCor2)
     mc2_params = asObject(mc2MGUI.get_args_mc2(return_only=True))
     mc2_params.project_name = user_params.project_name
     mc2_params.pixel_size = meta.acquisition["pixel_spacing"]
     mc2_params.exec_path = "MotionCor2_1.4.0_Cuda110"
-
-    logger = logMod.Logger(log_path="o2r_motioncor2.log")
     prmMod.new_mc2_yaml(mc2_params)
-    logger(level="info", message="MotionCor2 metadata file created.")
     mcMod.update_yaml(mc2_params)
 
-    logger(level="info", message="Motion correction in progress...")
+    log_general.logger.info("Motion correction started.")
     mcMod.run(exclusive=False, args_in=mc2_params)
+    log_general.logger.info("Motion correction successful.")
 
     time.sleep(2)
+    exit()
 
     # Create stacks (IMOD)
     imod_params = asObject(imodMGUI.get_args_align(return_only=True))
