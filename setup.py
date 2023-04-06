@@ -70,6 +70,7 @@ setup(
             "o2r.cleanup=Ot2Rec.main:cleanup",
             "o2r.runall.imod=Ot2Rec.main:run_all_imod",
             "o2r.previewer=Ot2Rec.previewer:run_previewer",
+            "o2r.rename=Ot2Rec.rename:rename_all",
         ]
     },
 )
