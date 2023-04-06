@@ -90,9 +90,8 @@ def update_datetime_mdocs_for_warp(
             date_str = datetime.strptime(date_from_mdoc, "%d-%b-%Y %H:%M:%S")
         except ValueError:
             if logger is not None:
-                logger(
-                    level="warning",
-                    message=f"""
+                logger.logger.warning(
+                    f"""
                     Could not parse date {date_from_mdoc} to Warp format yy-mmm-dd HH:MM:SS.
                     Is the date in the format dd-mmm-yy HH:MM:SS?
                     """,
@@ -103,9 +102,7 @@ def update_datetime_mdocs_for_warp(
         mdoc_obj.section_data[tilt].DateTime = date_to_mdoc
 
     if logger is not None:
-        logger(
-            level="info", message="Updated datetime to Warp format yy-mmm-dd HH:MM:SS."
-        )
+        logger.logger.info("Updated datetime to Warp format yy-mmm-dd HH:MM:SS.")
     return mdoc_obj
 
 
@@ -142,9 +139,8 @@ def update_mdocs(
     if os.path.isdir(new_mdocs_directory) is False:
         Path(new_mdocs_directory).mkdir(exist_ok=True)
         if logger is not None:
-            logger(
-                level="info",
-                message=f"Created new mdocs directory {os.path.abspath(new_mdocs_directory)}",
+            logger.logger.info(
+                f"Created new mdocs directory {os.path.abspath(new_mdocs_directory)}",
             )
     for mdoc in mdocs:
         mdoc_obj = Mdoc.from_file(mdoc)
@@ -222,16 +218,15 @@ def rename_all(
         update_dates_for_warp (bool, Optional): Updates mdoc dates to Warp formatting yy-mmm-dd. Defaults to False.
         message (str): Dummy variable required to print the help message
     """
-    logger = logMod.Logger(log_path="./o2r_rename.log")
-    logger(
-        level="info",
-        message=f"Renaming files in {micrograph_directory} according to mdocs in {mdocs_directory}",
+    logger = logMod.Logger(name="Rename", log_path="./o2r_rename.log")
+    logger.logger.info(
+        f"Renaming files in {micrograph_directory} according to mdocs in {mdocs_directory}",
     )
 
     mdocs_list = glob.glob(f"{mdocs_directory}/*mdoc")
     reassigned_names = reassign_names_from_mdoc(mdocs_list)
     rename_files(micrograph_directory, reassigned_names)
-    logger(level="info", message=f"Renamed {len(reassigned_names)} files")
+    logger.logger.info(f"Renamed {len(reassigned_names)} files")
 
     update_mdocs(
         mdocs_list,
@@ -241,14 +236,13 @@ def rename_all(
         update_dates_for_warp,
         logger,
     )
-    logger(level="info", message="Updated mdocs now saved in ./ot2rec_mdocs")
+    logger.logger.info("Updated mdocs now saved in ./ot2rec_mdocs")
 
     write_md_out(reassigned_names)
-    logger(
-        level="info",
-        message="Mapping of old to new filenames available in ot2rec_reassigned_names.yaml",
+    logger.logger.info(
+        "Mapping of old to new filenames available in ot2rec_reassigned_names.yaml",
     )
-    logger(level="info", message="Renaming complete, you can close the GUI now")
+    logger.logger.info("Renaming complete, you can close the GUI now")
 
 
 def rename_all_with_mgui():

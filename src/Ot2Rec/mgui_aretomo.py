@@ -131,4 +131,4 @@ def get_args_aretomo(
 
     logger(level="info", message=" metadata file created.")
 
-    return
+    return "Done. You can close this window now"

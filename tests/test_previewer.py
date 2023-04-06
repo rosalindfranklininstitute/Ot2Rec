@@ -12,15 +12,18 @@
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-import unittest
-from unittest.mock import patch
-from pathlib import Path
-import tempfile
 import os
 import shutil
-from Ot2Rec import previewer2 as previewer
-from Ot2Rec import params as prmMod
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
 import yaml
+
+from Ot2Rec import params as prmMod
+from Ot2Rec import previewer
+from Ot2Rec.metadata import Metadata
 
 
 class PreviewerTest(unittest.TestCase):
@@ -52,8 +55,21 @@ class PreviewerTest(unittest.TestCase):
 
         return tmpdir
 
+    @patch("ot2rec_report.main.main")
+    @patch("Ot2Rec.aretomo.AreTomo.run_aretomo_all")
+    @patch("Ot2Rec.aretomo._create_stacks_with_imod")
+    @patch("Ot2Rec.motioncorr.run")
+    @patch("Ot2Rec.metadata.Metadata.get_num_frames_parallel")
     @patch("Ot2Rec.mgui_import.get_args_new_proj")
-    def test_run_previewer(self, import_args_mock):
+    def test_run_previewer(
+        self,
+        import_args_mock,
+        get_num_frames_mock,
+        mc2_mock,
+        aretomo_create_stacks_mock,
+        aretomo_run_mock,
+        o2r_report_mock,
+    ):
         import_args_mock.return_value = {
             "project_name": "",
             "source_folder": Path("../raw"),
@@ -67,6 +83,21 @@ class PreviewerTest(unittest.TestCase):
             "no_mdoc": False,
             "return_only": True,
         }
+
+        # Mock get number of frames as our test data is empty and not EER
+        num_frames_list = []
+        for i in range(6):
+            num_frames_list.append([15, 1])
+        get_num_frames_mock.return_value = num_frames_list
+
+        # Make fake .st files to mock creating stacks with imod
+        def create_sts(args):
+            os.makedirs(f"{tmpdir.name}/aretomo/Position_001")
+            os.makedirs(f"{tmpdir.name}/aretomo/Position_002")
+            Path(f"{tmpdir.name}/aretomo/Position_001/Position_001.st").touch()
+            Path(f"{tmpdir.name}/aretomo/Position_001/Position_002.st").touch()
+
+        aretomo_create_stacks_mock.side_effect = create_sts
 
         tmpdir = self._create_expected_folder_structure()
 
@@ -97,7 +128,28 @@ class PreviewerTest(unittest.TestCase):
                 for img in list(self.__class__.reassigned_names.values())
             ],
         )
-        self.assertListEqual(master_md["image_idx"], ["1", "2", "3", "1", "2", "3"])
-        self.assertListEqual(
-            master_md["ts"], ["001", "001", "001", "002", "002", "002"]
+        self.assertListEqual(master_md["image_idx"], [1, 2, 3, 1, 2, 3])
+        self.assertListEqual(master_md["ts"], [1, 1, 1, 2, 2, 2])
+
+        # Check that acquisition yaml is correct
+        with open(f"{tmpdir.name}/Position_acquisition_md.yaml", "r") as f:
+            acquisition_md = yaml.load(f, Loader=yaml.FullLoader)
+        self.assertEqual(acquisition_md["magnification"], 64000)
+
+        # Check that motioncor2 params are created correctly
+        mc2_params = prmMod.read_yaml(
+            project_name="Position", filename=f"{tmpdir.name}/Position_mc2.yaml"
+        )
+        self.assertListEqual(mc2_params.params["System"]["process_list"], [1, 2])
+        self.assertEqual(mc2_params.params["MC2"]["pixel_size"], 1.98)
+
+        # Check that AreTomo parameters are created correctly
+        aretomo_params = prmMod.read_yaml(
+            project_name="Position",
+            filename=f"{tmpdir.name}/Position_aretomo_align-recon.yaml",
+        )
+        self.assertListEqual(aretomo_params.params["System"]["process_list"], [1, 2])
+        self.assertTrue(
+            "aretomo/Position_001/Position_001.st"
+            in aretomo_params.params["AreTomo_setup"]["input_mrc"]
         )

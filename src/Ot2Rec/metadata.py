@@ -304,10 +304,8 @@ class Metadata:
 
         tqdm_iter = tqdm(list(set(df.ts)), ncols=100)
         for curr_ts in tqdm_iter:
-            mdoc_path = (
-                f"{base_folder}/{self.params['file_prefix']}_" + str(curr_ts) + ".mdoc"
-            )
-            mdoc = mdf.read(mdoc_path)
+            mdoc_path = f"{base_folder}/{self.params['file_prefix']}_{curr_ts:03}.mdoc"
+            # mdoc = mdf.read(mdoc_path)
             ts_dose_dict = self.get_ts_dose(mdoc_path, 1)
 
             ts_image_list = df[df["ts"] == curr_ts]["file_paths"].to_list()
@@ -334,15 +332,7 @@ class Metadata:
         self.metadata["frame_dose"] = df.frame_dose.to_list()
 
     def get_acquisition_settings(self):
-        df = pd.DataFrame(self.metadata)
-        if self.params["mdocs_folder"] is None:
-            base_folder = "/".join(df.file_paths.values[0].split("/")[:-1])
-        else:
-            base_folder = "/".join(self.mdocs_paths[0].split("/")[:-1])
-
-        ts = list(set(df.ts))[0]  # Assuming settings same across one data set
-        mdoc_path = f"{base_folder}/{self.params['file_prefix']}_" + str(ts) + ".mdoc"
-        mdoc = mdf.read(mdoc_path)
+        mdoc = mdf.read(self.mdocs_paths[0])
 
         self.acquisition["magnification"] = int(mdoc.Magnification.unique()[0])
         self.acquisition["pixel_spacing"] = float(mdoc.PixelSpacing.unique()[0])
@@ -371,8 +361,8 @@ class Metadata:
                     f"{mdoc_df.iloc[tilt].TiltAngle.astype('int'):.2f}"
                 )
                 master_md["file_paths"].append(str(mdoc_df.iloc[tilt].SubFramePath))
-                master_md["image_idx"].append(str(mdoc_df.iloc[tilt].ZValue + 1))
-                master_md["ts"].append(ts)
+                master_md["image_idx"].append(int(mdoc_df.iloc[tilt].ZValue + 1))
+                master_md["ts"].append(int(ts))
 
         # Dump to yaml
         self.metadata = master_md

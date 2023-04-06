@@ -260,7 +260,9 @@ class AreTomo:
             for ts in list(self.sta.keys()):
                 sta_ts_folder = f"{self.sta_folder}/{self.sta[ts].split(os.sep)[-2]}"
                 if os.path.exists(sta_ts_folder):
-                    self.logObj.logger.warning(f"STA folder {sta_ts_folder} not empty, overwriting.")
+                    self.logObj.logger.warning(
+                        f"STA folder {sta_ts_folder} not empty, overwriting."
+                    )
                     shutil.rmtree(sta_ts_folder)
                 shutil.move(
                     src=self.sta[ts],
@@ -302,7 +304,7 @@ def _update_volz(args, aretomo_params):
 def _create_stacks_with_imod(args):
     # Uses align to create the InMrc and AngFile in correct form
     try:
-        args_in_align = imod_newstack_MGUI.get_args_align
+        args_in_align = imod_newstack_MGUI.get_args_align(return_only=True)
         args_in_align.project_name.value = args["project_name"]
         args_in_align.rot_angle.value = args["rot_angle"]
         args_in_align.output_folder.value = args["output_path"]
@@ -339,10 +341,10 @@ def _get_process_list(file_list, rootname, suffix, ext):
         st_bn = os.path.basename(st)
         if suffix != "":
             ts_list.append(
-                st_bn.split(f"{rootname}_")[1].split(f"_{suffix}{ext}")[0][:-1]
+                int(st_bn.split(f"{rootname}_")[1].split(f"_{suffix}{ext}")[0][:-1])
             )
         else:
-            ts_list.append(st_bn.split(f"{rootname}_")[1].split(ext)[0][:-1])
+            ts_list.append(int(st_bn.split(f"{rootname}_")[1].split(ext)[0][:-1]))
     return ts_list
 
 
