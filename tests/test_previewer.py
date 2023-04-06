@@ -27,7 +27,6 @@ from Ot2Rec.metadata import Metadata
 
 
 class PreviewerTest(unittest.TestCase):
-
     reassigned_names = {
         "Position_10_001_-20.00_20230324_121311_EER.eer": "Position_001_001_-20.00.eer",
         "Position_10_002_-17.00_20230324_121400_EER.eer": "Position_001_002_-17.00.eer",
@@ -55,6 +54,8 @@ class PreviewerTest(unittest.TestCase):
 
         return tmpdir
 
+    @patch("Ot2Rec.previewer._get_gpu_nvidia_smi")
+    @patch("shutil.which")
     @patch("ot2rec_report.main.main")
     @patch("Ot2Rec.aretomo.AreTomo.run_aretomo_all")
     @patch("Ot2Rec.aretomo._create_stacks_with_imod")
@@ -69,6 +70,8 @@ class PreviewerTest(unittest.TestCase):
         aretomo_create_stacks_mock,
         aretomo_run_mock,
         o2r_report_mock,
+        shutil_which_mock,
+        gpu_mock,
     ):
         import_args_mock.return_value = {
             "project_name": "",
@@ -83,6 +86,11 @@ class PreviewerTest(unittest.TestCase):
             "no_mdoc": False,
             "return_only": True,
         }
+        # Mock shutil.which result to assume modules are loaded
+        shutil_which_mock.return_value = "path"
+
+        # Mock get_gpu_nvidia_smi so tests think we have a gpu
+        gpu_mock.return_value = [0]
 
         # Mock get number of frames as our test data is empty and not EER
         num_frames_list = []

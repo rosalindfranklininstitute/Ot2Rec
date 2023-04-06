@@ -19,6 +19,7 @@ from pathlib import Path
 import yaml
 from magicgui import magicgui
 from ot2rec_report import main as o2r_report
+from importlib.metadata import version
 
 from Ot2Rec import aretomo as atMod
 from Ot2Rec import logger as logMod
@@ -29,11 +30,75 @@ from Ot2Rec import mgui_mc2 as mc2MGUI
 from Ot2Rec import motioncorr as mcMod
 from Ot2Rec import params as prmMod
 from Ot2Rec.utils import rename
+import shutil
+import subprocess
 
 
 class asObject(object):
     def __init__(self, dict_obj):
         self.__dict__ = dict_obj
+
+
+def _get_gpu_nvidia_smi():
+    """
+    TEMPORARY: will move to somewhere else later.
+    Subroutine to get visible GPU ID(s) from nvidia-smi
+    """
+
+    nv_uuid = subprocess.run(
+        ["nvidia-smi", "--list-gpus"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        encoding="ascii",
+        check=True,
+    )
+    nv_processes = subprocess.run(
+        ["nvidia-smi", "--query-compute-apps=gpu_uuid", "--format=csv"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        encoding="ascii",
+        check=True,
+    )
+
+    # catch the visible GPUs
+    if nv_uuid.returncode != 0 or nv_processes.returncode != 0:
+        self.logObj.logger.critical(
+            msg=f"nvidia-smi returned an error: {nv_uuid.stderr}",
+        )
+        raise AssertionError(
+            f"Error in Ot2Rec.Motioncorr._get_gpu_from_nvidia_smi: "
+            f"nvidia-smi returned an error: {nv_uuid.stderr}"
+        )
+
+    nv_uuid = nv_uuid.stdout.strip("\n").split("\n")
+    nv_processes = subprocess.run(
+        ["nvidia-smi", "--query-compute-apps=gpu_uuid", "--format=csv"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        encoding="ascii",
+        check=True,
+    )
+    visible_gpu = []
+    for gpu in nv_uuid:
+        id_idx = gpu.find("GPU ")
+        uuid_idx = gpu.find("UUID")
+
+        gpu_id = gpu[id_idx + 4 : id_idx + 6].strip(" ").strip(":")
+        gpu_uuid = gpu[uuid_idx + 5 : -1].strip(" ")
+
+        # discard the GPU hosting a process
+        if gpu_uuid not in nv_processes.stdout.split("\n"):
+            visible_gpu.append(gpu_id)
+
+    if not visible_gpu:
+        self.logObj.logger.critical(
+            f"{len(nv_uuid)} GPU detected, but none of them is free.",
+        )
+        raise ValueError(
+            f"Error in metadata._get_gpu_from_nvidia_smi: {len(nv_uuid)} GPU detected, "
+            "but none of them is free."
+        )
+    return visible_gpu
 
 
 @magicgui(
@@ -76,6 +141,19 @@ def run_previewer(
 ):
     log_general = logMod.Logger(name="general", log_path="o2r_general.log")
     log_general.logger.info("Ot2Rec-Previewer started.")
+
+    # Check that motioncor2 and AreTomo and IMOD are on the path
+    if shutil.which("MotionCor2_1.4.0_Cuda110") is None:
+        raise ImportError(
+            "MotionCor2_1.4.0_Cuda110 unavailable, try module load motioncor2"
+        )
+    if shutil.which(aretomo_path) is None:
+        raise ImportError(f"{aretomo_path} is not available, try module load aretomo")
+    if shutil.which("imod") is None:
+        raise ImportError(f"IMOD is unavailable, try module load imod")
+    visible_gpu = _get_gpu_nvidia_smi()
+    if len(visible_gpu) < 1:
+        raise RuntimeError("GPU unavailable so motioncor cannot proceed. Aborting now.")
 
     # Rename files according to mdocs
     rename.rename_all(
@@ -141,8 +219,8 @@ def run_previewer(
     at_params.aretomo_mode = 2
     at_params.pixel_size = meta.acquisition["pixel_spacing"]
     at_params.rot_angle = meta.acquisition["rotation_angle"]
-    at_params.input_mrc_folder = Path("./AreTomo")
-    at_params.input_ext = "st"
+    at_params.input_mrc_folder = Path("./aretomo")
+    at_params.input_ext = ".st"
     at_params.sample_thickness = tomogram_thickness
     at_params.output_binning = binning
     at_params.aretomo_path = str(aretomo_path)
@@ -178,6 +256,11 @@ def run_previewer(
         o2r_report.Choices.aretomo_align,
         o2r_report.Choices.aretomo_recon,
     ]
+    ot2rec_report_args.notes.value = f"""
+    This version of Ot2Rec: {version('Ot2Rec')}
+    MotionCor2 version: MotionCor2_1.4.0_Cuda110
+    AreTomo version: {aretomo_path}
+    """
     ot2rec_report_args.to_slides.value = True
     ot2rec_report_args.to_html.value = True
 

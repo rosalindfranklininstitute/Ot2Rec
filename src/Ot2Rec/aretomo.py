@@ -96,7 +96,7 @@ class AreTomo:
         )
         for i, curr_ts in enumerate(self.params["System"]["process_list"]):
             subfolder = (
-                f"{self.basis_folder}/" f"{self.rootname}_{curr_ts}{self.suffix}"
+                f"{self.basis_folder}/" f"{self.rootname}_{curr_ts:03}{self.suffix}"
             )
             os.makedirs(subfolder, exist_ok=True)
             # self._path_dict[curr_ts] = subfolder
@@ -304,15 +304,18 @@ def _update_volz(args, aretomo_params):
 def _create_stacks_with_imod(args):
     # Uses align to create the InMrc and AngFile in correct form
     try:
-        args_in_align = imod_newstack_MGUI.get_args_align(return_only=True)
-        args_in_align.project_name.value = args["project_name"]
-        args_in_align.rot_angle.value = args["rot_angle"]
-        args_in_align.output_folder.value = args["output_path"]
-        align.create_yaml(args_in=args_in_align)
-        align.run(newstack=True, do_align=False, args_pass=[args["project_name"]])
+        args_in_align = asObject(imod_newstack_MGUI.get_args_align(return_only=True))
+        args_in_align.project_name = args["project_name"]
+        args_in_align.rot_angle = args["rot_angle"]
+        args_in_align.output_folder = args["output_path"]
+        args_in_align.pixel_size = args["pixel_size"]
+        args_in_align.file_ext = "st"
+        prmMod.new_align_yaml(args_in_align)
+        align.update_yaml(args_in_align, None)
+        align.run(newstack=True, do_align=False, args_in=args_in_align, exclusive=False)
         print("Created stacks for input to AreTomo")
     except:
-        warnings.warn("Stacks could not be created, IMOD might not be loaded")
+        raise ImportError("Stacks could not be created, IMOD might not be loaded")
 
 
 def _find_files_with_ext(ext, rootname, suffix, directory):
@@ -338,13 +341,14 @@ def _get_yaml_filename(aretomo_mode, project_name):
 def _get_process_list(file_list, rootname, suffix, ext):
     ts_list = []
     for st in file_list:
-        st_bn = os.path.basename(st)
-        if suffix != "":
-            ts_list.append(
-                int(st_bn.split(f"{rootname}_")[1].split(f"_{suffix}{ext}")[0][:-1])
-            )
-        else:
-            ts_list.append(int(st_bn.split(f"{rootname}_")[1].split(ext)[0][:-1]))
+        st_bn = os.path.splitext(os.path.basename(st))[0]
+        # if suffix != "":
+        #     ts_list.append(
+        #         # int(st_bn.split(f"{rootname}_")[1].split(f"_{suffix}{ext}")[0][:-1])
+        #     )
+        # else:
+        #     ts_list.append(int(st_bn.split(f"{rootname}_")[1].split(ext)[0][:-1]))
+        ts_list.append(int(st_bn.split("_")[-1]))
     return ts_list
 
 
@@ -427,8 +431,8 @@ def update_yaml(args):
         out_file_list = [
             (
                 f"{aretomo_params.params['System']['output_path']}/"
-                f"{rootname}_{curr_ts}{suffix}/"
-                f"{rootname}_{curr_ts}{suffix}{ext}"
+                f"{rootname}_{curr_ts:03}{suffix}/"
+                f"{rootname}_{curr_ts:03}{suffix}{ext}"
             )
             for curr_ts in ts_list
         ]
