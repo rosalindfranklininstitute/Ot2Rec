@@ -237,8 +237,8 @@ class AreTomo:
                 f"{os.path.splitext(os.path.basename(output_mrc))[0]}_Imod/"
             )
 
-        self.logObj(f"\nStdOut:{aretomo_run.stdout}\n")
-        self.logObj(f"\nStdErr:{aretomo_run.stderr}\n")
+        self.logObj.logger.info(f"\nStdOut:{aretomo_run.stdout}\n")
+        self.logObj.logger.info(f"\nStdErr:{aretomo_run.stderr}\n")
 
     def run_aretomo_all(self):
         """
@@ -260,7 +260,7 @@ class AreTomo:
             for ts in list(self.sta.keys()):
                 sta_ts_folder = f"{self.sta_folder}/{self.sta[ts].split(os.sep)[-2]}"
                 if os.path.exists(sta_ts_folder):
-                    self.logObj(f"STA folder {sta_ts_folder} not empty, overwriting.")
+                    self.logObj.logger.warning(f"STA folder {sta_ts_folder} not empty, overwriting.")
                     shutil.rmtree(sta_ts_folder)
                 shutil.move(
                     src=self.sta[ts],

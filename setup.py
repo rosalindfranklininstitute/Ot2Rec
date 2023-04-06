@@ -36,6 +36,7 @@ setup(
         "scikit-image",
         "mrcfile",
         "tifffile",
+        "xmltodict",
         "redlionfish",
         "magicgui",
         "pyqt5",

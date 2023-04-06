@@ -84,7 +84,8 @@ def get_args_new_proj(
     OUTPUTs:
     Namespace
     """
-    logger = logMod.Logger(log_path="new_proj.log")
+    log_import = logMod.Logger(name="import",
+                               log_path="new_proj.log")
     args = asObject(locals())
 
     if return_only:
@@ -109,6 +110,6 @@ def get_args_new_proj(
     with open(acqui_md_name, "w") as g:
         yaml.dump(meta.acquisition, g, indent=4)
 
-    logger(level="info", message="Master metadata file created.")
+    log_import.logger.info("Master metadata file created.")
 
     return locals()
