@@ -104,9 +104,10 @@ class AreTomo:
                 self.md_out["aretomo_output_dir"] = {}
                 self.md_out["aretomo_align_stats"] = {}
             self.md_out["aretomo_output_dir"][curr_ts] = subfolder
-            input_img_name = os.path.splitext(
-                os.path.basename(self.params["AreTomo_setup"]["input_mrc"][i])
-            )[0]
+            input_img_name = os.path.basename(
+                self.params["AreTomo_setup"]["input_mrc"][i]
+            )
+
             self.md_out["aretomo_align_stats"][
                 curr_ts
             ] = f"{subfolder}/{input_img_name}.aln"
