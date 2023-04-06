@@ -257,7 +257,7 @@ class Align:
         Method to create stack file for a given tilt-series.
         """
         # Add log entry when job starts
-        self.logObj("Ot2Rec-align (IMOD) started: newstack.")
+        self.logObj.logger.info("Ot2Rec-align (IMOD) started: newstack.")
 
         error_count = 0
         tqdm_iter = tqdm(self._process_list, ncols=100)
@@ -307,9 +307,8 @@ class Align:
                 assert not run_newstack.stderr
             except:
                 error_count += 1
-                self.logObj(
-                    level="error",
-                    message="newstack: An error has occurred ({run_newstack.returncode}) on stack{curr_ts}.",
+                self.logObj.logger.error(
+                    "newstack: An error has occurred ({run_newstack.returncode}) on stack{curr_ts}.",
                 )
 
             self.stdout = run_newstack.stdout
@@ -317,11 +316,10 @@ class Align:
             self.export_metadata()
 
         if error_count == 0:
-            self.logObj("All Ot2Rec-align (IMOD): newstack jobs successfully finished.")
+            self.logObj.logger.info("All Ot2Rec-align (IMOD): newstack jobs successfully finished.")
         else:
-            self.logObj(
-                level="warning",
-                message="All Ot2Rec-align (IMOD): newstack jobs finished. {error_count} of {len(tqdm_iter)} jobs failed.",
+            self.logObj.logger.warning(
+                "All Ot2Rec-align (IMOD): newstack jobs finished. {error_count} of {len(tqdm_iter)} jobs failed.",
             )
 
     """
@@ -596,23 +594,29 @@ def create_yaml(args_in=None):
     mgMod.get_args_align.show(run=True)
 
 
-def update_yaml(args, logger):
+def update_yaml(args, logger=None):
     """
     Subroutine to update yaml file for IMOD newstack / alignment
 
     Args:
         args (Namespace): Namespace generated with user inputs
     """
+    if logger is None:
+        log_align = logMod.Logger(name="imod_align",
+                                  log_path="")
+    else:
+        log_align = logger
+
     # Check if align and motioncorr yaml files exist
     align_yaml_name = args.project_name + "_align.yaml"
     mc2_yaml_name = args.project_name + "_mc2.yaml"
     if not os.path.isfile(align_yaml_name):
-        logger(level="error", message="IMOD alignment config file not found.")
+        log_align.logger.error("IMOD alignment config file not found.")
         raise IOError(
             "Error in Ot2Rec.align.update_yaml: alignment config file not found."
         )
     if not os.path.isfile(mc2_yaml_name):
-        logger(level="error", message="MotionCor2 config file not found.")
+        log_align.logger.error(message="MotionCor2 config file not found.")
         raise IOError(
             "Error in Ot2Rec.align.update__yaml: motioncorr config file not found."
         )
@@ -747,9 +751,9 @@ def run(
     """
     # logger = logMod.Logger(log_path="o2r_imod_align.log")
 
-    logger = logMod.Logger()
+    log_align = logMod.Logger()
     if do_align:
-        logger.log_path = "o2r_imod_align.log"
+        log_align.log_path = "o2r_imod_align.log"
 
     if exclusive:
         parser = argparse.ArgumentParser()
@@ -779,7 +783,7 @@ def run(
         project_name=project_name,
         md_in=mc2_md if not ext else None,
         params_in=align_config,
-        logger_in=logger,
+        logger_in=log_align,
     )
 
     # Run IMOD

@@ -53,7 +53,6 @@ class Logger:
         screen_handler = logging.StreamHandler(stream=sys.stdout)
         screen_handler.setFormatter(formatter)
 
-        print(self.log_path)
         if not logger.hasHandlers():
             logger.addHandler(screen_handler)
 

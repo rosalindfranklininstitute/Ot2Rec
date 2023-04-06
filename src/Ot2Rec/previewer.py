@@ -106,7 +106,6 @@ def run_previewer():
     log_general.logger.info("Motion correction successful.")
 
     time.sleep(2)
-    exit()
 
     # Create stacks (IMOD)
     imod_params = asObject(imodMGUI.get_args_align(return_only=True))
@@ -116,12 +115,12 @@ def run_previewer():
     imod_params.rot_angle = meta.acquisition["rotation_angle"]
     imod_params.output_folder = Path("./stacks/")
 
-    logger = logMod.Logger()
-    logger(level="info", message="Creating stacks for reconstruction...")
+    log_general.logger.info("Image stack creation for reconstruction started.")
 
     prmMod.new_align_yaml(imod_params)
-    alignMod.update_yaml(imod_params, logger)
+    alignMod.update_yaml(imod_params, None)
     alignMod.run(newstack=True, do_align=False, exclusive=False, args_in=imod_params)
+    log_general.logger.info("Image stack creation successful.")
 
     # Alignment + reconstruction (AreTomo)
     at_params_dict = atMGUI.get_args_aretomo(return_only=True)
@@ -136,12 +135,13 @@ def run_previewer():
     at_params.output_binning = user_params.binning
     at_params.aretomo_path = str(user_params.aretomo_path)
 
-    logger = logMod.Logger(log_path="o2r_aretomo_align-recon.log")
+    log_aretomo = logMod.Logger(name="aretomo",
+                                log_path="o2r_aretomo_align-recon.log")
     prmMod.new_aretomo_yaml(at_params)
-    logger(level="info", message="AreTomo metadata file created.")
+    log_aretomo.logger.info("AreTomo metadata file created.")
     atMod.update_yaml(at_params_dict)
 
-    logger(level="info", message="AreTomo processing in progress...")
+    log_general.logger.info("Alignment and reconstruction (AreTomo) started.")
 
     aretomo_config = prmMod.read_yaml(
         project_name=user_params.project_name,
@@ -151,13 +151,16 @@ def run_previewer():
     aretomo_obj = atMod.AreTomo(
         project_name=user_params.project_name,
         params_in=aretomo_config,
-        logger_in=logger,
+        logger_in=log_aretomo,
     )
 
     # Run AreTomo commands
     aretomo_obj.run_aretomo_all()
+    log_general.logger.info("Alignment and reconstruction (AreTomo) successful.")
+
 
     # Run Ot2Rec report
+    log_general.logger.info("Report generation started.")
     ot2rec_report_args = o2r_report.get_args_o2r_report
     ot2rec_report_args.project_name.value = user_params.project_name
     ot2rec_report_args.processes.value = [
@@ -169,3 +172,6 @@ def run_previewer():
     ot2rec_report_args.to_html.value = True
 
     o2r_report.main(args=ot2rec_report_args)
+
+    log_general.logger.info("Report generation successful.")
+    log_general.logger.info("All Ot2Rec-Previewer tasks finished.")

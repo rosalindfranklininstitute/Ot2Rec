@@ -114,7 +114,7 @@ class Motioncorr:
             self.meta_out = self.meta_out[self._merged["_merge"] == "left_only"]
 
             if len(self._missing_specified) > 0:
-                self.logObj(
+                self.logObj.logger.info(
                     f"{len(self._missing_specified)} images in record missing in folder. "
                     "Will be added back for processing."
                 )
@@ -122,11 +122,11 @@ class Motioncorr:
         # Drop the items in input metadata if they are in the output record
         _ignored = self.meta[self.meta.output.isin(self.meta_out.output)]
         if len(_ignored) > 0 and len(_ignored) < len(self.meta):
-            self.logObj(
+            self.logObj.logger.info(
                 f"{len(_ignored)} images had been processed and will be omitted."
             )
         elif len(_ignored) == len(self.meta):
-            self.logObj(
+            self.logObj.logger.info(
                 "All specified images had been processed. Nothing will be done."
             )
             self.no_processes = True
@@ -155,9 +155,8 @@ class Motioncorr:
 
         # catch the visible GPUs
         if nv_uuid.returncode != 0 or nv_processes.returncode != 0:
-            self.logObj(
+            self.logObj.logger.critical(
                 msg=f"nvidia-smi returned an error: {nv_uuid.stderr}",
-                level="critical",
             )
             raise AssertionError(
                 f"Error in Ot2Rec.Motioncorr._get_gpu_from_nvidia_smi: "
@@ -185,9 +184,8 @@ class Motioncorr:
                 visible_gpu.append(gpu_id)
 
         if not visible_gpu:
-            self.logObj(
+            self.logObj.logger.critical(
                 f"{len(nv_uuid)} GPU detected, but none of them is free.",
-                level="critical",
             )
             raise ValueError(
                 f"Error in metadata._get_gpu_from_nvidia_smi: {len(nv_uuid)} GPU detected, "
@@ -321,7 +319,7 @@ class Motioncorr:
             self.update_mc2_metadata()
             self.export_metadata()
 
-        self.logObj("Ot2Rec-MotionCor2 jobs finished.")
+        self.logObj.logger.info("Ot2Rec-MotionCor2 jobs finished.")
 
     def update_mc2_metadata(self):
         """
