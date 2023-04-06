@@ -43,7 +43,7 @@ class asObject(object):
     stack_field={"min": 0, "label": "Stack index field #"},
     index_field={"min": 0, "label": "Image index field #"},
     tiltangle_field={"min": 0, "label": "Tilt angle field #"},
-    thickness={"min": 0, "step": 0.1, "label": "Lamella thickness (in nm)"},
+    thickness={"min": 0, "step": 0.1, "label": "Tomogram thickness (in nm)"},
     binning={"min": 1, "label": "Output tomogram binning factor"},
     aretomo_path={
         "widget_type": "FileEdit",
