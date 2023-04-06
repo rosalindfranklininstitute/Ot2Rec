@@ -127,7 +127,7 @@ def write_md_out(reassigned_names: dict):
         reassigned_names (dict): Mapping of old filenames to new filenames
     """
     with open("./ot2rec_reassigned_names.yaml", "w") as f:
-        yaml.dump(reassigned_names)
+        yaml.dump(reassigned_names, f)
 
 
 @magicgui(

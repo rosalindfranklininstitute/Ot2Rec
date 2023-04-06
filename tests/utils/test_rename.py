@@ -20,6 +20,7 @@ from pathlib import Path
 import shutil
 import mdocfile as mdf
 import glob
+import yaml
 
 
 class RenameTest(unittest.TestCase):
@@ -103,8 +104,11 @@ class RenameTest(unittest.TestCase):
         tmpdir = self._create_expected_folder_structure()
         os.chdir(tmpdir.name)
         rename.write_md_out(self.__class__.reassigned_names)
-        self.assertTrue(os.path.isfile(f"{tmpdir.name}/ot2rec_reassigned_names.yaml"))
 
+        with open(f"{tmpdir.name}/ot2rec_reassigned_names.yaml", "r") as f:
+            saved_names = yaml.load(f, Loader=yaml.FullLoader)
+
+        self.assertDictEqual(saved_names, self.__class__.reassigned_names)
         tmpdir.cleanup()
 
     def test_rename_all(self):
