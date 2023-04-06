@@ -24,7 +24,6 @@ from tqdm import tqdm
 import pandas as pd
 from icecream import ic
 
-from . import user_args as uaMod
 from . import mgui_ctffind as mgMod
 from . import metadata as mdMod
 from . import logger as logMod

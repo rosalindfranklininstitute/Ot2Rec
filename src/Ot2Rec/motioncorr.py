@@ -22,7 +22,6 @@ import yaml
 from tqdm import tqdm
 
 from . import metadata as mdMod
-from . import user_args as uaMod
 from . import mgui_mc2 as mgMod
 from . import logger as logMod
 from . import params as prmMod

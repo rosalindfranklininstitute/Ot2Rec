@@ -27,7 +27,6 @@ from tqdm import tqdm
 import yaml
 from beautifultable import BeautifulTable as bt
 
-from . import user_args as uaMod
 from . import mgui_imod_align as mgMod
 from . import metadata as mdMod
 from . import params as prmMod

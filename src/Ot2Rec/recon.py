@@ -23,7 +23,6 @@ import yaml
 
 from . import metadata as mdMod
 from . import params as prmMod
-from . import user_args as uaMod
 from . import logger as logMod
 from . import mgui_imod_recon as mgMod
 
