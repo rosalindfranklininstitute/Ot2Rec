@@ -13,17 +13,18 @@
 # language governing permissions and limitations under the License.
 
 
+import itertools
+import multiprocessing as mp
 import os
 import re
-import itertools
-from functools import partial
-import multiprocessing as mp
 import subprocess
+from functools import partial
 from glob import glob
+from pathlib import Path
 
-import yaml
 import mdocfile as mdf
 import pandas as pd
+import yaml
 from icecream import ic
 
 from . import params as prmMod
@@ -135,7 +136,7 @@ class Metadata:
         if len(raw_images_list) == 0:
             raise IOError(
                 "Error in Ot2Rec.metadata.Metadata.create_master_metadata: "
-                "No vaild files found using given criteria."
+                "No valid files found using given criteria."
             )
 
         # Find MDOC files and check
@@ -342,6 +343,32 @@ class Metadata:
         self.acquisition["rotation_angle"] = float(mdoc.RotationAngle.unique()[0])
         self.acquisition["voltage"] = float(mdoc.Voltage.unique()[0])
         self.acquisition["image_size"] = list(mdoc.ImageSize.unique()[0])
+
+    def create_master_metadata_from_mdocs(self, mdocs_folder: Path = None):
+        if mdocs_folder is None:
+            mdocs_folder = self.params["mdocs_folder"]
+
+        mdocs_list = glob(f"{mdocs_folder}/*.mdoc")
+        if len(mdocs_list) < 1:
+            raise FileNotFoundError(
+                f"No mdocs found with the search term {mdocs_folder}/*.mdoc"
+            )
+        self.mdocs_paths = mdocs_list
+
+        master_md = {"angles": [], "file_paths": [], "image_idx": [], "ts": []}
+        for mdoc in mdocs_list:
+            mdoc_df = mdf.read(mdoc)
+            ts = os.path.splitext(os.path.basename(mdoc))[0].split("_")[-1]
+            for tilt in range(len(mdoc_df)):
+                master_md["angles"].append(
+                    f"{mdoc_df.iloc[tilt].TiltAngle.astype('int'):.2f}"
+                )
+                master_md["file_paths"].append(str(mdoc_df.iloc[tilt].SubFramePath))
+                master_md["image_idx"].append(str(mdoc_df.iloc[tilt].ZValue + 1))
+                master_md["ts"].append(ts)
+
+        # Dump to yaml
+        self.metadata = master_md
 
 
 def read_md_yaml(
