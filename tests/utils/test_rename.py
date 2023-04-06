@@ -12,15 +12,18 @@
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-import unittest
-from Ot2Rec.utils import rename
-import tempfile
-import os
-from pathlib import Path
-import shutil
-import mdocfile as mdf
 import glob
+import os
+import shutil
+import tempfile
+import unittest
+from pathlib import Path
+
+import mdocfile as mdf
 import yaml
+from mdocfile.mdoc import Mdoc
+
+from Ot2Rec.utils import rename
 
 
 class RenameTest(unittest.TestCase):
@@ -75,6 +78,32 @@ class RenameTest(unittest.TestCase):
         )
 
         tmpdir.cleanup()
+
+    def test_update_datetime_mdocs_for_warp(self):
+        mdoc_obj = Mdoc.from_file(
+            f"{os.path.dirname(os.path.dirname(__file__))}/template_yamls/Position_1_2.mdoc"
+        )
+        new_mdoc_obj = rename.update_datetime_mdocs_for_warp(
+            mdoc_obj=mdoc_obj,
+        )
+
+        self.assertEqual(new_mdoc_obj.section_data[0].DateTime, "23-Mar-24 12:13:13")
+
+    def test_update_mdocs_with_warp_date(self):
+        tmpdir = self._create_expected_folder_structure()
+        rename.update_mdocs(
+            mdocs=[
+                f"{tmpdir.name}/Position_1_2.mdoc",
+                f"{tmpdir.name}/Position_10.mdoc",
+            ],
+            new_mdocs_directory=f"{tmpdir.name}/ot2rec_mdocs",
+            micrograph_directory=f"{tmpdir.name}/raw",
+            reassigned_names=self.__class__.reassigned_names,
+            update_dates_for_warp=True,
+        )
+
+        mdoc_df = mdf.read(f"{tmpdir.name}/ot2rec_mdocs/Position_001.mdoc")
+        self.assertEqual(mdoc_df.iloc[0].DateTime, "23-Mar-24 12:13:13")
 
     def test_update_mdocs(self):
         tmpdir = self._create_expected_folder_structure()

@@ -15,13 +15,14 @@
 import glob
 import os
 import re
+from datetime import datetime
 from pathlib import Path
 
 import mdocfile as mdf
 import yaml
+from magicgui import magicgui
 from mdocfile.mdoc import Mdoc
 
-from magicgui import magicgui
 from Ot2Rec import logger as logMod
 
 
@@ -74,11 +75,47 @@ def rename_files(directory: Path, reassigned_names: dict):
         os.rename(src=os.path.join(directory, src), dst=os.path.join(directory, dst))
 
 
+def update_datetime_mdocs_for_warp(
+    mdoc_obj: Mdoc, logger: logMod.Logger = None
+) -> Mdoc:
+    """Reconfigure dates in mdocs from dd-mmm-yyyy to yy-mmm-dd expected by Warp
+
+    Args:
+        mdoc_obj (Mdoc): mdoc object containing information from mdoc
+        logger (Logger, optional): logger object, Defaults to None
+    """
+    for tilt in range(len(mdoc_obj.section_data)):
+        try:
+            date_from_mdoc = mdoc_obj.section_data[tilt].DateTime
+            date_str = datetime.strptime(date_from_mdoc, "%d-%b-%Y %H:%M:%S")
+        except ValueError:
+            if logger is not None:
+                logger(
+                    level="warning",
+                    message=f"""
+                    Could not parse date {date_from_mdoc} to Warp format yy-mmm-dd HH:MM:SS.
+                    Is the date in the format dd-mmm-yy HH:MM:SS?
+                    """,
+                )
+                pass
+
+        date_to_mdoc = date_str.strftime("%y-%b-%d %H:%M:%S")
+        mdoc_obj.section_data[tilt].DateTime = date_to_mdoc
+
+    if logger is not None:
+        logger(
+            level="info", message="Updated datetime to Warp format yy-mmm-dd HH:MM:SS."
+        )
+    return mdoc_obj
+
+
 def update_mdocs(
     mdocs: list,
     new_mdocs_directory: Path,
     micrograph_directory: Path,
     reassigned_names: dict,
+    update_dates_for_warp: bool = False,
+    logger: logMod.Logger = None,
 ):
     """Create new mdocs with new filenames
 
@@ -99,9 +136,16 @@ def update_mdocs(
         micrograph_directory (Path): Directory where raw micrographs are. Used
             to write absolute paths in the new mdocs
         reassigned_names (dict): Mapping of old filenames to new filenames
+        update_dates_for_warp (bool, optional): If True, change dates to yy-mmm-dd. Defaults to False.
+        logger (Logger, optional): logger object, Defaults to None
     """
     if os.path.isdir(new_mdocs_directory) is False:
         Path(new_mdocs_directory).mkdir(exist_ok=True)
+        if logger is not None:
+            logger(
+                level="info",
+                message=f"Created new mdocs directory {os.path.abspath(new_mdocs_directory)}",
+            )
     for mdoc in mdocs:
         mdoc_obj = Mdoc.from_file(mdoc)
 
@@ -115,6 +159,9 @@ def update_mdocs(
         proj_name = last_micrograph_split[0]
         ts_index = last_micrograph_split[1]
         new_mdoc = f"{proj_name}_{ts_index:03}.mdoc"
+
+        if update_dates_for_warp is True:
+            update_datetime_mdocs_for_warp(mdoc_obj=mdoc_obj, logger=logger)
 
         with open(f"{new_mdocs_directory}/{new_mdoc}", "w") as f:
             f.write(mdoc_obj.to_string())
@@ -143,6 +190,7 @@ def write_md_out(reassigned_names: dict):
         "label": "Directory where raw micrographs are stored*",
         "mode": "d",
     },
+    update_dates_for_warp={"label": "Convert mdoc dates to yy-mmm-dd for Warp?"},
     message={
         "widget_type": "Label",
         "label": """
@@ -152,7 +200,12 @@ def write_md_out(reassigned_names: dict):
     """,
     },
 )
-def rename_all(mdocs_directory: Path, micrograph_directory: Path, message: str = ""):
+def rename_all(
+    mdocs_directory: Path,
+    micrograph_directory: Path,
+    update_dates_for_warp=False,
+    message: str = "",
+):
     """Renames microraphs and mdocs to an Ot2Rec-friendly filenaming pattern
     and save updated mdocs in a new directory `ot2rec_mdocs`.
 
@@ -166,6 +219,7 @@ def rename_all(mdocs_directory: Path, micrograph_directory: Path, message: str =
     Args:
         mdocs_directory (Path): Original directory containing mdocs
         micrograph_directory (Path): Directory containing raw micrographs
+        update_dates_for_warp (bool, Optional): Updates mdoc dates to Warp formatting yy-mmm-dd. Defaults to False.
         message (str): Dummy variable required to print the help message
     """
     logger = logMod.Logger(log_path="./o2r_rename.log")
@@ -179,7 +233,14 @@ def rename_all(mdocs_directory: Path, micrograph_directory: Path, message: str =
     rename_files(micrograph_directory, reassigned_names)
     logger(level="info", message=f"Renamed {len(reassigned_names)} files")
 
-    update_mdocs(mdocs_list, "./ot2rec_mdocs", micrograph_directory, reassigned_names)
+    update_mdocs(
+        mdocs_list,
+        "./ot2rec_mdocs",
+        micrograph_directory,
+        reassigned_names,
+        update_dates_for_warp,
+        logger,
+    )
     logger(level="info", message="Updated mdocs now saved in ./ot2rec_mdocs")
 
     write_md_out(reassigned_names)
