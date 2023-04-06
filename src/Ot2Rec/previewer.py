@@ -185,3 +185,7 @@ def run_previewer(
 
     log_general.logger.info("Report generation successful.")
     log_general.logger.info("All Ot2Rec-Previewer tasks finished.")
+
+
+def run_previewer_with_mgui():
+    run_previewer.show(run=True)

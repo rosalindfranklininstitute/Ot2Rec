@@ -70,7 +70,7 @@ setup(
             "o2r.deconv.run=Ot2Rec.rlf_deconv:run",
             "o2r.cleanup=Ot2Rec.main:cleanup",
             "o2r.runall.imod=Ot2Rec.main:run_all_imod",
-            "o2r.previewer=Ot2Rec.previewer:run_previewer",
+            "o2r.previewer=Ot2Rec.previewer:run_previewer_with_mgui",
             "o2r.rename=Ot2Rec.utils.rename:rename_all_with_mgui",
         ]
     },
