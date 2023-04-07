@@ -31,6 +31,7 @@ import pandas as pd
 from icecream import ic
 
 from . import params as prmMod
+from .prog_bar import *
 
 
 class Metadata:
@@ -304,36 +305,37 @@ class Metadata:
         df["ds_factor"] = None
         df["frame_dose"] = None
 
-        tqdm_iter = tqdm(list(set(df.ts)), ncols=100)
-        for curr_ts in tqdm_iter:
-            mdoc_path = (
-                f"{base_folder}/{self.params['file_prefix']}_" + str(curr_ts) + ".mdoc"
-            )
-            mdoc = mdf.read(mdoc_path)
-            ts_dose_dict = self.get_ts_dose(mdoc_path, 1)
+        with prog_bar as p:
+            clear_tasks(p)
+            for curr_ts in p.track(list(set(df.ts))):
+                mdoc_path = (
+                    f"{base_folder}/{self.params['file_prefix']}_" + str(curr_ts) + ".mdoc"
+                )
+                mdoc = mdf.read(mdoc_path)
+                ts_dose_dict = self.get_ts_dose(mdoc_path, 1)
 
-            ts_image_list = df[df["ts"] == curr_ts]["file_paths"].to_list()
-            ts_image_idx_list = df[df["ts"] == curr_ts]["image_idx"].to_list()
-            ts_num_frame_list = self.get_num_frames_parallel(
-                func=self.get_num_frames,
-                filelist=ts_image_list,
-            )
+                ts_image_list = df[df["ts"] == curr_ts]["file_paths"].to_list()
+                ts_image_idx_list = df[df["ts"] == curr_ts]["image_idx"].to_list()
+                ts_num_frame_list = self.get_num_frames_parallel(
+                    func=self.get_num_frames,
+                    filelist=ts_image_list,
+                )
 
-            for curr_idx in ts_image_idx_list:
-                nf, dsf = ts_num_frame_list[curr_idx - 1]
-                df.loc[
-                    (df.ts == curr_ts) & (df.image_idx == curr_idx), "num_frames"
-                ] = nf
-                df.loc[
-                    (df.ts == curr_ts) & (df.image_idx == curr_idx), "ds_factor"
-                ] = dsf
-                df.loc[
-                    (df.ts == curr_ts) & (df.image_idx == curr_idx), "frame_dose"
-                ] = (ts_dose_dict[curr_idx] / nf)
+                for curr_idx in ts_image_idx_list:
+                    nf, dsf = ts_num_frame_list[curr_idx - 1]
+                    df.loc[
+                        (df.ts == curr_ts) & (df.image_idx == curr_idx), "num_frames"
+                    ] = nf
+                    df.loc[
+                        (df.ts == curr_ts) & (df.image_idx == curr_idx), "ds_factor"
+                    ] = dsf
+                    df.loc[
+                        (df.ts == curr_ts) & (df.image_idx == curr_idx), "frame_dose"
+                    ] = (ts_dose_dict[curr_idx] / nf)
 
-        self.metadata["num_frames"] = df.num_frames.to_list()
-        self.metadata["ds_factor"] = df.ds_factor.to_list()
-        self.metadata["frame_dose"] = df.frame_dose.to_list()
+            self.metadata["num_frames"] = df.num_frames.to_list()
+            self.metadata["ds_factor"] = df.ds_factor.to_list()
+            self.metadata["frame_dose"] = df.frame_dose.to_list()
 
 
     def get_acquisition_settings(self):

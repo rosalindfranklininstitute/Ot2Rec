@@ -21,6 +21,7 @@ import pandas as pd
 import yaml
 from tqdm import tqdm
 
+from .prog_bar import (prog_bar, clear_tasks)
 from . import metadata as mdMod
 from . import user_args as uaMod
 from . import mgui_mc2 as mgMod
@@ -285,39 +286,37 @@ class Motioncorr:
         self.logObj.logger.info("Ot2Rec-MotionCor2 started.")
 
         # Process tilt-series one at a time
-        ts_list = self.params["System"]["process_list"]
-        tqdm_iter = tqdm(self.meta.iterrows(), total=self.meta.shape[0], ncols=100)
-        for idx, curr_image in tqdm_iter:
-            curr_ts = self.meta.ts[idx]
-            tqdm_iter.set_description(f"Processing TS {curr_ts}...")
-            self._curr_meta = curr_image
+        with prog_bar as p:
+            clear_tasks(p)
+            for curr_image in p.track(self.meta.itertuples(), total=len(self.meta)):
+                self._curr_meta = curr_image
 
-            file_in = self._curr_meta.file_paths
-            file_out = self._curr_meta.output
-            gpu = self._curr_meta.gpu
+                file_in = self._curr_meta.file_paths
+                file_out = self._curr_meta.output
+                gpu = self._curr_meta.gpu
 
-            # Get commands to run MC2
-            if self._dose_data_present:
-                frame = self._curr_meta.num_frames
-                ds = self._curr_meta.ds_factor
-                dose = self._curr_meta.frame_dose
+                # Get commands to run MC2
+                if self._dose_data_present:
+                    frame = self._curr_meta.num_frames
+                    ds = self._curr_meta.ds_factor
+                    dose = self._curr_meta.frame_dose
 
-                cmd = self._get_command((file_in, file_out, gpu), (frame, ds, dose))
+                    cmd = self._get_command((file_in, file_out, gpu), (frame, ds, dose))
 
-            else:
-                cmd = self._get_command((file_in, file_out, gpu))
+                else:
+                    cmd = self._get_command((file_in, file_out, gpu))
 
-            job = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            )
-            try:
-                assert job.returncode is None
-            except:
-                self.logObj.logger.warning("Ot2Rec-MotionCor2 job failed.")
+                job = subprocess.Popen(
+                    cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+                )
+                try:
+                    assert job.returncode is None
+                except:
+                    self.logObj.logger.warning("Ot2Rec-MotionCor2 job failed.")
 
-            self.log.append(job.communicate()[0].decode("UTF-8"))
-            self.update_mc2_metadata()
-            self.export_metadata()
+                self.log.append(job.communicate()[0].decode("UTF-8"))
+                self.update_mc2_metadata()
+                self.export_metadata()
 
         self.logObj.logger.info("Ot2Rec-MotionCor2 jobs finished.")
 
