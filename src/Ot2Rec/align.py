@@ -32,6 +32,7 @@ from . import mgui_imod_align as mgMod
 from . import metadata as mdMod
 from . import params as prmMod
 from . import logger as logMod
+from .prog_bar import *
 
 
 class Align:
@@ -260,66 +261,66 @@ class Align:
         self.logObj.logger.info("Ot2Rec-align (IMOD) started: newstack.")
 
         error_count = 0
-        tqdm_iter = tqdm(self._process_list, ncols=100)
-        for curr_ts in tqdm_iter:
-            tqdm_iter.set_description(f"Creating stack for TS {curr_ts}...")
+        with prog_bar as p:
+            clear_tasks(p)
+            for curr_ts in p.track(self._process_list,
+                                   total=len(self._process_list)):
+                # Define path where the new stack file should go
+                stack_file = self._align_images[self._align_images["ts"] == curr_ts][
+                    "stack_output"
+                ].values[0]
 
-            # Define path where the new stack file should go
-            stack_file = self._align_images[self._align_images["ts"] == curr_ts][
-                "stack_output"
-            ].values[0]
+                # Sort the filtered metadata
+                # Metadata is fetched in the _sort_tilt_angles method
+                meta_ts = self._sort_tilt_angles(curr_ts)
 
-            # Sort the filtered metadata
-            # Metadata is fetched in the _sort_tilt_angles method
-            meta_ts = self._sort_tilt_angles(curr_ts)
+                # Create template for newstack
+                self._filename_fileinlist = (
+                    f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}"
+                    f"_{curr_ts}{self.params['System']['output_suffix']}_sources.txt"
+                )
+                self._stack_template = (
+                    f"{len(meta_ts)}\n" + "\n0\n".join(meta_ts["output"]) + "\n0\n"
+                )
+                with open(self._filename_fileinlist, "w") as f:
+                    f.write(self._stack_template)
 
-            # Create template for newstack
-            self._filename_fileinlist = (
-                f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}"
-                f"_{curr_ts}{self.params['System']['output_suffix']}_sources.txt"
-            )
-            self._stack_template = (
-                f"{len(meta_ts)}\n" + "\n0\n".join(meta_ts["output"]) + "\n0\n"
-            )
-            with open(self._filename_fileinlist, "w") as f:
-                f.write(self._stack_template)
+                # Define command for running newstack
+                cmd = [
+                    "newstack",
+                    "-fileinlist",
+                    self._filename_fileinlist,
+                    "-output",
+                    stack_file,
+                    "-bin",
+                    str(self.params["BatchRunTomo"]["setup"]["stack_bin_factor"]),
+                ]
 
-            # Define command for running newstack
-            cmd = [
-                "newstack",
-                "-fileinlist",
-                self._filename_fileinlist,
-                "-output",
-                stack_file,
-                "-bin",
-                str(self.params["BatchRunTomo"]["setup"]["stack_bin_factor"]),
-            ]
-
-            # Run newstack to create stack
-            run_newstack = subprocess.run(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                check=True,
-            )
-
-            try:
-                assert not run_newstack.stderr
-            except:
-                error_count += 1
-                self.logObj.logger.error(
-                    "newstack: An error has occurred ({run_newstack.returncode}) on stack{curr_ts}.",
+                # Run newstack to create stack
+                run_newstack = subprocess.run(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    check=True,
                 )
 
-            self.stdout = run_newstack.stdout
-            self.update_align_metadata(ext=False)
-            self.export_metadata()
+                try:
+                    assert not run_newstack.stderr
+                except:
+                    error_count += 1
+                    self.logObj.logger.error(
+                        "newstack: An error has occurred ({run_newstack.returncode}) on stack{curr_ts}.",
+                    )
+
+                self.stdout = run_newstack.stdout
+                self.update_align_metadata(ext=False)
+                self.export_metadata()
 
         if error_count == 0:
             self.logObj.logger.info("All Ot2Rec-align (IMOD): newstack jobs successfully finished.")
         else:
             self.logObj.logger.warning(
-                "All Ot2Rec-align (IMOD): newstack jobs finished. {error_count} of {len(tqdm_iter)} jobs failed.",
+                "All Ot2Rec-align (IMOD): newstack jobs finished. {error_count} of {len(self._process_list)} jobs failed.",
             )
 
     """

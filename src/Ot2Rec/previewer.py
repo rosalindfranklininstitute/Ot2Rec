@@ -24,6 +24,7 @@ from ot2rec_report import main as o2r_report
 
 import yaml
 
+from .prog_bar import *
 from . import logger as logMod
 from . import metadata as mdMod
 from . import params as prmMod
@@ -175,3 +176,5 @@ def run_previewer():
 
     log_general.logger.info("Report generation successful.")
     log_general.logger.info("All Ot2Rec-Previewer tasks finished.")
+
+    clear_tasks(prog_bar)
