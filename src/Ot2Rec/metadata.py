@@ -229,26 +229,35 @@ class Metadata:
             angles=self.tilt_angles,
         )
 
-    @staticmethod
-    def get_num_frames(file_path, target_nframes=15):
-        with tf(file_path) as f:
-            tag = f.pages[0].tags['65001']
-            data = tag.value.decode('UTF-8')
+    def get_num_frames(self, file_path, target_nframes=15):
+        if self.params['filetype'] == "eer":
+            with tf(file_path) as f:
+                tag = f.pages[0].tags['65001']
+                data = tag.value.decode('UTF-8')
 
-        parsed = x2d.parse(data)
-        metadata = dict()
-        for item in parsed["metadata"]["item"]:
-            key = item["@name"]
-            value = item["#text"]
-            metadata[key] = value
+            parsed = x2d.parse(data)
+            metadata = dict()
+            for item in parsed["metadata"]["item"]:
+                key = item["@name"]
+                value = item["#text"]
+                metadata[key] = value
 
-            try:
-                unit = item["@unit"]
-                metadata[f"{key}.unit"] = unit
-            except:
-                pass
+                try:
+                    unit = item["@unit"]
+                    metadata[f"{key}.unit"] = unit
+                except:
+                    pass
 
-        nframes = int(metadata["numberOfFrames"])
+            nframes = int(metadata["numberOfFrames"])
+        else:
+            command = ['header', file_path]
+            text = subprocess.run(command, capture_output=True, check=True)
+            text_split = str(text.stdout).split('\\n')
+            r = re.compile(r'\s*Number')
+            line = list(filter(r.match, text_split))[0].lstrip()
+
+            nframes = int(re.split(r'\s+', line)[-1])
+
         sampling = max(1, nframes // target_nframes)
 
         return [nframes, sampling]
