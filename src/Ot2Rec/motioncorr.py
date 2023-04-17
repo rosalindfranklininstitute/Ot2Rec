@@ -196,11 +196,17 @@ class Motioncorr:
         """
         Subroutine to set output path for motioncorr'd images
         """
-        self.meta["output"] = self.meta.apply(
-            lambda row: f"{self.params['System']['output_path']}/"
-            f"{self.params['System']['output_prefix']}_{row['ts']}_{row['angles']}.mrc",
-            axis=1,
-        )
+        # self.meta["output"] = self.meta.apply(
+        #     lambda row: f"{self.params['System']['output_path']}/"
+        #     f"{self.params['System']['output_prefix']}_{row['ts']}_{row['angles']}.mrc",
+        #     axis=1,
+        # )
+        output_files = []
+        for file in self.meta["file_paths"]:
+            output_files.append(
+                f"{self.params['System']['output_path']}/{os.path.splitext(os.path.basename(file))[0]}.mrc"
+            )
+        self.meta["output"] = output_files
 
     def _get_command(self, image, extra_info=None):
         """
@@ -367,8 +373,7 @@ def update_yaml(args):
     Args:
         args (Namespace) : Arguments obtained from user
     """
-    log_mc2 = logMod.Logger(name="mc2",
-                            log_path="o2r_motioncor2.log")
+    log_mc2 = logMod.Logger(name="mc2", log_path="o2r_motioncor2.log")
 
     # Check if MC2 yaml exists
     mc2_yaml_name = args.project_name + "_mc2.yaml"
@@ -430,8 +435,7 @@ def run(exclusive=True, args_in=None):
     """
     Method to run motioncorr
     """
-    log_mc2 = logMod.Logger(name="mc2",
-                            log_path="o2r_motioncor2.log")
+    log_mc2 = logMod.Logger(name="mc2", log_path="o2r_motioncor2.log")
 
     if exclusive:
         parser = argparse.ArgumentParser()
@@ -461,7 +465,10 @@ def run(exclusive=True, args_in=None):
 
     # Create Motioncorr object
     mc2_obj = Motioncorr(
-        project_name=project_name, mc2_params=mc2_config, md_in=master_md, logger=log_mc2
+        project_name=project_name,
+        mc2_params=mc2_config,
+        md_in=master_md,
+        logger=log_mc2,
     )
 
     if not mc2_obj.no_processes:
