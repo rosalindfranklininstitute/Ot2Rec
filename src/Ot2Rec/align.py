@@ -27,7 +27,6 @@ from tqdm import tqdm
 import yaml
 from beautifultable import BeautifulTable as bt
 
-from . import user_args as uaMod
 from . import mgui_imod_align as mgMod
 from . import metadata as mdMod
 from . import params as prmMod
@@ -91,7 +90,7 @@ class Align:
             columns=["ts", "stack_output", "align_output"]
         )
         for curr_ts in self.params["System"]["process_list"]:
-            subfolder_name = f"{self.rootname}_{curr_ts}{self.suffix}"
+            subfolder_name = f"{self.rootname}_{curr_ts:03}{self.suffix}"
             _to_append = pd.DataFrame(
                 {
                     "ts": [curr_ts],
@@ -167,8 +166,11 @@ class Align:
 
         self._merged = self._align_images.merge(_ignored, how="left", indicator=True)
         self._align_images = self._align_images[self._merged["_merge"] == "left_only"]
-        self._process_list = (
-            self._align_images["ts"].sort_values(ascending=True).unique().tolist()
+        # self._process_list = (
+        #     self._align_images["ts"].sort_values(ascending=True).unique().tolist()
+        # )
+        self._process_list = sorted(
+            list(self._align_images["ts"].unique().astype("int"))
         )
 
     """
@@ -201,7 +203,7 @@ class Align:
         else:
             for curr_ts in self._process_list:
                 subfolder_path = (
-                    f"{self.basis_folder}/{self.rootname}_{curr_ts}{self.suffix}"
+                    f"{self.basis_folder}/{self.rootname}_{curr_ts:03}{self.suffix}"
                 )
                 os.makedirs(subfolder_path, exist_ok=True)
                 self._path_dict[curr_ts] = subfolder_path
@@ -239,7 +241,7 @@ class Align:
             # Define path where the new rawtlt file should go
             rawtlt_file = (
                 f"{self._path_dict[curr_ts]}/{self.params['System']['output_rootname']}_"
-                f"{curr_ts}{self.params['System']['output_suffix']}.rawtlt"
+                f"{curr_ts:03}{self.params['System']['output_suffix']}.rawtlt"
             )
 
             # Sort the filtered metadata
@@ -316,7 +318,9 @@ class Align:
             self.export_metadata()
 
         if error_count == 0:
-            self.logObj.logger.info("All Ot2Rec-align (IMOD): newstack jobs successfully finished.")
+            self.logObj.logger.info(
+                "All Ot2Rec-align (IMOD): newstack jobs successfully finished."
+            )
         else:
             self.logObj.logger.warning(
                 "All Ot2Rec-align (IMOD): newstack jobs finished. {error_count} of {len(tqdm_iter)} jobs failed.",
@@ -602,8 +606,7 @@ def update_yaml(args, logger=None):
         args (Namespace): Namespace generated with user inputs
     """
     if logger is None:
-        log_align = logMod.Logger(name="imod_align",
-                                  log_path="")
+        log_align = logMod.Logger(name="imod_align", log_path="")
     else:
         log_align = logger
 
@@ -616,7 +619,7 @@ def update_yaml(args, logger=None):
             "Error in Ot2Rec.align.update_yaml: alignment config file not found."
         )
     if not os.path.isfile(mc2_yaml_name):
-        log_align.logger.error(message="MotionCor2 config file not found.")
+        log_align.logger.error("MotionCor2 config file not found.")
         raise IOError(
             "Error in Ot2Rec.align.update__yaml: motioncorr config file not found."
         )
@@ -659,7 +662,9 @@ def update_yaml(args, logger=None):
         project_name=args.project_name, filename=mc2_yaml_name
     )
 
-    align_params.params["System"]["process_list"] = unique_ts_numbers
+    align_params.params["System"]["process_list"] = [
+        int(ts) for ts in unique_ts_numbers
+    ]
     align_params.params["BatchRunTomo"]["setup"]["pixel_size"] = (
         mc2_params.params["MC2"]["desired_pixel_size"] * 0.1
     )

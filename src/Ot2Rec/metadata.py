@@ -13,21 +13,22 @@
 # language governing permissions and limitations under the License.
 
 
+import itertools
+import multiprocessing as mp
 import os
 import re
-import itertools
-from functools import partial
-import multiprocessing as mp
 import subprocess
+from functools import partial
 from glob import glob
+from pathlib import Path
 from tqdm import tqdm
 
 from tifffile import TiffFile as tf
 import xmltodict as x2d
 
-import yaml
 import mdocfile as mdf
 import pandas as pd
+import yaml
 from icecream import ic
 
 from . import params as prmMod
@@ -139,7 +140,7 @@ class Metadata:
         if len(raw_images_list) == 0:
             raise IOError(
                 "Error in Ot2Rec.metadata.Metadata.create_master_metadata: "
-                "No vaild files found using given criteria."
+                "No valid files found using given criteria."
             )
 
         # Find MDOC files and check
@@ -231,8 +232,8 @@ class Metadata:
     @staticmethod
     def get_num_frames(file_path, target_nframes=15):
         with tf(file_path) as f:
-            tag = f.pages[0].tags['65001']
-            data = tag.value.decode('UTF-8')
+            tag = f.pages[0].tags["65001"]
+            data = tag.value.decode("UTF-8")
 
         parsed = x2d.parse(data)
         metadata = dict()
@@ -252,7 +253,6 @@ class Metadata:
 
         return [nframes, sampling]
 
-
     @staticmethod
     def get_num_frames_parallel(func, filelist, target_nframes=15, np=8):
         """
@@ -265,7 +265,6 @@ class Metadata:
             result = p.map(func_filelist, filelist)
 
         return result
-
 
     @staticmethod
     def get_ts_dose(mdoc_in, start=0):
@@ -291,7 +290,6 @@ class Metadata:
 
         return ts_dose_dict
 
-
     def get_mc2_temp(self):
         df = pd.DataFrame(self.metadata)
 
@@ -306,10 +304,8 @@ class Metadata:
 
         tqdm_iter = tqdm(list(set(df.ts)), ncols=100)
         for curr_ts in tqdm_iter:
-            mdoc_path = (
-                f"{base_folder}/{self.params['file_prefix']}_" + str(curr_ts) + ".mdoc"
-            )
-            mdoc = mdf.read(mdoc_path)
+            mdoc_path = f"{base_folder}/{self.params['file_prefix']}_{curr_ts:03}.mdoc"
+            # mdoc = mdf.read(mdoc_path)
             ts_dose_dict = self.get_ts_dose(mdoc_path, 1)
 
             ts_image_list = df[df["ts"] == curr_ts]["file_paths"].to_list()
@@ -335,17 +331,8 @@ class Metadata:
         self.metadata["ds_factor"] = df.ds_factor.to_list()
         self.metadata["frame_dose"] = df.frame_dose.to_list()
 
-
     def get_acquisition_settings(self):
-        df = pd.DataFrame(self.metadata)
-        if self.params["mdocs_folder"] is None:
-            base_folder = "/".join(df.file_paths.values[0].split("/")[:-1])
-        else:
-            base_folder = "/".join(self.mdocs_paths[0].split("/")[:-1])
-
-        ts = list(set(df.ts))[0]  # Assuming settings same across one data set
-        mdoc_path = f"{base_folder}/{self.params['file_prefix']}_" + str(ts) + ".mdoc"
-        mdoc = mdf.read(mdoc_path)
+        mdoc = mdf.read(self.mdocs_paths[0])
 
         self.acquisition["magnification"] = int(mdoc.Magnification.unique()[0])
         self.acquisition["pixel_spacing"] = float(mdoc.PixelSpacing.unique()[0])
@@ -353,6 +340,32 @@ class Metadata:
         self.acquisition["rotation_angle"] = float(mdoc.RotationAngle.unique()[0])
         self.acquisition["voltage"] = float(mdoc.Voltage.unique()[0])
         self.acquisition["image_size"] = list(mdoc.ImageSize.unique()[0])
+
+    def create_master_metadata_from_mdocs(self, mdocs_folder: Path = None):
+        if mdocs_folder is None:
+            mdocs_folder = self.params["mdocs_folder"]
+
+        mdocs_list = glob(f"{mdocs_folder}/*.mdoc")
+        if len(mdocs_list) < 1:
+            raise FileNotFoundError(
+                f"No mdocs found with the search term {mdocs_folder}/*.mdoc"
+            )
+        self.mdocs_paths = mdocs_list
+
+        master_md = {"angles": [], "file_paths": [], "image_idx": [], "ts": []}
+        for mdoc in mdocs_list:
+            mdoc_df = mdf.read(mdoc)
+            ts = os.path.splitext(os.path.basename(mdoc))[0].split("_")[-1]
+            for tilt in range(len(mdoc_df)):
+                master_md["angles"].append(
+                    f"{mdoc_df.iloc[tilt].TiltAngle.astype('int'):.2f}"
+                )
+                master_md["file_paths"].append(str(mdoc_df.iloc[tilt].SubFramePath))
+                master_md["image_idx"].append(int(mdoc_df.iloc[tilt].ZValue + 1))
+                master_md["ts"].append(int(ts))
+
+        # Dump to yaml
+        self.metadata = master_md
 
 
 def read_md_yaml(

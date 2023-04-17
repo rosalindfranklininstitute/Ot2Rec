@@ -26,7 +26,6 @@ import tifffile
 
 import RedLionfishDeconv as rlf
 
-from . import user_args as uaMod
 from . import magicgui as mgMod
 from . import logger as logMod
 

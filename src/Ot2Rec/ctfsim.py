@@ -31,7 +31,6 @@ import mrcfile
 
 from icecream import ic
 
-from . import user_args as uaMod
 from . import magicgui as mgMod
 from . import metadata as mdMod
 from . import logger as logMod
