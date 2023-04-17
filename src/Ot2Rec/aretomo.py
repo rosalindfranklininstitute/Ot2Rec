@@ -25,6 +25,7 @@ import yaml
 from icecream import ic
 from tqdm import tqdm
 
+from .prog_bar import *
 from . import align
 from . import logger as logMod
 from . import params as prmMod
@@ -221,13 +222,14 @@ class AreTomo:
         self.md_out["aretomo_cmd"][curr_ts] = " ".join(cmd)
 
         # Run aretomo
-        aretomo_run = subprocess.run(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="ascii",
-            check=True,
-        )
+        with open("aretomo_stdout.txt", "a+") as f:
+            aretomo_run = subprocess.run(
+                cmd,
+                stdout=f,
+                stderr=f,
+                encoding="ascii",
+                check=True,
+            )
 
         # If STA files are generated save folder names to move to common folder
         if self.params["AreTomo_setup"]["out_imod"] != "N/A":
@@ -238,19 +240,22 @@ class AreTomo:
                 f"{os.path.splitext(os.path.basename(output_mrc))[0]}_Imod/"
             )
 
-        self.logObj.logger.info(f"\nStdOut:{aretomo_run.stdout}\n")
-        self.logObj.logger.info(f"\nStdErr:{aretomo_run.stderr}\n")
+        # self.logObj.logger.info(f"\nStdOut:{aretomo_run.stdout}\n")
+        # self.logObj.logger.info(f"\nStdErr:{aretomo_run.stderr}\n")
 
     def run_aretomo_all(self):
         """
         Method to run AreTomo for all ts in process list
         """
         ts_list = self.params["System"]["process_list"]
-        tqdm_iter = tqdm(ts_list, ncols=100)
-        for i, curr_ts in enumerate(tqdm_iter):
-            tqdm_iter.set_description(f"Processing TS {curr_ts}...")
-            self._run_aretomo(i)
-        self.export_metadata()
+
+        with prog_bar as p:
+            clear_tasks(p)
+            if os.path.isfile("aretomo_stdout.txt"):
+                os.remove("aretomo_stdout.txt")
+            for curr_idx in p.track(range(len(ts_list)), total=len(ts_list)):
+                self._run_aretomo(curr_idx)
+                self.export_metadata()
 
     def export_metadata(self):
         """
