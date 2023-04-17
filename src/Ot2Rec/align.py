@@ -166,8 +166,11 @@ class Align:
 
         self._merged = self._align_images.merge(_ignored, how="left", indicator=True)
         self._align_images = self._align_images[self._merged["_merge"] == "left_only"]
-        self._process_list = (
-            self._align_images["ts"].sort_values(ascending=True).unique().tolist()
+        # self._process_list = (
+        #     self._align_images["ts"].sort_values(ascending=True).unique().tolist()
+        # )
+        self._process_list = sorted(
+            list(self._align_images["ts"].unique().astype("int"))
         )
 
     """
@@ -659,7 +662,9 @@ def update_yaml(args, logger=None):
         project_name=args.project_name, filename=mc2_yaml_name
     )
 
-    align_params.params["System"]["process_list"] = unique_ts_numbers
+    align_params.params["System"]["process_list"] = [
+        int(ts) for ts in unique_ts_numbers
+    ]
     align_params.params["BatchRunTomo"]["setup"]["pixel_size"] = (
         mc2_params.params["MC2"]["desired_pixel_size"] * 0.1
     )
