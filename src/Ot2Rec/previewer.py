@@ -62,9 +62,9 @@ def _get_gpu_nvidia_smi():
 
     # catch the visible GPUs
     if nv_uuid.returncode != 0 or nv_processes.returncode != 0:
-        self.logObj.logger.critical(
-            msg=f"nvidia-smi returned an error: {nv_uuid.stderr}",
-        )
+        # self.logObj.logger.critical(
+        #     msg=f"nvidia-smi returned an error: {nv_uuid.stderr}",
+        # )
         raise AssertionError(
             f"Error in Ot2Rec.Motioncorr._get_gpu_from_nvidia_smi: "
             f"nvidia-smi returned an error: {nv_uuid.stderr}"
@@ -91,9 +91,9 @@ def _get_gpu_nvidia_smi():
             visible_gpu.append(gpu_id)
 
     if not visible_gpu:
-        self.logObj.logger.critical(
-            f"{len(nv_uuid)} GPU detected, but none of them is free.",
-        )
+        # self.logObj.logger.critical(
+        #     f"{len(nv_uuid)} GPU detected, but none of them is free.",
+        # )
         raise ValueError(
             f"Error in metadata._get_gpu_from_nvidia_smi: {len(nv_uuid)} GPU detected, "
             "but none of them is free."
