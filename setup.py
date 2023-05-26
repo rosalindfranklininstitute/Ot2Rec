@@ -17,7 +17,7 @@ from setuptools import setup, find_packages
 
 
 setup(
-    version="0.4.0_post1",
+    version="0.4.0_post2",
     name="Ot2Rec",
     description="Ot2Rec",
     url="https://github.com/rosalindfranklininstitute/Ot2Rec",
