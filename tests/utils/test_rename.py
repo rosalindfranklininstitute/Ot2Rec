@@ -14,6 +14,7 @@
 
 import glob
 import os
+import random
 import shutil
 import tempfile
 import unittest
@@ -59,7 +60,8 @@ class RenameTest(unittest.TestCase):
     def test_reassign_names_from_mdoc(self):
         tmpdir = self._create_expected_folder_structure()
 
-        mdocs = sorted(glob.glob(f"{tmpdir.name}/*mdoc"))
+        mdocs = glob.glob(f"{tmpdir.name}/*mdoc")
+        random.shuffle(mdocs)  # ensure that mdocs sorting works
 
         reassigned = rename.reassign_names_from_mdoc(mdocs)
 
