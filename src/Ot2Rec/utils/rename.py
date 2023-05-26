@@ -44,7 +44,7 @@ def reassign_names_from_mdoc(mdocs: list) -> dict:
     reassigned_names = {}
     ts_index = 1
 
-    for mdoc in mdocs:
+    for mdoc in sorted(mdocs):
         df = mdf.read(mdoc)
 
         for micrograph in range(len(df)):
