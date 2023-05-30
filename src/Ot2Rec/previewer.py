@@ -117,7 +117,7 @@ def _get_gpu_nvidia_smi():
     update_dates_for_warp={"label": "Convert mdoc dates to yy-mmm-dd for Warp?"},
     tomogram_thickness={
         "min": 0,
-        "step": 0.1,
+        "max": 10000,
         "label": "Thickness of tomogram in nm",
     },
     binning={
