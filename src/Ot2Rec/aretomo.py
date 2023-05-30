@@ -234,7 +234,7 @@ class AreTomo:
             output_mrc = self.params["AreTomo_setup"]["output_mrc"][i]
             self.sta[curr_ts] = (
                 f"{self.basis_folder}/"
-                f"{self.rootname}_{curr_ts}{self.suffix}/"
+                f"{self.rootname}_{curr_ts:03}{self.suffix}/"
                 f"{os.path.splitext(os.path.basename(output_mrc))[0]}_Imod/"
             )
 
